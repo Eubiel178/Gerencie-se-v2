@@ -46,7 +46,7 @@ const Login = () => {
           </Title.Root>
           <FormContainer
             onSubmit={handleSubmit(handleOnSubmit)}
-            buttonLabel="Login"
+            buttonLabel="Logar"
           >
             <Input.Root>
               <Input.Div>
@@ -96,7 +96,7 @@ const Login = () => {
           <Link to="#">Esqueceu sua senha?</Link>
         </p>
       </RememberContainer>  */}
-          </FormContainer>{" "}
+          </FormContainer>
         </section>
       </main>
     </div>
