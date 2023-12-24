@@ -10,6 +10,7 @@ import Image from "next/image";
 import img from "@/assets/img/login/login.svg";
 
 import { Title, FormContainer, Input } from "@/components";
+import Link from "next/link";
 
 interface FormData {
   email: string;
@@ -29,10 +30,12 @@ const Login = () => {
   });
 
   const [isVisible, setVisible] = useState<boolean>(false);
+  const [remember, setRemember] = useState<boolean>(false);
 
   const handleOnSubmit = async (data: FormData) => {
     console.log(data);
   };
+
   return (
     <div className="flex items-stretch w-full max-w-[125rem] h-full max-h-[75rem]">
       <figure className="bg-sky-600 flex-1 flex items-center justify-center tablet:hidden">
@@ -81,22 +84,35 @@ const Login = () => {
               />
             </Input.Root>
 
-            {/* <RememberContainer>
-        <RememberLabel htmlFor="remember">
-          <input
-            type="checkbox"
-            name="remember"
-            id="remember"
-            onChange={(): void => setRemember(!remember)}
-          />
-          <span> Lembrar de mim</span>
-        </RememberLabel>
+            <Input.Root>
+              <div className="flex justify-between items-center text-xs">
+                <Link className="text-blue-500 hover:text-blue-700" href="#">
+                  Esqueceu sua senha?
+                </Link>
 
-        <p>
-          <Link to="#">Esqueceu sua senha?</Link>
-        </p>
-      </RememberContainer>  */}
+                <div className="flex items-center gap-1">
+                  <input
+                    type="checkbox"
+                    name="remember"
+                    id="remember"
+                    onChange={(): void => setRemember(!remember)}
+                  />
+
+                  <label htmlFor="remember">Manter-me conectado</label>
+                </div>
+              </div>
+            </Input.Root>
           </FormContainer>
+
+          <p className="flex gap-2 text-xs">
+            Ainda não tem conta?
+            <Link
+              className="text-blue-500 hover:text-blue-700"
+              href="/register"
+            >
+              Cadastre-se
+            </Link>
+          </p>
         </section>
       </main>
     </div>
