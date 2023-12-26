@@ -53,9 +53,7 @@ const Register = () => {
     <>
       <main className="bg-white flex-1 flex items-center justify-center">
         <section className="p-8 flex flex-col gap-16">
-          <Title.Root>
-            <Title.One text="Cadastre-se" />
-          </Title.Root>
+          <Title.One text="Cadastre-se" />
 
           <FormContainer
             onSubmit={handleSubmit(handleOnSubmit)}

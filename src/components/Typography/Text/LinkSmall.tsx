@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { HTMLAttributes } from "react";
+import { AnchorHTMLAttributes } from "react";
 import { twMerge } from "tailwind-merge";
 
-interface LinkSmallProps extends HTMLAttributes<HTMLLinkElement> {
+interface LinkSmallProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
   text: string;
-  href: string;
+  href:string
 }
 
 export const LinkSmall = ({ text, href, className }: LinkSmallProps) => {

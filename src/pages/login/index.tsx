@@ -50,9 +50,7 @@ const Login = () => {
 
       <main className="bg-white flex-1 flex items-center justify-center">
         <section className="p-8 flex flex-col gap-16">
-          <Title.Root>
-            <Title.One text="Login" />
-          </Title.Root>
+          <Title.One text="Login" />
 
           <FormContainer
             onSubmit={handleSubmit(handleOnSubmit)}
@@ -111,7 +109,7 @@ const Login = () => {
 
           <div className="flex gap-2 ">
             <TextSmall text="Ainda não tem conta?" />
-            <LinkSmall text="  Cadastre-se" href="/register" />
+            <LinkSmall text="Cadastre-se" href="/register" />
           </div>
         </section>
       </main>
