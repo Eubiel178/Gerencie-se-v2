@@ -2,17 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
+body,
+#__next {
+  min-height: 100vh;
+  width: 100%;
+
   display: flex;
   justify-content: center;
-  align-items: center;
-
-  height: 100vh;
-  height: 100dvh;
-
+  align-items: stretch;
   background-color: #f5f5f5;
 }
 
-input {
+body::-webkit-scrollbar {
+  display: none;
+}
+
+input,
+select {
   outline: none;
 }
