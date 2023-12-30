@@ -2,10 +2,10 @@ import { HTMLAttributes } from "react";
 import { twMerge } from "tailwind-merge";
 
 interface InputHelperText extends HTMLAttributes<HTMLParagraphElement> {
-  error: string | undefined;
+  error?: string;
 }
 
-export const InputHelperText = ({ error, className = "" }: InputHelperText) => {
+export const InputHelperText = ({ error, className }: InputHelperText) => {
   return (
     <>
       {error && (

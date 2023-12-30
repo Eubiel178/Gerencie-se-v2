@@ -1,13 +1,17 @@
 import { ButtonHTMLAttributes } from "react";
 import { twMerge } from "tailwind-merge";
 
-export const NotificationButton = ({
-  className,
+export const InputButton = ({
   children,
+  className,
   ...rest
 }: ButtonHTMLAttributes<HTMLButtonElement>) => {
   return (
-    <button className={twMerge("", className)} {...rest}>
+    <button
+      {...rest}
+      type="button"
+      className={twMerge("bg-stone-200 p-1.5", className)}
+    >
       {children}
     </button>
   );

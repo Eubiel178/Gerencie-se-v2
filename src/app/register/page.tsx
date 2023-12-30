@@ -1,37 +1,25 @@
 "use client";
 
-import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { validationSchema } from "./validationSchema";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { validationSchema } from "@/validation/registerSchema";
 
 import Image from "next/image";
 import img from "@/assets/img/register/register.png";
 
-import {
-  Title,
-  FormContainer,
-  Input,
-  TextSmall,
-  LinkSmall,
-} from "@/components";
+import { Title, FormContainer, Input, DefaultLink } from "@/components";
 
-interface FormData {
-  name: string;
-  email: string;
-  use_type: string;
-  password: string;
-  confirm_password: string;
-}
+interface FormData extends z.input<typeof validationSchema> {}
 
 const Register = () => {
   const {
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
     register,
   } = useForm<FormData>({
     resolver: zodResolver(validationSchema),
+    mode: "all",
     defaultValues: {
       name: "",
       email: "",
@@ -41,10 +29,6 @@ const Register = () => {
     },
   });
 
-  const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
-  const [confirmPasswordVisible, setConfirmPasswordVisible] =
-    useState<boolean>(false);
-
   const handleOnSubmit = async (data: FormData) => {
     console.log(data);
   };
@@ -53,18 +37,19 @@ const Register = () => {
     <>
       <main className="bg-white flex-1 flex items-center justify-center">
         <section className="p-8 flex flex-col gap-16">
-          <Title.One text="Cadastre-se" />
+          <Title.One>Cadastre-se</Title.One>
 
           <FormContainer
+            isSubmitting={isSubmitting}
             onSubmit={handleSubmit(handleOnSubmit)}
             buttonLabel="Cadastrar"
           >
             <Input.Root>
               <Input.Div>
-                <input
-                  type="text"
-                  placeholder="Seu nome aqui"
+                <Input.Field
                   {...register("name")}
+                  placeholder="Seu nome aqui"
+                  autoFocus
                 />
               </Input.Div>
 
@@ -73,10 +58,10 @@ const Register = () => {
 
             <Input.Root>
               <Input.Div>
-                <input
+                <Input.Field
+                  {...register("email")}
                   type="email"
                   placeholder="Seu email aqui"
-                  {...register("email")}
                 />
               </Input.Div>
 
@@ -87,14 +72,23 @@ const Register = () => {
 
             <Input.Root>
               <Input.Div>
-                <select {...register("use_type")}>
-                  <option value="" disabled>
-                    Selecione
-                  </option>
-                  <option value="1">Estudo</option>
-                  <option value="2">Trabalho</option>
-                  <option value="3">Trabalho e Estudo</option>
-                </select>
+                <Input.FieldSelect
+                  {...register("use_type")}
+                  optionsArray={[
+                    {
+                      label: "Estudo",
+                      value: "1",
+                    },
+                    {
+                      label: "Trabalho",
+                      value: "2",
+                    },
+                    {
+                      label: "Trabalho e Estudo",
+                      value: "3",
+                    },
+                  ]}
+                />
               </Input.Div>
 
               <Input.HelperText
@@ -104,15 +98,9 @@ const Register = () => {
 
             <Input.Root>
               <Input.Div>
-                <input
-                  type={passwordVisible ? "text" : "password"}
-                  placeholder="Sua senha aqui"
+                <Input.FieldPassword
                   {...register("password")}
-                />
-
-                <Input.Icon
-                  onClick={(): void => setPasswordVisible(!passwordVisible)}
-                  icon={passwordVisible ? FaEyeSlash : FaEye}
+                  placeholder="Sua senha aqui"
                 />
               </Input.Div>
 
@@ -123,17 +111,9 @@ const Register = () => {
 
             <Input.Root>
               <Input.Div>
-                <input
-                  type={confirmPasswordVisible ? "text" : "password"}
-                  placeholder="Confirme sua senha aqui"
+                <Input.FieldPassword
                   {...register("confirm_password")}
-                />
-
-                <Input.Icon
-                  onClick={(): void =>
-                    setConfirmPasswordVisible(!confirmPasswordVisible)
-                  }
-                  icon={confirmPasswordVisible ? FaEyeSlash : FaEye}
+                  placeholder="Confirme sua senha aqui"
                 />
               </Input.Div>
 
@@ -146,9 +126,9 @@ const Register = () => {
           </FormContainer>
 
           <div className="flex gap-2">
-            <TextSmall text="Já tem uma conta?" />
+            <p>Já tem uma conta?</p>
 
-            <LinkSmall text="Logar" href="/login" />
+            <DefaultLink href="/login">Logar</DefaultLink>
           </div>
         </section>
       </main>

@@ -1,14 +1,15 @@
-import { FormHTMLAttributes, ReactNode } from "react";
+import { FormHTMLAttributes } from "react";
 
 interface FormContainerProps extends FormHTMLAttributes<HTMLFormElement> {
-  children: ReactNode;
+  isSubmitting: boolean;
   buttonLabel: string;
 }
 
 export const FormContainer = ({
-  children,
+  isSubmitting = false,
   onSubmit,
   buttonLabel,
+  children,
 }: FormContainerProps) => {
   return (
     <form
@@ -17,7 +18,12 @@ export const FormContainer = ({
     >
       <div className="flex flex-col gap-6	">{children}</div>
 
-      <button className="bg-sky-600 text-white p-2">{buttonLabel}</button>
+      <button
+        className="bg-sky-600 text-white p-2 disabled:opacity-25"
+        disabled={isSubmitting}
+      >
+        {isSubmitting ? "Carregando..." : buttonLabel}
+      </button>
     </form>
   );
 };

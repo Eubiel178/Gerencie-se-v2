@@ -1,9 +1,10 @@
-import { RootComponentProps } from "@/types/RootComponentProps";
+import { HTMLAttributes } from "react";
 import { twMerge } from "tailwind-merge";
 
-interface InputRootProps extends RootComponentProps {}
-
-export const InputRoot = ({ children, className = "" }: InputRootProps) => {
+export const InputRoot = ({
+  children,
+  className,
+}: HTMLAttributes<HTMLDivElement>) => {
   return (
     <div className={twMerge("flex flex-col gap-2", className)}>{children}</div>
   );

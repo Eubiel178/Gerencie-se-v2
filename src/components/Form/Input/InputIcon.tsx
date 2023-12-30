@@ -1,22 +1,10 @@
-import { ButtonHTMLAttributes, ElementType } from "react";
+import { ComponentProps, ElementType, SVGAttributes } from "react";
 import { twMerge } from "tailwind-merge";
 
-interface InputIconProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface InputIconProps extends SVGAttributes<SVGAElement> {
   icon: ElementType;
 }
 
-export const InputIcon = ({
-  icon: Icon,
-  className = "",
-  ...rest
-}: InputIconProps) => {
-  return (
-    <button
-      type="button"
-      className={twMerge("bg-stone-200 p-1.5	", className)}
-      {...rest}
-    >
-      <Icon />
-    </button>
-  );
+export const InputIcon = ({ icon: Icon, className }: InputIconProps) => {
+  return <Icon className={twMerge("bg-stone-200 text-xl", className)} />;
 };
