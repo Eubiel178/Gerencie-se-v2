@@ -1,6 +1,6 @@
 "use client";
 
-import { DefaultLink, Header, Input, Notification, Title } from "@/components";
+import { DefaultLink, Input, Notification, Title } from "@/components";
 import { useState } from "react";
 import { TaskProps } from "./type";
 import { taskData } from "@/data/tasksData";
@@ -25,7 +25,7 @@ const Home = () => {
 
   const handleListCards = () => {
     if (tasks.length === 0) {
-      return <li>Nenhum Tarefa adicionada</li>;
+      return <li></li>;
     } else {
       const tagJSON = {
         studie: "#Estudo",
@@ -64,53 +64,49 @@ const Home = () => {
   };
 
   return (
-    <div className="flex-1 flex smallTablet:flex-col">
-      <Header />
+    <>
+      <form className="flex items-stretch justify-between">
+        <Input.Root>
+          <Input.Div>
+            <Input.FieldSelect
+              optionsArray={[
+                {
+                  label: "Todos",
+                  value: "all",
+                },
+                {
+                  label: "Estudos",
+                  value: "studie",
+                },
+                {
+                  label: "Trabalhos",
+                  value: "work",
+                },
+                {
+                  label: "Exercícios",
+                  value: "exercise",
+                },
+                {
+                  label: "Outros",
+                  value: "other",
+                },
+              ]}
+            />
+          </Input.Div>
+        </Input.Root>
 
-      <main className="flex-1 flex flex-col gap-10 p-5">
-        <form className="flex items-stretch justify-between">
-          <Input.Root>
-            <Input.Div>
-              <Input.FieldSelect
-                optionsArray={[
-                  {
-                    label: "Todos",
-                    value: "all",
-                  },
-                  {
-                    label: "Estudos",
-                    value: "studie",
-                  },
-                  {
-                    label: "Trabalhos",
-                    value: "work",
-                  },
-                  {
-                    label: "Exercícios",
-                    value: "exercise",
-                  },
-                  {
-                    label: "Outros",
-                    value: "other",
-                  },
-                ]}
-              />
-            </Input.Div>
-          </Input.Root>
+        <button
+          type="button"
+          className="border-solid border-2 bg-green-500 text-slate-100 font-medium px-4"
+        >
+          Novo
+        </button>
+      </form>
 
-          <button
-            type="button"
-            className="border-solid border-2 bg-green-500 text-slate-100 font-medium px-4"
-          >
-            Novo
-          </button>
-        </form>
-
-        <section>
-          <ul className="flex flex-wrap gap-10">{handleListCards()}</ul>
-        </section>
-      </main>
-    </div>
+      <section>
+        <ul className="flex flex-wrap gap-10">{handleListCards()}</ul>
+      </section>
+    </>
   );
 };
 
