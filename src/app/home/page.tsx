@@ -1,9 +1,9 @@
 "use client";
 
-import { DefaultLink, Input, Notification, TitleThree } from "@/components";
 import { useState } from "react";
-import { taskData } from "@/data/tasksData";
 import { tv } from "tailwind-variants";
+import { DefaultLink, Input, Notification, TitleThree } from "@/components";
+import { taskData } from "@/data/tasksData";
 
 const home = tv({
   slots: {
@@ -35,15 +35,7 @@ const home = tv({
   },
 });
 
-export interface TaskProps {
-  id: string;
-  tag: string;
-  title: string;
-  description: string;
-}
-
 const Home = () => {
-  const [tasks, setTasks] = useState<TaskProps[]>(taskData);
   const [tips, setTips] = useState<string>(
     "Lembre-se de fazer pequenas pausas durante o trabalho para manter a produtividade."
   );
@@ -68,41 +60,6 @@ const Home = () => {
     ];
 
     setTips(tips[Math.floor(Math.random() * tips.length)]);
-  };
-
-  const handleListCards = () => {
-    if (tasks.length === 0) {
-      return <li></li>;
-    } else {
-      const tagJSON = {
-        studie: "#Estudo",
-        work: "#Trabalho",
-        exercise: "#Exercício",
-        other: "#Outros",
-      };
-
-      return tasks.map((element: TaskProps) => {
-        const { id, tag, title, description } = element;
-
-        return (
-          <li key={id} className={card()}>
-            <div className={cardColor()}></div>
-
-            <div className={cardContent()}>
-              <div>
-                <span className={cardTag()}>{(tagJSON as any)[tag]}</span>
-
-                <TitleThree>{title}</TitleThree>
-
-                <p className={cardDescription()}>{description}</p>
-              </div>
-
-              <DefaultLink href={`home/${id}`}>Acessar</DefaultLink>
-            </div>
-          </li>
-        );
-      });
-    }
   };
 
   return (
@@ -143,7 +100,38 @@ const Home = () => {
       </form>
 
       <section>
-        <ul className={cardList()}>{handleListCards()}</ul>
+        {taskData.length === 0 ? (
+          <p>Nenhuma tarefa adicionada</p>
+        ) : (
+          <ul className={cardList()}>
+            {taskData.map(({ id, tag, title, description }) => {
+              const tagJSON = {
+                studie: "#Estudo",
+                work: "#Trabalho",
+                exercise: "#Exercício",
+                other: "#Outros",
+              };
+
+              return (
+                <li key={id} className={card()}>
+                  <div className={cardColor()}></div>
+
+                  <div className={cardContent()}>
+                    <div>
+                      <span className={cardTag()}>{(tagJSON as any)[tag]}</span>
+
+                      <TitleThree>{title}</TitleThree>
+
+                      <p className={cardDescription()}>{description}</p>
+                    </div>
+
+                    <DefaultLink href={`home/${id}`}>Acessar</DefaultLink>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </section>
     </>
   );
