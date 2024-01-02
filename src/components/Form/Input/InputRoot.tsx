@@ -1,11 +1,14 @@
 import { HTMLAttributes } from "react";
-import { twMerge } from "tailwind-merge";
+import { VariantProps, tv } from "tailwind-variants";
 
-export const InputRoot = ({
-  children,
-  className,
-}: HTMLAttributes<HTMLDivElement>) => {
-  return (
-    <div className={twMerge("flex flex-col gap-2", className)}>{children}</div>
-  );
+const div = tv({
+  base: "flex flex-col gap-2",
+});
+
+interface InputRootProps
+  extends HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof div> {}
+
+export const InputRoot = ({ children, className }: InputRootProps) => {
+  return <div className={div()}>{children}</div>;
 };

@@ -20,6 +20,7 @@ body::-webkit-scrollbar {
 input,
 select {
   outline: none;
+  border: none;
 }
 
 @layer utilities {

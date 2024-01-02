@@ -1,16 +1,16 @@
 import { HTMLAttributes } from "react";
-import { twMerge } from "tailwind-merge";
+import { VariantProps, tv } from "tailwind-variants";
 
-interface InputHelperText extends HTMLAttributes<HTMLParagraphElement> {
+const helperText = tv({
+  base: "text-red-500 text-xs",
+});
+
+interface InputHelperText
+  extends HTMLAttributes<HTMLParagraphElement>,
+    VariantProps<typeof helperText> {
   error?: string;
 }
 
-export const InputHelperText = ({ error, className }: InputHelperText) => {
-  return (
-    <>
-      {error && (
-        <p className={twMerge("text-xs text-red-500", className)}>{error}</p>
-      )}
-    </>
-  );
+export const InputHelperText = ({ error }: InputHelperText) => {
+  return <>{error && <p className={helperText()}>{error}</p>}</>;
 };

@@ -1,8 +1,10 @@
-import { twMerge } from "tailwind-merge";
+import { tv } from "tailwind-variants";
 import { TitleProps } from "./type";
 
-export const TitleThree = ({ children, className = "" }: TitleProps) => {
-  return (
-    <h3 className={twMerge("text-lg font-bold", className)}>{children}</h3>
-  );
+const title = tv({
+  base: "text-lg font-bold",
+});
+
+export const TitleThree = ({ children }: TitleProps) => {
+  return <h3 className={title()}>{children}</h3>;
 };

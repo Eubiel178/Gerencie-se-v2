@@ -1,6 +1,7 @@
+import { withTV } from "tailwind-variants/dist/transformer.js";
 import type { Config } from "tailwindcss";
 
-const config: Config = {
+const config: Config = withTV({
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -8,14 +9,7 @@ const config: Config = {
   ],
   theme: {
     extend: {
-      screens: {
-        mobile: { max: "480px" },
-        smallTablet: { max: "640px" },
-        tablet: { max: "768px" },
-        computer: { max: "992px" },
-        desktop: { max: "1200px" },
-        widescreen: { max: "1920px" },
-      },
+      screens: {},
 
       colors: {
         // primary: "#0c66e4",
@@ -29,6 +23,6 @@ const config: Config = {
       },
     },
   },
-  plugins: [],
-};
+});
+
 export default config;

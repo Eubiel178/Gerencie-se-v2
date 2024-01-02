@@ -1,17 +1,17 @@
 import { ButtonHTMLAttributes } from "react";
-import { twMerge } from "tailwind-merge";
+import { VariantProps, tv } from "tailwind-variants";
 
-export const InputButton = ({
-  children,
-  className,
-  ...rest
-}: ButtonHTMLAttributes<HTMLButtonElement>) => {
+const button = tv({
+  base: "bg-stone-200 p-1.5",
+});
+
+interface InputButtonProps
+  extends ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof button> {}
+
+export const InputButton = ({ children, ...rest }: InputButtonProps) => {
   return (
-    <button
-      {...rest}
-      type="button"
-      className={twMerge("bg-stone-200 p-1.5", className)}
-    >
+    <button {...rest} type="button" className={button()}>
       {children}
     </button>
   );

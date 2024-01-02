@@ -1,11 +1,12 @@
 import { HTMLAttributes } from "react";
-import { twMerge } from "tailwind-merge";
+import { VariantProps, tv } from "tailwind-variants";
 
-export const NotificationContent = ({
-  children,
-  className,
-}: HTMLAttributes<HTMLDivElement>) => {
-  return (
-    <div className={twMerge("flex flex-col gap-5", className)}>{children}</div>
-  );
+const div = tv({ base: "flex flex-col gap-5" });
+
+interface NotificationContentProps
+  extends HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof div> {}
+
+export const NotificationContent = ({ children }: NotificationContentProps) => {
+  return <div className={div()}>{children}</div>;
 };

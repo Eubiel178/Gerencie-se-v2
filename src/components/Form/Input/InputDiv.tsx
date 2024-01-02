@@ -1,11 +1,14 @@
 import { HTMLAttributes } from "react";
-import { twMerge } from "tailwind-merge";
+import { VariantProps, tv } from "tailwind-variants";
 
-export const InputDiv = ({
-  children,
-  className,
-}: HTMLAttributes<HTMLDivElement>) => {
-  return (
-    <div className={twMerge("flex items-stretch", className)}>{children}</div>
-  );
+const div = tv({
+  base: "flex items-stretch",
+});
+
+interface InputDivProps
+  extends HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof div> {}
+
+export const InputDiv = ({ children }: InputDivProps) => {
+  return <div className={div()}>{children}</div>;
 };

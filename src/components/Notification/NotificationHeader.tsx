@@ -1,13 +1,12 @@
 import { HTMLAttributes } from "react";
-import { twMerge } from "tailwind-merge";
+import { VariantProps, tv } from "tailwind-variants";
 
-export const NotificationHeader = ({
-  children,
-  className,
-}: HTMLAttributes<HTMLDivElement>) => {
-  return (
-    <div className={twMerge("flex items-center justify-between	", className)}>
-      {children}
-    </div>
-  );
+const div = tv({ base: "flex items-center justify-between" });
+
+interface NotificationHeaderProps
+  extends HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof div> {}
+
+export const NotificationHeader = ({ children }: NotificationHeaderProps) => {
+  return <div className={div()}>{children}</div>;
 };

@@ -1,24 +1,20 @@
 import Link from "next/link";
 import { AnchorHTMLAttributes } from "react";
-import { twMerge } from "tailwind-merge";
+import { VariantProps, tv } from "tailwind-variants";
 
-interface DefaultLinkProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
+const anchor = tv({
+  base: "text-[#0000ff] hover:text-red-700 hover:underline",
+});
+
+interface DefaultLinkProps
+  extends AnchorHTMLAttributes<HTMLAnchorElement>,
+    VariantProps<typeof anchor> {
   href: string;
 }
 
-export const DefaultLink = ({
-  href,
-  children,
-  className = "",
-}: DefaultLinkProps) => {
+export const DefaultLink = ({ href, children }: DefaultLinkProps) => {
   return (
-    <Link
-      href={href}
-      className={twMerge(
-        "text-[#0000ff] hover:text-red-700 hover:underline",
-        className
-      )}
-    >
+    <Link href={href} className={anchor()}>
       {children}
     </Link>
   );

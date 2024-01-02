@@ -1,5 +1,7 @@
 "use client";
 
+import { tv } from "tailwind-variants";
+
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,7 +10,32 @@ import { validationSchema } from "@/validation/registerSchema";
 import Image from "next/image";
 import img from "@/assets/img/register/register.png";
 
-import { Title, FormContainer, Input, DefaultLink } from "@/components";
+import { TitleOne, FormContainer, Input, DefaultLink } from "@/components";
+
+const registerTv = tv(
+  {
+    slots: {
+      main: "flex-1 flex items-center justify-center bg-white ",
+      section: "p-8 flex flex-col gap-16",
+      loginPageDiv: "flex items-center gap-2",
+      figure: "bg-sky-600",
+      image: "w-10/12",
+    },
+
+    variants: {
+      responsive: {
+        mobile: {
+          figure: "hidden",
+        },
+        medium: {
+          figure: "flex-1 flex items-center justify-center",
+        },
+      },
+    },
+  },
+
+  { responsiveVariants: ["md"] }
+);
 
 interface FormData extends z.input<typeof validationSchema> {}
 
@@ -19,7 +46,7 @@ const Register = () => {
     register,
   } = useForm<FormData>({
     resolver: zodResolver(validationSchema),
-    mode: "all",
+    mode: "onBlur",
     defaultValues: {
       name: "",
       email: "",
@@ -29,15 +56,19 @@ const Register = () => {
     },
   });
 
+  const { main, section, loginPageDiv, figure, image } = registerTv({
+    responsive: { initial: "mobile", md: "medium" },
+  });
+
   const handleOnSubmit = async (data: FormData) => {
     console.log(data);
   };
 
   return (
     <>
-      <main className="bg-white flex-1 flex items-center justify-center">
-        <section className="p-8 flex flex-col gap-16">
-          <Title.One>Cadastre-se</Title.One>
+      <main className={main()}>
+        <section className={section()}>
+          <TitleOne>Cadastre-se</TitleOne>
 
           <FormContainer
             isSubmitting={isSubmitting}
@@ -125,17 +156,17 @@ const Register = () => {
             </Input.Root>
           </FormContainer>
 
-          <div className="flex gap-2">
+          <div className={loginPageDiv()}>
             <p>Já tem uma conta?</p>
 
-            <DefaultLink href="/login">Logar</DefaultLink>
+            <DefaultLink href="/">Logar</DefaultLink>
           </div>
         </section>
       </main>
 
-      <figure className="bg-sky-600 flex-1 flex items-center justify-center tablet:hidden">
+      <figure className={figure()}>
         <Image
-          className="w-10/12"
+          className={image()}
           src={img}
           alt="Figura de usuário se cadastrando"
         />

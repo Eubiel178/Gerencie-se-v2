@@ -1,16 +1,22 @@
 import { InputHTMLAttributes, forwardRef, useState } from "react";
-import { twMerge } from "tailwind-merge";
+import { VariantProps, tv } from "tailwind-variants";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 import { InputButton } from "./InputButton";
 import { InputIcon } from "./InputIcon";
 
-interface InputFieldPassword extends InputHTMLAttributes<HTMLInputElement> {}
+const input = tv({
+  base: "w-full border border-solid border-stone-200 p-2",
+});
+
+interface InputFieldPassword
+  extends InputHTMLAttributes<HTMLInputElement>,
+    VariantProps<typeof input> {}
 
 export const InputFieldPassword = forwardRef<
   HTMLInputElement,
   InputFieldPassword
->(({ className, name, placeholder, ...rest }, ref) => {
+>(({ name, placeholder, ...rest }, ref) => {
   const [isVisible, setVisible] = useState<boolean>(false);
 
   return (
@@ -18,10 +24,7 @@ export const InputFieldPassword = forwardRef<
       <input
         {...rest}
         type={isVisible ? "text" : "password"}
-        className={twMerge(
-          "w-full border border-solid border-stone-200 p-2 ",
-          className
-        )}
+        className={input()}
         name={name}
         id={name}
         placeholder={placeholder}

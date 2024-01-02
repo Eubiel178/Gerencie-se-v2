@@ -1,15 +1,62 @@
 "use client";
 
-import { DefaultLink, Input, Notification, Title } from "@/components";
+import { DefaultLink, Input, Notification, TitleThree } from "@/components";
 import { useState } from "react";
-import { TaskProps } from "./type";
 import { taskData } from "@/data/tasksData";
+import { tv } from "tailwind-variants";
+
+const home = tv({
+  slots: {
+    form: "flex items-stretch justify-between",
+    formButton: "border-solid border-2 font-medium px-4",
+    cardList: "flex flex-wrap gap-10",
+    card: "min-w-72	w-full max-w-xs h-96 shadow rounded-ee-lg rounded-es-lg flex flex-col",
+    cardColor: "h-32",
+    cardContent: "flex-1 flex flex-col items-start justify-between p-3.5",
+    cardTag: "mb-2 text-sm",
+    cardDescription: "text-sm break-all mt-3",
+  },
+
+  variants: {
+    color: {
+      primary: {
+        formButton: "bg-green-500 text-slate-100",
+        card: "bg-white",
+        cardColor: "bg-slate-500",
+        cardTag: "text-blue-400",
+        cardDescription: "text-gray-700",
+      },
+    },
+  },
+
+  defaultVariants: {
+    color: "primary",
+    size: "default",
+  },
+});
+
+export interface TaskProps {
+  id: string;
+  tag: string;
+  title: string;
+  description: string;
+}
 
 const Home = () => {
   const [tasks, setTasks] = useState<TaskProps[]>(taskData);
   const [tips, setTips] = useState<string>(
     "Lembre-se de fazer pequenas pausas durante o trabalho para manter a produtividade."
   );
+  const {
+    form,
+    formButton,
+    cardList,
+    card,
+    cardColor,
+    cardContent,
+    cardTag,
+    cardDescription,
+  } = home();
 
   const handletips = (): void => {
     const tips = [
@@ -38,21 +85,16 @@ const Home = () => {
         const { id, tag, title, description } = element;
 
         return (
-          <li
-            key={id}
-            className="min-w-72	 w-full max-w-xs h-96 bg-white shadow rounded-ee-lg rounded-es-lg flex flex-col  "
-          >
-            <div className="bg-slate-500 h-32"></div>
+          <li key={id} className={card()}>
+            <div className={cardColor()}></div>
 
-            <div className="flex-1 flex flex-col items-start justify-between p-3.5 ">
+            <div className={cardContent()}>
               <div>
-                <span className="text-blue-400 mb-2 text-sm">
-                  {(tagJSON as any)[tag]}
-                </span>
+                <span className={cardTag()}>{(tagJSON as any)[tag]}</span>
 
-                <Title.Three className="mb-5">{title}</Title.Three>
+                <TitleThree>{title}</TitleThree>
 
-                <p className="text-gray-700 text-sm break-all">{description}</p>
+                <p className={cardDescription()}>{description}</p>
               </div>
 
               <DefaultLink href={`home/${id}`}>Acessar</DefaultLink>
@@ -65,7 +107,7 @@ const Home = () => {
 
   return (
     <>
-      <form className="flex items-stretch justify-between">
+      <form className={form()}>
         <Input.Root>
           <Input.Div>
             <Input.FieldSelect
@@ -95,16 +137,13 @@ const Home = () => {
           </Input.Div>
         </Input.Root>
 
-        <button
-          type="button"
-          className="border-solid border-2 bg-green-500 text-slate-100 font-medium px-4"
-        >
+        <button type="button" className={formButton()}>
           Novo
         </button>
       </form>
 
       <section>
-        <ul className="flex flex-wrap gap-10">{handleListCards()}</ul>
+        <ul className={cardList()}>{handleListCards()}</ul>
       </section>
     </>
   );

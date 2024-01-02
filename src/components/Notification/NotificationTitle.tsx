@@ -1,9 +1,12 @@
 import { HTMLAttributes } from "react";
-import { twMerge } from "tailwind-merge";
+import { VariantProps, tv } from "tailwind-variants";
 
-export const NotificationTitle = ({
-  children,
-  className,
-}: HTMLAttributes<HTMLHeadingElement>) => {
-  return <h3 className={twMerge("font-semibold", className)}>{children}</h3>;
+const title = tv({ base: "font-semibold" });
+
+interface NotificationTitleProps
+  extends HTMLAttributes<HTMLHeadingElement>,
+    VariantProps<typeof title> {}
+
+export const NotificationTitle = ({ children }: NotificationTitleProps) => {
+  return <h3 className={title()}>{children}</h3>;
 };

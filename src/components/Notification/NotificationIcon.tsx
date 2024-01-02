@@ -1,16 +1,19 @@
 import { HTMLAttributes, ElementType } from "react";
-import { twMerge } from "tailwind-merge";
+import { VariantProps, tv } from "tailwind-variants";
 
-interface NotificationIconProps extends HTMLAttributes<HTMLParagraphElement> {
+const paragraph = tv({
+  base: "text-2xl",
+});
+
+interface NotificationIconProps
+  extends HTMLAttributes<HTMLParagraphElement>,
+    VariantProps<typeof paragraph> {
   icon: ElementType;
 }
 
-export const NotificationIcon = ({
-  icon: Icon,
-  className,
-}: NotificationIconProps) => {
+export const NotificationIcon = ({ icon: Icon }: NotificationIconProps) => {
   return (
-    <p className={twMerge("text-2xl", className)}>
+    <p className={paragraph()}>
       <Icon />
     </p>
   );
