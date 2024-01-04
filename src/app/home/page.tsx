@@ -1,40 +1,19 @@
 "use client";
 
 import { tv } from "tailwind-variants";
-
-import { DefaultLink, Input, TitleThree } from "@/components";
+import { CardList, DefaultLink, Input } from "@/components";
 import { taskData } from "@/data/tasksData";
-import { useState } from "react";
 
 const homeTv = tv({
   slots: {
-    form: "flex items-stretch justify-between",
-    formButton:
+    taskTypesContainer: "flex items-stretch justify-between",
+    button:
       "bg-green-500 text-slate-100 border-solid border-2 border-green-500 font-medium px-4",
-    cardList: "flex flex-wrap gap-10",
-    card: "bg-white min-w-72	w-full max-w-xs h-96 shadow rounded-ee-lg rounded-es-lg flex flex-col",
-    cardColor: "bg-slate-500 h-32",
-    cardContent: "flex-1 flex flex-col items-start justify-between p-3.5",
-    cardTag: "mb-2 text-sm text-blue-400",
-    cardDescription: "text-gray-700 text-sm break-all mt-3",
   },
 });
 
 const Home = () => {
-  const [tip, setTip] = useState(
-    "Lembre-se de fazer pequenas pausas durante o trabalho para manter a produtividade."
-  );
-
-  const {
-    form,
-    formButton,
-    cardList,
-    card,
-    cardColor,
-    cardContent,
-    cardTag,
-    cardDescription,
-  } = homeTv();
+  const { taskTypesContainer, button } = homeTv();
 
   const tagLabels: Record<string, string> = {
     studie: "#Estudo",
@@ -43,80 +22,57 @@ const Home = () => {
     other: "#Outros",
   };
 
-  const handletips = (): void => {
-    const tips = [
-      "Organize suas tarefas por prioridade para garantir que o mais importante seja feito primeiro.",
-      "Use a técnica Pomodoro para dividir o trabalho em períodos de foco intenso intercalados com pausas.",
-      "Mantenha sua área de trabalho limpa e organizada para reduzir distrações.",
-      "Defina metas realistas para suas tarefas diárias e celebre suas conquistas.",
-    ];
-    const randomIndex = Math.floor(Math.random() * tips.length);
-    const randomTip = tips[randomIndex];
-
-    setTip(randomTip);
-  };
-
   return (
     <section>
-      <form className={form()}>
+      <div className={taskTypesContainer()}>
         <Input.Root>
           <Input.Div>
             <Input.FieldSelect
+              title="Listar tarefas por tag"
               optionsArray={[
-                {
-                  label: "Todos",
-                  value: "all",
-                },
-                {
-                  label: "Estudos",
-                  value: "studie",
-                },
-                {
-                  label: "Trabalhos",
-                  value: "work",
-                },
-                {
-                  label: "Exercícios",
-                  value: "exercise",
-                },
-                {
-                  label: "Outros",
-                  value: "other",
-                },
+                { label: "Todos", value: "all" },
+                { label: "Estudos", value: "studie" },
+                { label: "Trabalhos", value: "work" },
+                { label: "Exercícios", value: "exercise" },
+                { label: "Outros", value: "other" },
               ]}
             />
           </Input.Div>
         </Input.Root>
 
-        <button type="button" className={formButton()}>
+        <button type="button" className={button()}>
           Novo
         </button>
-      </form>
+      </div>
 
       {taskData.length === 0 ? (
         <div>
           <p>Nenhuma tarefa adicionada</p>
         </div>
       ) : (
-        <ul className={cardList()}>
+        <CardList.Root>
           {taskData.map(({ id, tag, title, description }) => (
-            <li key={id} className={card()}>
-              <div className={cardColor()}></div>
+            <CardList.Item key={id}>
+              <CardList.Div height="h32" className="bg-slate-500" />
 
-              <div className={cardContent()}>
-                <div>
-                  <span className={cardTag()}>{tagLabels[tag]}</span>
+              <CardList.Div justify="between" height="flex1" padding="md">
+                <CardList.Div>
+                  <CardList.Text
+                    textColor="secondary"
+                    margin="mb2"
+                    text={tagLabels[tag]}
+                  />
 
-                  <TitleThree>{title}</TitleThree>
+                  <CardList.Title title={title} />
 
-                  <p className={cardDescription()}>{description}</p>
-                </div>
+                  <CardList.Text margin="mt3" text={description} />
+                </CardList.Div>
 
                 <DefaultLink href={`home/${id}`}>Acessar</DefaultLink>
-              </div>
-            </li>
+              </CardList.Div>
+            </CardList.Item>
           ))}
-        </ul>
+        </CardList.Root>
       )}
     </section>
   );
