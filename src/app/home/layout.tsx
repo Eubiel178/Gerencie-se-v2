@@ -3,7 +3,7 @@
 import { Header } from "@/components";
 import { tv } from "tailwind-variants";
 
-const homeLayout = tv(
+const homeLayoutTv = tv(
   {
     slots: {
       pageContainer: "flex-1 flex",
@@ -27,7 +27,7 @@ const homeLayout = tv(
 );
 
 const HomeLayout = ({ children }: { children: React.ReactNode }) => {
-  const { pageContainer, mainContainer } = homeLayout({
+  const { pageContainer, mainContainer } = homeLayoutTv({
     responsive: {
       initial: "initial",
       sm: "desktop",
