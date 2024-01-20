@@ -1,44 +1,46 @@
-"use client";
-
-import { Header } from "@/components";
+import { Header } from "@/components/_ui";
 import { tv } from "tailwind-variants";
 
-const homeLayoutTv = tv(
+const styles = tv(
   {
     slots: {
-      pageContainer: "flex-1 flex",
-      mainContainer: "flex-1 flex flex-col gap-10 p-5",
+      pageContainer: "",
+      mainContainer: "relative gap-10 p-5",
     },
 
     variants: {
       responsive: {
-        initial: {
-          pageContainer: "flex-col",
-        },
         desktop: {
           pageContainer: "flex-row",
         },
       },
     },
+
+    compoundSlots: [
+      {
+        slots: ["pageContainer", "mainContainer"],
+        className: "flex-1 flex flex-col",
+      },
+    ],
   },
+
   {
     responsiveVariants: ["sm"],
   }
 );
 
 const HomeLayout = ({ children }: { children: React.ReactNode }) => {
-  const { pageContainer, mainContainer } = homeLayoutTv({
+  const tv = styles({
     responsive: {
-      initial: "initial",
       sm: "desktop",
     },
   });
 
   return (
-    <div className={pageContainer()}>
+    <div className={tv.pageContainer()}>
       <Header />
 
-      <main className={mainContainer()}>{children}</main>
+      <main className={tv.mainContainer()}>{children}</main>
     </div>
   );
 };
