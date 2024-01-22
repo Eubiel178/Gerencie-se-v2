@@ -15,7 +15,7 @@ const wrapperStyles = tv({
     },
   },
 
-  defaultVariants: { direction: "column", gap: "small" },
+  defaultVariants: { direction: "column", gap: "xsmall" },
 });
 
 type FormWrapperProps = React.ComponentProps<"div"> &

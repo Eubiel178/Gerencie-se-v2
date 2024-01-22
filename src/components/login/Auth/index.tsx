@@ -22,7 +22,7 @@ const styles = tv({
 
 type FormData = z.infer<typeof validationSchema>;
 
-export const Auth = async () => {
+export const Auth = () => {
   const {
     handleSubmit,
     formState: { errors, isSubmitting },
