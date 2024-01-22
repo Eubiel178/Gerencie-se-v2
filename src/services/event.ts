@@ -19,7 +19,7 @@ const getEventAll = async () => {
     next: { tags: ["events"] },
   });
 
-  const data = await response.json();
+  const data: EventType[] = await response.json();
 
   return data;
 };
@@ -31,7 +31,7 @@ const createEvent = async (requestBody: Omit<EventType, "id">) => {
     body: JSON.stringify(requestBody),
   });
 
-  const data = await response.json();
+  const data: EventType = await response.json();
 
   revalidateTag("events");
   return data;
