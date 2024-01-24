@@ -1,7 +1,7 @@
 import { VariantProps, tv } from "tailwind-variants";
 
 const formStyles = tv({
-  base: "flex w-full max-w-[23rem]",
+  base: "flex w-full",
 
   variants: {
     direction: {
