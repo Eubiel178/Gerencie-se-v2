@@ -1,6 +1,12 @@
+"use client";
+
+import { AddTask } from "../Modal/AddTask";
+import { useTaskListContext } from "@/providers/TasksListContext";
 import { Button, Input, Wrapper } from "@/components/_ui";
 
 export const TasksListHeader = () => {
+  const { setIsOpenModal } = useTaskListContext();
+
   const listingTypeOptions = [
     { label: "Todos", value: "all" },
     { label: "Estudos", value: "studie" },
@@ -20,7 +26,11 @@ export const TasksListHeader = () => {
         </Input.Wrapper>
       </Input.Root>
 
-      <Button type="button">Novo</Button>
+      <Button type="button" onClick={() => setIsOpenModal(true)}>
+        Novo
+      </Button>
+
+      <AddTask />
     </Wrapper>
   );
 };
