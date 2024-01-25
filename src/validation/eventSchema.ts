@@ -5,17 +5,20 @@ export const validationSchema = z
   .object({
     title: z.string().min(1, "Campo obrigatório"),
     description: z.string().min(1, "Campo obrigatório"),
-    start: z.string().min(1, "Campo obrigatório").refine(dateIsValid, {
-      message: "Data inválida",
-    }),
-    end: z
+    start: z
       .string()
-      .optional()
-      .refine((value) => (value ? dateIsValid(value) : true), {
+      .min(1, "Campo obrigatório")
+      .refine((value) => dateIsValid(value), {
         message: "Data inválida",
       }),
-    url: z.string().url("Informe uma url válida").optional(),
-    backgroundColor: z.string().optional(),
+    end: z
+      .string()
+      .refine((value) => dateIsValid(value), {
+        message: "Data inválida",
+      })
+      .or(z.literal("")),
+    url: z.string().url("Data inválida").or(z.literal("")),
+    backgroundColor: z.string(),
   })
   .refine(
     ({ start, end }) => {
@@ -26,7 +29,7 @@ export const validationSchema = z
       return true;
     },
     {
-      message: "A data de início deve ser maior que a de início",
-      path: ["start"],
+      message: "A data final deve ser maior que a inicial",
+      path: ["end"],
     }
   );
