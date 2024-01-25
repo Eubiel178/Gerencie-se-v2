@@ -17,7 +17,7 @@ type ContextType = {
   setEventBeingEdited: (event: EventType) => void;
   handleEventCreate: (data: Omit<EventType, "id">) => void;
   handleEventEdit: (data: EventType) => void;
-  handleEventRemove: (id: string) => {};
+  handleEventRemove: (id: string) => void;
 };
 
 const Context = createContext({} as ContextType);
@@ -28,9 +28,9 @@ const EventListProvider = ({ children }: ProviderProps) => {
 
   const handleEventCreate: ContextType["handleEventCreate"] = async (data) => {
     try {
-      const newDate = { ...data, createdAt: new Date() };
+      const newData = { ...data, createdAt: new Date() };
 
-      const response = await createEvent(newDate);
+      const response = await createEvent(newData);
     } catch (error) {}
   };
 
