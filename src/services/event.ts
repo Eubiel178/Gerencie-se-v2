@@ -1,7 +1,7 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { api } from "./api";
-import { revalidateTag } from "next/cache";
 
 type EventType = {
   id: string;
@@ -16,7 +16,6 @@ type EventType = {
 const getEventAll = async () => {
   const response = await fetch(`${api}/events`, {
     cache: "force-cache",
-    next: { tags: ["events"] },
   });
 
   const data: EventType[] = await response.json();
@@ -33,7 +32,7 @@ const createEvent = async (requestBody: Omit<EventType, "id">) => {
 
   const data: EventType = await response.json();
 
-  revalidateTag("events");
+  revalidatePath("/home/event", "page");
   return data;
 };
 
@@ -46,7 +45,7 @@ const editEvent = async (requestBody: EventType, id: string) => {
 
   const data = await response.json();
 
-  revalidateTag("events");
+  revalidatePath("/home/event", "page");
   return data;
 };
 
@@ -56,7 +55,7 @@ const deleteEvent = async (id: string) => {
     cache: "no-store",
   });
 
-  revalidateTag("events");
+  revalidatePath("/home/event", "page");
   return response;
 };
 

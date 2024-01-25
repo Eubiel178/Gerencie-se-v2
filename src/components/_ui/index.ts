@@ -3,6 +3,7 @@ export { Form } from "./FormComponents/Form";
 export { Button } from "./FormComponents/Button";
 export { Input } from "./FormComponents/Input";
 export { Header } from "./Header";
+export { Modal } from "./Modal";
 export { Notification } from "./Notification";
 export { DefaultLink } from "./Typography/DefaultLink";
 export { Feedback } from "./Typography/Feedback";

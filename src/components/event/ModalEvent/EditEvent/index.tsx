@@ -2,7 +2,6 @@
 
 import { useEventListContext } from "@/providers/EventListContext";
 
-import { tv } from "tailwind-variants";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,12 +9,15 @@ import { validationSchema } from "@/validation/eventSchema";
 
 import { MdClose } from "react-icons/md";
 
-import { Input, TitleTwo, Form, Button, Wrapper } from "@/components/_ui";
+import {
+  Input,
+  TitleTwo,
+  Form,
+  Button,
+  Wrapper,
+  Modal,
+} from "@/components/_ui";
 import { EventType } from "@/services/event";
-
-const styles = tv({
-  base: "fixed z-10 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gray-100 border-solid border-2 border-gray-300",
-});
 
 type FormData = EventType & z.infer<typeof validationSchema>;
 
@@ -69,13 +71,7 @@ export const EditEvent = () => {
   };
 
   return (
-    <Wrapper
-      direction="column"
-      gap="large"
-      padding="medium"
-      shadow="large"
-      className={styles()}
-    >
+    <Modal>
       <Wrapper justify="between" align="center">
         <TitleTwo>Editando Evento</TitleTwo>
 
@@ -170,6 +166,6 @@ export const EditEvent = () => {
 
         <Button loading={isSubmitting}>Salvar</Button>
       </Form.Root>
-    </Wrapper>
+    </Modal>
   );
 };
