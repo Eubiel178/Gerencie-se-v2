@@ -29,7 +29,7 @@ const createTask = async (requestBody: Omit<TaskType, "id">) => {
 
   const data: TaskType = await response.json();
 
-  revalidatePath("/home/event", "page");
+  revalidatePath("/home", "page");
   return data;
 };
 
@@ -42,7 +42,7 @@ const editTask = async (requestBody: TaskType, id: string) => {
 
   const data = await response.json();
 
-  revalidatePath("/home/event", "page");
+  revalidatePath("/home", "page");
   return data;
 };
 
@@ -52,7 +52,7 @@ const deleteTask = async (id: string) => {
     cache: "no-store",
   });
 
-  revalidatePath("/home/event", "page");
+  revalidatePath("/home", "page");
   return response;
 };
 
