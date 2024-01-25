@@ -42,14 +42,10 @@ export const AddEvent = () => {
     defaultValues: defaultValues,
   });
 
-  const resetFields = () => {
-    reset(defaultValues);
-  };
-
   const handleFormSubmit = (data: FormData) => {
     handleEventCreate(data);
 
-    resetFields();
+    reset(defaultValues);
   };
 
   return (
@@ -65,7 +61,7 @@ export const AddEvent = () => {
               size="xlarge"
               onClick={() => {
                 setIsOpenModal(false);
-                resetFields();
+                reset(defaultValues);
               }}
             >
               <MdClose />
