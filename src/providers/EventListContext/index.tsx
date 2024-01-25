@@ -28,26 +28,22 @@ const EventListProvider = ({ children }: ProviderProps) => {
 
   const handleEventCreate: ContextType["handleEventCreate"] = async (data) => {
     try {
-      const response = await createEvent(data);
-    } catch (error) {
-      console.log(error);
-    }
+      const newDate = { ...data, createdAt: new Date() };
+
+      const response = await createEvent(newDate);
+    } catch (error) {}
   };
 
   const handleEventEdit: ContextType["handleEventEdit"] = async (data) => {
     try {
       const response = await editEvent(data, eventBeingEdited.id);
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   };
 
   const handleEventRemove: ContextType["handleEventRemove"] = async (id) => {
     try {
       const response = await deleteEvent(id);
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   };
 
   return (

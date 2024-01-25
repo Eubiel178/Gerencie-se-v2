@@ -18,7 +18,7 @@ import {
 } from "@/components/_ui";
 
 import { tv } from "tailwind-variants";
-import { EditEvent } from "../ModalEvent/EditEvent";
+import { EditEvent } from "../Modal/EditEvent";
 
 const styles = tv({
   base: "border-solid border-2 border-gray-300 p-3 flex flex-col gap-4",

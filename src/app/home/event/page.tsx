@@ -5,7 +5,7 @@ import { Calendar, EventList, EventListHeader } from "@/components/event";
 import { EventListProvider } from "@/providers/EventListContext";
 
 const Event = async () => {
-  const eventsList = await getEventAll();
+  const eventsList = (await getEventAll()) || [];
 
   return (
     <>

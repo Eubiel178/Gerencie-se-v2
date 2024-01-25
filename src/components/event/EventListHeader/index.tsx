@@ -2,7 +2,7 @@
 
 import { Button, TitleThree, Wrapper } from "@/components/_ui";
 import { useEventListContext } from "@/providers/EventListContext";
-import { AddEvent } from "../ModalEvent/AddEvent";
+import { AddEvent } from "../Modal/AddEvent";
 
 export const EventListHeader = () => {
   const { setIsOpenModal } = useEventListContext();
