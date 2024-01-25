@@ -92,7 +92,7 @@ export const AddTask = () => {
                 <Input.Wrapper>
                   <Input.Field
                     {...register("title")}
-                    placeholder="Nome do Evento"
+                    placeholder="Nome da Tarefa"
                   />
                 </Input.Wrapper>
 
@@ -103,7 +103,7 @@ export const AddTask = () => {
                 <Input.Wrapper>
                   <Input.Field
                     {...register("description")}
-                    placeholder="Descrição do Evento"
+                    placeholder="Descrição da Tarefa"
                   />
                 </Input.Wrapper>
 
@@ -111,7 +111,7 @@ export const AddTask = () => {
               </Input.Root>
             </Form.Wrapper>
 
-            <Button loading={isSubmitting}>Novo Evento</Button>
+            <Button loading={isSubmitting}>Nova Tarefa</Button>
           </Form.Root>
         </Modal>
       )}
