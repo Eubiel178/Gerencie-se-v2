@@ -21,7 +21,7 @@ import {
 type FormData = TaskType & z.infer<typeof validationSchema>;
 
 export const EditTask = () => {
-  const { handleTaskCreation, taskBeingEdited, setTaskBeingEdited } =
+  const { handleTaskEditing, taskBeingEdited, setTaskBeingEdited } =
     useTaskListContext();
 
   const {
@@ -58,7 +58,7 @@ export const EditTask = () => {
   };
 
   const handleFormSubmit = (data: FormData) => {
-    handleTaskCreation(data);
+    handleTaskEditing(data);
 
     closeModal();
   };

@@ -47,10 +47,10 @@
       "description": "Lorem ipsum dolor sit amet consectetur, adipisicing elit. In"
     },
     {
-      "id": "adar",
-      "tag": "work",
+      "tag": "exercise",
       "title": "Linkedin",
-      "description": "Lorem ipsum dolor sit amet consectetur, adipisicing elit. In Lorem..."
+      "description": "Lorem não",
+      "id": "adar"
     },
     {
       "id": "a2we4rwer",
@@ -63,6 +63,12 @@
       "tag": "studie",
       "title": "Kenzie Academy",
       "description": "Lorem ipsum dolor sit amet , adipisicing Lorem ipsum dolor sit amet consectetur, adipisicing elit. In"
+    },
+    {
+      "tag": "work",
+      "title": "Teste",
+      "description": "Esqueci de por descrição",
+      "id": "5696"
     }
   ]
 }
