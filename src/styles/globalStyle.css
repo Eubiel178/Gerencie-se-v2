@@ -18,7 +18,8 @@ body::-webkit-scrollbar {
 }
 
 input,
-select {
+select,
+textarea {
   outline: none;
   border: none;
 }
