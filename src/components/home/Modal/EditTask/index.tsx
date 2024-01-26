@@ -108,6 +108,7 @@ export const EditTask = () => {
             <Input.Wrapper>
               <Input.FieldTextarea
                 {...register("description")}
+                className="max-h-40"
                 rows={5}
                 placeholder="Descrição da Tarefa"
               />
