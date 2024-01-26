@@ -10,6 +10,8 @@ type ContextType = {
   setIsOpenModal: (isOpen: boolean) => void;
   taskBeingEdited: TaskType;
   setTaskBeingEdited: (event: TaskType) => void;
+  tag: string;
+  setTag: (tag: string) => void;
   handleTaskCreation: (data: Omit<TaskType, "id">) => void;
   handleTaskEditing: (data: TaskType) => void;
   handleTaskRemove: (id: string) => void;
@@ -20,6 +22,7 @@ const Context = createContext({} as ContextType);
 const TaskListProvider = ({ children }: ProviderProps) => {
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [taskBeingEdited, setTaskBeingEdited] = useState({} as TaskType);
+  const [tag, setTag] = useState("all");
 
   const handleTaskCreation: ContextType["handleTaskCreation"] = async (
     data
@@ -50,6 +53,8 @@ const TaskListProvider = ({ children }: ProviderProps) => {
         setIsOpenModal,
         taskBeingEdited,
         setTaskBeingEdited,
+        tag,
+        setTag,
         handleTaskCreation,
         handleTaskEditing,
         handleTaskRemove,

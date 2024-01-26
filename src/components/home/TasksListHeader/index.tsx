@@ -5,7 +5,7 @@ import { useTaskListContext } from "@/providers/TasksListContext";
 import { Button, Input, Wrapper } from "@/components/_ui";
 
 export const TasksListHeader = () => {
-  const { setIsOpenModal } = useTaskListContext();
+  const { setIsOpenModal, setTag } = useTaskListContext();
 
   const listingTypeOptions = [
     { label: "Todos", value: "all" },
@@ -22,6 +22,7 @@ export const TasksListHeader = () => {
           <Input.FieldSelect
             title="Listar tarefas por tag"
             optionsArray={listingTypeOptions}
+            onChange={(e) => setTag(e.target.value)}
           />
         </Input.Wrapper>
       </Input.Root>
