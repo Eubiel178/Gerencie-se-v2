@@ -3,7 +3,7 @@
 import { createContext, useContext, useState } from "react";
 
 import { ProviderProps } from "../ProviderProps";
-import { TaskType } from "@/services/task";
+import { TaskType, createTask, deleteTask, editTask } from "@/services/task";
 
 type ContextType = {
   isOpenModal: boolean;
@@ -26,18 +26,20 @@ const TaskListProvider = ({ children }: ProviderProps) => {
   ) => {
     const newData = { ...data, createdAt: new Date() };
 
-    // const response = await createTask(newData);
+    const response = await createTask(newData);
     try {
     } catch (error) {}
   };
 
-  const handleTaskEditing: ContextType["handleTaskCreation"] = async (data) => {
+  const handleTaskEditing: ContextType["handleTaskEditing"] = async (data) => {
     try {
+      const response = await editTask(data, taskBeingEdited.id);
     } catch (error) {}
   };
 
-  const handleTaskRemove = async () => {
+  const handleTaskRemove: ContextType["handleTaskRemove"] = async (id) => {
     try {
+      const response = await deleteTask(id);
     } catch (error) {}
   };
 
