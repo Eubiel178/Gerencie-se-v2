@@ -1,13 +1,13 @@
 "use client";
 
-import { useEventListContext } from "@/providers/EventListContext";
-
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { validationSchema } from "@/validation/eventSchema";
-
 import { MdClose } from "react-icons/md";
+
+import { useEventListContext } from "@/providers/EventListContext";
+import { validationSchema } from "@/validation/eventSchema";
+import { EventType } from "@/services/event";
 
 import {
   Input,
@@ -17,7 +17,6 @@ import {
   Wrapper,
   Modal,
 } from "@/components/_ui";
-import { EventType } from "@/services/event";
 
 type FormData = EventType & z.infer<typeof validationSchema>;
 
@@ -164,7 +163,7 @@ export const EditEvent = () => {
           </Input.Root>
         </Form.Wrapper>
 
-        <Button loading={isSubmitting}>Salvar</Button>
+        <Button loading={isSubmitting}>Salvar Alterações</Button>
       </Form.Root>
     </Modal>
   );

@@ -1,12 +1,12 @@
 "use client";
 
-import { useEventListContext } from "@/providers/EventListContext";
-
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { validationSchema } from "@/validation/eventSchema";
 import { MdClose } from "react-icons/md";
+
+import { useEventListContext } from "@/providers/EventListContext";
+import { validationSchema } from "@/validation/eventSchema";
 
 import {
   Input,
