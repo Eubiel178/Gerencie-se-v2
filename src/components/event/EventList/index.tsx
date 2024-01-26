@@ -28,13 +28,13 @@ export const EventList = ({ eventsList }: { eventsList: EventType[] }) => {
   const { setEventBeingEdited, eventBeingEdited, handleEventRemove } =
     useEventListContext();
   const thereAreEvents = eventsList.length > 0;
-  const thereEventBbeingEdited = eventBeingEdited.id && true;
+  const thereEventBeingEdited = eventBeingEdited.id && true;
 
   return (
     <>
       {thereAreEvents ? (
         <>
-          {thereEventBbeingEdited && <EditEvent />}
+          {thereEventBeingEdited && <EditEvent />}
 
           <List direction="column" wrap="nowrap">
             {eventsList.map((data) => (
