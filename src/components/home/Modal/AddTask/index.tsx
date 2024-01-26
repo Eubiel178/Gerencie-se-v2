@@ -92,7 +92,7 @@ export const AddTask = () => {
                 <Input.Wrapper>
                   <Input.Field
                     {...register("title")}
-                    placeholder="Nome da Tarefa"
+                    placeholder="Título da Tarefa"
                   />
                 </Input.Wrapper>
 
@@ -101,8 +101,9 @@ export const AddTask = () => {
 
               <Input.Root sharedProps={{ error: errors.description?.message }}>
                 <Input.Wrapper>
-                  <Input.Field
+                  <Input.FieldTextarea
                     {...register("description")}
+                    rows={5}
                     placeholder="Descrição da Tarefa"
                   />
                 </Input.Wrapper>
