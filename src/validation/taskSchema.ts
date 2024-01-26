@@ -15,6 +15,5 @@ export const validationSchema = z.object({
     .max(30, "O título deve ter no máximo 30 caracteres"),
   description: z
     .string()
-    .min(1, "Campo obrigatório")
     .max(165, "A descricão deve ter no máximo 165 caracteres"),
 });
