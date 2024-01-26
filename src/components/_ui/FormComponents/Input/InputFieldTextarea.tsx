@@ -13,25 +13,24 @@ const inputStyles = tv({
   },
 });
 
-type InputFieldTextareaProps = React.ComponentProps<"input"> &
+type InputFieldTextareaProps = React.ComponentProps<"textarea"> &
   VariantProps<typeof inputStyles>;
 
 export const InputFieldTextarea = forwardRef<
-  HTMLInputElement,
+  HTMLTextAreaElement,
   InputFieldTextareaProps
->(({ type = "text", name, placeholder, className, ...rest }, ref) => {
+>(({ name, placeholder, className, ...rest }, ref) => {
   const { sharedProps } = useInputRootContext();
   const incorrect = sharedProps?.error ? true : false;
 
   return (
-    <input
+    <textarea
       {...rest}
       className={inputStyles({ className, incorrect: incorrect })}
-      type={type}
       name={name}
       id={name}
       placeholder={placeholder}
       ref={ref}
-    />
+    ></textarea>
   );
 });
