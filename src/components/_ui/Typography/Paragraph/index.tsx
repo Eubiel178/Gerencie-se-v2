@@ -9,7 +9,7 @@ const paragraphStyles = tv({
       secondary: "text-gray-700",
       tertiary: "text-gray-800",
       quarternary: "text-black",
-      highlight: "text-sky-600",
+      highlight: "text-[#00b8ff]",
     },
 
     weight: {
