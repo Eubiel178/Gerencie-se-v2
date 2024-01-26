@@ -1,12 +1,12 @@
 "use client";
 
-import { useTaskListContext } from "@/providers/TasksListContext";
-
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { validationSchema } from "@/validation/taskSchema";
 import { MdClose } from "react-icons/md";
+
+import { useTaskListContext } from "@/providers/TasksListContext";
+import { validationSchema } from "@/validation/taskSchema";
 
 import {
   Input,
@@ -32,7 +32,7 @@ export const AddTask = () => {
     mode: "onChange",
     resolver: zodResolver(validationSchema),
     defaultValues: {
-      tag: "other",
+      tag: "",
       title: "",
       description: "",
     },

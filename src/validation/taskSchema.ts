@@ -1,7 +1,14 @@
 import { z } from "zod";
 
 export const validationSchema = z.object({
-  tag: z.enum(["studie", "work", "exercise", "other"]),
+  tag: z
+    .string()
+    .refine(
+      (value) => ["studie", "work", "exercise", "other"].includes(value),
+      {
+        message: "Selecione uma tag",
+      }
+    ),
   title: z
     .string()
     .min(1, "Campo obrigatório")
