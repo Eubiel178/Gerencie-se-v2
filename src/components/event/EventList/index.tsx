@@ -1,11 +1,13 @@
 "use client";
 
+import { tv } from "tailwind-variants";
+import { FaEdit, FaTrash } from "react-icons/fa";
+import { GoLinkExternal } from "react-icons/go";
+
 import { useEventListContext } from "@/providers/EventListContext";
 import { EventType } from "@/services/event";
 import { dateFormatedToFront } from "@/utils";
-
-import { FaEdit, FaTrash } from "react-icons/fa";
-import { GoLinkExternal } from "react-icons/go";
+import { EditEvent } from "../Modal/EditEvent";
 
 import {
   Button,
@@ -16,9 +18,6 @@ import {
   TitleFour,
   Wrapper,
 } from "@/components/_ui";
-
-import { tv } from "tailwind-variants";
-import { EditEvent } from "../Modal/EditEvent";
 
 const styles = tv({
   base: "border-solid border-2 border-gray-300 p-3 flex flex-col gap-4",
