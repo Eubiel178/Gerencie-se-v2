@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "api": "json-server --watch ./src/@fakeapi/db.json --port 3001"
+    "api": "json-server --watch ./src/@fakeapi/db.json --port 3000"
   },
   "dependencies": {
     "@fullcalendar/core": "^6.1.10",

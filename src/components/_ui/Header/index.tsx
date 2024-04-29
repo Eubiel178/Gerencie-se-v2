@@ -68,7 +68,7 @@ export const Header = () => {
 
   return (
     <header className={tv.base()}>
-      <TitleOne>Gerencie-se</TitleOne>
+      <h1>Gerencie-se</h1>
 
       <button
         type="button"

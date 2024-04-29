@@ -1,3 +1,1 @@
-export const ConfigsTypes = {
-  ApiLocalInstance: Symbol("ApiLocalInstance"),
-};
+export const ConfigsTypes = {};

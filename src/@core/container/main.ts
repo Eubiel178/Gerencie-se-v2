@@ -1,3 +1,5 @@
+import "reflect-metadata";
+
 import { Container } from "inversify";
 
 import { configsContainer } from "./configs";

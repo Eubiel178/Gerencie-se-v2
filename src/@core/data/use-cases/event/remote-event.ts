@@ -1,16 +1,17 @@
-import { inject, injectable } from "inversify";
-
-import { AxiosInstance } from "axios";
-
 import * as domain from "@/@core/domain";
+
+import { IHttpAdpter } from "@/@core/infra/adapters/interfaces";
 
 export class RemoteEvent
   implements domain.CreateEvent, domain.LoadAll, domain.DeleteEvent
 {
-  constructor(private http: AxiosInstance) {}
+  constructor(private http: IHttpAdpter) {}
 
   async create(params: domain.CreateEvent.Params) {
-    return this.http.post("/events", params, {
+    return await this.http.request({
+      url: "events",
+      method: "post",
+      body: params,
       headers: {
         "Content-Type": "application/json",
         // Authorization: `Bearer ${params.token}`,
@@ -19,7 +20,10 @@ export class RemoteEvent
   }
 
   async loadAll(params: domain.LoadAll.Params) {
-    return (await this.http.get("/events")).data;
+    return (await this.http.request({
+      url: "events",
+      method: "get",
+    })) as domain.LoadAll.Model;
   }
 
   async delete(params: domain.DeleteEvent.Params) {

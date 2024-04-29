@@ -1,19 +1,5 @@
-import { getTaskAll } from "@/services/task";
+import { Home } from "@/@core/presentation";
 
-import { Section, TasksList, TasksListHeader } from "@/components/home";
-import { TaskListProvider } from "@/providers/TasksListContext";
-
-const Home = async () => {
-  const tasks = await getTaskAll();
-
-  return (
-    <Section>
-      <TaskListProvider>
-        <TasksListHeader />
-        <TasksList tasksList={tasks} />
-      </TaskListProvider>
-    </Section>
-  );
-};
-
-export default Home;
+export default function HomePage() {
+  return <Home />;
+}

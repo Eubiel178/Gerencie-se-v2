@@ -11,13 +11,11 @@ type TaskType = {
 };
 
 const getTaskAll = async () => {
-  const response = await fetch(`${api}/tasks`, {
-    cache: "force-cache",
-  });
-
-  const data: TaskType[] = await response.json();
-
-  return data;
+  // const response = await fetch(`${api}/tasks`, {
+  //   cache: "force-cache",
+  // });
+  // const data: TaskType[] = await response.json();
+  // return data;
 };
 
 const createTask = async (requestBody: Omit<TaskType, "id">) => {

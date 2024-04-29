@@ -13,6 +13,8 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "plugins": [
       {
         "name": "next"
@@ -27,7 +29,8 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "src/components/Layout/layout.js"
+    "src/components/Layout/layout.js",
+    "src/@core/presentation/event/components/Modal/index.ts]"
   ],
   "exclude": ["node_modules"]
 }
