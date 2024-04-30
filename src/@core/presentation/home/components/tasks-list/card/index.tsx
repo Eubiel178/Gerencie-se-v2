@@ -1,21 +1,24 @@
-import Link from "next/link";
-
 import { tv } from "tailwind-variants";
 
 import { FaTrash } from "react-icons/fa";
 
 import { useTask } from "@/@core/presentation/hooks/use-task";
 
-import { Button, Paragraph, Wrapper } from "@/components/_ui";
+import { Button, Paragraph, Wrapper, DefaultLink } from "@/components/_ui";
 import { EditTask } from "../../modal";
 
 import { ITask } from "@/@core/domain";
 
 const styles = tv({
-  base: "bg-white flex flex-col w-full max-w-xs h-96 shadow",
+  slots: {
+    container: "bg-white flex flex-col flex-1 max-w-xs h-96 shadow",
+    title: "text-base font-medium",
+  },
 });
 
 export function Card(task: ITask) {
+  const tv = styles();
+
   const { fetcher } = useTask();
 
   function handleTaskRemove() {
@@ -23,7 +26,7 @@ export function Card(task: ITask) {
   }
 
   return (
-    <li key={task.id} className={styles()}>
+    <li key={task.id} className={tv.container()}>
       <Wrapper align="start" background="dark" className="h-32">
         <Wrapper flex="flex1" justify="between" align="center" padding="small">
           <Paragraph color="highlight" size="small">
@@ -52,12 +55,14 @@ export function Card(task: ITask) {
         padding="medium"
       >
         <Wrapper direction="column" gap="medium">
-          <h3>{task.title}</h3>
+          <h3 className={tv.title()}>{task.title}</h3>
 
-          <Paragraph color="secondary">{task.description}</Paragraph>
+          <Paragraph color="secondary" size="small">
+            {task.description}
+          </Paragraph>
         </Wrapper>
 
-        <Link href={"/home/" + task.id}>Acessar</Link>
+        <DefaultLink href={"/home/" + task.id}>Acessar</DefaultLink>
       </Wrapper>
     </li>
   );

@@ -10,6 +10,7 @@ export async function Home() {
   return (
     <Section>
       <TasksListHeader />
+
       <TasksList tasksList={tasksList} />
     </Section>
   );

@@ -11,11 +11,11 @@ import { validationSchema } from "@/validation/taskSchema";
 
 import { Form, Input, Modal, Button, Wrapper } from "@/components/_ui";
 
-import { create } from "./actions";
+import { create } from "../actions";
 
-import { FormData, IModalProps } from "./interfaces";
+import { FormData, IAddTaskProps } from "../interfaces";
 
-export function AddTask({ buttonText }: IModalProps) {
+export function AddTask({ buttonText }: IAddTaskProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const formTags = useFormTags();

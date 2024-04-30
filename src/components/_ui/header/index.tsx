@@ -8,8 +8,7 @@ import { MdEvent } from "react-icons/md";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { IoClose } from "react-icons/io5";
 
-import { TitleOne } from "..";
-import { ListItem } from "./ListItem";
+import { ListItem } from "./list-item";
 
 const headerStyles = tv(
   {

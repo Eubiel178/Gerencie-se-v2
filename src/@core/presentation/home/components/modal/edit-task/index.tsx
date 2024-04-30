@@ -12,9 +12,9 @@ import { validationSchema } from "@/validation/taskSchema";
 
 import { Form, Modal, Input, Button, Wrapper } from "@/components/_ui";
 
-import { FormData, IModalProps } from "./interfaces";
+import { FormData, IEditTaskProps } from "../interfaces";
 
-export function EditTask({ taskBeingEdited }: IModalProps) {
+export function EditTask({ taskBeingEdited }: IEditTaskProps) {
   const [isOpen, setIsOpen] = useState(false);
   const formTags = useFormTags();
 

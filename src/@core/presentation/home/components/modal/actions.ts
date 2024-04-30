@@ -14,3 +14,11 @@ export async function create(data: FormData) {
     return response;
   });
 }
+
+export async function update(data: FormData) {
+  return await fetcher.create(data).then(function (response) {
+    revalidatePath("/home", "page");
+
+    return response;
+  });
+}

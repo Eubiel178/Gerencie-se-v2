@@ -21,17 +21,15 @@ export function TasksList({ tasksList }: { tasksList: ITask[] }) {
   return (
     <>
       {thereAreTasks ? (
-        <>
-          <List>
-            {tasksFiltred.map((task) => (
-              <Card
-                key={task.id}
-                {...task}
-                tag={"#" + formTags.tagsLabels[task.tag]}
-              />
-            ))}
-          </List>
-        </>
+        <List direction="row" wrap="wrap">
+          {tasksFiltred.map((task) => (
+            <Card
+              key={task.id}
+              {...task}
+              tag={"#" + formTags.tagsLabels[task.tag]}
+            />
+          ))}
+        </List>
       ) : (
         <Wrapper>
           <Feedback>Nenhuma tarefa adicionada</Feedback>

@@ -1,7 +1,7 @@
 import { VariantProps, tv } from "tailwind-variants";
 
 const wrapperStyles = tv({
-  base: " text-black",
+  base: " text-blacks",
 
   variants: {
     flex: {

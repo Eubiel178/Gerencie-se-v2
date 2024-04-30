@@ -1,4 +1,4 @@
-import { Auth, Figure, Main } from "@/components/login";
+import { Auth, Figure, Main } from "@/@core/presentation/login";
 
 const Login = () => {
   return (
