@@ -1,14 +1,16 @@
+import { useTask } from "../hooks/use-task";
+
 import { Section, TasksList, TasksListHeader } from "./components";
 
-export function Home() {
-  // const tasks = await getTaskAll();
+export async function Home() {
+  const { fetcher } = useTask();
+
+  const tasksList = await fetcher.loadAll({ id: "1" });
 
   return (
     <Section>
-      {/* <TaskListProvider> */}
       <TasksListHeader />
-      <TasksList tasksList={[]} />
-      {/* </TaskListProvider> */}
+      <TasksList tasksList={tasksList} />
     </Section>
   );
 }

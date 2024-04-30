@@ -1,10 +1,9 @@
-import { IEvent } from "./event"
+import { IEvent } from "./event";
 
 export type DeleteEvent = {
-  delete: (params: DeleteEvent.Params) => Promise<void>
-}
+  delete: (params: DeleteEvent.Params) => Promise<any>;
+};
 
 export namespace DeleteEvent {
-  export type Params =Omit<IEvent, 'id'>
-
+  export type Params = Pick<IEvent, "id">;
 }

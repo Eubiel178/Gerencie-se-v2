@@ -30,7 +30,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "src/components/Layout/layout.js",
-    "src/@core/presentation/event/components/Modal/index.ts]"
+    "src/@core/presentation/event/components/modal/index.ts]"
   ],
   "exclude": ["node_modules"]
 }

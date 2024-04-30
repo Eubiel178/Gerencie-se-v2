@@ -3,7 +3,7 @@ import * as domain from "@/@core/domain";
 import { IHttpAdpter } from "@/@core/infra/adapters/interfaces";
 
 export class RemoteEvent
-  implements domain.CreateEvent, domain.LoadAll, domain.DeleteEvent
+  implements domain.CreateEvent, domain.LoadAllEvents, domain.DeleteEvent
 {
   constructor(private http: IHttpAdpter) {}
 
@@ -19,11 +19,11 @@ export class RemoteEvent
     });
   }
 
-  async loadAll(params: domain.LoadAll.Params) {
-    return (await this.http.request({
+  async loadAll(params: domain.LoadAllEvents.Params) {
+    return await this.http.request({
       url: "events",
       method: "get",
-    })) as domain.LoadAll.Model;
+    });
   }
 
   async delete(params: domain.DeleteEvent.Params) {

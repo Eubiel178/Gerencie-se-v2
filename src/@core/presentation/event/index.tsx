@@ -7,7 +7,7 @@ import { useEvent } from "../hooks";
 export async function Event() {
   const { fetcher } = useEvent();
 
-  const eventsList = await fetcher.loadAll({ id: 1 });
+  const eventsList = await fetcher.loadAll({ id: "1" });
 
   return (
     <>

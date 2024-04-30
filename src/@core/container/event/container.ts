@@ -1,8 +1,11 @@
 import { Container } from "inversify";
+
 import { RemoteEvent } from "@/@core/data";
-import { EventTypes } from "./types";
-import { configsContainer } from "../configs";
 import { AxiosAdapter } from "@/@core/infra";
+
+import { configsContainer } from "../configs";
+
+import { EventTypes } from "./types";
 
 export const eventContainer = new Container();
 

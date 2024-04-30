@@ -1,14 +1,11 @@
 import { injectable } from "inversify";
+
 import axios, { AxiosResponse } from "axios";
 
-import { IHttpRequest } from "../interfaces";
-
-export interface IAxiosAdapter {
-  request: (params: IHttpRequest) => Promise<unknown>;
-}
+import { IHttpAdpter, IHttpRequest } from "../interfaces";
 
 @injectable()
-export class AxiosAdapter {
+export class AxiosAdapter implements IHttpAdpter {
   async request(httpRequest: IHttpRequest) {
     const { url, method, body, headers } = httpRequest;
 

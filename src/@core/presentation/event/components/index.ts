@@ -1,4 +1,4 @@
-export * from "./Modal";
-export * from "./Calendar";
+export * from "./modal";
+export * from "./calendar";
 export * from "./EventList";
-export * from "./EventListHeader";
+export * from "./event-list-header";

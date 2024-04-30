@@ -1,4 +1,4 @@
-import { Event } from "@/@core/presentation";
+import { Event } from "@/@core/presentation/event";
 
 export default function EventPage() {
   return <Event />;
