@@ -1,15 +1,7 @@
-import { Auth, Figure, Main } from "@/components/register";
+import { Register } from "@/@core/presentation/register";
 
-const Register = () => {
-  return (
-    <>
-      <Figure />
+export function RegisterPage() {
+  return <Register />;
+}
 
-      <Main>
-        <Auth />
-      </Main>
-    </>
-  );
-};
-
-export default Register;
+export default RegisterPage;

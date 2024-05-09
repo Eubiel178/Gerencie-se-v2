@@ -6,7 +6,7 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 
-import { Wrapper } from "@/components/_ui";
+import { Wrapper } from "@/components";
 
 import { IEvent } from "@/@core/domain";
 

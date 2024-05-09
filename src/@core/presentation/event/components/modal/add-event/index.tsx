@@ -10,7 +10,7 @@ import { useEvent } from "@/@core/presentation/hooks";
 
 import { validationSchema } from "@/validation/eventSchema";
 
-import { Form, Input, Modal, Button, Wrapper } from "@/components/_ui";
+import { Form, Input, Modal, Button, Wrapper } from "@/components";
 
 import { FormData, IModalProps } from "./interfaces";
 

@@ -3,7 +3,7 @@
 import { useRouter, usePathname } from "next/navigation";
 import { useParamsUrl } from "@/@core/presentation/hooks/use-params-url";
 
-import { Input, Wrapper } from "@/components/_ui";
+import { Input, Wrapper } from "@/components";
 import { AddTask } from "../modal";
 
 export function TasksListHeader() {

@@ -9,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/eventSchema";
 
-import { Form, Modal, Input, Button, Wrapper } from "@/components/_ui";
+import { Form, Modal, Input, Button, Wrapper } from "@/components";
 
 import { FormData, IModalProps } from "./interfaces";
 

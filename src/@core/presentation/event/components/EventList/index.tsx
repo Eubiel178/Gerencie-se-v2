@@ -1,4 +1,4 @@
-import { List, Feedback } from "@/components/_ui";
+import { List, Feedback } from "@/components";
 
 import { Card } from "./card";
 

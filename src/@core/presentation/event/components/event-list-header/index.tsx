@@ -1,6 +1,6 @@
 "use client";
 
-import { Wrapper } from "@/components/_ui";
+import { Wrapper } from "@/components";
 
 import { AddEvent } from "../modal";
 

@@ -10,7 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/taskSchema";
 
-import { Form, Modal, Input, Button, Wrapper } from "@/components/_ui";
+import { Form, Modal, Input, Button, Wrapper } from "@/components";
 
 import { FormData, IEditTaskProps } from "../interfaces";
 

@@ -1,4 +1,4 @@
-import { Wrapper } from "@/components/_ui";
+import { Wrapper } from "@/components";
 
 import { Calendar, EventList, EventListHeader } from "./components";
 

@@ -4,7 +4,7 @@ import { FaTrash } from "react-icons/fa";
 
 import { useTask } from "@/@core/presentation/hooks/use-task";
 
-import { Button, Paragraph, Wrapper, DefaultLink } from "@/components/_ui";
+import { Button, Paragraph, Wrapper, DefaultLink } from "@/components";
 import { EditTask } from "../../modal";
 
 import { ITask } from "@/@core/domain";

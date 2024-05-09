@@ -9,7 +9,7 @@ import { GoLinkExternal } from "react-icons/go";
 import { useEvent } from "@/@core/presentation/hooks";
 import { dateFormatedToFront } from "@/utils";
 
-import { Button, Paragraph, Wrapper } from "@/components/_ui";
+import { Button, Paragraph, Wrapper } from "@/components";
 
 import { EditEvent } from "../../modal";
 

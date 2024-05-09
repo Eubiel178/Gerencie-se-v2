@@ -1,4 +1,4 @@
-import { Header } from "@/components/_ui";
+import { Header } from "@/components";
 import { tv } from "tailwind-variants";
 
 const styles = tv(

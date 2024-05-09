@@ -2,7 +2,7 @@
 
 import { useFormTags, useParamsUrl } from "@/@core/presentation/hooks";
 
-import { List, Wrapper, Feedback } from "@/components/_ui";
+import { List, Wrapper, Feedback } from "@/components";
 import { Card } from "./card";
 
 import { ITask } from "@/@core/domain";
