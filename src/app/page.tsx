@@ -1,9 +1,9 @@
-import { redirect } from "next/navigation";
-
-const App = () => {
-  redirect("/login");
-
-  return;
+const LandingPage = () => {
+  return (
+    <div>
+      <h1>Gerencie-se</h1>
+    </div>
+  );
 };
 
-export default App;
+export default LandingPage;

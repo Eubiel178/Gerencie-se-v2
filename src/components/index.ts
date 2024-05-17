@@ -1,6 +1,11 @@
-export { FormContainer } from "./Form/FormContainer/index";
-export { Input } from "./Form/Input";
-export { Notification } from "./Notification";
-export { Title } from "./Typography/Title";
-export { LinkSmall } from "./Typography/Text/LinkSmall";
-export { TextSmall } from "./Typography/Text/TextSmall";
+export { List } from "./list";
+export { Header } from "./header";
+export { Modal } from "./modal";
+export { Form } from "./form-components/form";
+export { Button } from "./form-components/button";
+export { Input } from "./form-components/input";
+export { Notification } from "./notification";
+export { Feedback } from "./typography/feedback";
+export { Paragraph } from "./typography/paragraph";
+export { DefaultLink } from "./typography/default-link";
+export { Wrapper } from "./wrapper";
