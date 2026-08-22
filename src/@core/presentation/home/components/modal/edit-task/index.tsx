@@ -5,7 +5,7 @@ import { useState } from "react";
 import { FaEdit } from "react-icons/fa";
 import { MdClose } from "react-icons/md";
 import { useForm } from "react-hook-form";
-import { useFormTags } from "@/@core/presentation/hooks";
+import { useFormTags, useTask } from "@/@core/presentation/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/taskSchema";
@@ -15,6 +15,8 @@ import { Form, Modal, Input, Button, Wrapper } from "@/components";
 import { FormData, IEditTaskProps } from "../interfaces";
 
 export function EditTask({ taskBeingEdited }: IEditTaskProps) {
+  const { fetcher } = useTask();
+
   const [isOpen, setIsOpen] = useState(false);
   const formTags = useFormTags();
 
@@ -36,8 +38,11 @@ export function EditTask({ taskBeingEdited }: IEditTaskProps) {
     reset();
   };
 
-  const handleFormSubmit = (data: FormData) => {
-    closeModal();
+  const handleFormSubmit = async (data: FormData) => {
+    try {
+      // const response = await fetcher.update(data);
+      // closeModal();
+    } catch (error) {}
   };
 
   return (

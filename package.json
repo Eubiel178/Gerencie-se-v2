@@ -3,11 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "concurrently -n web,api -c blue,green \"next dev\" \"npm run api\"",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "api": "json-server --watch ./src/@fakeapi/db.json --port 3000"
+    "api": "json-server --watch ./src/@fakeapi/db.json --port 3001"
   },
   "dependencies": {
     "@fullcalendar/core": "^6.1.10",
@@ -37,6 +37,7 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "autoprefixer": "^10.0.1",
+    "concurrently": "^10.0.5",
     "eslint": "^8",
     "eslint-config-next": "14.0.4",
     "postcss": "^8",

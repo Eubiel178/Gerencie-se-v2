@@ -4,19 +4,18 @@ import { useState } from "react";
 
 import { MdClose } from "react-icons/md";
 import { useForm } from "react-hook-form";
-import { useFormTags } from "@/@core/presentation/hooks";
+import { useFormTags, useTask } from "@/@core/presentation/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/taskSchema";
 
 import { Form, Input, Modal, Button, Wrapper } from "@/components";
 
-import { create } from "../actions";
-
 import { FormData, IAddTaskProps } from "../interfaces";
 
 export function AddTask({ buttonText }: IAddTaskProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const { fetcher } = useTask();
 
   const formTags = useFormTags();
 
@@ -41,7 +40,11 @@ export function AddTask({ buttonText }: IAddTaskProps) {
   }
 
   async function handleOnSubmit(data: FormData) {
-    const response = await create(data).then(closeModal);
+    try {
+      const response = await fetcher.create(data);
+
+      closeModal();
+    } catch (error) {}
   }
 
   return (
