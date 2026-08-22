@@ -1,7 +1,5 @@
 import { Register } from "@/@core/presentation/register";
 
-export function RegisterPage() {
+export default function RegisterPage() {
   return <Register />;
 }
-
-export default RegisterPage;

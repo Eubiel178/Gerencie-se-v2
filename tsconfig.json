@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "ignoreDeprecations": "6.0",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
@@ -31,7 +30,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "src/components/Layout/layout.js",
-    "src/@core/presentation/event/components/modal/index.ts]"
+    "src/@core/presentation/event/components/modal/index.ts"
   ],
   "exclude": ["node_modules"]
 }

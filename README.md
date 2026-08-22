@@ -22,7 +22,7 @@ Eu também padronizaria a ordem das declarações dentro dos componentes. Primei
 
 Também refatoraria o estilo de toda a aplicação, buscando uma maior padronização visual entre as telas e componentes.
 
-Para as listagens, utilizaria `display: grid` de forma mais consistente, permitindo um controle melhor sobre o posicionamento, espaçamento e responsividade dos elementos. Isso facilitaria a manipulação das listas e permitiria que a interface se adaptasse melhor a diferentes tamanhos de tela.
+Para as listagens, utilizaria `display: grid` de forma mais consistente, permitindo um controle melhor sobre o posicionamento, espaçamento e responsividade dos elementos. Isso facilitaria a manipulação das listas e permitiria que a interface se adaptasse melhor a diferentes tamanhos de tela e trocaria a tag "img" por "Image".
 
 Por fim, eu usaria o cache do Next.js de forma mais intencional. Dados que não mudam a todo momento poderiam ser armazenados em cache para evitar requisições desnecessárias. Quando uma tarefa ou evento fosse criado, editado ou excluído, a aplicação invalidaria apenas os dados relacionados e carregaria a lista atualizada. Dessa forma, o projeto teria uma navegação mais rápida sem mostrar informações desatualizadas.
 
