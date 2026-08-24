@@ -26,6 +26,12 @@ Para as listagens, utilizaria `display: grid` de forma mais consistente, permiti
 
 Por fim, eu usaria o cache do Next.js de forma mais intencional. Dados que não mudam a todo momento poderiam ser armazenados em cache para evitar requisições desnecessárias. Quando uma tarefa ou evento fosse criado, editado ou excluído, a aplicação invalidaria apenas os dados relacionados e carregaria a lista atualizada. Dessa forma, o projeto teria uma navegação mais rápida sem mostrar informações desatualizadas.
 
+### Estado de tarefas e eventos
+
+Hoje, o resultado das buscas da API é armazenado em constantes locais nas páginas de tarefas e eventos. Isso funciona para a primeira renderização, mas não cria um estado compartilhado: quando uma tarefa ou um evento é criado, editado ou excluído, as outras partes da interface não são atualizadas automaticamente.
+
+Em uma próxima versão, eu usaria Zustand para centralizar tarefas e eventos em uma store. Assim, todas as telas consumiriam a mesma fonte de dados e a interface poderia ser atualizada imediatamente após criar, editar ou excluir um item. A API continuaria responsável pela persistência; Zustand ficaria responsável pelo estado compartilhado, carregamento e erros no cliente.
+
 ## Execução local
 
 ```bash
