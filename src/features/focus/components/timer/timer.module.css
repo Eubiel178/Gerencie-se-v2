@@ -1,4 +1,6 @@
-.panel{display:flex;flex-direction:column;align-items:center;gap:var(--space-5);padding:var(--space-6);border:1px solid var(--color-border);border-radius:var(--radius-lg);background:var(--color-surface);box-shadow:0 .5rem 1.25rem var(--color-shadow)}
+.panel{position:relative;display:flex;flex-direction:column;align-items:center;gap:var(--space-5);padding:var(--space-6);border:1px solid var(--color-border);border-radius:var(--radius-lg);background:var(--color-surface);box-shadow:0 .5rem 1.25rem var(--color-shadow)}
+.panel[data-fullscreen="true"]{justify-content:center;min-height:100vh;border-radius:0}
+.fullscreenToggle{position:absolute;top:var(--space-3);right:var(--space-3);font-size:1.25rem}
 .clock{font-variant-numeric:tabular-nums;font-size:clamp(2.4rem,8vw,3.6rem);font-weight:700;color:var(--color-text);letter-spacing:-.03em}
 .presets{display:flex;gap:var(--space-2);flex-wrap:wrap;justify-content:center}
 .controls{display:flex;gap:var(--space-3)}

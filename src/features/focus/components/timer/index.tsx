@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { MdFullscreen, MdFullscreenExit } from "react-icons/md";
 
 import { useRouter } from "next/navigation";
 
@@ -45,10 +46,14 @@ export function Timer({ initialSession, mascot }: TimerProps) {
   const [isBusy, setIsBusy] = useState(false);
   const [celebration, setCelebration] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [awayNudge, setAwayNudge] = useState<string | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Evita completar a mesma sessão duas vezes se o relógio e um clique em
   // "Concluir agora" chegarem no mesmo instante.
   const isCompletingRef = useRef(false);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const hiddenAtRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!session) return;
@@ -59,6 +64,73 @@ export function Timer({ initialSession, mascot }: TimerProps) {
     const interval = setInterval(tick, 1000);
     return () => clearInterval(interval);
   }, [session]);
+
+  // Bloqueio de distração real que um app web consegue oferecer (ver item
+  // 26 do plano): nunca é possível impedir o usuário de trocar de aba ou
+  // fechar o navegador de verdade — só avisar/lembrar. Três coisas, todas
+  // dentro do que a plataforma web permite:
+  // 1. Aviso nativo do navegador ao tentar fechar/recarregar a aba com uma
+  //    sessão em andamento (beforeunload).
+  useEffect(() => {
+    if (!session) return;
+
+    function handleBeforeUnload(event: BeforeUnloadEvent) {
+      event.preventDefault();
+      event.returnValue = "";
+    }
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [session]);
+
+  // 2. Lembrete gentil (não punitivo) de quanto tempo a aba ficou em
+  //    segundo plano durante a sessão, ao voltar pra ela.
+  useEffect(() => {
+    if (!session) return;
+
+    function handleVisibilityChange() {
+      if (document.hidden) {
+        hiddenAtRef.current = Date.now();
+        return;
+      }
+
+      if (hiddenAtRef.current === null) return;
+
+      const awaySeconds = Math.round((Date.now() - hiddenAtRef.current) / 1000);
+      hiddenAtRef.current = null;
+
+      if (awaySeconds >= 5) {
+        setAwayNudge(`Bem-vindo de volta — você saiu do foco por ${awaySeconds}s.`);
+        setTimeout(() => setAwayNudge(null), 5000);
+      }
+    }
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [session]);
+
+  // 3. Modo tela cheia opcional, reduz a visibilidade de outras abas/UI do
+  //    sistema operacional enquanto a sessão está ativa.
+  useEffect(() => {
+    function handleFullscreenChange() {
+      setIsFullscreen(document.fullscreenElement === panelRef.current);
+    }
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
+
+  async function handleToggleFullscreen() {
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+      return;
+    }
+
+    await panelRef.current?.requestFullscreen().catch(() => {
+      // Best-effort — alguns navegadores/contextos (ex.: iframe sem
+      // allow="fullscreen") recusam; o timer continua funcionando normal.
+    });
+  }
 
   useEffect(() => {
     if (session && remaining === 0 && !isCompletingRef.current) {
@@ -142,11 +214,25 @@ export function Timer({ initialSession, mascot }: TimerProps) {
   const mood: MascotMood = celebration ? "happy" : session ? "working" : "idle";
 
   return (
-    <div className={styles.panel}>
+    <div ref={panelRef} className={styles.panel} data-fullscreen={isFullscreen}>
+      {session && (
+        <Button
+          type="button"
+          background="transparent"
+          size="small"
+          className={styles.fullscreenToggle}
+          aria-label={isFullscreen ? "Sair da tela cheia" : "Modo foco em tela cheia"}
+          onClick={handleToggleFullscreen}
+        >
+          {isFullscreen ? <MdFullscreenExit /> : <MdFullscreen />}
+        </Button>
+      )}
+
       <Mascot mascot={mascot} mood={mood} />
 
       {celebration && <Feedback type="success">{celebration}</Feedback>}
       {actionError && <Feedback type="error">{actionError}</Feedback>}
+      {awayNudge && <Feedback type="info">{awayNudge}</Feedback>}
 
       {session ? (
         <>
