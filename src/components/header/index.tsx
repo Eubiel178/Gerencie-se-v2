@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { FaHome, FaSignOutAlt } from "react-icons/fa";
+import { FaHome, FaSignOutAlt, FaFire } from "react-icons/fa";
 import { MdEvent, MdSettings } from "react-icons/md";
 import { MdOutlineSchedule } from "react-icons/md";
 
@@ -12,6 +12,7 @@ import styles from "@/app/home/home-layout.module.css";
 const links = [
   { href: "/home", label: "Visão geral", icon: FaHome },
   { href: "/home/routine", label: "Rotina", icon: MdOutlineSchedule },
+  { href: "/home/habits", label: "Hábitos", icon: FaFire },
   { href: "/home/event", label: "Calendário", icon: MdEvent },
   { href: "/home/settings", label: "Configurações", icon: MdSettings },
 ];

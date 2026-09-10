@@ -1,0 +1,156 @@
+"use client";
+
+import { useState } from "react";
+
+import { useRouter } from "next/navigation";
+
+import { FaEdit } from "react-icons/fa";
+import { MdClose } from "react-icons/md";
+import { useForm, useWatch } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+import { validationSchema } from "@/validation/habit-schema";
+
+import { Form, Modal, Input, Button, Wrapper, Feedback } from "@/components";
+
+import { updateHabitAction } from "@/features/habits/actions";
+
+import { FormData, IEditHabitProps } from "../interfaces";
+
+const FREQUENCY_OPTIONS = [
+  { label: "Todo dia", value: "daily" },
+  { label: "Algumas vezes por semana", value: "weekly" },
+];
+
+export function EditHabit({ habitBeingEdited }: IEditHabitProps) {
+  const router = useRouter();
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const {
+    reset,
+    register,
+    control,
+    formState: { errors, isSubmitting },
+    handleSubmit,
+  } = useForm<FormData>({
+    mode: "onChange",
+    resolver: zodResolver(validationSchema),
+    defaultValues: {
+      title: habitBeingEdited.title,
+      frequency: habitBeingEdited.frequency,
+      targetPerWeek: String(habitBeingEdited.targetPerWeek ?? 3),
+    },
+  });
+
+  const frequency = useWatch({ control, name: "frequency" });
+
+  const closeModal = () => {
+    setIsOpen(false);
+    reset();
+  };
+
+  const handleFormSubmit = async (data: FormData) => {
+    setSubmitError(null);
+
+    const result = await updateHabitAction({
+      id: habitBeingEdited.id,
+      title: data.title,
+      frequency: data.frequency,
+      targetPerWeek: data.frequency === "weekly" ? Number(data.targetPerWeek) : null,
+      goalId: habitBeingEdited.goalId,
+    });
+
+    if (result.error) {
+      setSubmitError(result.error);
+      return;
+    }
+
+    closeModal();
+    router.refresh();
+  };
+
+  return (
+    <>
+      <Button
+        color="primary"
+        background="transparent"
+        size="xlarge"
+        aria-label={`Editar hábito ${habitBeingEdited.title}`}
+        onClick={function () {
+          setIsOpen(true);
+        }}
+      >
+        <FaEdit />
+      </Button>
+
+      {isOpen && (
+        <Modal>
+          <Wrapper justify="between" align="center">
+            <h3>Editar Hábito</h3>
+
+            <Button
+              background="transparent"
+              color="secondary"
+              size="xlarge"
+              aria-label="Fechar"
+              onClick={closeModal}
+            >
+              <MdClose />
+            </Button>
+          </Wrapper>
+
+          <Form.Root onSubmit={handleSubmit(handleFormSubmit)}>
+            <Form.Wrapper gap="xsmall">
+              <Input.Root sharedProps={{ error: errors.title?.message }}>
+                <Input.Wrapper>
+                  <Input.Field
+                    {...register("title")}
+                    placeholder="Ex.: Beber água, Ler, Meditar..."
+                  />
+                </Input.Wrapper>
+
+                <Input.HelperText />
+              </Input.Root>
+
+              <Input.Root sharedProps={{ error: errors.frequency?.message }}>
+                <Input.Label>Frequência</Input.Label>
+
+                <Input.Wrapper>
+                  <Input.FieldSelect
+                    {...register("frequency")}
+                    optionsArray={FREQUENCY_OPTIONS}
+                  />
+                </Input.Wrapper>
+
+                <Input.HelperText />
+              </Input.Root>
+
+              {frequency === "weekly" && (
+                <Input.Root sharedProps={{ error: errors.targetPerWeek?.message }}>
+                  <Input.Label>Quantas vezes por semana</Input.Label>
+
+                  <Input.Wrapper>
+                    <Input.Field
+                      {...register("targetPerWeek")}
+                      type="number"
+                      min={1}
+                      max={7}
+                    />
+                  </Input.Wrapper>
+
+                  <Input.HelperText />
+                </Input.Root>
+              )}
+            </Form.Wrapper>
+
+            {submitError && <Feedback>{submitError}</Feedback>}
+
+            <Button loading={isSubmitting}>Salvar Alterações</Button>
+          </Form.Root>
+        </Modal>
+      )}
+    </>
+  );
+}
