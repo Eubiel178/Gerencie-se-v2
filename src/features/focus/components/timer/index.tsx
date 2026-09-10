@@ -44,6 +44,7 @@ export function Timer({ initialSession, mascot }: TimerProps) {
   );
   const [isBusy, setIsBusy] = useState(false);
   const [celebration, setCelebration] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   // Evita completar a mesma sessão duas vezes se o relógio e um clique em
   // "Concluir agora" chegarem no mesmo instante.
@@ -93,9 +94,15 @@ export function Timer({ initialSession, mascot }: TimerProps) {
     if (!session || isCompletingRef.current) return;
     isCompletingRef.current = true;
     setIsBusy(true);
+    setActionError(null);
 
     try {
       const result = await completeFocusSessionAction({ id: session.id });
+
+      if (result.error) {
+        setActionError(result.error);
+        return;
+      }
 
       setSession(null);
       setCelebration(
@@ -115,9 +122,16 @@ export function Timer({ initialSession, mascot }: TimerProps) {
   async function handleCancel() {
     if (!session) return;
     setIsBusy(true);
+    setActionError(null);
 
     try {
-      await cancelFocusSessionAction({ id: session.id });
+      const result = await cancelFocusSessionAction({ id: session.id });
+
+      if (result.error) {
+        setActionError(result.error);
+        return;
+      }
+
       setSession(null);
       router.refresh();
     } finally {
@@ -132,6 +146,7 @@ export function Timer({ initialSession, mascot }: TimerProps) {
       <Mascot mascot={mascot} mood={mood} />
 
       {celebration && <Feedback type="success">{celebration}</Feedback>}
+      {actionError && <Feedback type="error">{actionError}</Feedback>}
 
       {session ? (
         <>

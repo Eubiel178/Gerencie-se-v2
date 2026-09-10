@@ -4,14 +4,20 @@ import { revalidatePath } from "next/cache";
 
 import * as domain from "@/features/menstrual-cycle/domain";
 import { getCycleFetcher } from "@/features/menstrual-cycle/data/get-cycle-fetcher";
+import { createCycleEntrySchema } from "@/validation/menstrual-cycle-schema";
 
 type ActionResult = { error: string | null };
 
 export async function createCycleEntryAction(
   data: domain.CreateCycleEntry.Params
 ): Promise<ActionResult> {
+  const parsed = createCycleEntrySchema.safeParse(data);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Dados inválidos." };
+  }
+
   try {
-    await getCycleFetcher().create(data);
+    await getCycleFetcher().create(parsed.data);
     revalidatePath("/home/menstrual-cycle");
 
     return { error: null };

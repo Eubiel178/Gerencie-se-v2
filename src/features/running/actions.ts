@@ -4,14 +4,20 @@ import { revalidatePath } from "next/cache";
 
 import * as domain from "@/features/running/domain";
 import { getRunningFetcher } from "@/features/running/data/get-running-fetcher";
+import { createRunningSessionSchema } from "@/validation/running-schema";
 
 type ActionResult = { error: string | null };
 
 export async function createRunningSessionAction(
   data: domain.CreateRunningSession.Params
 ): Promise<ActionResult> {
+  const parsed = createRunningSessionSchema.safeParse(data);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Dados inválidos." };
+  }
+
   try {
-    await getRunningFetcher().create(data);
+    await getRunningFetcher().create(parsed.data);
     revalidatePath("/home/running");
 
     return { error: null };

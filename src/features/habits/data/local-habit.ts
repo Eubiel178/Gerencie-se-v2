@@ -115,14 +115,33 @@ export class LocalHabit
       return { completed: false };
     }
 
-    await db.insert(habitLogs).values({
-      id: crypto.randomUUID(),
-      habitId: params.habitId,
-      userId,
-      date: params.date,
-    });
+    try {
+      await db.insert(habitLogs).values({
+        id: crypto.randomUUID(),
+        habitId: params.habitId,
+        userId,
+        date: params.date,
+      });
 
-    return { completed: true };
+      return { completed: true };
+    } catch (error) {
+      // Corrida rara (dois cliques quase simultâneos): outra requisição já
+      // inseriu o mesmo (habitId, date) entre o SELECT acima e este INSERT
+      // — a chave primária composta rejeita a duplicata. O hábito já está
+      // marcado (foi a outra requisição que marcou primeiro), então
+      // tratamos como sucesso em vez de propagar um erro confuso.
+      const isUniqueViolation =
+        typeof error === "object" &&
+        error !== null &&
+        "code" in error &&
+        (error as { code?: string }).code === "23505";
+
+      if (isUniqueViolation) {
+        return { completed: true };
+      }
+
+      throw error;
+    }
   }
 }
 

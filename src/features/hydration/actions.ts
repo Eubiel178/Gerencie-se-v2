@@ -4,12 +4,18 @@ import { revalidatePath } from "next/cache";
 
 import * as domain from "@/features/hydration/domain";
 import { getHydrationFetcher } from "@/features/hydration/data/get-hydration-fetcher";
+import { logWaterSchema, updateGoalSchema } from "@/validation/hydration-schema";
 
 type ActionResult = { error: string | null };
 
 export async function logWaterAction(data: domain.LogWater.Params): Promise<ActionResult> {
+  const parsed = logWaterSchema.safeParse(data);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Dados inválidos." };
+  }
+
   try {
-    await getHydrationFetcher().logWater(data);
+    await getHydrationFetcher().logWater(parsed.data);
     revalidatePath("/home/hydration");
 
     return { error: null };
@@ -32,8 +38,13 @@ export async function deleteHydrationLogAction(
 }
 
 export async function updateHydrationGoalAction(dailyGoalMl: number): Promise<ActionResult> {
+  const parsed = updateGoalSchema.safeParse(dailyGoalMl);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Meta inválida." };
+  }
+
   try {
-    await getHydrationFetcher().updateGoal(dailyGoalMl);
+    await getHydrationFetcher().updateGoal(parsed.data);
     revalidatePath("/home/hydration");
 
     return { error: null };

@@ -30,13 +30,20 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
   const [isBusy, setIsBusy] = useState(false);
   const [isEditingGoal, setIsEditingGoal] = useState(false);
   const [goalInput, setGoalInput] = useState(String(today.goalMl));
+  const [actionError, setActionError] = useState<string | null>(null);
 
   async function handleLog(amountMl: number) {
     if (amountMl <= 0) return;
     setIsBusy(true);
+    setActionError(null);
 
     try {
-      await logWaterAction({ amountMl });
+      const result = await logWaterAction({ amountMl });
+      if (result.error) {
+        setActionError(result.error);
+        return;
+      }
+
       router.refresh();
     } finally {
       setIsBusy(false);
@@ -53,7 +60,14 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
   }
 
   async function handleDelete(id: string) {
-    await deleteHydrationLogAction({ id });
+    setActionError(null);
+
+    const result = await deleteHydrationLogAction({ id });
+    if (result.error) {
+      setActionError(result.error);
+      return;
+    }
+
     router.refresh();
   }
 
@@ -62,7 +76,13 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
     const goalMl = Number(goalInput);
     if (!Number.isFinite(goalMl) || goalMl <= 0) return;
 
-    await updateHydrationGoalAction(goalMl);
+    setActionError(null);
+    const result = await updateHydrationGoalAction(goalMl);
+    if (result.error) {
+      setActionError(result.error);
+      return;
+    }
+
     setIsEditingGoal(false);
     router.refresh();
   }
@@ -73,6 +93,8 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
   return (
     <div className={styles.panel}>
       <span className={styles.amount}>{today.totalMl} ml</span>
+
+      {actionError && <Feedback type="error">{actionError}</Feedback>}
 
       {isEditingGoal ? (
         <form className={styles.goalForm} onSubmit={handleSaveGoal}>

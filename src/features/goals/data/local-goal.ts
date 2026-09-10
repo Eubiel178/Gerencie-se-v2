@@ -75,6 +75,22 @@ export class LocalGoal
 
   async createStep(params: domain.CreateGoalStep.Params) {
     const userId = await requireUserId();
+
+    // `goalId` vem do cliente — sem essa checagem, qualquer usuário
+    // autenticado que soubesse/adivinhasse o UUID de um objetivo alheio
+    // conseguiria injetar uma etapa nele (a etapa aparece na tela de quem
+    // é dono do objetivo e distorce o `progressPercent`, mesmo a etapa
+    // "pertencendo" a outro usuário).
+    const [ownedGoal] = await db
+      .select({ id: goals.id })
+      .from(goals)
+      .where(and(eq(goals.id, params.goalId), eq(goals.userId, userId)))
+      .limit(1);
+
+    if (!ownedGoal) {
+      throw new Error("Objetivo não encontrado.");
+    }
+
     const id = crypto.randomUUID();
 
     const [{ maxOrder }] = await db

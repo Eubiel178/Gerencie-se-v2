@@ -151,6 +151,17 @@ function LiveTracker({ onSaved }: { onSaved: () => void }) {
   const lastPositionRef = useRef<{ lat: number; lng: number } | null>(null);
   const startedAtRef = useRef<number | null>(null);
 
+  // Libera o GPS se o usuário sair desta tela (trocar de aba/rota) sem
+  // clicar em "Finalizar" — sem isso, o rastreamento continuaria ligado
+  // em segundo plano gastando bateria indefinidamente.
+  useEffect(() => {
+    return () => {
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+      }
+    };
+  }, []);
+
   useEffect(() => {
     if (!isTracking) return;
 
@@ -213,7 +224,12 @@ function LiveTracker({ onSaved }: { onSaved: () => void }) {
   async function handleFinish() {
     stopWatching();
 
-    if (elapsedSeconds < 5) return;
+    if (elapsedSeconds < 5) {
+      setPermissionError("Corrida muito curta para ser salva (menos de 5 segundos).");
+      setDistanceMeters(0);
+      setElapsedSeconds(0);
+      return;
+    }
 
     setIsSaving(true);
 

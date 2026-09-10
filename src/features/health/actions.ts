@@ -4,14 +4,20 @@ import { revalidatePath } from "next/cache";
 
 import * as domain from "@/features/health/domain";
 import { getHealthFetcher } from "@/features/health/data/get-health-fetcher";
+import { createHealthCheckupSchema } from "@/validation/health-schema";
 
 type ActionResult = { error: string | null };
 
 export async function createHealthCheckupAction(
   data: domain.CreateHealthCheckup.Params
 ): Promise<ActionResult> {
+  const parsed = createHealthCheckupSchema.safeParse(data);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Dados inválidos." };
+  }
+
   try {
-    await getHealthFetcher().create(data);
+    await getHealthFetcher().create(parsed.data);
     revalidatePath("/home/health");
 
     return { error: null };

@@ -4,14 +4,25 @@ import { revalidatePath } from "next/cache";
 
 import * as domain from "@/features/goals/domain";
 import { getGoalFetcher } from "@/features/goals/data/get-goal-fetcher";
+import {
+  createGoalSchema,
+  createGoalStepSchema,
+  updateGoalSchema,
+  updateGoalStepSchema,
+} from "@/validation/goal-schema";
 
 type ActionResult = { error: string | null };
 
 export async function createGoalAction(
   data: domain.CreateGoal.Params
 ): Promise<ActionResult> {
+  const parsed = createGoalSchema.safeParse(data);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Dados inválidos." };
+  }
+
   try {
-    await getGoalFetcher().create(data);
+    await getGoalFetcher().create(parsed.data);
     revalidatePath("/home/goals");
 
     return { error: null };
@@ -23,8 +34,13 @@ export async function createGoalAction(
 export async function updateGoalAction(
   data: domain.UpdateGoal.Params
 ): Promise<ActionResult> {
+  const parsed = updateGoalSchema.safeParse(data);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Dados inválidos." };
+  }
+
   try {
-    await getGoalFetcher().update(data);
+    await getGoalFetcher().update(parsed.data);
     revalidatePath("/home/goals");
 
     return { error: null };
@@ -49,8 +65,13 @@ export async function deleteGoalAction(
 export async function createGoalStepAction(
   data: domain.CreateGoalStep.Params
 ): Promise<ActionResult> {
+  const parsed = createGoalStepSchema.safeParse(data);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Dados inválidos." };
+  }
+
   try {
-    await getGoalFetcher().createStep(data);
+    await getGoalFetcher().createStep(parsed.data);
     revalidatePath("/home/goals");
 
     return { error: null };
@@ -62,8 +83,13 @@ export async function createGoalStepAction(
 export async function updateGoalStepAction(
   data: domain.UpdateGoalStep.Params
 ): Promise<ActionResult> {
+  const parsed = updateGoalStepSchema.safeParse(data);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Dados inválidos." };
+  }
+
   try {
-    await getGoalFetcher().updateStep(data);
+    await getGoalFetcher().updateStep(parsed.data);
     revalidatePath("/home/goals");
 
     return { error: null };

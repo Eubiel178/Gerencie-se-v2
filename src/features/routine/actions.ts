@@ -4,14 +4,20 @@ import { revalidatePath } from "next/cache";
 
 import * as domain from "@/features/routine/domain";
 import { getRoutineFetcher } from "@/features/routine/data/get-routine-fetcher";
+import { createRoutineItemSchema, updateRoutineItemSchema } from "@/validation/routine-schema";
 
 type ActionResult = { error: string | null };
 
 export async function createRoutineItemAction(
   data: domain.CreateRoutineItem.Params
 ): Promise<ActionResult> {
+  const parsed = createRoutineItemSchema.safeParse(data);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Dados inválidos." };
+  }
+
   try {
-    await getRoutineFetcher().create(data);
+    await getRoutineFetcher().create(parsed.data);
     revalidatePath("/home/routine");
 
     return { error: null };
@@ -23,8 +29,13 @@ export async function createRoutineItemAction(
 export async function updateRoutineItemAction(
   data: domain.UpdateRoutineItem.Params
 ): Promise<ActionResult> {
+  const parsed = updateRoutineItemSchema.safeParse(data);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Dados inválidos." };
+  }
+
   try {
-    await getRoutineFetcher().update(data);
+    await getRoutineFetcher().update(parsed.data);
     revalidatePath("/home/routine");
 
     return { error: null };
