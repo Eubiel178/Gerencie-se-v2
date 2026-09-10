@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 
-import type { IEvent } from "@/@core/domain";
+import type { IEvent } from "@/features/events/domain";
 
 interface EventStore {
   events: IEvent[];

@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 
-import type { ITask } from "@/@core/domain";
+import type { ITask } from "@/features/tasks/domain";
 
 interface TaskStore {
   tasks: ITask[];

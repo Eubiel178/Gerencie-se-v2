@@ -1,4 +1,4 @@
-import { Settings } from "@/@core/presentation/settings";
+import { Settings } from "@/features/settings";
 
 interface SettingsPageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;

@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 import authConfig from "@/lib/auth.config";
 
-// O middleware roda no Edge Runtime, que não suporta `@libsql/client`
+// O middleware roda no Edge Runtime, que não suporta o driver `postgres`
 // (Node-only). Por isso ele usa a config "edge-safe" (`auth.config.ts`, sem
 // adapter nem Credentials provider) em vez de `@/lib/auth` — só precisa ler
 // o JWT da sessão para decidir se redireciona, nunca toca no banco.

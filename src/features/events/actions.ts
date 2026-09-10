@@ -2,8 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 
-import * as domain from "@/@core/domain";
-import { LocalEvent } from "@/@core/data";
+import * as domain from "@/features/events/domain";
+import { LocalEvent } from "@/features/events/data";
 
 /**
  * Server Actions de Event.

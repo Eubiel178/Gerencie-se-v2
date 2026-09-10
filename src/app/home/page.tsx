@@ -1,4 +1,4 @@
-import { Home } from "@/@core/presentation/home";
+import { Home } from "@/features/tasks";
 
 export default function HomePage() {
   return <Home />;

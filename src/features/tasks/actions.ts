@@ -2,8 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 
-import * as domain from "@/@core/domain";
-import { LocalTask } from "@/@core/data";
+import * as domain from "@/features/tasks/domain";
+import { LocalTask } from "@/features/tasks/data";
 
 import { requireUserId } from "@/lib/require-user-id";
 import { deleteCalendarEventForTask } from "@/lib/google-calendar";

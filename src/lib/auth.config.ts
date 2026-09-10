@@ -5,7 +5,7 @@ import Google from "next-auth/providers/google";
  * Configuração "edge-safe" do Auth.js: só o que roda em qualquer runtime,
  * inclusive o Edge Runtime usado pelo `middleware.ts`.
  *
- * Não inclui o adapter (Drizzle/@libsql/client, que é Node-only) nem o
+ * Não inclui o adapter (Drizzle/postgres-js, que é Node-only) nem o
  * Credentials provider (seu `authorize()` faz bcrypt + consulta ao banco,
  * também Node-only). O middleware só precisa validar o *token* de sessão
  * (JWT) para decidir redirecionar ou não — ele nunca chama `authorize()`
