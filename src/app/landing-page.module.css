@@ -148,11 +148,17 @@
   box-shadow:
     1.3rem 1.5rem 0 color-mix(in srgb, var(--color-highlight) 10%, transparent),
     0 1.5rem 3rem var(--color-shadow);
-  transform: rotate(2deg);
+  transform: rotate(2deg) translateZ(0);
   transition: transform var(--duration-slow) var(--easing-standard);
+  /* Sem isso, o texto interno "treme"/borra durante a transição do
+     rotate — o navegador refaz o antialiasing do texto a cada frame do
+     ângulo mudando. Força a camada a ficar numa composição de GPU só
+     dela, renderizada uma vez. */
+  backface-visibility: hidden;
+  will-change: transform;
 }
 .dashboardPreview:hover {
-  transform: rotate(0) translateY(-0.35rem);
+  transform: rotate(0) translateY(-0.35rem) translateZ(0);
 }
 .previewTopbar,
 .cardTitle,
