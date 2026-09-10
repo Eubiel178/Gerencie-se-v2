@@ -3,12 +3,10 @@
   font-family: var(--font-sans);
 }
 
-.colorPrimary,
-.colorSecondary {
+.colorMuted {
   color: var(--color-text-muted);
 }
-.colorTertiary,
-.colorQuarternary {
+.colorDefault {
   color: var(--color-text);
 }
 .colorHighlight {

@@ -13,7 +13,7 @@ export default function OfflinePage() {
 
       <Paragraph size="large">Você está sem conexão</Paragraph>
 
-      <Paragraph color="secondary" size="small">
+      <Paragraph color="muted" size="small">
         O Gerencie-se precisa de internet para carregar suas tarefas,
         hábitos e metas. Assim que a conexão voltar, tente novamente.
       </Paragraph>

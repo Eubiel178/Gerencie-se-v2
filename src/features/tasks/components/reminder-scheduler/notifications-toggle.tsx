@@ -32,7 +32,7 @@ export function NotificationsToggle() {
 
   if (permission === "unsupported") {
     return (
-      <Paragraph size="small" color="secondary">
+      <Paragraph size="small" color="muted">
         Seu navegador não aceita notificações.
       </Paragraph>
     );
@@ -48,7 +48,7 @@ export function NotificationsToggle() {
 
   if (permission === "denied") {
     return (
-      <Paragraph size="small" color="secondary">
+      <Paragraph size="small" color="muted">
         Notificações bloqueadas para este site. Para ativar, permita
         notificações do Gerencie-se nas configurações do seu navegador.
       </Paragraph>
@@ -57,7 +57,7 @@ export function NotificationsToggle() {
 
   return (
     <Wrapper direction="column" gap="small">
-      <Paragraph size="small" color="secondary">
+      <Paragraph size="small" color="muted">
         Ative para receber lembretes de tarefas enquanto o Gerencie-se
         estiver aberto no navegador — fechar o navegador cancela os
         lembretes pendentes, já que não há um servidor de notificações

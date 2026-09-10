@@ -1,7 +1,7 @@
 import styles from "./styles.module.css";
 
 type ParagraphProps = React.ComponentProps<"p"> & {
-  color?: "primary" | "secondary" | "tertiary" | "quarternary" | "highlight";
+  color?: "muted" | "default" | "highlight";
   weight?: "bold" | "medium" | "regular" | "light";
   size?: "xsmall" | "small" | "medium" | "large";
 };
@@ -10,7 +10,7 @@ const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slic
 
 export const Paragraph = ({
   children,
-  color = "quarternary",
+  color = "default",
   weight,
   size,
   className,

@@ -61,12 +61,12 @@ export function Card(event: IEvent) {
 
         <Wrapper direction="column" gap="small">
           <Wrapper direction="column">
-            <Paragraph color="primary" size="medium">
+            <Paragraph color="muted" size="medium">
               Início: {dateFormatedToFront(event.start)}
             </Paragraph>
 
             {event.end && (
-              <Paragraph color="primary" size="medium">
+              <Paragraph color="muted" size="medium">
                 Fim: {dateFormatedToFront(event.end)}
               </Paragraph>
             )}

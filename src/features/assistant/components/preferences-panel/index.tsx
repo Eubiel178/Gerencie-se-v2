@@ -52,7 +52,7 @@ export function PreferencesPanel({ preferences }: { preferences: IAssistantPrefe
         <span>Presença reduzida (não abrir mensagens sozinho)</span>
       </label>
 
-      <Paragraph size="small" color="secondary">
+      <Paragraph size="small" color="muted">
         O assistente observa suas tarefas, hábitos e metas para sugerir o
         que fazer a seguir — nunca acessa nada fora disso.
       </Paragraph>
