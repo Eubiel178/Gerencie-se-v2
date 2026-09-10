@@ -1,6 +1,6 @@
 import { HTMLAttributes } from "react";
 
-import styles from "./card.module.css";
+import styles from "./styles.module.css";
 
 interface CardRootProps extends HTMLAttributes<HTMLDivElement> {
   interactive?: boolean;

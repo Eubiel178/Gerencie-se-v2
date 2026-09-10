@@ -1,61 +1,21 @@
-import { VariantProps, tv } from "tailwind-variants";
+import styles from "./styles.module.css";
 
-const buttonStyles = tv({
-  base: "text-[var(--color-on-info)] p-2 border-hidden",
+type ButtonProps = React.ComponentProps<"button"> & {
+  color?: "primary" | "secondary" | "danger";
+  background?: "transparent" | "primary" | "secondary";
+  radius?: "square" | "rounded" | "lg" | "md" | "sm";
+  size?: "xsmall" | "small" | "medium" | "large" | "xlarge";
+  loading?: boolean;
+};
 
-  variants: {
-    color: {
-      primary: "text-[var(--color-on-info)]",
-      secondary: "text-[var(--color-on-success)]",
-      danger: "text-[var(--color-danger)]",
-    },
-
-    background: {
-      transparent: "bg-transparent",
-      primary: "bg-[var(--color-highlight)]",
-      secondary: "bg-[var(--color-success)]",
-    },
-
-    radius: {
-      square: "rounded-none",
-      rounded: "rounded-full",
-      lg: "rounded-lg",
-      md: "rounded-md",
-      sm: "rounded-sm",
-    },
-
-    disabled: {
-      true: "opacity-50 bg-[var(--color-text-muted)] pointer-events-none",
-      false: "",
-    },
-
-    size: {
-      xsmall: "text-xs",
-      small: "text-sm",
-      medium: "text-base",
-      large: "text-lg",
-      xlarge: "text-xl",
-    },
-  },
-
-  defaultVariants: {
-    color: "primary",
-    background: "primary",
-    radius: "square",
-  },
-});
-
-type ButtonProps = React.ComponentProps<"button"> &
-  VariantProps<typeof buttonStyles> & {
-    loading?: boolean;
-  };
+const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
 
 export const Button = ({
   loading = false,
   children,
-  color,
-  background,
-  radius,
+  color = "primary",
+  background = "primary",
+  radius = "square",
   disabled,
   size,
   className,
@@ -63,21 +23,26 @@ export const Button = ({
 }: ButtonProps) => {
   const isDisabled = loading || disabled;
 
+  const classNames = [
+    styles.button,
+    styles[`color${capitalize(color)}`],
+    styles[`background${capitalize(background)}`],
+    styles[`radius${capitalize(radius)}`],
+    size && styles[`size${capitalize(size)}`],
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <button
-      className={buttonStyles({
-        color,
-        background,
-        radius,
-        disabled: isDisabled,
-        size,
-        className,
-      })}
+      className={classNames}
       disabled={isDisabled}
-      aria-busy={loading}
+      aria-busy={loading || undefined}
       {...rest}
     >
-      {loading ? "Carregando..." : children}
+      {loading && <span className={styles.spinner} aria-hidden="true" />}
+      {children}
     </button>
   );
 };

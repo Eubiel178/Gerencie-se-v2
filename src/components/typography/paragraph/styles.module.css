@@ -1,0 +1,42 @@
+.paragraph {
+  margin: 0;
+  font-family: var(--font-sans);
+}
+
+.colorPrimary,
+.colorSecondary {
+  color: var(--color-text-muted);
+}
+.colorTertiary,
+.colorQuarternary {
+  color: var(--color-text);
+}
+.colorHighlight {
+  color: var(--color-highlight);
+}
+
+.weightBold {
+  font-weight: 700;
+}
+.weightMedium {
+  font-weight: 500;
+}
+.weightRegular {
+  font-weight: 400;
+}
+.weightLight {
+  font-weight: 300;
+}
+
+.sizeXsmall {
+  font-size: var(--font-size-xs);
+}
+.sizeSmall {
+  font-size: var(--font-size-sm);
+}
+.sizeMedium {
+  font-size: var(--font-size-md);
+}
+.sizeLarge {
+  font-size: var(--font-size-lg);
+}

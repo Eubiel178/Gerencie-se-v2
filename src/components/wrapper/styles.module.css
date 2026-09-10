@@ -1,0 +1,117 @@
+.wrapper {
+  color: var(--color-text);
+}
+
+.displayFlex {
+  display: flex;
+}
+.displayBlock {
+  display: block;
+}
+
+.directionRow {
+  flex-direction: row;
+}
+.directionColumn {
+  flex-direction: column;
+}
+
+.flex1 {
+  flex: 1;
+}
+.flex2 {
+  flex: 2;
+}
+.flex3 {
+  flex: 3;
+}
+
+.bgLight {
+  background: var(--color-surface);
+}
+.bgDark {
+  background: var(--color-surface-elevated);
+}
+.bgTransparent {
+  background: transparent;
+}
+
+.gapXsmall {
+  gap: var(--space-1);
+}
+.gapSmall {
+  gap: var(--space-2);
+}
+.gapMedium {
+  gap: var(--space-3);
+}
+.gapLarge {
+  gap: var(--space-4);
+}
+.gapXlarge {
+  gap: var(--space-5);
+}
+
+.justifyStart {
+  justify-content: flex-start;
+}
+.justifyCenter {
+  justify-content: center;
+}
+.justifyEnd {
+  justify-content: flex-end;
+}
+.justifyBetween {
+  justify-content: space-between;
+}
+.justifyStretch {
+  justify-content: stretch;
+}
+
+.alignStart {
+  align-items: flex-start;
+}
+.alignCenter {
+  align-items: center;
+}
+.alignEnd {
+  align-items: flex-end;
+}
+.alignStretch {
+  align-items: stretch;
+}
+
+.shadowXsmall {
+  box-shadow: 0 1px 2px var(--color-shadow);
+}
+.shadowSmall {
+  box-shadow: 0 1px 3px var(--color-shadow);
+}
+.shadowMedium {
+  box-shadow: 0 4px 6px var(--color-shadow);
+}
+.shadowLarge {
+  box-shadow: 0 10px 15px var(--color-shadow);
+}
+.shadowXlarge {
+  box-shadow: 0 20px 25px var(--color-shadow);
+}
+
+.paddingXsmall {
+  padding: var(--space-1);
+}
+.paddingSmall {
+  padding: var(--space-2);
+}
+.paddingMedium {
+  padding: var(--space-3);
+}
+.paddingLarge {
+  padding: var(--space-4);
+}
+.paddingXlarge {
+  padding: var(--space-5);
+}
+.paddingXxlarge {
+  padding: var(--space-6);
+}

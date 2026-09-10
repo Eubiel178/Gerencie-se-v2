@@ -12,6 +12,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { validationSchema } from "@/validation/event-schema";
 
 import { Form, Modal, Input, Button, Wrapper, Feedback } from "@/components";
+import inputStyles from "@/components/form-components/input/styles.module.css";
 
 import { updateEventAction } from "@/features/events/actions";
 
@@ -160,14 +161,12 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
                 <Input.Wrapper>
                   <Input.Field
                     {...register("backgroundColor")}
-                    className="p-[0px] px-1 h-10"
+                    className={inputStyles.colorField}
                     type="color"
                   />
                 </Input.Wrapper>
 
-                <Input.HelperText>
-                  {errors.backgroundColor?.message}
-                </Input.HelperText>
+                <Input.HelperText />
               </Input.Root>
             </Form.Wrapper>
 

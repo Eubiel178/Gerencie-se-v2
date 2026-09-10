@@ -1,27 +1,31 @@
-import { VariantProps, tv } from "tailwind-variants";
+import styles from "./styles.module.css";
 
-const listStyles = tv({
-  base: "flex gap-6",
+type ListProps = React.ComponentProps<"ul"> & {
+  direction?: "row" | "column";
+  wrap?: "nowrap" | "wrap";
+};
 
-  variants: {
-    direction: {
-      row: "flex-row",
-      column: "flex-col",
-    },
+const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
 
-    wrap: {
-      nowrap: " flex-nowrap",
-      wrap: " flex-wrap",
-    },
-  },
+export const List = ({
+  children,
+  direction,
+  wrap = "wrap",
+  className,
+  ...rest
+}: ListProps) => {
+  const classNames = [
+    styles.list,
+    direction && styles[`direction${capitalize(direction)}`],
+    styles[`wrap${capitalize(wrap)}`],
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ");
 
-  defaultVariants: {
-    wrap: "wrap",
-  },
-});
-
-type ListProps = React.ComponentProps<"ol"> & VariantProps<typeof listStyles>;
-
-export const List = ({ children, direction, wrap }: ListProps) => {
-  return <ul className={listStyles({ direction, wrap })}>{children}</ul>;
+  return (
+    <ul className={classNames} {...rest}>
+      {children}
+    </ul>
+  );
 };

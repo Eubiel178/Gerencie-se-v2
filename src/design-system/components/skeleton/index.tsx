@@ -1,6 +1,6 @@
 import { CSSProperties } from "react";
 
-import styles from "./skeleton.module.css";
+import styles from "./styles.module.css";
 
 export interface SkeletonProps {
   width?: CSSProperties["width"];

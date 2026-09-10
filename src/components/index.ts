@@ -4,7 +4,6 @@ export { Modal } from "./modal";
 export { Form } from "./form-components/form";
 export { Button } from "./form-components/button";
 export { Input } from "./form-components/input";
-export { Notification } from "./notification";
 export { Feedback } from "./typography/feedback";
 export { Paragraph } from "./typography/paragraph";
 export { DefaultLink } from "./typography/default-link";

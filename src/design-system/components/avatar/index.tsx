@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-import styles from "./avatar.module.css";
+import styles from "./styles.module.css";
 
 export interface AvatarProps {
   src?: string | null;

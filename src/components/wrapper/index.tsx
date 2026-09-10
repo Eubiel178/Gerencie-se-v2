@@ -1,85 +1,23 @@
-import { VariantProps, tv } from "tailwind-variants";
+import styles from "./styles.module.css";
 
-const wrapperStyles = tv({
-  base: "text-[var(--color-text)]",
+type WrapperProps = React.ComponentProps<"div"> & {
+  flex?: "flex1" | "flex2" | "flex3";
+  display?: "flex" | "block";
+  direction?: "row" | "column";
+  background?: "light" | "dark" | "transparent";
+  gap?: "xsmall" | "small" | "medium" | "large" | "xlarge";
+  justify?: "start" | "center" | "end" | "between" | "stretch";
+  align?: "start" | "center" | "end" | "stretch";
+  shadow?: "xsmall" | "small" | "medium" | "large" | "xlarge";
+  padding?: "xsmall" | "small" | "medium" | "large" | "xlarge" | "xxlarge";
+};
 
-  variants: {
-    flex: {
-      flex1: "flex-1",
-      flex2: "flex-2",
-      flex3: "flex-3",
-    },
-
-    display: {
-      flex: "flex",
-      block: "block",
-    },
-
-    direction: {
-      row: "flex-row",
-      column: "flex-col",
-    },
-
-    background: {
-      light: "bg-[var(--color-surface)]",
-      dark: "bg-[var(--color-surface-elevated)]",
-      transparent: "bg-transparent",
-    },
-
-    gap: {
-      xsmall: "gap-1",
-      small: "gap-2",
-      medium: "gap-3",
-      large: "gap-4",
-      xlarge: "gap-5",
-    },
-
-    justify: {
-      start: "justify-start",
-      center: "justify-center",
-      end: "justify-end",
-      between: "justify-between",
-      stretch: "justify-stretch",
-    },
-
-    align: {
-      start: "items-start",
-      center: "items-center",
-      end: "items-end",
-      between: "items-between",
-      stretch: "items-stretch",
-    },
-
-    shadow: {
-      xsmall: "shadow",
-      small: "shadow-sm",
-      medium: "shadow-md",
-      large: "shadow-lg",
-      xlarge: "shadow-xl",
-    },
-
-    padding: {
-      xsmall: "p-1",
-      small: "p-2",
-      medium: "p-3",
-      large: "p-4",
-      xlarge: "p-5",
-      xxlarge: "p-6",
-    },
-  },
-
-  defaultVariants: {
-    display: "flex",
-  },
-});
-
-type WrapperProps = React.ComponentProps<"div"> &
-  VariantProps<typeof wrapperStyles>;
+const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
 
 export const Wrapper = ({
   children,
   flex,
-  display,
+  display = "flex",
   direction,
   background,
   gap,
@@ -89,22 +27,21 @@ export const Wrapper = ({
   padding,
   className,
 }: WrapperProps) => {
-  return (
-    <div
-      className={wrapperStyles({
-        flex,
-        display,
-        background,
-        gap,
-        direction,
-        justify,
-        align,
-        shadow,
-        padding,
-        className,
-      })}
-    >
-      {children}
-    </div>
-  );
+  const classNames = [
+    styles.wrapper,
+    styles[`display${capitalize(display)}`],
+    direction && styles[`direction${capitalize(direction)}`],
+    flex && styles[flex],
+    background && styles[`bg${capitalize(background)}`],
+    gap && styles[`gap${capitalize(gap)}`],
+    justify && styles[`justify${capitalize(justify)}`],
+    align && styles[`align${capitalize(align)}`],
+    shadow && styles[`shadow${capitalize(shadow)}`],
+    padding && styles[`padding${capitalize(padding)}`],
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  return <div className={classNames}>{children}</div>;
 };

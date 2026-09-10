@@ -1,6 +1,6 @@
 import { HTMLAttributes } from "react";
 
-import styles from "./badge.module.css";
+import styles from "./styles.module.css";
 
 type BadgeVariant = "neutral" | "success" | "warning" | "danger" | "info" | "highlight";
 type BadgeSize = "sm" | "md";

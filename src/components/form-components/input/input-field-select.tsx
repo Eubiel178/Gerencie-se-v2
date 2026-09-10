@@ -1,28 +1,17 @@
 "use client";
 
 import { forwardRef } from "react";
-import { VariantProps, tv } from "tailwind-variants";
+
 import { useInputRootContext } from "@/providers/input-root-context";
 
-const selectStyles = tv({
-  base: "appearance-none w-full border border-solid border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] p-2",
-
-  variants: {
-    incorrect: {
-      true: "border-[var(--color-danger)]",
-      false: "border-[var(--color-border)]",
-    },
-  },
-});
+import styles from "./styles.module.css";
 
 type OptionSelectProps = {
   label: string;
   value: string;
 };
 
-interface InputFieldSelectProps
-  extends React.ComponentProps<"select">,
-    VariantProps<typeof selectStyles> {
+interface InputFieldSelectProps extends React.ComponentProps<"select"> {
   optionsArray: OptionSelectProps[];
 }
 
@@ -31,29 +20,28 @@ export const InputFieldSelect = forwardRef<
   InputFieldSelectProps
 >(({ className, name, optionsArray, ...rest }, ref) => {
   const { sharedProps } = useInputRootContext();
-  const incorrect = sharedProps?.error ? true : false;
+  const incorrect = Boolean(sharedProps?.error);
+
+  const classNames = [
+    styles.field,
+    styles.select,
+    incorrect && styles.incorrect,
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
-    <select
-      {...rest}
-      className={selectStyles({
-        incorrect: incorrect,
-      })}
-      name={name}
-      id={name}
-      ref={ref}
-    >
+    <select {...rest} className={classNames} name={name} id={name} ref={ref}>
       <option value="" disabled>
         Selecione
       </option>
 
-      {optionsArray.map((element, index) => {
-        return (
-          <option key={index} value={element.value}>
-            {element.label}
-          </option>
-        );
-      })}
+      {optionsArray.map((element, index) => (
+        <option key={index} value={element.value}>
+          {element.label}
+        </option>
+      ))}
     </select>
   );
 });

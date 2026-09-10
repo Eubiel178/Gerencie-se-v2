@@ -1,18 +1,13 @@
-import { VariantProps, tv } from "tailwind-variants";
+import styles from "./styles.module.css";
 
-const wrapperStyles = tv({
-  base: "flex items-stretch",
-
-  variants: {
-    gap: {
-      small: "gap-1",
-    },
-  },
-});
-
-type InputWrapperProps = React.ComponentProps<"div"> &
-  VariantProps<typeof wrapperStyles>;
+type InputWrapperProps = React.ComponentProps<"div"> & {
+  gap?: "small";
+};
 
 export const InputWrapper = ({ children, gap }: InputWrapperProps) => {
-  return <div className={wrapperStyles({ gap })}>{children}</div>;
+  const classNames = [styles.wrapper, gap === "small" && styles.gapSmall]
+    .filter(Boolean)
+    .join(" ");
+
+  return <div className={classNames}>{children}</div>;
 };

@@ -57,7 +57,7 @@ export function Card({ task, tagLabel, isGoogleConnected }: CardProps) {
 
   return (
     <li key={task.id} className={styles.taskCard}>
-      <Wrapper align="start" background="dark" className="h-32">
+      <Wrapper align="start" background="dark" className={styles.taskCardHeader}>
         <Wrapper flex="flex1" justify="between" align="center" padding="small">
           <Paragraph color="highlight" size="small">
             {tagLabel}

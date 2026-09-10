@@ -1,0 +1,109 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border: none;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition:
+    filter var(--duration-fast) var(--easing-standard),
+    opacity var(--duration-fast) var(--easing-standard),
+    transform var(--duration-fast) var(--easing-standard);
+}
+
+.button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--color-highlight);
+  outline-offset: 2px;
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+/* Cor do texto/ícone */
+.colorPrimary {
+  color: var(--color-on-highlight);
+}
+.colorSecondary {
+  color: var(--color-on-success);
+}
+.colorDanger {
+  color: var(--color-danger);
+}
+
+/* Fundo */
+.backgroundTransparent {
+  background: transparent;
+}
+.backgroundPrimary {
+  background: var(--color-highlight);
+}
+.backgroundSecondary {
+  background: var(--color-surface-elevated);
+}
+.backgroundPrimary:hover:not(:disabled),
+.backgroundSecondary:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+/* Raio */
+.radiusSquare {
+  border-radius: 0;
+}
+.radiusRounded {
+  border-radius: var(--radius-full);
+}
+.radiusLg {
+  border-radius: var(--radius-lg);
+}
+.radiusMd {
+  border-radius: var(--radius-md);
+}
+.radiusSm {
+  border-radius: var(--radius-sm);
+}
+
+/* Tamanho (afeta o texto/ícone, o padding acompanha proporcionalmente) */
+.sizeXsmall {
+  padding: var(--space-1);
+  font-size: var(--font-size-xs);
+}
+.sizeSmall {
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--font-size-sm);
+}
+.sizeMedium {
+  padding: var(--space-2);
+  font-size: var(--font-size-md);
+}
+.sizeLarge {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-lg);
+}
+.sizeXlarge {
+  padding: var(--space-2);
+  font-size: var(--font-size-xl);
+}
+
+.spinner {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  animation: spin 700ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

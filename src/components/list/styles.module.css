@@ -1,0 +1,21 @@
+.list {
+  display: flex;
+  gap: var(--space-6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.directionRow {
+  flex-direction: row;
+}
+.directionColumn {
+  flex-direction: column;
+}
+
+.wrapNowrap {
+  flex-wrap: nowrap;
+}
+.wrapWrap {
+  flex-wrap: wrap;
+}

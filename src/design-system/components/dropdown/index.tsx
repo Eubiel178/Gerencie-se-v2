@@ -11,7 +11,7 @@ import {
   useState,
 } from "react";
 
-import styles from "./dropdown.module.css";
+import styles from "./styles.module.css";
 
 interface DropdownContextValue {
   open: boolean;

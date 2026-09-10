@@ -1,48 +1,36 @@
 import Link from "next/link";
-import { VariantProps, tv } from "tailwind-variants";
 
-const linkStyles = tv({
-  base: "text-[var(--color-highlight)] hover:underline",
+import styles from "./styles.module.css";
 
-  variants: {
-    display: {
-      flex: "flex items-center gap-1.5",
-      block: "block",
-    },
+type DefaultLinkProps = React.ComponentProps<typeof Link> & {
+  display?: "flex" | "block";
+  size?: "small" | "medium" | "large";
+  width?: "fit";
+};
 
-    size: {
-      small: "text-xs",
-      medium: "text-sm",
-      large: "text-lg",
-    },
-
-    width: {
-      fit: "w-fit",
-    },
-  },
-
-  defaultVariants: {
-    display: "block",
-  },
-});
-
-type DefaultLinkProps = React.ComponentProps<typeof Link> &
-  VariantProps<typeof linkStyles>;
+const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
 
 export const DefaultLink = ({
   size,
   href,
   width,
-  display,
+  display = "block",
   children,
+  className,
   ...rest
 }: DefaultLinkProps) => {
+  const classNames = [
+    styles.link,
+    styles[`display${capitalize(display)}`],
+    size && styles[`size${capitalize(size)}`],
+    width && styles[`width${capitalize(width)}`],
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
-    <Link
-      className={linkStyles({ display, width, size })}
-      href={href}
-      {...rest}
-    >
+    <Link className={classNames} href={href} {...rest}>
       {children}
     </Link>
   );

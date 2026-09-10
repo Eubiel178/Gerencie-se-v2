@@ -1,48 +1,35 @@
 import { InputRootProvider, SharedProps } from "@/providers/input-root-context";
-import { VariantProps, tv } from "tailwind-variants";
 
-const rootStyles = tv({
-  base: "flex gap-2",
-
-  variants: {
-    direction: {
-      row: "flex-row",
-      col: "flex-col",
-    },
-
-    justify: {
-      center: "justify-center",
-      between: "justify-between",
-      stretch: "justify-stretch",
-    },
-
-    align: {
-      start: "items-start",
-      center: "items-center",
-      end: "items-end",
-      stretch: "items-stretch",
-    },
-  },
-
-  defaultVariants: { direction: "col" },
-});
+import styles from "./styles.module.css";
 
 type InputRootProps = React.ComponentProps<"div"> &
-  VariantProps<typeof rootStyles> &
-  SharedProps;
+  SharedProps & {
+    direction?: "row" | "col";
+    justify?: "center" | "between" | "stretch";
+    align?: "start" | "center" | "end" | "stretch";
+  };
+
+const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
 
 export const InputRoot = ({
   children,
-  direction,
+  direction = "col",
   justify,
   align,
   sharedProps,
 }: InputRootProps) => {
+  const classNames = [
+    styles.root,
+    styles[`direction${capitalize(direction)}`],
+    justify && styles[`justify${capitalize(justify)}`],
+    align && styles[`align${capitalize(align)}`],
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <InputRootProvider sharedProps={sharedProps}>
-      <div className={rootStyles({ direction, justify, align })}>
-        {children}
-      </div>
+      <div className={classNames}>{children}</div>
     </InputRootProvider>
   );
 };

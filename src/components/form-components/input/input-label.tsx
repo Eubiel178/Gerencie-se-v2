@@ -1,23 +1,18 @@
-import { VariantProps, tv } from "tailwind-variants";
+import styles from "./styles.module.css";
 
-const labelStyles = tv({
-  base: "",
+type InputLabelProps = React.ComponentProps<"label"> & {
+  size?: "small" | "medium" | "large";
+};
 
-  variants: {
-    size: {
-      small: "text-xs",
-      medium: "text-sm",
-      large: "text-lg",
-    },
-  },
-});
-
-type InputLabelProps = React.ComponentProps<"label"> &
-  VariantProps<typeof labelStyles>;
+const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
 
 export const InputLabel = ({ children, htmlFor, size }: InputLabelProps) => {
+  const classNames = [styles.label, size && styles[`label${capitalize(size)}`]]
+    .filter(Boolean)
+    .join(" ");
+
   return (
-    <label className={labelStyles({ size })} htmlFor={htmlFor}>
+    <label className={classNames} htmlFor={htmlFor}>
       {children}
     </label>
   );

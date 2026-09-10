@@ -1,36 +1,35 @@
 import { forwardRef } from "react";
-import { VariantProps, tv } from "tailwind-variants";
+
 import { useInputRootContext } from "@/providers/input-root-context";
 
-const inputStyles = tv({
-  base: "w-full border border-solid border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] p-2",
+import styles from "./styles.module.css";
 
-  variants: {
-    incorrect: {
-      true: "border-[var(--color-danger)] placeholder:text-[var(--color-danger)]",
-      false: "border-[var(--color-border)]",
-    },
-  },
-});
-
-type InputFieldTextareaProps = React.ComponentProps<"textarea"> &
-  VariantProps<typeof inputStyles>;
+type InputFieldTextareaProps = React.ComponentProps<"textarea">;
 
 export const InputFieldTextarea = forwardRef<
   HTMLTextAreaElement,
   InputFieldTextareaProps
 >(({ name, placeholder, className, ...rest }, ref) => {
   const { sharedProps } = useInputRootContext();
-  const incorrect = sharedProps?.error ? true : false;
+  const incorrect = Boolean(sharedProps?.error);
+
+  const classNames = [
+    styles.field,
+    styles.textarea,
+    incorrect && styles.incorrect,
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <textarea
       {...rest}
-      className={inputStyles({ className, incorrect: incorrect })}
+      className={classNames}
       name={name}
       id={name}
       placeholder={placeholder}
       ref={ref}
-    ></textarea>
+    />
   );
 });

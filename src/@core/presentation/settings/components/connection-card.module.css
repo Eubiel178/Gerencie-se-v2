@@ -1,0 +1,18 @@
+.connectLink {
+  display: inline-block;
+  width: fit-content;
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-highlight);
+  color: var(--color-on-highlight);
+  text-align: center;
+  text-decoration: none;
+  transition: filter var(--duration-fast) var(--easing-standard);
+}
+.connectLink:hover {
+  filter: brightness(1.08);
+}
+.connectLink:focus-visible {
+  outline: 2px solid var(--color-highlight);
+  outline-offset: 2px;
+}

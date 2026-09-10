@@ -1,4 +1,4 @@
-import styles from "./spinner.module.css";
+import styles from "./styles.module.css";
 
 export interface SpinnerProps {
   size?: "sm" | "md" | "lg";

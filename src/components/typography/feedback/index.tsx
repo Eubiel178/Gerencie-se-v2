@@ -1,33 +1,24 @@
-import { VariantProps, tv } from "tailwind-variants";
+import styles from "./styles.module.css";
 
-const feedbackStyles = tv({
-  base: "text-[var(--color-text-muted)]",
+type FeedbackProps = React.ComponentProps<"p"> & {
+  type?: "error" | "success" | "warning" | "info";
+  size?: "xSmall" | "small" | "medium" | "large";
+};
 
-  variants: {
-    type: {
-      error: "text-[var(--color-danger)]",
-      success: "text-[var(--color-success)]",
-      warning: "text-yellow-500",
-      info: "text-[var(--color-info)]",
-    },
+const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
 
-    size: {
-      xSmall: "text-xs",
-      small: "text-sm",
-      medium: "text-base",
-      large: "text-lg",
-    },
-  },
+export const Feedback = ({
+  children,
+  type = "info",
+  size = "medium",
+}: FeedbackProps) => {
+  const classNames = [
+    styles.feedback,
+    styles[`type${capitalize(type)}`],
+    styles[`size${capitalize(size)}`],
+  ]
+    .filter(Boolean)
+    .join(" ");
 
-  defaultVariants: {
-    type: "info",
-    size: "medium",
-  },
-});
-
-type FeedbackProps = React.ComponentProps<"p"> &
-  VariantProps<typeof feedbackStyles>;
-
-export const Feedback = ({ children, type, size }: FeedbackProps) => {
-  return <p className={feedbackStyles({ type, size })}>{children}</p>;
+  return <p className={classNames}>{children}</p>;
 };

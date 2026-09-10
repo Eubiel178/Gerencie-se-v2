@@ -2,7 +2,7 @@
 
 import { ReactElement, cloneElement, useId } from "react";
 
-import styles from "./tooltip.module.css";
+import styles from "./styles.module.css";
 
 export interface TooltipProps {
   content: string;

@@ -1,53 +1,36 @@
-import { VariantProps, tv } from "tailwind-variants";
+import styles from "./styles.module.css";
 
-const formStyles = tv({
-  base: "flex w-full",
+type FormRootProps = React.ComponentProps<"form"> & {
+  direction?: "column" | "row";
+  justify?: "center" | "between" | "stretch";
+  align?: "start" | "center" | "end" | "stretch";
+  gap?: "xsmall" | "small" | "medium" | "large";
+};
 
-  variants: {
-    direction: {
-      column: "flex-col",
-      row: "flex-row",
-    },
-
-    justify: {
-      center: "justify-center",
-      between: "justify-between",
-      stretch: "justify-stretch",
-    },
-
-    align: {
-      start: "items-start",
-      center: "items-center",
-      end: "items-end",
-      stretch: "items-stretch",
-    },
-
-    gap: {
-      xsmall: "gap-3",
-      small: "gap-6",
-      medium: "gap-8",
-      large: "gap-16",
-    },
-  },
-
-  defaultVariants: { direction: "column", gap: "large" },
-});
-
-type FormRootrops = React.ComponentProps<"form"> &
-  VariantProps<typeof formStyles>;
+const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
 
 export const FormRoot = ({
   children,
   onSubmit,
-  direction,
-  gap,
+  direction = "column",
+  justify,
+  align,
+  gap = "large",
   className,
-}: FormRootrops) => {
+}: FormRootProps) => {
+  const classNames = [
+    styles.root,
+    styles[`direction${capitalize(direction)}`],
+    justify && styles[`justify${capitalize(justify)}`],
+    align && styles[`align${capitalize(align)}`],
+    styles[`gap${capitalize(gap)}`],
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
-    <form
-      className={formStyles({ direction, gap, className })}
-      onSubmit={onSubmit}
-    >
+    <form className={classNames} onSubmit={onSubmit}>
       {children}
     </form>
   );

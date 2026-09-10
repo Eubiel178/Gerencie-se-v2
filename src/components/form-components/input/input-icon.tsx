@@ -1,11 +1,7 @@
-import { VariantProps, tv } from "tailwind-variants";
+import styles from "./styles.module.css";
 
-const styles = tv({
-  base: "bg-[var(--color-surface-elevated)] text-[var(--color-text)] text-xl",
-});
-
-type InputIconProps = React.ComponentProps<"p"> & VariantProps<typeof styles>;
+type InputIconProps = React.ComponentProps<"p">;
 
 export const InputIcon = ({ children }: InputIconProps) => {
-  return <p className={styles()}>{children}</p>;
+  return <p className={styles.icon}>{children}</p>;
 };

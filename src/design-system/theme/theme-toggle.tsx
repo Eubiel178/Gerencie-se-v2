@@ -2,7 +2,7 @@
 
 import { ThemePreference, useTheme } from "./use-theme";
 
-import styles from "./theme-toggle.module.css";
+import styles from "./styles.module.css";
 
 const OPTIONS: { value: ThemePreference; label: string }[] = [
   { value: "system", label: "Sistema" },

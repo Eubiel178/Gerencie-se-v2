@@ -1,0 +1,36 @@
+.link {
+  color: var(--color-highlight);
+  font-family: var(--font-sans);
+  text-decoration: none;
+}
+.link:hover {
+  text-decoration: underline;
+}
+.link:focus-visible {
+  outline: 2px solid var(--color-highlight);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.displayFlex {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.displayBlock {
+  display: block;
+}
+
+.sizeSmall {
+  font-size: var(--font-size-xs);
+}
+.sizeMedium {
+  font-size: var(--font-size-sm);
+}
+.sizeLarge {
+  font-size: var(--font-size-lg);
+}
+
+.widthFit {
+  width: fit-content;
+}

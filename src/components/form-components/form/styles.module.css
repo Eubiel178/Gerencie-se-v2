@@ -1,0 +1,52 @@
+.root {
+  display: flex;
+  width: 100%;
+}
+
+.wrapper {
+  display: flex;
+  gap: var(--space-6);
+}
+
+.directionColumn {
+  flex-direction: column;
+}
+.directionRow {
+  flex-direction: row;
+}
+
+.justifyCenter {
+  justify-content: center;
+}
+.justifyBetween {
+  justify-content: space-between;
+}
+.justifyStretch {
+  justify-content: stretch;
+}
+
+.alignStart {
+  align-items: flex-start;
+}
+.alignCenter {
+  align-items: center;
+}
+.alignEnd {
+  align-items: flex-end;
+}
+.alignStretch {
+  align-items: stretch;
+}
+
+.gapXsmall {
+  gap: var(--space-3);
+}
+.gapSmall {
+  gap: var(--space-5);
+}
+.gapMedium {
+  gap: var(--space-6);
+}
+.gapLarge {
+  gap: var(--space-8);
+}

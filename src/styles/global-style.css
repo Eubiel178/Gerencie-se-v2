@@ -1,7 +1,3 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 /*
  * Cores e fonte vêm de src/design-system/tokens (importado antes deste
  * arquivo em src/app/layout.tsx) — nada de cor solta aqui. `color-scheme`
@@ -46,7 +42,4 @@ textarea {
 
 .no-scroll {
   overflow-y: hidden;
-}
-
-@layer utilities {
 }

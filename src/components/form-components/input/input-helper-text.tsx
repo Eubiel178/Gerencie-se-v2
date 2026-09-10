@@ -1,17 +1,11 @@
 "use client";
 
 import { useInputRootContext } from "@/providers/input-root-context";
-import { VariantProps, tv } from "tailwind-variants";
 
-const textStyles = tv({
-  base: "text-[var(--color-danger)] text-xs",
-});
+import styles from "./styles.module.css";
 
-type InputHelperTextProps = React.ComponentProps<"p"> &
-  VariantProps<typeof textStyles>;
-
-export const InputHelperText = ({}: InputHelperTextProps) => {
+export const InputHelperText = () => {
   const { sharedProps } = useInputRootContext();
 
-  return <p className={textStyles()}>{sharedProps?.error}</p>;
+  return <p className={styles.helperText}>{sharedProps?.error}</p>;
 };

@@ -1,26 +1,26 @@
-import { VariantProps, tv } from "tailwind-variants";
+import styles from "./styles.module.css";
 
-const wrapperStyles = tv({
-  base: "flex gap-6",
+type FormWrapperProps = React.ComponentProps<"div"> & {
+  direction?: "column" | "row";
+  gap?: "xsmall" | "small";
+};
 
-  variants: {
-    direction: {
-      column: "flex-col",
-      row: "flex-row",
-    },
+const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
 
-    gap: {
-      xsmall: "gap-3",
-      small: "gap-6",
-    },
-  },
+export const FormWrapper = ({
+  children,
+  direction = "column",
+  gap = "xsmall",
+  className,
+}: FormWrapperProps) => {
+  const classNames = [
+    styles.wrapper,
+    styles[`direction${capitalize(direction)}`],
+    styles[`gap${capitalize(gap)}`],
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ");
 
-  defaultVariants: { direction: "column", gap: "xsmall" },
-});
-
-type FormWrapperProps = React.ComponentProps<"div"> &
-  VariantProps<typeof wrapperStyles>;
-
-export const FormWrapper = ({ children, direction, gap }: FormWrapperProps) => {
-  return <div className={wrapperStyles({ direction, gap })}>{children}</div>;
+  return <div className={classNames}>{children}</div>;
 };

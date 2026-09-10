@@ -12,6 +12,8 @@ import { Button, Feedback, Input, Paragraph, Wrapper } from "@/components";
 
 import type { GoogleCalendarOption } from "@/lib/google-calendar";
 
+import styles from "./connection-card.module.css";
+
 interface ConnectionCardProps {
   isConnected: boolean;
   googleAccountEmail?: string;
@@ -75,10 +77,7 @@ export function ConnectionCard({
           <Paragraph>Não conectado</Paragraph>
         </Wrapper>
 
-        <a
-          href="/api/google-calendar/connect"
-          className="inline-block text-center text-[var(--color-on-info)] bg-[var(--color-highlight)] p-2 border-hidden w-fit"
-        >
+        <a href="/api/google-calendar/connect" className={styles.connectLink}>
           Conectar Google Agenda
         </a>
       </Wrapper>
