@@ -15,6 +15,7 @@ import { Form, Modal, Input, Button, Wrapper, Feedback } from "@/components";
 import inputStyles from "@/components/form-components/input/styles.module.css";
 
 import { updateEventAction } from "@/features/events/actions";
+import { useEventStore } from "@/features/events/event-store";
 
 import { FormData, IModalProps } from "./interfaces";
 
@@ -22,6 +23,7 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const router = useRouter();
+  const replaceEvent = useEventStore((state) => state.replaceEvent);
 
   const {
     handleSubmit,
@@ -46,17 +48,17 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
   }
 
   async function handleFormSubmit(data: FormData) {
-    // TODO(fase 7 — Zustand): trocar por update otimista assim que a store
-    // de eventos existir; hoje o `router.refresh()` refaz o fetch no server.
     setSubmitError(null);
 
-    const result = await updateEventAction({ ...eventBeingEdited, ...data });
+    const updatedEvent = { ...eventBeingEdited, ...data };
+    const result = await updateEventAction(updatedEvent);
 
     if (result.error) {
       setSubmitError(result.error);
       return;
     }
 
+    replaceEvent(updatedEvent);
     closeModal();
     router.refresh();
   }
