@@ -14,8 +14,11 @@ export const metadata: Metadata = {
     "Produtividade, organização, foco e disciplina em um só lugar.",
   manifest: "/manifest.webmanifest",
   icons: {
-    icon: "/icon.svg",
-    apple: "/icon.svg",
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    apple: "/apple-icon.png",
   },
   appleWebApp: {
     capable: true,
