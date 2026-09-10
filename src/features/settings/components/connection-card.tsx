@@ -91,7 +91,7 @@ export function ConnectionCard({
         <Paragraph>Conectado</Paragraph>
       </Wrapper>
 
-      <Paragraph size="small" color="secondary">
+      <Paragraph size="small" color="muted">
         Conta: {googleAccountEmail}
       </Paragraph>
 

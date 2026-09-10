@@ -5,12 +5,15 @@ import { useParamsUrl } from "@/hooks/use-params-url";
 
 import { Input } from "@/components";
 import { AddTask } from "../modal";
+import { LoadAcceptedConnections } from "@/features/connections/domain";
 import styles from "../../home-dashboard.module.css";
 
 export function TasksListHeader({
   isGoogleConnected,
+  connections,
 }: {
   isGoogleConnected: boolean;
+  connections: LoadAcceptedConnections.Model;
 }) {
   const router = useRouter();
   const pathaname = usePathname();
@@ -46,7 +49,7 @@ export function TasksListHeader({
           />
         </Input.Wrapper>
       </Input.Root>
-      <AddTask buttonText="Nova Tarefa" isGoogleConnected={isGoogleConnected} />
+      <AddTask buttonText="Nova Tarefa" isGoogleConnected={isGoogleConnected} connections={connections} />
       </div>
     </header>
   );

@@ -10,6 +10,8 @@ export const validationSchema = z
     // String no formulário (input number vem como string) — convertido e
     // validado só quando frequency = "weekly".
     targetPerWeek: z.string().optional(),
+    // "" no formulário = não compartilhado.
+    sharedWithUserId: z.string().optional(),
   })
   .refine(
     (data) => {
@@ -34,6 +36,7 @@ const habitParamsBase = z
     frequency: z.enum(["daily", "weekly"]),
     targetPerWeek: z.number().int().min(1).max(7).optional().nullable(),
     goalId: z.string().optional().nullable(),
+    sharedWithUserId: z.string().optional().nullable(),
   })
   .refine((data) => data.frequency !== "weekly" || !!data.targetPerWeek, {
     message: "Informe quantas vezes por semana (de 1 a 7)",
@@ -54,6 +57,7 @@ export const updateHabitSchema = z
     frequency: z.enum(["daily", "weekly"]),
     targetPerWeek: z.number().int().min(1).max(7).optional().nullable(),
     goalId: z.string().optional().nullable(),
+    sharedWithUserId: z.string().optional().nullable(),
   })
   .refine((data) => data.frequency !== "weekly" || !!data.targetPerWeek, {
     message: "Informe quantas vezes por semana (de 1 a 7)",

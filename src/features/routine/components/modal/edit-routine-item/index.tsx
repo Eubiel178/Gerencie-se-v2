@@ -11,13 +11,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/routine-schema";
 
-import { Form, Modal, Input, Button, Wrapper, Feedback } from "@/components";
+import { Form, Modal, Input, Button, Wrapper, Feedback, Paragraph } from "@/components";
 
 import { updateRoutineItemAction } from "@/features/routine/actions";
+import { ShareSelect } from "@/features/connections/components/share-select";
 
 import { FormData, IEditRoutineItemProps, NO_TASK_VALUE } from "../interfaces";
 
-export function EditRoutineItem({ itemBeingEdited, taskOptions }: IEditRoutineItemProps) {
+export function EditRoutineItem({ itemBeingEdited, taskOptions, connections }: IEditRoutineItemProps) {
   const router = useRouter();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -35,6 +36,7 @@ export function EditRoutineItem({ itemBeingEdited, taskOptions }: IEditRoutineIt
       time: itemBeingEdited.time,
       title: itemBeingEdited.title,
       taskId: itemBeingEdited.taskId || NO_TASK_VALUE,
+      sharedWithUserId: itemBeingEdited.sharedWithUserId ?? "",
     },
   });
 
@@ -51,6 +53,7 @@ export function EditRoutineItem({ itemBeingEdited, taskOptions }: IEditRoutineIt
       time: data.time,
       title: data.title,
       taskId: data.taskId === NO_TASK_VALUE ? null : data.taskId,
+      sharedWithUserId: data.sharedWithUserId,
     });
 
     if (result.error) {
@@ -132,6 +135,26 @@ export function EditRoutineItem({ itemBeingEdited, taskOptions }: IEditRoutineIt
                     />
                   </Input.Wrapper>
                 </Input.Root>
+              )}
+
+              <Input.Root sharedProps={{ error: errors.sharedWithUserId?.message }}>
+                <Input.Label>Compartilhar com</Input.Label>
+
+                <Input.Wrapper>
+                  <ShareSelect
+                    connections={connections}
+                    disabled={itemBeingEdited.isSharedWithMe}
+                    {...register("sharedWithUserId")}
+                  />
+                </Input.Wrapper>
+
+                <Input.HelperText />
+              </Input.Root>
+
+              {itemBeingEdited.isSharedWithMe && (
+                <Paragraph size="xsmall" color="muted">
+                  Só quem compartilhou este item pode mudar isso.
+                </Paragraph>
               )}
             </Form.Wrapper>
 

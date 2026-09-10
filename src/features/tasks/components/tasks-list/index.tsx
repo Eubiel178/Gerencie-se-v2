@@ -9,15 +9,17 @@ import { List, Wrapper, Feedback } from "@/components";
 import { Card } from "./card";
 
 import { ITask } from "@/features/tasks/domain";
+import { LoadAcceptedConnections } from "@/features/connections/domain";
 import styles from "../../home-dashboard.module.css";
 import { useTaskStore } from "@/features/tasks/task-store";
 
 interface TasksListProps {
   tasksList: ITask[];
   isGoogleConnected: boolean;
+  connections: LoadAcceptedConnections.Model;
 }
 
-export function TasksList({ tasksList, isGoogleConnected }: TasksListProps) {
+export function TasksList({ tasksList, isGoogleConnected, connections }: TasksListProps) {
   const paramsUrl = useParamsUrl();
   const formTags = useFormTags();
   const tasks = useTaskStore((state) => state.tasks);
@@ -44,6 +46,7 @@ export function TasksList({ tasksList, isGoogleConnected }: TasksListProps) {
               task={task}
               tagLabel={"#" + formTags.tagsLabels[task.tag]}
               isGoogleConnected={isGoogleConnected}
+              connections={connections}
             />
           ))}
         </List>

@@ -52,4 +52,14 @@ export interface ITask {
   // usado só internamente pelo polling Google→App para saber se o evento
   // mudou desde a última sincronização.
   googleEventUpdatedAt?: Date | null;
+
+  // Compartilhamento com UMA conta conectada (ver features/connections) —
+  // dono continua sendo `userId`; quem está aqui só pode ver/editar/
+  // concluir, nunca excluir (ver `LocalTask.delete`). `null` = privada.
+  sharedWithUserId?: string | null;
+  // Calculados a partir de quem está logado (nunca guardados): se a
+  // tarefa listada é minha ou de alguém que compartilhou comigo, e o
+  // nome/e-mail de quem compartilhou (só preenchido no segundo caso).
+  isSharedWithMe: boolean;
+  ownerLabel?: string | null;
 }

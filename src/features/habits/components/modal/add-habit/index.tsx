@@ -13,6 +13,7 @@ import { validationSchema } from "@/validation/habit-schema";
 import { Form, Input, Modal, Button, Wrapper, Feedback } from "@/components";
 
 import { createHabitAction } from "@/features/habits/actions";
+import { ShareSelect } from "@/features/connections/components/share-select";
 
 import { FormData, IAddHabitProps } from "../interfaces";
 
@@ -21,7 +22,7 @@ const FREQUENCY_OPTIONS = [
   { label: "Algumas vezes por semana", value: "weekly" },
 ];
 
-export function AddHabit({ buttonText }: IAddHabitProps) {
+export function AddHabit({ buttonText, connections }: IAddHabitProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const router = useRouter();
@@ -39,6 +40,7 @@ export function AddHabit({ buttonText }: IAddHabitProps) {
       title: "",
       frequency: "daily",
       targetPerWeek: "3",
+      sharedWithUserId: "",
     },
   });
 
@@ -57,6 +59,7 @@ export function AddHabit({ buttonText }: IAddHabitProps) {
       frequency: data.frequency,
       targetPerWeek: data.frequency === "weekly" ? Number(data.targetPerWeek) : null,
       goalId: null,
+      sharedWithUserId: data.sharedWithUserId,
     });
 
     if (result.error) {
@@ -138,6 +141,16 @@ export function AddHabit({ buttonText }: IAddHabitProps) {
                   <Input.HelperText />
                 </Input.Root>
               )}
+
+              <Input.Root sharedProps={{ error: errors.sharedWithUserId?.message }}>
+                <Input.Label>Compartilhar com</Input.Label>
+
+                <Input.Wrapper>
+                  <ShareSelect connections={connections} {...register("sharedWithUserId")} />
+                </Input.Wrapper>
+
+                <Input.HelperText />
+              </Input.Root>
             </Form.Wrapper>
 
             {submitError && <Feedback>{submitError}</Feedback>}

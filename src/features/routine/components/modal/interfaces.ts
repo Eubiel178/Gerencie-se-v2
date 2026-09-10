@@ -3,6 +3,7 @@ import { z } from "zod";
 import { validationSchema } from "@/validation/routine-schema";
 
 import { IRoutineItem } from "@/features/routine/domain";
+import { LoadAcceptedConnections } from "@/features/connections/domain";
 
 export interface FormData extends z.infer<typeof validationSchema> {}
 
@@ -20,9 +21,11 @@ export interface TaskOption {
 export interface IAddRoutineItemProps {
   buttonText: string;
   taskOptions: TaskOption[];
+  connections: LoadAcceptedConnections.Model;
 }
 
 export interface IEditRoutineItemProps {
   itemBeingEdited: IRoutineItem;
   taskOptions: TaskOption[];
+  connections: LoadAcceptedConnections.Model;
 }

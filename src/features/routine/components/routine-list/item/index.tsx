@@ -6,12 +6,13 @@ import { useRouter } from "next/navigation";
 
 import { FaTrash } from "react-icons/fa";
 
-import { Button } from "@/components";
+import { Button, Feedback } from "@/components";
 
 import { deleteRoutineItemAction } from "@/features/routine/actions";
 import { EditRoutineItem } from "../../modal";
 
 import { IRoutineItem } from "@/features/routine/domain";
+import { LoadAcceptedConnections } from "@/features/connections/domain";
 import { TaskOption } from "../../modal/interfaces";
 
 import styles from "../../../routine.module.css";
@@ -19,10 +20,11 @@ import styles from "../../../routine.module.css";
 interface RoutineListItemProps {
   item: IRoutineItem;
   taskOptions: TaskOption[];
+  connections: LoadAcceptedConnections.Model;
   linkedTaskTitle?: string;
 }
 
-export function RoutineListItem({ item, taskOptions, linkedTaskTitle }: RoutineListItemProps) {
+export function RoutineListItem({ item, taskOptions, connections, linkedTaskTitle }: RoutineListItemProps) {
   const router = useRouter();
   const [isRemoving, setIsRemoving] = useState(false);
 
@@ -46,21 +48,28 @@ export function RoutineListItem({ item, taskOptions, linkedTaskTitle }: RoutineL
         {linkedTaskTitle && (
           <p className={styles.linkedTask}>Vinculado a: {linkedTaskTitle}</p>
         )}
+        {item.isSharedWithMe ? (
+          <Feedback type="info" size="xSmall">Compartilhado por {item.ownerLabel}</Feedback>
+        ) : (
+          item.sharedWithUserId && <Feedback type="info" size="xSmall">Compartilhado</Feedback>
+        )}
       </div>
 
       <div className={styles.actions}>
-        <EditRoutineItem itemBeingEdited={item} taskOptions={taskOptions} />
+        <EditRoutineItem itemBeingEdited={item} taskOptions={taskOptions} connections={connections} />
 
-        <Button
-          color="danger"
-          background="transparent"
-          size="xlarge"
-          aria-label={`Remover ${item.title} da rotina`}
-          loading={isRemoving}
-          onClick={handleRemove}
-        >
-          <FaTrash />
-        </Button>
+        {!item.isSharedWithMe && (
+          <Button
+            color="danger"
+            background="transparent"
+            size="xlarge"
+            aria-label={`Remover ${item.title} da rotina`}
+            loading={isRemoving}
+            onClick={handleRemove}
+          >
+            <FaTrash />
+          </Button>
+        )}
       </div>
     </li>
   );

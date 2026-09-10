@@ -27,4 +27,13 @@ export interface IHabit {
   // Quantos registros de conclusão existem nos últimos 7 dias (incluindo
   // hoje) — usado para comparar com `targetPerWeek` em hábitos semanais.
   completionsThisWeek: number;
+
+  // Compartilhamento (ver `assertAcceptedConnection`): quem esse hábito foi
+  // compartilhado pode ver/editar/concluir, mas só o dono pode mudar isso
+  // ou excluí-lo. O registro de conclusão (`habit_log`) é único por
+  // (hábito, dia) — ou seja, dono e colaborador compartilham a MESMA
+  // sequência/streak, não sequências separadas.
+  sharedWithUserId?: string | null;
+  isSharedWithMe: boolean;
+  ownerLabel?: string | null;
 }

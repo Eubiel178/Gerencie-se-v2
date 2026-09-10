@@ -17,6 +17,7 @@ import { EditTask } from "../../modal";
 import { PRIORITY_LABELS } from "../../modal/interfaces";
 
 import { ITask } from "@/features/tasks/domain";
+import { LoadAcceptedConnections } from "@/features/connections/domain";
 
 import styles from "../../../home-dashboard.module.css";
 import { useTaskStore } from "@/features/tasks/task-store";
@@ -34,9 +35,10 @@ interface CardProps {
   // formatada só para exibição.
   tagLabel: string;
   isGoogleConnected: boolean;
+  connections: LoadAcceptedConnections.Model;
 }
 
-export function Card({ task, tagLabel, isGoogleConnected }: CardProps) {
+export function Card({ task, tagLabel, isGoogleConnected, connections }: CardProps) {
   const router = useRouter();
   const [isRemoving, setIsRemoving] = useState(false);
   const [isRetrying, setIsRetrying] = useState(false);
@@ -100,18 +102,20 @@ export function Card({ task, tagLabel, isGoogleConnected }: CardProps) {
           </Wrapper>
 
           <Wrapper gap="medium">
-            <Button
-              color="danger"
-              background="transparent"
-              size="xlarge"
-              aria-label={`Excluir tarefa ${task.title}`}
-              loading={isRemoving}
-              onClick={handleTaskRemove}
-            >
-              <FaTrash />
-            </Button>
+            {!task.isSharedWithMe && (
+              <Button
+                color="danger"
+                background="transparent"
+                size="xlarge"
+                aria-label={`Excluir tarefa ${task.title}`}
+                loading={isRemoving}
+                onClick={handleTaskRemove}
+              >
+                <FaTrash />
+              </Button>
+            )}
 
-            <EditTask taskBeingEdited={task} isGoogleConnected={isGoogleConnected} />
+            <EditTask taskBeingEdited={task} isGoogleConnected={isGoogleConnected} connections={connections} />
           </Wrapper>
         </Wrapper>
       </Wrapper>
@@ -152,9 +156,21 @@ export function Card({ task, tagLabel, isGoogleConnected }: CardProps) {
             )}
           </Wrapper>
 
-          <Paragraph color="secondary" size="small">
+          <Paragraph color="muted" size="small">
             {task.description}
           </Paragraph>
+
+          {task.isSharedWithMe ? (
+            <Feedback type="info" size="xSmall">
+              Compartilhada por {task.ownerLabel}
+            </Feedback>
+          ) : (
+            task.sharedWithUserId && (
+              <Feedback type="info" size="xSmall">
+                Compartilhada
+              </Feedback>
+            )
+          )}
         </Wrapper>
 
         {task.syncEnabled && (

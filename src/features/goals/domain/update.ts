@@ -7,6 +7,6 @@ export type UpdateGoal = {
 export namespace UpdateGoal {
   export type Params = Pick<
     IGoal,
-    "id" | "title" | "description" | "deadline" | "priority"
+    "id" | "title" | "description" | "deadline" | "priority" | "sharedWithUserId"
   >;
 }

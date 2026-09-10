@@ -8,6 +8,13 @@
       "when": 1789049117201,
       "tag": "0000_fast_calypso",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789080481157,
+      "tag": "0001_tricky_quicksilver",
+      "breakpoints": true
     }
   ]
 }

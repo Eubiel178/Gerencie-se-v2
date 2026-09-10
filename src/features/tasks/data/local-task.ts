@@ -1,13 +1,14 @@
 import "server-only";
 
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray, or } from "drizzle-orm";
 
 import * as domain from "@/features/tasks/domain";
 import type { TaskSyncStatus } from "@/features/tasks/domain";
 
 import { db } from "@/db/client";
-import { tasks } from "@/db/schema";
+import { tasks, users } from "@/db/schema";
 import { requireUserId } from "@/lib/require-user-id";
+import { assertAcceptedConnection } from "@/lib/assert-accepted-connection";
 
 export type UpdateTaskSyncStateParams = {
   id: string;
@@ -25,6 +26,10 @@ export type UpdateTaskSyncStateParams = {
  * isso ela é consumida exclusivamente pelas Server Actions em
  * `src/features/tasks/actions.ts` e pelo Server Component `Home`, nunca
  * diretamente por um Client Component.
+ *
+ * Compartilhamento (ver `sharedWithUserId` no schema): quem a tarefa foi
+ * compartilhada pode ver/editar/concluir, mas só o DONO pode mudar com
+ * quem ela está compartilhada ou excluí-la — ver cada método abaixo.
  */
 export class LocalTask
   implements
@@ -38,6 +43,10 @@ export class LocalTask
     const userId = await requireUserId();
     const id = crypto.randomUUID();
 
+    if (params.sharedWithUserId) {
+      await assertAcceptedConnection(userId, params.sharedWithUserId);
+    }
+
     await db.insert(tasks).values({
       id,
       userId,
@@ -49,6 +58,7 @@ export class LocalTask
       syncEnabled: params.syncEnabled,
       reminderOffsetsMinutes: serializeReminders(params.reminderOffsetsMinutes),
       recurrence: params.recurrence,
+      sharedWithUserId: params.sharedWithUserId || null,
     });
 
     return { id };
@@ -57,14 +67,50 @@ export class LocalTask
   async loadAll(): Promise<domain.LoadAllTasks.Model> {
     const userId = await requireUserId();
 
-    const rows = await db.select().from(tasks).where(eq(tasks.userId, userId));
+    const rows = await db
+      .select()
+      .from(tasks)
+      .where(or(eq(tasks.userId, userId), eq(tasks.sharedWithUserId, userId)));
 
-    return rows.map(mapRowToTask);
+    const ownerIds = [...new Set(rows.filter((row) => row.userId !== userId).map((row) => row.userId))];
+
+    const owners =
+      ownerIds.length === 0
+        ? []
+        : await db.select({ id: users.id, name: users.name, email: users.email }).from(users).where(inArray(users.id, ownerIds));
+
+    const ownerById = new Map(owners.map((owner) => [owner.id, owner]));
+
+    return rows.map((row) => mapRowToTask(row, userId, ownerById.get(row.userId)));
   }
 
   async update(params: domain.UpdateTask.Params) {
     const userId = await requireUserId();
     const { id, tag, title, description, priority, scheduledAt, syncEnabled, recurrence } = params;
+
+    const [existing] = await db
+      .select({ userId: tasks.userId, sharedWithUserId: tasks.sharedWithUserId })
+      .from(tasks)
+      .where(and(eq(tasks.id, id), or(eq(tasks.userId, userId), eq(tasks.sharedWithUserId, userId))))
+      .limit(1);
+
+    if (!existing) {
+      throw new Error("Tarefa não encontrada.");
+    }
+
+    // Só o dono pode mudar com quem a tarefa está compartilhada — um
+    // colaborador editando a tarefa (título, prioridade, etc.) nunca
+    // consegue alterar isso de tabela, seu valor de `sharedWithUserId` no
+    // formulário é simplesmente ignorado.
+    const isOwner = existing.userId === userId;
+    let nextSharedWithUserId = existing.sharedWithUserId;
+
+    if (isOwner && params.sharedWithUserId !== existing.sharedWithUserId) {
+      if (params.sharedWithUserId) {
+        await assertAcceptedConnection(userId, params.sharedWithUserId);
+      }
+      nextSharedWithUserId = params.sharedWithUserId || null;
+    }
 
     await db
       .update(tasks)
@@ -77,16 +123,19 @@ export class LocalTask
         syncEnabled,
         reminderOffsetsMinutes: serializeReminders(params.reminderOffsetsMinutes),
         recurrence,
+        sharedWithUserId: nextSharedWithUserId,
         updatedAt: new Date(),
       })
-      .where(and(eq(tasks.id, id), eq(tasks.userId, userId)));
+      .where(and(eq(tasks.id, id), or(eq(tasks.userId, userId), eq(tasks.sharedWithUserId, userId))));
   }
 
   /** Alterna conclusão — não passa pelo formulário de edição geral (mesmo
    * raciocínio de `updateSyncState` abaixo: estado gerido por uma ação
    * dedicada). Lê o estado atual e inverte, em vez de aceitar um valor
    * explícito do chamador — evita o formulário de edição sobrescrever
-   * silenciosamente uma conclusão feita por outra aba/dispositivo.
+   * silenciosamente uma conclusão feita por outra aba/dispositivo. Dono OU
+   * colaborador (tarefa compartilhada) podem concluir — é o caso de uso
+   * central do compartilhamento (ajudar/lembrar o outro).
    *
    * Tarefa recorrente: ao MARCAR como concluída (nunca ao desmarcar), cria
    * a próxima ocorrência deslocando `scheduledAt` em vez de gerar todas as
@@ -96,7 +145,8 @@ export class LocalTask
    * especificamente, não herdada automaticamente (evita criar uma cadeia
    * de eventos no Google sem confirmação explícita a cada vez). Sem
    * `scheduledAt`, não há o que deslocar, então a recorrência é ignorada
-   * silenciosamente (tarefa comum, sem data).
+   * silenciosamente (tarefa comum, sem data). A ocorrência seguinte
+   * mantém o mesmo `sharedWithUserId` do original.
    */
   async toggleComplete(
     params: domain.ToggleTaskComplete.Params
@@ -106,7 +156,9 @@ export class LocalTask
     const [row] = await db
       .select()
       .from(tasks)
-      .where(and(eq(tasks.id, params.id), eq(tasks.userId, userId)))
+      .where(
+        and(eq(tasks.id, params.id), or(eq(tasks.userId, userId), eq(tasks.sharedWithUserId, userId)))
+      )
       .limit(1);
 
     if (!row) {
@@ -118,7 +170,7 @@ export class LocalTask
     await db
       .update(tasks)
       .set({ completed, completedAt: completed ? new Date() : null })
-      .where(and(eq(tasks.id, params.id), eq(tasks.userId, userId)));
+      .where(eq(tasks.id, params.id));
 
     const nextScheduledAt = completed
       ? domain.computeNextOccurrence(row.scheduledAt, row.recurrence as domain.TaskRecurrence)
@@ -127,7 +179,7 @@ export class LocalTask
     if (nextScheduledAt) {
       await db.insert(tasks).values({
         id: crypto.randomUUID(),
-        userId,
+        userId: row.userId,
         tag: row.tag,
         title: row.title,
         description: row.description,
@@ -136,12 +188,15 @@ export class LocalTask
         syncEnabled: false,
         reminderOffsetsMinutes: row.reminderOffsetsMinutes,
         recurrence: row.recurrence,
+        sharedWithUserId: row.sharedWithUserId,
       });
     }
 
     return { completed };
   }
 
+  /** Só o DONO pode excluir — compartilhamento dá acesso de ajudar, nunca
+   * de apagar o que é do outro. */
   async delete(params: domain.DeleteTask.Params) {
     const userId = await requireUserId();
 
@@ -152,7 +207,9 @@ export class LocalTask
 
   /** Lê uma tarefa específica do usuário logado — usado pela orquestração
    * de sincronização, que precisa saber o `googleEventId` atual antes de
-   * decidir se cria, atualiza ou desfaz o vínculo com o Google. */
+   * decidir se cria, atualiza ou desfaz o vínculo com o Google. Sempre só
+   * do dono: sincronização com o Google é uma decisão de quem é dono da
+   * tarefa, não de quem colabora nela. */
   async getById(id: string): Promise<domain.ITask | null> {
     const userId = await requireUserId();
 
@@ -162,7 +219,7 @@ export class LocalTask
       .where(and(eq(tasks.id, id), eq(tasks.userId, userId)))
       .limit(1);
 
-    return row ? mapRowToTask(row) : null;
+    return row ? mapRowToTask(row, userId) : null;
   }
 
   /**
@@ -231,7 +288,11 @@ export class LocalTask
   }
 }
 
-function mapRowToTask(row: typeof tasks.$inferSelect): domain.ITask {
+function mapRowToTask(
+  row: typeof tasks.$inferSelect,
+  viewerId: string,
+  owner?: { name: string | null; email: string | null }
+): domain.ITask {
   return {
     id: row.id,
     userId: row.userId,
@@ -249,6 +310,9 @@ function mapRowToTask(row: typeof tasks.$inferSelect): domain.ITask {
     googleEventUpdatedAt: row.googleEventUpdatedAt,
     reminderOffsetsMinutes: deserializeReminders(row.reminderOffsetsMinutes),
     recurrence: row.recurrence as domain.TaskRecurrence,
+    sharedWithUserId: row.sharedWithUserId,
+    isSharedWithMe: row.userId !== viewerId,
+    ownerLabel: row.userId !== viewerId ? owner?.name || owner?.email || null : null,
   };
 }
 

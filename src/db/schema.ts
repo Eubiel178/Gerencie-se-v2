@@ -97,6 +97,32 @@ export const googleConnections = pgTable("google_connection", {
     .$defaultFn(() => new Date()),
 });
 
+/**
+ * Convite/vínculo de colaboração entre duas contas (ex.: casal, família).
+ * Uma linha serve tanto pro convite pendente quanto pro vínculo aceito -
+ * só o `status` muda. `addresseeId` começa nulo se o e-mail convidado
+ * ainda não tinha conta; é preenchido depois, no login/cadastro de quem
+ * tiver aquele e-mail (ver `src/features/connections/actions.ts`), sem
+ * precisar de token por link - o match é sempre por e-mail.
+ */
+export const connections = pgTable("connection", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  requesterId: text("requester_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  addresseeId: text("addressee_id").references(() => users.id, { onDelete: "cascade" }),
+  addresseeEmail: text("addressee_email").notNull(),
+  status: text("status", { enum: ["pending", "accepted", "declined"] })
+    .notNull()
+    .default("pending"),
+  createdAt: timestamp("created_at", { mode: "date" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  respondedAt: timestamp("responded_at", { mode: "date" }),
+});
+
 export const tasks = pgTable("task", {
   id: text("id")
     .primaryKey()
@@ -104,6 +130,12 @@ export const tasks = pgTable("task", {
   userId: text("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
+  // Compartilhamento opcional com UMA conta conectada (ver `connections`)
+  // - dono continua sendo `userId`; quem está aqui só ganha permissão de
+  // ver/editar/concluir, nunca de excluir (ver `LocalTask`).
+  sharedWithUserId: text("shared_with_user_id").references(() => users.id, {
+    onDelete: "set null",
+  }),
   tag: text("tag").notNull(),
   title: text("title").notNull(),
   description: text("description").notNull(),
@@ -186,6 +218,9 @@ export const routineItems = pgTable("routine_item", {
   userId: text("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
+  sharedWithUserId: text("shared_with_user_id").references(() => users.id, {
+    onDelete: "set null",
+  }),
   time: text("time").notNull(), // "HH:MM"
   title: text("title").notNull(),
   taskId: text("task_id").references(() => tasks.id, { onDelete: "set null" }),
@@ -201,6 +236,9 @@ export const goals = pgTable("goal", {
   userId: text("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
+  sharedWithUserId: text("shared_with_user_id").references(() => users.id, {
+    onDelete: "set null",
+  }),
   title: text("title").notNull(),
   description: text("description").notNull().default(""),
   deadline: text("deadline"), // "YYYY-MM-DD", opcional
@@ -237,6 +275,9 @@ export const habits = pgTable("habit", {
   userId: text("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
+  sharedWithUserId: text("shared_with_user_id").references(() => users.id, {
+    onDelete: "set null",
+  }),
   title: text("title").notNull(),
   frequency: text("frequency", { enum: ["daily", "weekly"] })
     .notNull()

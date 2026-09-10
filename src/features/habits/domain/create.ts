@@ -5,5 +5,8 @@ export type CreateHabit = {
 };
 
 export namespace CreateHabit {
-  export type Params = Pick<IHabit, "title" | "frequency" | "targetPerWeek" | "goalId">;
+  export type Params = Pick<
+    IHabit,
+    "title" | "frequency" | "targetPerWeek" | "goalId" | "sharedWithUserId"
+  >;
 }

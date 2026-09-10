@@ -1,6 +1,7 @@
 import { Feedback, Wrapper } from "@/components";
 
 import { IRoutineItem } from "@/features/routine/domain";
+import { LoadAcceptedConnections } from "@/features/connections/domain";
 import { TaskOption } from "../modal/interfaces";
 import { RoutineListItem } from "./item";
 
@@ -9,9 +10,10 @@ import styles from "../../routine.module.css";
 interface RoutineListProps {
   items: IRoutineItem[];
   taskOptions: TaskOption[];
+  connections: LoadAcceptedConnections.Model;
 }
 
-export function RoutineList({ items, taskOptions }: RoutineListProps) {
+export function RoutineList({ items, taskOptions, connections }: RoutineListProps) {
   if (items.length === 0) {
     return (
       <Wrapper className={styles.empty}>
@@ -31,6 +33,7 @@ export function RoutineList({ items, taskOptions }: RoutineListProps) {
           key={item.id}
           item={item}
           taskOptions={taskOptions}
+          connections={connections}
           linkedTaskTitle={item.taskId ? taskTitleById.get(item.taskId) : undefined}
         />
       ))}

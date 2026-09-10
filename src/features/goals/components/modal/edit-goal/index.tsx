@@ -11,13 +11,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/goal-schema";
 
-import { Form, Modal, Input, Button, Wrapper, Feedback } from "@/components";
+import { Form, Modal, Input, Button, Wrapper, Feedback, Paragraph } from "@/components";
 
 import { updateGoalAction } from "@/features/goals/actions";
+import { ShareSelect } from "@/features/connections/components/share-select";
 
 import { FormData, IEditGoalProps, PRIORITY_OPTIONS } from "../interfaces";
 
-export function EditGoal({ goalBeingEdited }: IEditGoalProps) {
+export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
   const router = useRouter();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -36,6 +37,7 @@ export function EditGoal({ goalBeingEdited }: IEditGoalProps) {
       description: goalBeingEdited.description,
       deadline: goalBeingEdited.deadline || "",
       priority: goalBeingEdited.priority,
+      sharedWithUserId: goalBeingEdited.sharedWithUserId ?? "",
     },
   });
 
@@ -53,6 +55,7 @@ export function EditGoal({ goalBeingEdited }: IEditGoalProps) {
       description: data.description,
       deadline: data.deadline || null,
       priority: data.priority,
+      sharedWithUserId: data.sharedWithUserId,
     });
 
     if (result.error) {
@@ -138,6 +141,26 @@ export function EditGoal({ goalBeingEdited }: IEditGoalProps) {
 
                 <Input.HelperText />
               </Input.Root>
+
+              <Input.Root sharedProps={{ error: errors.sharedWithUserId?.message }}>
+                <Input.Label>Compartilhar com</Input.Label>
+
+                <Input.Wrapper>
+                  <ShareSelect
+                    connections={connections}
+                    disabled={goalBeingEdited.isSharedWithMe}
+                    {...register("sharedWithUserId")}
+                  />
+                </Input.Wrapper>
+
+                <Input.HelperText />
+              </Input.Root>
+
+              {goalBeingEdited.isSharedWithMe && (
+                <Paragraph size="xsmall" color="muted">
+                  Só quem compartilhou este objetivo pode mudar isso.
+                </Paragraph>
+              )}
             </Form.Wrapper>
 
             {submitError && <Feedback>{submitError}</Feedback>}

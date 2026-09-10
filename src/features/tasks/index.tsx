@@ -1,6 +1,7 @@
 import { requireUserId } from "@/lib/require-user-id";
 import { isGoogleCalendarConnected } from "@/lib/google-calendar";
 import { syncTasksFromGoogle } from "@/features/tasks/sync";
+import { getConnectionFetcher } from "@/features/connections/data/get-connection-fetcher";
 
 import { getTaskFetcher } from "./data/get-task-fetcher";
 
@@ -22,13 +23,16 @@ export async function Home() {
     await syncTasksFromGoogle(tasksBeforeSync, fetcher);
   }
 
-  const tasksList = await fetcher.loadAll();
+  const [tasksList, connections] = await Promise.all([
+    fetcher.loadAll(),
+    getConnectionFetcher().loadAccepted(),
+  ]);
 
   return (
     <Section>
-      <TasksListHeader isGoogleConnected={isGoogleConnected} />
+      <TasksListHeader isGoogleConnected={isGoogleConnected} connections={connections} />
 
-      <TasksList tasksList={tasksList} isGoogleConnected={isGoogleConnected} />
+      <TasksList tasksList={tasksList} isGoogleConnected={isGoogleConnected} connections={connections} />
     </Section>
   );
 }

@@ -12,15 +12,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/task-schema";
 
-import { Form, Modal, Input, Button, Wrapper, Feedback } from "@/components";
+import { Form, Modal, Input, Button, Wrapper, Feedback, Paragraph } from "@/components";
 
 import { updateTaskAction } from "@/features/tasks/actions";
+
+import { ShareSelect } from "@/features/connections/components/share-select";
 
 import { SyncWithGoogle } from "../sync-with-google";
 import { ReminderFields } from "../reminder-fields";
 import { FormData, IEditTaskProps, PRIORITY_OPTIONS } from "../interfaces";
 
-export function EditTask({ taskBeingEdited, isGoogleConnected }: IEditTaskProps) {
+export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IEditTaskProps) {
   const router = useRouter();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -45,6 +47,7 @@ export function EditTask({ taskBeingEdited, isGoogleConnected }: IEditTaskProps)
       scheduledAt: taskBeingEdited.scheduledAt || "",
       reminderOffsetsMinutes: taskBeingEdited.reminderOffsetsMinutes ?? [],
       recurrence: taskBeingEdited.recurrence,
+      sharedWithUserId: taskBeingEdited.sharedWithUserId ?? "",
       syncEnabled: taskBeingEdited.syncEnabled,
     },
   });
@@ -160,6 +163,26 @@ export function EditTask({ taskBeingEdited, isGoogleConnected }: IEditTaskProps)
                 scheduledAtError={errors.scheduledAt?.message}
                 hasScheduledAt={!!scheduledAt}
               />
+
+              <Input.Root sharedProps={{ error: errors.sharedWithUserId?.message }}>
+                <Input.Label>Compartilhar com</Input.Label>
+
+                <Input.Wrapper>
+                  <ShareSelect
+                    connections={connections}
+                    disabled={taskBeingEdited.isSharedWithMe}
+                    {...register("sharedWithUserId")}
+                  />
+                </Input.Wrapper>
+
+                <Input.HelperText />
+              </Input.Root>
+
+              {taskBeingEdited.isSharedWithMe && (
+                <Paragraph size="xsmall" color="muted">
+                  Só quem compartilhou esta tarefa pode mudar isso.
+                </Paragraph>
+              )}
 
               <SyncWithGoogle
                 register={register}

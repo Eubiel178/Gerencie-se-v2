@@ -5,5 +5,8 @@ export type CreateGoal = {
 };
 
 export namespace CreateGoal {
-  export type Params = Pick<IGoal, "title" | "description" | "deadline" | "priority">;
+  export type Params = Pick<
+    IGoal,
+    "title" | "description" | "deadline" | "priority" | "sharedWithUserId"
+  >;
 }

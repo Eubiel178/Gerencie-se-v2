@@ -22,5 +22,7 @@ export namespace CreateTask {
     | "googleEventUpdatedAt"
     | "completed"
     | "completedAt"
+    | "isSharedWithMe"
+    | "ownerLabel"
   >;
 }

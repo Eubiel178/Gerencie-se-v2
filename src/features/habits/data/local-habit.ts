@@ -1,13 +1,14 @@
 import "server-only";
 
 import dayjs from "dayjs";
-import { and, eq, gte } from "drizzle-orm";
+import { and, eq, gte, inArray, or } from "drizzle-orm";
 
 import * as domain from "@/features/habits/domain";
 
 import { db } from "@/db/client";
-import { habitLogs, habits } from "@/db/schema";
+import { habitLogs, habits, users } from "@/db/schema";
 import { requireUserId } from "@/lib/require-user-id";
+import { assertAcceptedConnection } from "@/lib/assert-accepted-connection";
 
 const STREAK_WINDOW_DAYS = 60;
 
@@ -18,6 +19,13 @@ const STREAK_WINDOW_DAYS = 60;
  * calcula sequência/porcentagem de conclusão a partir de `habit_log` a
  * cada chamada — nunca lê um valor pré-calculado, exatamente como o
  * comentário do schema pede.
+ *
+ * Compartilhamento (ver `sharedWithUserId` no schema): quem o hábito foi
+ * compartilhado pode ver/editar/concluir, mas só o DONO pode mudar com
+ * quem ele está compartilhado ou excluí-lo. Como `habit_log` tem chave
+ * primária (habitId, date) — não (habitId, userId, date) — dono e
+ * colaborador compartilham a MESMA sequência: quem marcar primeiro no dia
+ * "trava" o registro para os dois.
  */
 export class LocalHabit
   implements
@@ -31,6 +39,10 @@ export class LocalHabit
     const userId = await requireUserId();
     const id = crypto.randomUUID();
 
+    if (params.sharedWithUserId) {
+      await assertAcceptedConnection(userId, params.sharedWithUserId);
+    }
+
     await db.insert(habits).values({
       id,
       userId,
@@ -38,6 +50,7 @@ export class LocalHabit
       frequency: params.frequency,
       targetPerWeek: params.targetPerWeek ?? null,
       goalId: params.goalId ?? null,
+      sharedWithUserId: params.sharedWithUserId || null,
     });
 
     return { id };
@@ -49,16 +62,41 @@ export class LocalHabit
     const habitRows = await db
       .select()
       .from(habits)
-      .where(and(eq(habits.userId, userId), eq(habits.archived, false)));
+      .where(
+        and(
+          or(eq(habits.userId, userId), eq(habits.sharedWithUserId, userId)),
+          eq(habits.archived, false)
+        )
+      );
 
+    const ownerIds = [
+      ...new Set(habitRows.filter((row) => row.userId !== userId).map((row) => row.userId)),
+    ];
+
+    const owners =
+      ownerIds.length === 0
+        ? []
+        : await db
+            .select({ id: users.id, name: users.name, email: users.email })
+            .from(users)
+            .where(inArray(users.id, ownerIds));
+
+    const ownerById = new Map(owners.map((owner) => [owner.id, owner]));
+
+    const habitIds = habitRows.map((row) => row.id);
     const windowStart = dayjs()
       .subtract(STREAK_WINDOW_DAYS, "day")
       .format("YYYY-MM-DD");
 
-    const logRows = await db
-      .select({ habitId: habitLogs.habitId, date: habitLogs.date })
-      .from(habitLogs)
-      .where(and(eq(habitLogs.userId, userId), gte(habitLogs.date, windowStart)));
+    // Não filtra por `userId`: um hábito compartilhado tem uma sequência
+    // ÚNICA, então o log conta independente de quem marcou.
+    const logRows =
+      habitIds.length === 0
+        ? []
+        : await db
+            .select({ habitId: habitLogs.habitId, date: habitLogs.date })
+            .from(habitLogs)
+            .where(and(inArray(habitLogs.habitId, habitIds), gte(habitLogs.date, windowStart)));
 
     const datesByHabit = new Map<string, Set<string>>();
 
@@ -69,12 +107,39 @@ export class LocalHabit
     }
 
     return habitRows.map((row) =>
-      mapRowToHabit(row, datesByHabit.get(row.id) ?? new Set<string>())
+      mapRowToHabit(row, datesByHabit.get(row.id) ?? new Set<string>(), userId, ownerById.get(row.userId))
     );
   }
 
   async update(params: domain.UpdateHabit.Params) {
     const userId = await requireUserId();
+
+    const [existing] = await db
+      .select({ userId: habits.userId, sharedWithUserId: habits.sharedWithUserId })
+      .from(habits)
+      .where(
+        and(
+          eq(habits.id, params.id),
+          or(eq(habits.userId, userId), eq(habits.sharedWithUserId, userId))
+        )
+      )
+      .limit(1);
+
+    if (!existing) {
+      throw new Error("Hábito não encontrado.");
+    }
+
+    // Só o dono pode mudar com quem o hábito está compartilhado — mesmo
+    // raciocínio de `LocalTask.update`.
+    const isOwner = existing.userId === userId;
+    let nextSharedWithUserId = existing.sharedWithUserId;
+
+    if (isOwner && params.sharedWithUserId !== existing.sharedWithUserId) {
+      if (params.sharedWithUserId) {
+        await assertAcceptedConnection(userId, params.sharedWithUserId);
+      }
+      nextSharedWithUserId = params.sharedWithUserId || null;
+    }
 
     await db
       .update(habits)
@@ -83,10 +148,18 @@ export class LocalHabit
         frequency: params.frequency,
         targetPerWeek: params.targetPerWeek ?? null,
         goalId: params.goalId ?? null,
+        sharedWithUserId: nextSharedWithUserId,
       })
-      .where(and(eq(habits.id, params.id), eq(habits.userId, userId)));
+      .where(
+        and(
+          eq(habits.id, params.id),
+          or(eq(habits.userId, userId), eq(habits.sharedWithUserId, userId))
+        )
+      );
   }
 
+  /** Só o DONO pode excluir — compartilhamento dá acesso de ajudar, nunca
+   * de apagar o que é do outro. */
   async delete(params: domain.DeleteHabit.Params) {
     const userId = await requireUserId();
 
@@ -98,16 +171,28 @@ export class LocalHabit
   async toggleLog(params: domain.ToggleHabitLog.Params): Promise<domain.ToggleHabitLog.Result> {
     const userId = await requireUserId();
 
+    const [habit] = await db
+      .select({ id: habits.id })
+      .from(habits)
+      .where(
+        and(
+          eq(habits.id, params.habitId),
+          or(eq(habits.userId, userId), eq(habits.sharedWithUserId, userId))
+        )
+      )
+      .limit(1);
+
+    if (!habit) {
+      throw new Error("Hábito não encontrado.");
+    }
+
+    // Não filtra por `userId`: a chave primária de `habit_log` é
+    // (habitId, date), então só existe UM registro por dia — de quem quer
+    // que tenha marcado primeiro. Ver comentário da classe.
     const [existing] = await db
       .select({ id: habitLogs.id })
       .from(habitLogs)
-      .where(
-        and(
-          eq(habitLogs.habitId, params.habitId),
-          eq(habitLogs.userId, userId),
-          eq(habitLogs.date, params.date)
-        )
-      )
+      .where(and(eq(habitLogs.habitId, params.habitId), eq(habitLogs.date, params.date)))
       .limit(1);
 
     if (existing) {
@@ -125,10 +210,10 @@ export class LocalHabit
 
       return { completed: true };
     } catch (error) {
-      // Corrida rara (dois cliques quase simultâneos): outra requisição já
-      // inseriu o mesmo (habitId, date) entre o SELECT acima e este INSERT
-      // — a chave primária composta rejeita a duplicata. O hábito já está
-      // marcado (foi a outra requisição que marcou primeiro), então
+      // Corrida rara (dois cliques quase simultâneos, inclusive entre dono
+      // e colaborador): outra requisição já inseriu o mesmo (habitId,
+      // date) entre o SELECT acima e este INSERT — a chave primária
+      // composta rejeita a duplicata. O hábito já está marcado, então
       // tratamos como sucesso em vez de propagar um erro confuso.
       const isUniqueViolation =
         typeof error === "object" &&
@@ -147,7 +232,9 @@ export class LocalHabit
 
 function mapRowToHabit(
   row: typeof habits.$inferSelect,
-  completedDates: Set<string>
+  completedDates: Set<string>,
+  viewerId: string,
+  owner?: { name: string | null; email: string | null }
 ): domain.IHabit {
   const { completedToday, currentStreak, completionsThisWeek } =
     domain.calculateHabitStats(completedDates);
@@ -164,5 +251,8 @@ function mapRowToHabit(
     completedToday,
     currentStreak,
     completionsThisWeek,
+    sharedWithUserId: row.sharedWithUserId,
+    isSharedWithMe: row.userId !== viewerId,
+    ownerLabel: row.userId !== viewerId ? owner?.name || owner?.email || null : null,
   };
 }

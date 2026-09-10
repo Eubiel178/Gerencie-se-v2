@@ -26,6 +26,7 @@ function task(overrides: Partial<Parameters<typeof calculateTaskStats>[0][number
     syncEnabled: false,
     syncStatus: "NONE" as const,
     recurrence: "none" as const,
+    isSharedWithMe: false,
     ...overrides,
   };
 }

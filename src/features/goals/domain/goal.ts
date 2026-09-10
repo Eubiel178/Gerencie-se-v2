@@ -21,4 +21,11 @@ export interface IGoal {
   // Calculado a partir de `steps` a cada `loadAll()` — nunca guardado (ver
   // comentário do schema em `src/db/schema.ts`). 0 quando não há etapas.
   progressPercent: number;
+
+  // Compartilhamento (ver `assertAcceptedConnection`): quem esse objetivo
+  // foi compartilhado pode ver/editar/gerenciar etapas, mas só o dono pode
+  // mudar isso ou excluir o objetivo.
+  sharedWithUserId?: string | null;
+  isSharedWithMe: boolean;
+  ownerLabel?: string | null;
 }

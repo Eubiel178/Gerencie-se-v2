@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { FaTrash, FaPlus } from "react-icons/fa";
 
-import { Button, Input } from "@/components";
+import { Button, Input, Feedback } from "@/components";
 
 import {
   createGoalStepAction,
@@ -18,14 +18,16 @@ import { EditGoal } from "../../modal";
 import { PRIORITY_LABELS } from "../../modal/interfaces";
 
 import { IGoal } from "@/features/goals/domain";
+import { LoadAcceptedConnections } from "@/features/connections/domain";
 
 import styles from "../../../goals.module.css";
 
 interface CardProps {
   goal: IGoal;
+  connections: LoadAcceptedConnections.Model;
 }
 
-export function Card({ goal }: CardProps) {
+export function Card({ goal, connections }: CardProps) {
   const router = useRouter();
   const [isRemoving, setIsRemoving] = useState(false);
   const [newStepTitle, setNewStepTitle] = useState("");
@@ -87,20 +89,28 @@ export function Card({ goal }: CardProps) {
         </div>
 
         <div className={styles.actions}>
-          <EditGoal goalBeingEdited={goal} />
+          <EditGoal goalBeingEdited={goal} connections={connections} />
 
-          <Button
-            color="danger"
-            background="transparent"
-            size="xlarge"
-            aria-label={`Excluir objetivo ${goal.title}`}
-            loading={isRemoving}
-            onClick={handleRemoveGoal}
-          >
-            <FaTrash />
-          </Button>
+          {!goal.isSharedWithMe && (
+            <Button
+              color="danger"
+              background="transparent"
+              size="xlarge"
+              aria-label={`Excluir objetivo ${goal.title}`}
+              loading={isRemoving}
+              onClick={handleRemoveGoal}
+            >
+              <FaTrash />
+            </Button>
+          )}
         </div>
       </div>
+
+      {goal.isSharedWithMe ? (
+        <Feedback type="info" size="xSmall">Compartilhado por {goal.ownerLabel}</Feedback>
+      ) : (
+        goal.sharedWithUserId && <Feedback type="info" size="xSmall">Compartilhado</Feedback>
+      )}
 
       {goal.description && <p className={styles.description}>{goal.description}</p>}
 

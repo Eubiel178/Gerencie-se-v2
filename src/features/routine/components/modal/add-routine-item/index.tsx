@@ -13,10 +13,11 @@ import { validationSchema } from "@/validation/routine-schema";
 import { Form, Input, Modal, Button, Wrapper, Feedback } from "@/components";
 
 import { createRoutineItemAction } from "@/features/routine/actions";
+import { ShareSelect } from "@/features/connections/components/share-select";
 
 import { FormData, IAddRoutineItemProps, NO_TASK_VALUE } from "../interfaces";
 
-export function AddRoutineItem({ buttonText, taskOptions }: IAddRoutineItemProps) {
+export function AddRoutineItem({ buttonText, taskOptions, connections }: IAddRoutineItemProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const router = useRouter();
@@ -33,6 +34,7 @@ export function AddRoutineItem({ buttonText, taskOptions }: IAddRoutineItemProps
       time: "",
       title: "",
       taskId: NO_TASK_VALUE,
+      sharedWithUserId: "",
     },
   });
 
@@ -48,6 +50,7 @@ export function AddRoutineItem({ buttonText, taskOptions }: IAddRoutineItemProps
       time: data.time,
       title: data.title,
       taskId: data.taskId === NO_TASK_VALUE ? null : data.taskId,
+      sharedWithUserId: data.sharedWithUserId,
     });
 
     if (result.error) {
@@ -127,6 +130,16 @@ export function AddRoutineItem({ buttonText, taskOptions }: IAddRoutineItemProps
                   </Input.Wrapper>
                 </Input.Root>
               )}
+
+              <Input.Root sharedProps={{ error: errors.sharedWithUserId?.message }}>
+                <Input.Label>Compartilhar com</Input.Label>
+
+                <Input.Wrapper>
+                  <ShareSelect connections={connections} {...register("sharedWithUserId")} />
+                </Input.Wrapper>
+
+                <Input.HelperText />
+              </Input.Root>
             </Form.Wrapper>
 
             {submitError && <Feedback>{submitError}</Feedback>}

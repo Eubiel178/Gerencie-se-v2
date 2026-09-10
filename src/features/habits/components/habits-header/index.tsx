@@ -1,8 +1,13 @@
 import { AddHabit } from "../modal";
+import { LoadAcceptedConnections } from "@/features/connections/domain";
 
 import styles from "../../habits.module.css";
 
-export function HabitsHeader() {
+interface HabitsHeaderProps {
+  connections: LoadAcceptedConnections.Model;
+}
+
+export function HabitsHeader({ connections }: HabitsHeaderProps) {
   return (
     <header className={styles.toolbar}>
       <div>
@@ -10,7 +15,7 @@ export function HabitsHeader() {
         <p className={styles.subheading}>Construa consistência, um dia de cada vez.</p>
       </div>
 
-      <AddHabit buttonText="Novo Hábito" />
+      <AddHabit buttonText="Novo Hábito" connections={connections} />
     </header>
   );
 }

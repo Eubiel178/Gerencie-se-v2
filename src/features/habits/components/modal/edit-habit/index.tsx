@@ -11,9 +11,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/habit-schema";
 
-import { Form, Modal, Input, Button, Wrapper, Feedback } from "@/components";
+import { Form, Modal, Input, Button, Wrapper, Feedback, Paragraph } from "@/components";
 
 import { updateHabitAction } from "@/features/habits/actions";
+import { ShareSelect } from "@/features/connections/components/share-select";
 
 import { FormData, IEditHabitProps } from "../interfaces";
 
@@ -22,7 +23,7 @@ const FREQUENCY_OPTIONS = [
   { label: "Algumas vezes por semana", value: "weekly" },
 ];
 
-export function EditHabit({ habitBeingEdited }: IEditHabitProps) {
+export function EditHabit({ habitBeingEdited, connections }: IEditHabitProps) {
   const router = useRouter();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -41,6 +42,7 @@ export function EditHabit({ habitBeingEdited }: IEditHabitProps) {
       title: habitBeingEdited.title,
       frequency: habitBeingEdited.frequency,
       targetPerWeek: String(habitBeingEdited.targetPerWeek ?? 3),
+      sharedWithUserId: habitBeingEdited.sharedWithUserId ?? "",
     },
   });
 
@@ -60,6 +62,7 @@ export function EditHabit({ habitBeingEdited }: IEditHabitProps) {
       frequency: data.frequency,
       targetPerWeek: data.frequency === "weekly" ? Number(data.targetPerWeek) : null,
       goalId: habitBeingEdited.goalId,
+      sharedWithUserId: data.sharedWithUserId,
     });
 
     if (result.error) {
@@ -142,6 +145,26 @@ export function EditHabit({ habitBeingEdited }: IEditHabitProps) {
 
                   <Input.HelperText />
                 </Input.Root>
+              )}
+
+              <Input.Root sharedProps={{ error: errors.sharedWithUserId?.message }}>
+                <Input.Label>Compartilhar com</Input.Label>
+
+                <Input.Wrapper>
+                  <ShareSelect
+                    connections={connections}
+                    disabled={habitBeingEdited.isSharedWithMe}
+                    {...register("sharedWithUserId")}
+                  />
+                </Input.Wrapper>
+
+                <Input.HelperText />
+              </Input.Root>
+
+              {habitBeingEdited.isSharedWithMe && (
+                <Paragraph size="xsmall" color="muted">
+                  Só quem compartilhou este hábito pode mudar isso.
+                </Paragraph>
               )}
             </Form.Wrapper>
 

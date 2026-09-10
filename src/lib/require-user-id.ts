@@ -20,3 +20,19 @@ export async function requireUserId(): Promise<string> {
 
   return userId;
 }
+
+/** Mesma ideia de `requireUserId`, mas também com o e-mail da sessão —
+ * usado por `features/connections` para resolver convites pendentes pelo
+ * e-mail de quem está logado. Nunca aceita e-mail vindo do cliente, só o
+ * da sessão autenticada. */
+export async function requireCurrentUser(): Promise<{ id: string; email: string }> {
+  const session = await auth();
+  const userId = session?.user?.id;
+  const email = session?.user?.email;
+
+  if (!userId || !email) {
+    throw new Error("Usuário não autenticado.");
+  }
+
+  return { id: userId, email };
+}

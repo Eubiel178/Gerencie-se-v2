@@ -1,13 +1,15 @@
 import { AddRoutineItem } from "../modal";
 import { TaskOption } from "../modal/interfaces";
+import { LoadAcceptedConnections } from "@/features/connections/domain";
 
 import styles from "../../routine.module.css";
 
 interface RoutineHeaderProps {
   taskOptions: TaskOption[];
+  connections: LoadAcceptedConnections.Model;
 }
 
-export function RoutineHeader({ taskOptions }: RoutineHeaderProps) {
+export function RoutineHeader({ taskOptions, connections }: RoutineHeaderProps) {
   return (
     <header className={styles.toolbar}>
       <div>
@@ -17,7 +19,7 @@ export function RoutineHeader({ taskOptions }: RoutineHeaderProps) {
         </p>
       </div>
 
-      <AddRoutineItem buttonText="Novo Item" taskOptions={taskOptions} />
+      <AddRoutineItem buttonText="Novo Item" taskOptions={taskOptions} connections={connections} />
     </header>
   );
 }

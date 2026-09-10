@@ -7,6 +7,6 @@ export type UpdateHabit = {
 export namespace UpdateHabit {
   export type Params = Pick<
     IHabit,
-    "id" | "title" | "frequency" | "targetPerWeek" | "goalId"
+    "id" | "title" | "frequency" | "targetPerWeek" | "goalId" | "sharedWithUserId"
   >;
 }

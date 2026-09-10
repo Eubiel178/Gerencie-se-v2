@@ -15,11 +15,13 @@ import { Form, Input, Modal, Button, Wrapper, Feedback } from "@/components";
 
 import { createTaskAction } from "@/features/tasks/actions";
 
+import { ShareSelect } from "@/features/connections/components/share-select";
+
 import { SyncWithGoogle } from "../sync-with-google";
 import { ReminderFields } from "../reminder-fields";
 import { FormData, IAddTaskProps, PRIORITY_OPTIONS } from "../interfaces";
 
-export function AddTask({ buttonText, isGoogleConnected }: IAddTaskProps) {
+export function AddTask({ buttonText, isGoogleConnected, connections }: IAddTaskProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const router = useRouter();
@@ -44,6 +46,7 @@ export function AddTask({ buttonText, isGoogleConnected }: IAddTaskProps) {
       scheduledAt: "",
       reminderOffsetsMinutes: [],
       recurrence: "none",
+      sharedWithUserId: "",
       syncEnabled: false,
     },
   });
@@ -153,6 +156,16 @@ export function AddTask({ buttonText, isGoogleConnected }: IAddTaskProps) {
                 scheduledAtError={errors.scheduledAt?.message}
                 hasScheduledAt={!!scheduledAt}
               />
+
+              <Input.Root sharedProps={{ error: errors.sharedWithUserId?.message }}>
+                <Input.Label>Compartilhar com</Input.Label>
+
+                <Input.Wrapper>
+                  <ShareSelect connections={connections} {...register("sharedWithUserId")} />
+                </Input.Wrapper>
+
+                <Input.HelperText />
+              </Input.Root>
 
               <SyncWithGoogle
                 register={register}

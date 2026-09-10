@@ -1,18 +1,26 @@
 import "server-only";
 
-import { and, eq, max } from "drizzle-orm";
+import { and, eq, inArray, max, or } from "drizzle-orm";
 
 import * as domain from "@/features/goals/domain";
 
 import { db } from "@/db/client";
-import { goalSteps, goals } from "@/db/schema";
+import { goalSteps, goals, users } from "@/db/schema";
 import { requireUserId } from "@/lib/require-user-id";
+import { assertAcceptedConnection } from "@/lib/assert-accepted-connection";
 
 /**
  * Implementação local (Drizzle + Postgres) dos casos de uso de Goal e suas
  * etapas (`goal_step`). Segue o mesmo padrão de `LocalTask`/`LocalHabit`.
  * `loadAll()` sempre traz as etapas junto e calcula `progressPercent` na
  * hora — nunca lê um valor pré-calculado (ver comentário do schema).
+ *
+ * Compartilhamento (ver `sharedWithUserId` no schema): quem o objetivo foi
+ * compartilhado pode ver/editar/gerenciar etapas, mas só o DONO pode mudar
+ * com quem ele está compartilhado ou excluí-lo. `goal_step.userId` é só
+ * metadado de quem criou a etapa — o controle de acesso de
+ * `updateStep`/`deleteStep` é sempre pelo objetivo (dono OU colaborador),
+ * nunca por esse campo.
  */
 export class LocalGoal
   implements
@@ -28,6 +36,10 @@ export class LocalGoal
     const userId = await requireUserId();
     const id = crypto.randomUUID();
 
+    if (params.sharedWithUserId) {
+      await assertAcceptedConnection(userId, params.sharedWithUserId);
+    }
+
     await db.insert(goals).values({
       id,
       userId,
@@ -35,6 +47,7 @@ export class LocalGoal
       description: params.description,
       deadline: params.deadline || null,
       priority: params.priority,
+      sharedWithUserId: params.sharedWithUserId || null,
     });
 
     return { id };
@@ -44,15 +57,54 @@ export class LocalGoal
     const userId = await requireUserId();
 
     const rows = await db.query.goals.findMany({
-      where: and(eq(goals.userId, userId), eq(goals.archived, false)),
+      where: and(
+        or(eq(goals.userId, userId), eq(goals.sharedWithUserId, userId)),
+        eq(goals.archived, false)
+      ),
       with: { steps: true },
     });
 
-    return rows.map(mapRowToGoal);
+    const ownerIds = [...new Set(rows.filter((row) => row.userId !== userId).map((row) => row.userId))];
+
+    const owners =
+      ownerIds.length === 0
+        ? []
+        : await db
+            .select({ id: users.id, name: users.name, email: users.email })
+            .from(users)
+            .where(inArray(users.id, ownerIds));
+
+    const ownerById = new Map(owners.map((owner) => [owner.id, owner]));
+
+    return rows.map((row) => mapRowToGoal(row, userId, ownerById.get(row.userId)));
   }
 
   async update(params: domain.UpdateGoal.Params) {
     const userId = await requireUserId();
+
+    const [existing] = await db
+      .select({ userId: goals.userId, sharedWithUserId: goals.sharedWithUserId })
+      .from(goals)
+      .where(
+        and(eq(goals.id, params.id), or(eq(goals.userId, userId), eq(goals.sharedWithUserId, userId)))
+      )
+      .limit(1);
+
+    if (!existing) {
+      throw new Error("Objetivo não encontrado.");
+    }
+
+    // Só o dono pode mudar com quem o objetivo está compartilhado — mesmo
+    // raciocínio de `LocalTask.update`.
+    const isOwner = existing.userId === userId;
+    let nextSharedWithUserId = existing.sharedWithUserId;
+
+    if (isOwner && params.sharedWithUserId !== existing.sharedWithUserId) {
+      if (params.sharedWithUserId) {
+        await assertAcceptedConnection(userId, params.sharedWithUserId);
+      }
+      nextSharedWithUserId = params.sharedWithUserId || null;
+    }
 
     await db
       .update(goals)
@@ -61,10 +113,15 @@ export class LocalGoal
         description: params.description,
         deadline: params.deadline || null,
         priority: params.priority,
+        sharedWithUserId: nextSharedWithUserId,
       })
-      .where(and(eq(goals.id, params.id), eq(goals.userId, userId)));
+      .where(
+        and(eq(goals.id, params.id), or(eq(goals.userId, userId), eq(goals.sharedWithUserId, userId)))
+      );
   }
 
+  /** Só o DONO pode excluir — compartilhamento dá acesso de ajudar, nunca
+   * de apagar o que é do outro. */
   async delete(params: domain.DeleteGoal.Params) {
     const userId = await requireUserId();
 
@@ -78,16 +135,18 @@ export class LocalGoal
 
     // `goalId` vem do cliente — sem essa checagem, qualquer usuário
     // autenticado que soubesse/adivinhasse o UUID de um objetivo alheio
-    // conseguiria injetar uma etapa nele (a etapa aparece na tela de quem
-    // é dono do objetivo e distorce o `progressPercent`, mesmo a etapa
-    // "pertencendo" a outro usuário).
-    const [ownedGoal] = await db
+    // conseguiria injetar uma etapa nele. Dono OU colaborador (objetivo
+    // compartilhado) podem adicionar etapas — é o caso de uso central do
+    // compartilhamento (ajudar a planejar/cumprir).
+    const [accessibleGoal] = await db
       .select({ id: goals.id })
       .from(goals)
-      .where(and(eq(goals.id, params.goalId), eq(goals.userId, userId)))
+      .where(
+        and(eq(goals.id, params.goalId), or(eq(goals.userId, userId), eq(goals.sharedWithUserId, userId)))
+      )
       .limit(1);
 
-    if (!ownedGoal) {
+    if (!accessibleGoal) {
       throw new Error("Objetivo não encontrado.");
     }
 
@@ -112,23 +171,43 @@ export class LocalGoal
   async updateStep(params: domain.UpdateGoalStep.Params) {
     const userId = await requireUserId();
 
+    await this.assertStepAccess(params.id, userId);
+
     await db
       .update(goalSteps)
       .set({ completed: params.completed })
-      .where(and(eq(goalSteps.id, params.id), eq(goalSteps.userId, userId)));
+      .where(eq(goalSteps.id, params.id));
   }
 
   async deleteStep(params: domain.DeleteGoalStep.Params) {
     const userId = await requireUserId();
 
-    await db
-      .delete(goalSteps)
-      .where(and(eq(goalSteps.id, params.id), eq(goalSteps.userId, userId)));
+    await this.assertStepAccess(params.id, userId);
+
+    await db.delete(goalSteps).where(eq(goalSteps.id, params.id));
+  }
+
+  /** Etapa não tem dono próprio — o acesso é sempre decidido pelo
+   * objetivo (dono OU colaborador), nunca por `goal_step.userId` (que só
+   * registra quem criou a etapa). */
+  private async assertStepAccess(stepId: string, userId: string): Promise<void> {
+    const [row] = await db
+      .select({ goalUserId: goals.userId, goalSharedWithUserId: goals.sharedWithUserId })
+      .from(goalSteps)
+      .innerJoin(goals, eq(goalSteps.goalId, goals.id))
+      .where(eq(goalSteps.id, stepId))
+      .limit(1);
+
+    if (!row || (row.goalUserId !== userId && row.goalSharedWithUserId !== userId)) {
+      throw new Error("Etapa não encontrada.");
+    }
   }
 }
 
 function mapRowToGoal(
-  row: typeof goals.$inferSelect & { steps: (typeof goalSteps.$inferSelect)[] }
+  row: typeof goals.$inferSelect & { steps: (typeof goalSteps.$inferSelect)[] },
+  viewerId: string,
+  owner?: { name: string | null; email: string | null }
 ): domain.IGoal {
   const steps = [...row.steps]
     .sort((a, b) => a.order - b.order)
@@ -155,5 +234,8 @@ function mapRowToGoal(
     createdAt: row.createdAt,
     steps,
     progressPercent,
+    sharedWithUserId: row.sharedWithUserId,
+    isSharedWithMe: row.userId !== viewerId,
+    ownerLabel: row.userId !== viewerId ? owner?.name || owner?.email || null : null,
   };
 }

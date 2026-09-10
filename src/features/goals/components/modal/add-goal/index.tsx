@@ -13,10 +13,11 @@ import { validationSchema } from "@/validation/goal-schema";
 import { Form, Input, Modal, Button, Wrapper, Feedback } from "@/components";
 
 import { createGoalAction } from "@/features/goals/actions";
+import { ShareSelect } from "@/features/connections/components/share-select";
 
 import { FormData, IAddGoalProps, PRIORITY_OPTIONS } from "../interfaces";
 
-export function AddGoal({ buttonText }: IAddGoalProps) {
+export function AddGoal({ buttonText, connections }: IAddGoalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const router = useRouter();
@@ -34,6 +35,7 @@ export function AddGoal({ buttonText }: IAddGoalProps) {
       description: "",
       deadline: "",
       priority: "media",
+      sharedWithUserId: "",
     },
   });
 
@@ -50,6 +52,7 @@ export function AddGoal({ buttonText }: IAddGoalProps) {
       description: data.description,
       deadline: data.deadline || null,
       priority: data.priority,
+      sharedWithUserId: data.sharedWithUserId,
     });
 
     if (result.error) {
@@ -132,6 +135,16 @@ export function AddGoal({ buttonText }: IAddGoalProps) {
                     {...register("priority")}
                     optionsArray={PRIORITY_OPTIONS}
                   />
+                </Input.Wrapper>
+
+                <Input.HelperText />
+              </Input.Root>
+
+              <Input.Root sharedProps={{ error: errors.sharedWithUserId?.message }}>
+                <Input.Label>Compartilhar com</Input.Label>
+
+                <Input.Wrapper>
+                  <ShareSelect connections={connections} {...register("sharedWithUserId")} />
                 </Input.Wrapper>
 
                 <Input.HelperText />

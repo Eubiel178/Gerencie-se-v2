@@ -5,5 +5,5 @@ export type UpdateRoutineItem = {
 };
 
 export namespace UpdateRoutineItem {
-  export type Params = Omit<IRoutineItem, "userId" | "createdAt">;
+  export type Params = Omit<IRoutineItem, "userId" | "createdAt" | "isSharedWithMe" | "ownerLabel">;
 }

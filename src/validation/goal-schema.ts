@@ -10,6 +10,8 @@ export const validationSchema = z.object({
     .max(280, "A descrição deve ter no máximo 280 caracteres"),
   deadline: z.string().optional(),
   priority: z.enum(["baixa", "media", "alta", "critica"]),
+  // "" no formulário = não compartilhado.
+  sharedWithUserId: z.string().optional(),
 });
 
 // Revalidação no servidor (Server Action) do mesmo formato acima — o
@@ -20,6 +22,7 @@ export const createGoalSchema = z.object({
   description: z.string().max(280, "Descrição muito longa"),
   deadline: z.string().optional().nullable(),
   priority: z.enum(["baixa", "media", "alta", "critica"]),
+  sharedWithUserId: z.string().optional().nullable(),
 });
 
 export const updateGoalSchema = createGoalSchema.extend({

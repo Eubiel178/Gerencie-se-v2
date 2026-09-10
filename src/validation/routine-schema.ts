@@ -12,6 +12,8 @@ export const validationSchema = z.object({
   // `undefined` antes de chegar na Server Action (ver componentes de
   // formulário), que trata ausência como "sem vínculo".
   taskId: z.string().optional(),
+  // "" no formulário = não compartilhado.
+  sharedWithUserId: z.string().optional(),
 });
 
 // Revalidação no servidor da Server Action.
@@ -19,6 +21,7 @@ const routineItemParamsShape = {
   time: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Horário inválido"),
   title: z.string().min(1, "Campo obrigatório").max(60, "Título muito longo"),
   taskId: z.string().optional().nullable(),
+  sharedWithUserId: z.string().optional().nullable(),
 };
 
 export const createRoutineItemSchema = z.object(routineItemParamsShape);

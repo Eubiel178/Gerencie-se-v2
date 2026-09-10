@@ -50,6 +50,7 @@ export async function createTaskAction(
         syncStatus: "NONE",
         syncError: null,
         googleEventId: null,
+        isSharedWithMe: false,
       },
       repo
     );
@@ -89,6 +90,7 @@ export async function updateTaskAction(
         syncStatus: previousTask?.syncStatus ?? "NONE",
         syncError: previousTask?.syncError ?? null,
         googleEventId: previousTask?.googleEventId ?? null,
+        isSharedWithMe: false,
       },
       repo
     );

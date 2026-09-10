@@ -1,8 +1,13 @@
 import { AddGoal } from "../modal";
+import { LoadAcceptedConnections } from "@/features/connections/domain";
 
 import styles from "../../goals.module.css";
 
-export function GoalsHeader() {
+interface GoalsHeaderProps {
+  connections: LoadAcceptedConnections.Model;
+}
+
+export function GoalsHeader({ connections }: GoalsHeaderProps) {
   return (
     <header className={styles.toolbar}>
       <div>
@@ -10,7 +15,7 @@ export function GoalsHeader() {
         <p className={styles.subheading}>Divida em etapas pequenas e acompanhe o progresso.</p>
       </div>
 
-      <AddGoal buttonText="Novo Objetivo" />
+      <AddGoal buttonText="Novo Objetivo" connections={connections} />
     </header>
   );
 }
