@@ -13,6 +13,7 @@ import { EditHabit } from "../../modal";
 
 import { IHabit } from "@/features/habits/domain";
 import { LoadAcceptedConnections } from "@/features/connections/domain";
+import { GoalOption } from "../../modal/interfaces";
 
 import styles from "../../../habits.module.css";
 
@@ -20,9 +21,11 @@ interface CardProps {
   habit: IHabit;
   today: string;
   connections: LoadAcceptedConnections.Model;
+  goalOptions: GoalOption[];
+  linkedGoalTitle?: string;
 }
 
-export function Card({ habit, today, connections }: CardProps) {
+export function Card({ habit, today, connections, goalOptions, linkedGoalTitle }: CardProps) {
   const router = useRouter();
   const [isRemoving, setIsRemoving] = useState(false);
   const [isToggling, setIsToggling] = useState(false);
@@ -58,7 +61,7 @@ export function Card({ habit, today, connections }: CardProps) {
         <h3 className={styles.cardTitle}>{habit.title}</h3>
 
         <div className={styles.actions}>
-          <EditHabit habitBeingEdited={habit} connections={connections} />
+          <EditHabit habitBeingEdited={habit} connections={connections} goalOptions={goalOptions} />
 
           {!habit.isSharedWithMe && (
             <Button
@@ -80,6 +83,8 @@ export function Card({ habit, today, connections }: CardProps) {
       ) : (
         habit.sharedWithUserId && <Feedback type="info" size="xSmall">Compartilhado</Feedback>
       )}
+
+      {linkedGoalTitle && <p className={styles.linkedGoal}>Vinculado a: {linkedGoalTitle}</p>}
 
       <div className={styles.stats}>
         <span className={styles.streak}>

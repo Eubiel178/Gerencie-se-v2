@@ -9,9 +9,7 @@ export interface IHabit {
   frequency: HabitFrequency;
   // Só relevante quando frequency = "weekly" (ex.: 3x por semana).
   targetPerWeek?: number | null;
-  // Vínculo opcional com um objetivo (ver `src/features/goals`, ainda não
-  // construído — por enquanto só guardado, sem exibir o título do
-  // objetivo).
+  // Vínculo opcional com um objetivo (ver `src/features/goals`).
   goalId?: string | null;
   archived: boolean;
   createdAt: Date;

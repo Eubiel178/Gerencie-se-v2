@@ -10,6 +10,8 @@ export const validationSchema = z
     // String no formulário (input number vem como string) — convertido e
     // validado só quando frequency = "weekly".
     targetPerWeek: z.string().optional(),
+    // "" no formulário = nenhum objetivo vinculado.
+    goalId: z.string().optional(),
     // "" no formulário = não compartilhado.
     sharedWithUserId: z.string().optional(),
   })

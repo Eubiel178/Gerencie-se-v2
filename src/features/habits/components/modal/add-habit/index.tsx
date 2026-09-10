@@ -15,14 +15,14 @@ import { Form, Input, Modal, Button, Wrapper, Feedback } from "@/components";
 import { createHabitAction } from "@/features/habits/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
 
-import { FormData, IAddHabitProps } from "../interfaces";
+import { FormData, IAddHabitProps, NO_GOAL_VALUE } from "../interfaces";
 
 const FREQUENCY_OPTIONS = [
   { label: "Todo dia", value: "daily" },
   { label: "Algumas vezes por semana", value: "weekly" },
 ];
 
-export function AddHabit({ buttonText, connections }: IAddHabitProps) {
+export function AddHabit({ buttonText, connections, goalOptions }: IAddHabitProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const router = useRouter();
@@ -40,6 +40,7 @@ export function AddHabit({ buttonText, connections }: IAddHabitProps) {
       title: "",
       frequency: "daily",
       targetPerWeek: "3",
+      goalId: NO_GOAL_VALUE,
       sharedWithUserId: "",
     },
   });
@@ -58,7 +59,7 @@ export function AddHabit({ buttonText, connections }: IAddHabitProps) {
       title: data.title,
       frequency: data.frequency,
       targetPerWeek: data.frequency === "weekly" ? Number(data.targetPerWeek) : null,
-      goalId: null,
+      goalId: data.goalId === NO_GOAL_VALUE ? null : data.goalId,
       sharedWithUserId: data.sharedWithUserId,
     });
 
@@ -139,6 +140,22 @@ export function AddHabit({ buttonText, connections }: IAddHabitProps) {
                   </Input.Wrapper>
 
                   <Input.HelperText />
+                </Input.Root>
+              )}
+
+              {goalOptions.length > 0 && (
+                <Input.Root>
+                  <Input.Label>Vincular a um objetivo (opcional)</Input.Label>
+
+                  <Input.Wrapper>
+                    <Input.FieldSelect
+                      {...register("goalId")}
+                      optionsArray={[
+                        { label: "Nenhum", value: NO_GOAL_VALUE },
+                        ...goalOptions.map((goal) => ({ label: goal.title, value: goal.id })),
+                      ]}
+                    />
+                  </Input.Wrapper>
                 </Input.Root>
               )}
 

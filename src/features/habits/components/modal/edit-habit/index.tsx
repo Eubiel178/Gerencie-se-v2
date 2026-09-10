@@ -16,14 +16,14 @@ import { Form, Modal, Input, Button, Wrapper, Feedback, Paragraph } from "@/comp
 import { updateHabitAction } from "@/features/habits/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
 
-import { FormData, IEditHabitProps } from "../interfaces";
+import { FormData, IEditHabitProps, NO_GOAL_VALUE } from "../interfaces";
 
 const FREQUENCY_OPTIONS = [
   { label: "Todo dia", value: "daily" },
   { label: "Algumas vezes por semana", value: "weekly" },
 ];
 
-export function EditHabit({ habitBeingEdited, connections }: IEditHabitProps) {
+export function EditHabit({ habitBeingEdited, connections, goalOptions }: IEditHabitProps) {
   const router = useRouter();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -42,6 +42,7 @@ export function EditHabit({ habitBeingEdited, connections }: IEditHabitProps) {
       title: habitBeingEdited.title,
       frequency: habitBeingEdited.frequency,
       targetPerWeek: String(habitBeingEdited.targetPerWeek ?? 3),
+      goalId: habitBeingEdited.goalId || NO_GOAL_VALUE,
       sharedWithUserId: habitBeingEdited.sharedWithUserId ?? "",
     },
   });
@@ -61,7 +62,7 @@ export function EditHabit({ habitBeingEdited, connections }: IEditHabitProps) {
       title: data.title,
       frequency: data.frequency,
       targetPerWeek: data.frequency === "weekly" ? Number(data.targetPerWeek) : null,
-      goalId: habitBeingEdited.goalId,
+      goalId: data.goalId === NO_GOAL_VALUE ? null : data.goalId,
       sharedWithUserId: data.sharedWithUserId,
     });
 
@@ -144,6 +145,22 @@ export function EditHabit({ habitBeingEdited, connections }: IEditHabitProps) {
                   </Input.Wrapper>
 
                   <Input.HelperText />
+                </Input.Root>
+              )}
+
+              {goalOptions.length > 0 && (
+                <Input.Root>
+                  <Input.Label>Vincular a um objetivo (opcional)</Input.Label>
+
+                  <Input.Wrapper>
+                    <Input.FieldSelect
+                      {...register("goalId")}
+                      optionsArray={[
+                        { label: "Nenhum", value: NO_GOAL_VALUE },
+                        ...goalOptions.map((goal) => ({ label: goal.title, value: goal.id })),
+                      ]}
+                    />
+                  </Input.Wrapper>
                 </Input.Root>
               )}
 
