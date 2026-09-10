@@ -296,8 +296,12 @@ export const habits = pgTable("habit", {
 export const habitLogs = pgTable(
   "habit_log",
   {
+    // Não é chave primária: a chave real é a composta abaixo
+    // (habitId, date). Guardado só como identificador estável da linha
+    // (ex.: usado num `DELETE ... WHERE id = ...` depois de já ter
+    // localizado o registro pela chave composta).
     id: text("id")
-      .primaryKey()
+      .notNull()
       .$defaultFn(() => crypto.randomUUID()),
     habitId: text("habit_id")
       .notNull()
@@ -312,7 +316,8 @@ export const habitLogs = pgTable(
   },
   (table) => [
     // Nunca dois registros do mesmo hábito no mesmo dia (idempotente ao
-    // marcar/desmarcar duas vezes seguidas).
+    // marcar/desmarcar duas vezes seguidas). Esta é a ÚNICA chave
+    // primária da tabela — Postgres não aceita duas (ver `id` acima).
     primaryKey({ columns: [table.habitId, table.date] }),
   ]
 );

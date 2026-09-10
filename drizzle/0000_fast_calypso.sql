@@ -68,7 +68,7 @@ CREATE TABLE "google_connection" (
 );
 --> statement-breakpoint
 CREATE TABLE "habit_log" (
-	"id" text PRIMARY KEY NOT NULL,
+	"id" text NOT NULL,
 	"habit_id" text NOT NULL,
 	"user_id" text NOT NULL,
 	"date" text NOT NULL,
