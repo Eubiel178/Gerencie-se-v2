@@ -16,6 +16,12 @@
   }
 }
 
+html {
+  /* Rolagem suave ao clicar em links âncora (#id). Desativado de volta
+     para quem prefere menos animação — ver motion.css. */
+  scroll-behavior: smooth;
+}
+
 html,
 body {
   min-height: 100vh;
