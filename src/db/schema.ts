@@ -1,34 +1,34 @@
 import { relations } from "drizzle-orm";
-import { integer, primaryKey, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { boolean, integer, pgTable, primaryKey, text, timestamp } from "drizzle-orm/pg-core";
 
 /**
  * Tabelas exigidas pelo Auth.js (login). O pacote `@auth/drizzle-adapter`
  * só exporta um helper `defineTables()` por um subpath interno não público
- * (`./lib/sqlite`, fora do `exports` do package.json), então replicamos aqui
+ * (`./lib/pg`, fora do `exports` do package.json), então replicamos aqui
  * exatamente a forma que o adapter espera internamente — mesmos nomes de
  * propriedade (`userId`, `providerAccountId`, `sessionToken`, etc.), só o
  * nome da coluna SQL segue nosso padrão snake_case. Esse schema é passado
  * explicitamente pro `DrizzleAdapter(db, { usersTable, accountsTable, ... })`
  * em `src/lib/auth.ts`.
  */
-export const users = sqliteTable("user", {
+export const users = pgTable("user", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
   name: text("name"),
   email: text("email").unique(),
-  emailVerified: integer("email_verified", { mode: "timestamp_ms" }),
+  emailVerified: timestamp("email_verified", { mode: "date" }),
   image: text("image"),
 
   // Login por e-mail/senha (Credentials Provider) — ausente para usuários
   // que só entraram via Google.
   passwordHash: text("password_hash"),
-  createdAt: integer("created_at", { mode: "timestamp_ms" })
+  createdAt: timestamp("created_at", { mode: "date" })
     .notNull()
     .$defaultFn(() => new Date()),
 });
 
-export const accounts = sqliteTable(
+export const accounts = pgTable(
   "account",
   {
     userId: text("user_id")
@@ -52,20 +52,20 @@ export const accounts = sqliteTable(
   })
 );
 
-export const sessions = sqliteTable("session", {
+export const sessions = pgTable("session", {
   sessionToken: text("session_token").primaryKey(),
   userId: text("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  expires: integer("expires", { mode: "timestamp_ms" }).notNull(),
+  expires: timestamp("expires", { mode: "date" }).notNull(),
 });
 
-export const verificationTokens = sqliteTable(
+export const verificationTokens = pgTable(
   "verification_token",
   {
     identifier: text("identifier").notNull(),
     token: text("token").notNull(),
-    expires: integer("expires", { mode: "timestamp_ms" }).notNull(),
+    expires: timestamp("expires", { mode: "date" }).notNull(),
   },
   (verificationToken) => ({
     compositePk: primaryKey({
@@ -79,7 +79,7 @@ export const verificationTokens = sqliteTable(
  * (que é só identidade de login). Uma linha por usuário: se ele desconectar
  * e conectar de novo, sobrescrevemos em vez de acumular lixo.
  */
-export const googleConnections = sqliteTable("google_connection", {
+export const googleConnections = pgTable("google_connection", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
@@ -91,13 +91,13 @@ export const googleConnections = sqliteTable("google_connection", {
   calendarId: text("calendar_id").notNull().default("primary"),
   accessToken: text("access_token").notNull(),
   refreshToken: text("refresh_token").notNull(),
-  expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
-  connectedAt: integer("connected_at", { mode: "timestamp_ms" })
+  expiresAt: timestamp("expires_at", { mode: "date" }).notNull(),
+  connectedAt: timestamp("connected_at", { mode: "date" })
     .notNull()
     .$defaultFn(() => new Date()),
 });
 
-export const tasks = sqliteTable("task", {
+export const tasks = pgTable("task", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
@@ -107,10 +107,10 @@ export const tasks = sqliteTable("task", {
   tag: text("tag").notNull(),
   title: text("title").notNull(),
   description: text("description").notNull(),
-  createdAt: integer("created_at", { mode: "timestamp_ms" })
+  createdAt: timestamp("created_at", { mode: "date" })
     .notNull()
     .$defaultFn(() => new Date()),
-  updatedAt: integer("updated_at", { mode: "timestamp_ms" })
+  updatedAt: timestamp("updated_at", { mode: "date" })
     .notNull()
     .$defaultFn(() => new Date()),
 
@@ -127,9 +127,7 @@ export const tasks = sqliteTable("task", {
 
   // Sincronização opcional com o Google Agenda (por tarefa).
   googleEventId: text("google_event_id").unique(),
-  syncEnabled: integer("sync_enabled", { mode: "boolean" })
-    .notNull()
-    .default(false),
+  syncEnabled: boolean("sync_enabled").notNull().default(false),
   syncStatus: text("sync_status", {
     enum: ["NONE", "PENDING", "SYNCED", "ERROR"],
   })
@@ -139,15 +137,13 @@ export const tasks = sqliteTable("task", {
   // "updated" que o Google reportou da última vez que lemos o evento —
   // usado pra decidir, no polling Google→App, se o evento mudou desde a
   // última sincronização (evita sobrescrever a tarefa à toa a cada poll).
-  googleEventUpdatedAt: integer("google_event_updated_at", {
-    mode: "timestamp_ms",
-  }),
+  googleEventUpdatedAt: timestamp("google_event_updated_at", { mode: "date" }),
 
   priority: text("priority", { enum: ["baixa", "media", "alta", "critica"] })
     .notNull()
     .default("media"),
-  completed: integer("completed", { mode: "boolean" }).notNull().default(false),
-  completedAt: integer("completed_at", { mode: "timestamp_ms" }),
+  completed: boolean("completed").notNull().default(false),
+  completedAt: timestamp("completed_at", { mode: "date" }),
 
   // Vínculo opcional com um objetivo (nulo = tarefa avulsa).
   goalId: text("goal_id").references(() => goals.id, { onDelete: "set null" }),
@@ -166,7 +162,7 @@ export const tasks = sqliteTable("task", {
   reminderOffsetsMinutes: text("reminder_offsets_minutes"),
 });
 
-export const events = sqliteTable("event", {
+export const events = pgTable("event", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
@@ -183,7 +179,7 @@ export const events = sqliteTable("event", {
 
 /** Rotina diária: horários fixos que se repetem todo dia (ex. "07:00 —
  * Acordar"). Pode opcionalmente apontar para uma tarefa real do dia. */
-export const routineItems = sqliteTable("routine_item", {
+export const routineItems = pgTable("routine_item", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
@@ -193,12 +189,12 @@ export const routineItems = sqliteTable("routine_item", {
   time: text("time").notNull(), // "HH:MM"
   title: text("title").notNull(),
   taskId: text("task_id").references(() => tasks.id, { onDelete: "set null" }),
-  createdAt: integer("created_at", { mode: "timestamp_ms" })
+  createdAt: timestamp("created_at", { mode: "date" })
     .notNull()
     .$defaultFn(() => new Date()),
 });
 
-export const goals = sqliteTable("goal", {
+export const goals = pgTable("goal", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
@@ -211,15 +207,15 @@ export const goals = sqliteTable("goal", {
   priority: text("priority", { enum: ["baixa", "media", "alta", "critica"] })
     .notNull()
     .default("media"),
-  archived: integer("archived", { mode: "boolean" }).notNull().default(false),
-  createdAt: integer("created_at", { mode: "timestamp_ms" })
+  archived: boolean("archived").notNull().default(false),
+  createdAt: timestamp("created_at", { mode: "date" })
     .notNull()
     .$defaultFn(() => new Date()),
 });
 
 /** Progresso do objetivo = etapas concluídas / total de etapas — calculado,
  * nunca guardado, pra nunca ficar dessincronizado. */
-export const goalSteps = sqliteTable("goal_step", {
+export const goalSteps = pgTable("goal_step", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
@@ -230,11 +226,11 @@ export const goalSteps = sqliteTable("goal_step", {
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
-  completed: integer("completed", { mode: "boolean" }).notNull().default(false),
+  completed: boolean("completed").notNull().default(false),
   order: integer("order").notNull().default(0),
 });
 
-export const habits = sqliteTable("habit", {
+export const habits = pgTable("habit", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
@@ -248,15 +244,15 @@ export const habits = sqliteTable("habit", {
   // Só usado quando frequency = "weekly" (ex.: 3x por semana).
   targetPerWeek: integer("target_per_week"),
   goalId: text("goal_id").references(() => goals.id, { onDelete: "set null" }),
-  archived: integer("archived", { mode: "boolean" }).notNull().default(false),
-  createdAt: integer("created_at", { mode: "timestamp_ms" })
+  archived: boolean("archived").notNull().default(false),
+  createdAt: timestamp("created_at", { mode: "date" })
     .notNull()
     .$defaultFn(() => new Date()),
 });
 
 /** Um registro por hábito por dia concluído — sequência/porcentagem são
  * calculadas a partir daqui, nunca guardadas. */
-export const habitLogs = sqliteTable(
+export const habitLogs = pgTable(
   "habit_log",
   {
     id: text("id")
@@ -269,7 +265,7 @@ export const habitLogs = sqliteTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     date: text("date").notNull(), // "YYYY-MM-DD"
-    completedAt: integer("completed_at", { mode: "timestamp_ms" })
+    completedAt: timestamp("completed_at", { mode: "date" })
       .notNull()
       .$defaultFn(() => new Date()),
   },
@@ -280,17 +276,17 @@ export const habitLogs = sqliteTable(
   ]
 );
 
-export const focusSessions = sqliteTable("focus_session", {
+export const focusSessions = pgTable("focus_session", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
   userId: text("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  startedAt: integer("started_at", { mode: "timestamp_ms" })
+  startedAt: timestamp("started_at", { mode: "date" })
     .notNull()
     .$defaultFn(() => new Date()),
-  endedAt: integer("ended_at", { mode: "timestamp_ms" }),
+  endedAt: timestamp("ended_at", { mode: "date" }),
   plannedDurationSeconds: integer("planned_duration_seconds").notNull(),
   actualDurationSeconds: integer("actual_duration_seconds"),
   status: text("status", { enum: ["running", "completed", "cancelled"] })
@@ -302,35 +298,29 @@ export const focusSessions = sqliteTable("focus_session", {
 /** Uma linha por usuário — nível/mascote não têm histórico, só estado
  * atual. Humor do mascote é calculado a partir da atividade recente, não
  * guardado aqui (ver `src/features/mascot`). */
-export const mascotStates = sqliteTable("mascot_state", {
+export const mascotStates = pgTable("mascot_state", {
   userId: text("user_id")
     .primaryKey()
     .references(() => users.id, { onDelete: "cascade" }),
   name: text("name").notNull().default("Fofuxo"),
   totalXp: integer("total_xp").notNull().default(0),
-  updatedAt: integer("updated_at", { mode: "timestamp_ms" })
+  updatedAt: timestamp("updated_at", { mode: "date" })
     .notNull()
     .$defaultFn(() => new Date()),
 });
 
 /** Preferências gerais do usuário que não pertencem a nenhum domínio
  * específico — evita criar uma tabela nova a cada preferência simples. */
-export const userPreferences = sqliteTable("user_preference", {
+export const userPreferences = pgTable("user_preference", {
   userId: text("user_id")
     .primaryKey()
     .references(() => users.id, { onDelete: "cascade" }),
   hydrationDailyGoalMl: integer("hydration_daily_goal_ml").notNull().default(2000),
-  assistantEnabled: integer("assistant_enabled", { mode: "boolean" })
-    .notNull()
-    .default(true),
-  assistantReducedPresence: integer("assistant_reduced_presence", {
-    mode: "boolean",
-  })
-    .notNull()
-    .default(false),
+  assistantEnabled: boolean("assistant_enabled").notNull().default(true),
+  assistantReducedPresence: boolean("assistant_reduced_presence").notNull().default(false),
 });
 
-export const hydrationLogs = sqliteTable("hydration_log", {
+export const hydrationLogs = pgTable("hydration_log", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
@@ -339,19 +329,19 @@ export const hydrationLogs = sqliteTable("hydration_log", {
     .references(() => users.id, { onDelete: "cascade" }),
   date: text("date").notNull(), // "YYYY-MM-DD"
   amountMl: integer("amount_ml").notNull(),
-  loggedAt: integer("logged_at", { mode: "timestamp_ms" })
+  loggedAt: timestamp("logged_at", { mode: "date" })
     .notNull()
     .$defaultFn(() => new Date()),
 });
 
-export const runningSessions = sqliteTable("running_session", {
+export const runningSessions = pgTable("running_session", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
   userId: text("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  startedAt: integer("started_at", { mode: "timestamp_ms" })
+  startedAt: timestamp("started_at", { mode: "date" })
     .notNull()
     .$defaultFn(() => new Date()),
   durationSeconds: integer("duration_seconds").notNull(),
@@ -365,7 +355,7 @@ export const runningSessions = sqliteTable("running_session", {
  * NÃO ficam aqui — são dados mockados em código (ver
  * `src/features/reading/recommendations.ts`), claramente identificados como
  * mock, até existir uma fonte externa real. */
-export const readingItems = sqliteTable("reading_item", {
+export const readingItems = pgTable("reading_item", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
@@ -380,14 +370,14 @@ export const readingItems = sqliteTable("reading_item", {
     .notNull()
     .default("want_to_read"),
   progressPercent: integer("progress_percent").notNull().default(0),
-  addedAt: integer("added_at", { mode: "timestamp_ms" })
+  addedAt: timestamp("added_at", { mode: "date" })
     .notNull()
     .$defaultFn(() => new Date()),
 });
 
 /** Cuidados preventivos (check-ups, vacinas, exames de rotina) — só
  * lembretes e organização, nunca diagnóstico. */
-export const healthCheckups = sqliteTable("health_checkup", {
+export const healthCheckups = pgTable("health_checkup", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
@@ -404,7 +394,7 @@ export const healthCheckups = sqliteTable("health_checkup", {
 /** Cada linha é o início de um ciclo relatado pelo usuário. Duração média e
  * previsão do próximo ciclo são sempre calculadas a partir daqui (nunca
  * guardadas) e sempre apresentadas como estimativa, nunca certeza. */
-export const menstrualCycleEntries = sqliteTable("menstrual_cycle_entry", {
+export const menstrualCycleEntries = pgTable("menstrual_cycle_entry", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
@@ -415,7 +405,7 @@ export const menstrualCycleEntries = sqliteTable("menstrual_cycle_entry", {
   periodLengthDays: integer("period_length_days"),
   symptoms: text("symptoms"), // JSON: string[]
   notes: text("notes"),
-  createdAt: integer("created_at", { mode: "timestamp_ms" })
+  createdAt: timestamp("created_at", { mode: "date" })
     .notNull()
     .$defaultFn(() => new Date()),
 });

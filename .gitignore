@@ -25,14 +25,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# local env files (contêm segredos: AUTH_SECRET, credenciais do Google...)
+# local env files (contêm segredos: AUTH_SECRET, DATABASE_URL, credenciais do Google...)
 .env
 .env*.local
-
-# banco de dados local (SQLite) — as migrations em /drizzle continuam versionadas
-*.db
-*.db-shm
-*.db-wal
 
 # vercel
 .vercel
