@@ -9,6 +9,7 @@ import { getHydrationFetcher } from "@/features/hydration/data/get-hydration-fet
 
 import {
   GoalsProgress,
+  Greeting,
   HabitsToday,
   HydrationMini,
   MascotCard,
@@ -16,6 +17,7 @@ import {
   TasksSummary,
 } from "./components";
 import { buildNextAction } from "./next-action";
+import { greetingForHour } from "./greeting";
 
 import styles from "./dashboard.module.css";
 
@@ -43,12 +45,26 @@ export async function Dashboard() {
     .sort((a, b) => a.progressPercent - b.progressPercent)
     .slice(0, 3);
 
-  const today = dayjs().format("YYYY-MM-DD");
+  const now = dayjs();
+  const today = now.format("YYYY-MM-DD");
+
+  const priorityTaskCount = tasks.filter(
+    (task) => !task.completed && (task.priority === "alta" || task.priority === "critica")
+  ).length;
+  const pendingHabitCount = habits.filter(
+    (habit) => !habit.archived && !habit.completedToday
+  ).length;
 
   return (
     <div className={styles.grid}>
       <div className={styles.hero}>
-        <h1 className={styles.heading}>Visão geral</h1>
+        <Greeting
+          text={greetingForHour(now.hour())}
+          priorityTaskCount={priorityTaskCount}
+          pendingHabitCount={pendingHabitCount}
+          mainGoal={activeGoals[0] ?? null}
+        />
+
         <NextAction action={nextAction} />
       </div>
 

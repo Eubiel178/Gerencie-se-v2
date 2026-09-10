@@ -1,3 +1,4 @@
+export { Greeting } from "./greeting";
 export { NextAction } from "./next-action";
 export { TasksSummary } from "./tasks-summary";
 export { HabitsToday } from "./habits-today";

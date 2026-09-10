@@ -13,14 +13,6 @@
   gap: var(--space-4);
 }
 
-.heading {
-  margin: 0;
-  color: var(--color-text);
-  font-size: clamp(1.8rem, 4vw, 2.7rem);
-  line-height: var(--line-height-tight);
-  letter-spacing: -0.055em;
-}
-
 .column {
   display: flex;
   flex-direction: column;
