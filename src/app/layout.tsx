@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { SessionProvider } from "next-auth/react";
+import Script from "next/script";
 
 import "@/design-system/tokens/tokens.css";
 import "@/design-system/tokens/motion.css";
@@ -43,8 +44,14 @@ export default function RootLayout({
     <html lang="pt-BR" suppressHydrationWarning>
       <head>
         {/* Aplica o tema salvo antes da primeira pintura — evita flash do
-            tema errado. Ver design-system/theme/theme-script.ts. */}
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+            tema errado. Ver design-system/theme/theme-script.ts.
+            `next/script` com `beforeInteractive` (em vez de uma tag
+            <script> crua) porque só ele garante execução síncrona antes
+            da hidratação nesta versão do Next — uma <script> renderizada
+            direto pelo componente não é executada pelo navegador. */}
+        <Script id="theme-init" strategy="beforeInteractive">
+          {themeInitScript}
+        </Script>
       </head>
       <body>
         <SessionProvider>{children}</SessionProvider>
