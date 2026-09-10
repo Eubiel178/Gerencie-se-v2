@@ -142,10 +142,7 @@ function mapRowToGoal(
       })
     );
 
-  const progressPercent =
-    steps.length === 0
-      ? 0
-      : Math.round((steps.filter((step) => step.completed).length / steps.length) * 100);
+  const progressPercent = domain.calculateGoalProgress(steps);
 
   return {
     id: row.id,

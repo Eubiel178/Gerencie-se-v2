@@ -149,27 +149,8 @@ function mapRowToHabit(
   row: typeof habits.$inferSelect,
   completedDates: Set<string>
 ): domain.IHabit {
-  const today = dayjs();
-  const todayKey = today.format("YYYY-MM-DD");
-
-  const completedToday = completedDates.has(todayKey);
-
-  // Sequência "perdoa" o dia atual ainda não marcado (o dia não acabou) —
-  // só quebra a sequência se ONTEM também estiver faltando.
-  let cursor = completedToday ? today : today.subtract(1, "day");
-  let currentStreak = 0;
-
-  while (completedDates.has(cursor.format("YYYY-MM-DD"))) {
-    currentStreak += 1;
-    cursor = cursor.subtract(1, "day");
-  }
-
-  let completionsThisWeek = 0;
-  for (let i = 0; i < 7; i++) {
-    if (completedDates.has(today.subtract(i, "day").format("YYYY-MM-DD"))) {
-      completionsThisWeek += 1;
-    }
-  }
+  const { completedToday, currentStreak, completionsThisWeek } =
+    domain.calculateHabitStats(completedDates);
 
   return {
     id: row.id,

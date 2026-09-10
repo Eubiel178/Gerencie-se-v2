@@ -13,3 +13,21 @@ export interface IMascotState {
   xpIntoCurrentLevel: number;
   xpForNextLevel: number;
 }
+
+export interface MascotLevelInfo {
+  level: number;
+  xpIntoCurrentLevel: number;
+  xpForNextLevel: number;
+}
+
+/** Deriva nível e progresso dentro do nível a partir do XP total — função
+ * pura, sem banco, para ser testável isoladamente (ver `mascot.test.ts`). */
+export function calculateMascotLevel(totalXp: number): MascotLevelInfo {
+  const safeXp = Math.max(0, totalXp);
+
+  return {
+    level: Math.floor(safeXp / XP_PER_LEVEL) + 1,
+    xpIntoCurrentLevel: safeXp % XP_PER_LEVEL,
+    xpForNextLevel: XP_PER_LEVEL,
+  };
+}

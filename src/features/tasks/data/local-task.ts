@@ -1,6 +1,5 @@
 import "server-only";
 
-import dayjs from "dayjs";
 import { and, eq } from "drizzle-orm";
 
 import * as domain from "@/features/tasks/domain";
@@ -121,10 +120,11 @@ export class LocalTask
       .set({ completed, completedAt: completed ? new Date() : null })
       .where(and(eq(tasks.id, params.id), eq(tasks.userId, userId)));
 
-    if (completed && row.recurrence !== "none" && row.scheduledAt) {
-      const unit = row.recurrence === "daily" ? "day" : "week";
-      const nextScheduledAt = dayjs(row.scheduledAt).add(1, unit).format("YYYY-MM-DDTHH:mm");
+    const nextScheduledAt = completed
+      ? domain.computeNextOccurrence(row.scheduledAt, row.recurrence as domain.TaskRecurrence)
+      : null;
 
+    if (nextScheduledAt) {
       await db.insert(tasks).values({
         id: crypto.randomUUID(),
         userId,

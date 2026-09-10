@@ -3,7 +3,6 @@ import "server-only";
 import { eq, sql } from "drizzle-orm";
 
 import * as domain from "@/features/focus/domain";
-import { XP_PER_LEVEL } from "@/features/focus/domain";
 
 import { db } from "@/db/client";
 import { mascotStates } from "@/db/schema";
@@ -47,8 +46,7 @@ export class LocalMascot implements domain.GetMascotState, domain.AddMascotXp {
 }
 
 function mapRowToMascot(row: typeof mascotStates.$inferSelect): domain.IMascotState {
-  const level = Math.floor(row.totalXp / XP_PER_LEVEL) + 1;
-  const xpIntoCurrentLevel = row.totalXp % XP_PER_LEVEL;
+  const { level, xpIntoCurrentLevel, xpForNextLevel } = domain.calculateMascotLevel(row.totalXp);
 
   return {
     userId: row.userId,
@@ -56,6 +54,6 @@ function mapRowToMascot(row: typeof mascotStates.$inferSelect): domain.IMascotSt
     totalXp: row.totalXp,
     level,
     xpIntoCurrentLevel,
-    xpForNextLevel: XP_PER_LEVEL,
+    xpForNextLevel,
   };
 }
