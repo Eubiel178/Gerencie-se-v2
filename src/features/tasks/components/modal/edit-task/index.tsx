@@ -44,6 +44,7 @@ export function EditTask({ taskBeingEdited, isGoogleConnected }: IEditTaskProps)
       priority: taskBeingEdited.priority,
       scheduledAt: taskBeingEdited.scheduledAt || "",
       reminderOffsetsMinutes: taskBeingEdited.reminderOffsetsMinutes ?? [],
+      recurrence: taskBeingEdited.recurrence,
       syncEnabled: taskBeingEdited.syncEnabled,
     },
   });

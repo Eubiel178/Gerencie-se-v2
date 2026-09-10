@@ -14,6 +14,12 @@ const REMINDER_OPTIONS = [
   { label: "Na hora", value: 0 },
 ];
 
+const RECURRENCE_OPTIONS = [
+  { label: "Não repetir", value: "none" },
+  { label: "Repetir diariamente", value: "daily" },
+  { label: "Repetir semanalmente", value: "weekly" },
+];
+
 interface ReminderFieldsProps {
   register: UseFormRegister<FormData>;
   scheduledAtError?: string;
@@ -44,22 +50,36 @@ export function ReminderFields({ register, scheduledAtError, hasScheduledAt }: R
       </Input.Root>
 
       {hasScheduledAt && (
-        <Wrapper direction="column" gap="small">
-          <Paragraph size="small">Lembrar</Paragraph>
+        <>
+          <Wrapper direction="column" gap="small">
+            <Paragraph size="small">Lembrar</Paragraph>
 
-          <Wrapper gap="medium" align="center">
-            {REMINDER_OPTIONS.map((option) => (
-              <label key={option.value} className={styles.option}>
-                <input
-                  type="checkbox"
-                  value={option.value}
-                  {...register("reminderOffsetsMinutes")}
-                />
-                {option.label}
-              </label>
-            ))}
+            <Wrapper gap="medium" align="center">
+              {REMINDER_OPTIONS.map((option) => (
+                <label key={option.value} className={styles.option}>
+                  <input
+                    type="checkbox"
+                    value={option.value}
+                    {...register("reminderOffsetsMinutes")}
+                  />
+                  {option.label}
+                </label>
+              ))}
+            </Wrapper>
           </Wrapper>
-        </Wrapper>
+
+          <Input.Root>
+            <Input.Label htmlFor="recurrence">Repetição</Input.Label>
+
+            <Input.Wrapper>
+              <Input.FieldSelect
+                {...register("recurrence")}
+                id="recurrence"
+                optionsArray={RECURRENCE_OPTIONS}
+              />
+            </Input.Wrapper>
+          </Input.Root>
+        </>
       )}
     </Wrapper>
   );

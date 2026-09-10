@@ -1,5 +1,6 @@
 import "server-only";
 
+import dayjs from "dayjs";
 import { and, eq } from "drizzle-orm";
 
 import * as domain from "@/features/tasks/domain";
@@ -48,6 +49,7 @@ export class LocalTask
       scheduledAt: params.scheduledAt || null,
       syncEnabled: params.syncEnabled,
       reminderOffsetsMinutes: serializeReminders(params.reminderOffsetsMinutes),
+      recurrence: params.recurrence,
     });
 
     return { id };
@@ -63,7 +65,7 @@ export class LocalTask
 
   async update(params: domain.UpdateTask.Params) {
     const userId = await requireUserId();
-    const { id, tag, title, description, priority, scheduledAt, syncEnabled } = params;
+    const { id, tag, title, description, priority, scheduledAt, syncEnabled, recurrence } = params;
 
     await db
       .update(tasks)
@@ -75,6 +77,7 @@ export class LocalTask
         scheduledAt: scheduledAt || null,
         syncEnabled,
         reminderOffsetsMinutes: serializeReminders(params.reminderOffsetsMinutes),
+        recurrence,
         updatedAt: new Date(),
       })
       .where(and(eq(tasks.id, id), eq(tasks.userId, userId)));
@@ -84,14 +87,25 @@ export class LocalTask
    * raciocínio de `updateSyncState` abaixo: estado gerido por uma ação
    * dedicada). Lê o estado atual e inverte, em vez de aceitar um valor
    * explícito do chamador — evita o formulário de edição sobrescrever
-   * silenciosamente uma conclusão feita por outra aba/dispositivo. */
+   * silenciosamente uma conclusão feita por outra aba/dispositivo.
+   *
+   * Tarefa recorrente: ao MARCAR como concluída (nunca ao desmarcar), cria
+   * a próxima ocorrência deslocando `scheduledAt` em vez de gerar todas as
+   * instâncias futuras de uma vez (ver comentário do schema). A nova
+   * ocorrência nasce com `syncEnabled: false` — sincronizá-la com o Google
+   * Agenda é uma decisão nova do usuário para aquela ocorrência
+   * especificamente, não herdada automaticamente (evita criar uma cadeia
+   * de eventos no Google sem confirmação explícita a cada vez). Sem
+   * `scheduledAt`, não há o que deslocar, então a recorrência é ignorada
+   * silenciosamente (tarefa comum, sem data).
+   */
   async toggleComplete(
     params: domain.ToggleTaskComplete.Params
   ): Promise<domain.ToggleTaskComplete.Result> {
     const userId = await requireUserId();
 
     const [row] = await db
-      .select({ completed: tasks.completed })
+      .select()
       .from(tasks)
       .where(and(eq(tasks.id, params.id), eq(tasks.userId, userId)))
       .limit(1);
@@ -106,6 +120,24 @@ export class LocalTask
       .update(tasks)
       .set({ completed, completedAt: completed ? new Date() : null })
       .where(and(eq(tasks.id, params.id), eq(tasks.userId, userId)));
+
+    if (completed && row.recurrence !== "none" && row.scheduledAt) {
+      const unit = row.recurrence === "daily" ? "day" : "week";
+      const nextScheduledAt = dayjs(row.scheduledAt).add(1, unit).format("YYYY-MM-DDTHH:mm");
+
+      await db.insert(tasks).values({
+        id: crypto.randomUUID(),
+        userId,
+        tag: row.tag,
+        title: row.title,
+        description: row.description,
+        priority: row.priority,
+        scheduledAt: nextScheduledAt,
+        syncEnabled: false,
+        reminderOffsetsMinutes: row.reminderOffsetsMinutes,
+        recurrence: row.recurrence,
+      });
+    }
 
     return { completed };
   }
@@ -216,6 +248,7 @@ function mapRowToTask(row: typeof tasks.$inferSelect): domain.ITask {
     googleEventId: row.googleEventId,
     googleEventUpdatedAt: row.googleEventUpdatedAt,
     reminderOffsetsMinutes: deserializeReminders(row.reminderOffsetsMinutes),
+    recurrence: row.recurrence as domain.TaskRecurrence,
   };
 }
 

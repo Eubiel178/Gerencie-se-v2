@@ -43,6 +43,7 @@ export function AddTask({ buttonText, isGoogleConnected }: IAddTaskProps) {
       priority: "media",
       scheduledAt: "",
       reminderOffsetsMinutes: [],
+      recurrence: "none",
       syncEnabled: false,
     },
   });

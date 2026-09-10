@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { FaTrash, FaSyncAlt, FaCheck } from "react-icons/fa";
+import { FaTrash, FaSyncAlt, FaCheck, FaRedo } from "react-icons/fa";
 
 import {
   deleteTaskAction,
@@ -124,12 +124,26 @@ export function Card({ task, tagLabel, isGoogleConnected }: CardProps) {
       >
         <Wrapper direction="column" gap="medium">
           <Wrapper justify="between" align="center">
-            <h3
-              className={styles.taskTitle}
-              data-completed={task.completed}
-            >
-              {task.title}
-            </h3>
+            <Wrapper gap="small" align="center">
+              <h3
+                className={styles.taskTitle}
+                data-completed={task.completed}
+              >
+                {task.title}
+              </h3>
+
+              {task.recurrence !== "none" && (
+                <FaRedo
+                  role="img"
+                  aria-label={
+                    task.recurrence === "daily" ? "Repete diariamente" : "Repete semanalmente"
+                  }
+                  title={task.recurrence === "daily" ? "Repete diariamente" : "Repete semanalmente"}
+                  size={12}
+                  color="var(--color-text-muted)"
+                />
+              )}
+            </Wrapper>
 
             {(task.priority === "critica" || task.priority === "alta") && (
               <Feedback type={HIGH_PRIORITY_FEEDBACK_TYPE[task.priority]} size="xSmall">

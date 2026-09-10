@@ -1,5 +1,6 @@
 export type TaskSyncStatus = "NONE" | "PENDING" | "SYNCED" | "ERROR";
 export type TaskPriority = "baixa" | "media" | "alta" | "critica";
+export type TaskRecurrence = "none" | "daily" | "weekly";
 
 export interface ITask {
   id: string;
@@ -32,6 +33,13 @@ export interface ITask {
   // push, não é possível notificar com o app fechado; limitação
   // documentada na própria UI de lembretes.
   reminderOffsetsMinutes?: number[] | null;
+
+  // Recorrência simples (não é um motor de RRULE): ao concluir uma tarefa
+  // recorrente, `ToggleTaskComplete` cria a próxima ocorrência deslocando
+  // `scheduledAt` em vez de gerar todas as instâncias futuras de uma vez.
+  // Só faz sentido com `scheduledAt` definido (não há o que deslocar sem
+  // uma data).
+  recurrence: TaskRecurrence;
 
   // Sincronização opcional com o Google Agenda — sempre por tarefa, nunca
   // obrigatória. Ver `src/lib/google-calendar.ts` e
