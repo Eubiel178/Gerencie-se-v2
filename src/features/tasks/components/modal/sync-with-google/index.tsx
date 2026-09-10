@@ -12,7 +12,6 @@ interface SyncWithGoogleProps {
   setValue: UseFormSetValue<FormData>;
   isChecked: boolean;
   isGoogleConnected: boolean;
-  scheduledAtError?: string;
 }
 
 /**
@@ -21,15 +20,15 @@ interface SyncWithGoogleProps {
  * - a checkbox nunca bloqueia salvar a tarefa — se o Google não estiver
  *   conectado, mostramos um aviso com um jeito de conectar, mas o usuário
  *   pode desmarcar e continuar criando/editando a tarefa normalmente;
- * - só pedimos data/hora quando a sincronização está de fato marcada E o
- *   Google já está conectado (sem conexão, não faz sentido pedir).
+ * - a data/hora em si é pedida por `ReminderFields` (campo geral da
+ *   tarefa, não exclusivo do Google) — aqui só validamos que ela foi
+ *   preenchida quando marcar sincronizar (ver `task-schema.ts`).
  */
 export function SyncWithGoogle({
   register,
   setValue,
   isChecked,
   isGoogleConnected,
-  scheduledAtError,
 }: SyncWithGoogleProps) {
   const router = useRouter();
 
@@ -75,22 +74,6 @@ export function SyncWithGoogle({
             </Button>
           </Wrapper>
         </Wrapper>
-      )}
-
-      {isChecked && isGoogleConnected && (
-        <Input.Root sharedProps={{ error: scheduledAtError }}>
-          <Input.Label htmlFor="scheduledAt">Data e hora</Input.Label>
-
-          <Input.Wrapper>
-            <Input.Field
-              {...register("scheduledAt")}
-              type="datetime-local"
-              id="scheduledAt"
-            />
-          </Input.Wrapper>
-
-          <Input.HelperText />
-        </Input.Root>
       )}
     </Wrapper>
   );

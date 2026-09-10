@@ -17,6 +17,7 @@ import { Form, Modal, Input, Button, Wrapper, Feedback } from "@/components";
 import { updateTaskAction } from "@/features/tasks/actions";
 
 import { SyncWithGoogle } from "../sync-with-google";
+import { ReminderFields } from "../reminder-fields";
 import { FormData, IEditTaskProps, PRIORITY_OPTIONS } from "../interfaces";
 
 export function EditTask({ taskBeingEdited, isGoogleConnected }: IEditTaskProps) {
@@ -42,11 +43,13 @@ export function EditTask({ taskBeingEdited, isGoogleConnected }: IEditTaskProps)
       description: taskBeingEdited.description,
       priority: taskBeingEdited.priority,
       scheduledAt: taskBeingEdited.scheduledAt || "",
+      reminderOffsetsMinutes: taskBeingEdited.reminderOffsetsMinutes ?? [],
       syncEnabled: taskBeingEdited.syncEnabled,
     },
   });
 
   const syncEnabled = useWatch({ control, name: "syncEnabled" });
+  const scheduledAt = useWatch({ control, name: "scheduledAt" });
 
   const closeModal = () => {
     setIsOpen(false);
@@ -151,12 +154,17 @@ export function EditTask({ taskBeingEdited, isGoogleConnected }: IEditTaskProps)
                 <Input.HelperText />
               </Input.Root>
 
+              <ReminderFields
+                register={register}
+                scheduledAtError={errors.scheduledAt?.message}
+                hasScheduledAt={!!scheduledAt}
+              />
+
               <SyncWithGoogle
                 register={register}
                 setValue={setValue}
                 isChecked={!!syncEnabled}
                 isGoogleConnected={isGoogleConnected}
-                scheduledAtError={errors.scheduledAt?.message}
               />
             </Form.Wrapper>
 

@@ -1,5 +1,6 @@
 import { Header } from "@/components";
 import { Assistant } from "@/features/assistant";
+import { TaskReminders } from "@/features/tasks/components/reminder-scheduler";
 import styles from "./home-layout.module.css";
 
 // As tarefas e eventos são dados dinâmicos e específicos de cada usuário —
@@ -17,6 +18,7 @@ const HomeLayout = ({ children }: { children: React.ReactNode }) => {
       <main className={styles.main}>{children}</main>
 
       <Assistant />
+      <TaskReminders />
     </div>
   );
 };

@@ -24,6 +24,15 @@ export interface ITask {
   // horário do evento no Google Agenda.
   scheduledAt?: string;
 
+  // Minutos de antecedência para lembrete (ex.: [1440, 5, 0] = 1 dia
+  // antes, 5 min antes, na hora). Só faz sentido com `scheduledAt`
+  // definido. `null`/vazio = sem lembrete. Disparado no navegador via
+  // Notification API enquanto o app estiver aberto (ver
+  // `features/tasks/components/reminder-scheduler`) — sem um servidor de
+  // push, não é possível notificar com o app fechado; limitação
+  // documentada na própria UI de lembretes.
+  reminderOffsetsMinutes?: number[] | null;
+
   // Sincronização opcional com o Google Agenda — sempre por tarefa, nunca
   // obrigatória. Ver `src/lib/google-calendar.ts` e
   // `src/features/tasks/actions.ts`.

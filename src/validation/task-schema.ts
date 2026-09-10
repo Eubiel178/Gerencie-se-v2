@@ -19,6 +19,12 @@ export const validationSchema = z
       .max(165, "A descricão deve ter no máximo 165 caracteres"),
     priority: z.enum(["baixa", "media", "alta", "critica"]),
     scheduledAt: z.string().optional(),
+    // Minutos de antecedência marcados (1 dia antes = 1440, 5 min antes =
+    // 5, na hora = 0). Só faz sentido junto de `scheduledAt`, mas não é
+    // obrigatório mesmo com data marcada — usuário pode não querer
+    // lembrete nenhum. `z.coerce.number()` porque cada checkbox chega como
+    // string (atributo `value` do HTML) — ver `ReminderFields`.
+    reminderOffsetsMinutes: z.array(z.coerce.number()).optional(),
     // Sincronizar com o Google Agenda é opcional — mas se marcado, o
     // evento no Google precisa de uma data/hora, então passamos a exigir
     // `scheduledAt` só nesse caso (ver `.refine` abaixo).

@@ -7,6 +7,7 @@ import { ThemeToggle } from "@/design-system/theme/theme-toggle";
 
 import { PreferencesPanel } from "@/features/assistant/components/preferences-panel";
 import { getAssistantPreferencesFetcher } from "@/features/assistant/data/get-assistant-preferences-fetcher";
+import { NotificationsToggle } from "@/features/tasks/components/reminder-scheduler/notifications-toggle";
 
 import { CalendarStatusBanner } from "./components/calendar-status-banner";
 import { ConnectionCard } from "./components/connection-card";
@@ -66,6 +67,14 @@ export async function Settings({ searchParams }: SettingsProps) {
         </Wrapper>
 
         <PreferencesPanel preferences={assistantPreferences} />
+      </section>
+
+      <section className={styles.settingPanel}>
+        <Wrapper direction="column" gap="small">
+          <h2>Lembretes</h2>
+        </Wrapper>
+
+        <NotificationsToggle />
       </section>
 
       <section className={styles.settingPanel}>

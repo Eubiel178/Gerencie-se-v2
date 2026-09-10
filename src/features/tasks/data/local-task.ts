@@ -47,6 +47,7 @@ export class LocalTask
       priority: params.priority,
       scheduledAt: params.scheduledAt || null,
       syncEnabled: params.syncEnabled,
+      reminderOffsetsMinutes: serializeReminders(params.reminderOffsetsMinutes),
     });
 
     return { id };
@@ -73,6 +74,7 @@ export class LocalTask
         priority,
         scheduledAt: scheduledAt || null,
         syncEnabled,
+        reminderOffsetsMinutes: serializeReminders(params.reminderOffsetsMinutes),
         updatedAt: new Date(),
       })
       .where(and(eq(tasks.id, id), eq(tasks.userId, userId)));
@@ -213,5 +215,26 @@ function mapRowToTask(row: typeof tasks.$inferSelect): domain.ITask {
     syncError: row.syncError,
     googleEventId: row.googleEventId,
     googleEventUpdatedAt: row.googleEventUpdatedAt,
+    reminderOffsetsMinutes: deserializeReminders(row.reminderOffsetsMinutes),
   };
+}
+
+/** `reminder_offsets_minutes` é guardado como texto (JSON de uma lista de
+ * números pequena) — ver comentário no schema. Qualquer valor inesperado
+ * (coluna corrompida manualmente, por exemplo) vira "sem lembrete" em vez
+ * de derrubar a leitura da tarefa. */
+function deserializeReminders(value: string | null): number[] | null {
+  if (!value) return null;
+
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed.filter((item) => typeof item === "number") : null;
+  } catch {
+    return null;
+  }
+}
+
+function serializeReminders(offsets: number[] | null | undefined): string | null {
+  if (!offsets || offsets.length === 0) return null;
+  return JSON.stringify(offsets);
 }

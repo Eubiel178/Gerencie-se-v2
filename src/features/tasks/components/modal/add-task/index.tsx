@@ -16,6 +16,7 @@ import { Form, Input, Modal, Button, Wrapper, Feedback } from "@/components";
 import { createTaskAction } from "@/features/tasks/actions";
 
 import { SyncWithGoogle } from "../sync-with-google";
+import { ReminderFields } from "../reminder-fields";
 import { FormData, IAddTaskProps, PRIORITY_OPTIONS } from "../interfaces";
 
 export function AddTask({ buttonText, isGoogleConnected }: IAddTaskProps) {
@@ -41,11 +42,13 @@ export function AddTask({ buttonText, isGoogleConnected }: IAddTaskProps) {
       description: "",
       priority: "media",
       scheduledAt: "",
+      reminderOffsetsMinutes: [],
       syncEnabled: false,
     },
   });
 
   const syncEnabled = useWatch({ control, name: "syncEnabled" });
+  const scheduledAt = useWatch({ control, name: "scheduledAt" });
 
   function closeModal() {
     setIsOpen(false);
@@ -144,12 +147,17 @@ export function AddTask({ buttonText, isGoogleConnected }: IAddTaskProps) {
                 <Input.HelperText />
               </Input.Root>
 
+              <ReminderFields
+                register={register}
+                scheduledAtError={errors.scheduledAt?.message}
+                hasScheduledAt={!!scheduledAt}
+              />
+
               <SyncWithGoogle
                 register={register}
                 setValue={setValue}
                 isChecked={!!syncEnabled}
                 isGoogleConnected={isGoogleConnected}
-                scheduledAtError={errors.scheduledAt?.message}
               />
             </Form.Wrapper>
 
