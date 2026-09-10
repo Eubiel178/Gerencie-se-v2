@@ -1,0 +1,146 @@
+"use client";
+
+import { useState } from "react";
+
+import { useRouter } from "next/navigation";
+
+import { FaEdit } from "react-icons/fa";
+import { MdClose } from "react-icons/md";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+import { validationSchema } from "@/validation/routine-schema";
+
+import { Form, Modal, Input, Button, Wrapper, Feedback } from "@/components";
+
+import { updateRoutineItemAction } from "@/features/routine/actions";
+
+import { FormData, IEditRoutineItemProps, NO_TASK_VALUE } from "../interfaces";
+
+export function EditRoutineItem({ itemBeingEdited, taskOptions }: IEditRoutineItemProps) {
+  const router = useRouter();
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const {
+    reset,
+    register,
+    formState: { errors, isSubmitting },
+    handleSubmit,
+  } = useForm<FormData>({
+    mode: "onChange",
+    resolver: zodResolver(validationSchema),
+    defaultValues: {
+      time: itemBeingEdited.time,
+      title: itemBeingEdited.title,
+      taskId: itemBeingEdited.taskId || NO_TASK_VALUE,
+    },
+  });
+
+  const closeModal = () => {
+    setIsOpen(false);
+    reset();
+  };
+
+  const handleFormSubmit = async (data: FormData) => {
+    setSubmitError(null);
+
+    const result = await updateRoutineItemAction({
+      id: itemBeingEdited.id,
+      time: data.time,
+      title: data.title,
+      taskId: data.taskId === NO_TASK_VALUE ? null : data.taskId,
+    });
+
+    if (result.error) {
+      setSubmitError(result.error);
+      return;
+    }
+
+    closeModal();
+    router.refresh();
+  };
+
+  return (
+    <>
+      <Button
+        color="primary"
+        background="transparent"
+        size="xlarge"
+        aria-label={`Editar item de rotina ${itemBeingEdited.title}`}
+        onClick={function () {
+          setIsOpen(true);
+        }}
+      >
+        <FaEdit />
+      </Button>
+
+      {isOpen && (
+        <Modal>
+          <Wrapper justify="between" align="center">
+            <h3>Editar Item de Rotina</h3>
+
+            <Button
+              background="transparent"
+              color="secondary"
+              size="xlarge"
+              aria-label="Fechar"
+              onClick={closeModal}
+            >
+              <MdClose />
+            </Button>
+          </Wrapper>
+
+          <Form.Root onSubmit={handleSubmit(handleFormSubmit)}>
+            <Form.Wrapper gap="xsmall">
+              <Input.Root sharedProps={{ error: errors.time?.message }}>
+                <Input.Label>Horário</Input.Label>
+
+                <Input.Wrapper>
+                  <Input.Field {...register("time")} type="time" />
+                </Input.Wrapper>
+
+                <Input.HelperText />
+              </Input.Root>
+
+              <Input.Root sharedProps={{ error: errors.title?.message }}>
+                <Input.Wrapper>
+                  <Input.Field
+                    {...register("title")}
+                    placeholder="Ex.: Acordar, Estudar, Exercício..."
+                  />
+                </Input.Wrapper>
+
+                <Input.HelperText />
+              </Input.Root>
+
+              {taskOptions.length > 0 && (
+                <Input.Root>
+                  <Input.Label>Vincular a uma tarefa (opcional)</Input.Label>
+
+                  <Input.Wrapper>
+                    <Input.FieldSelect
+                      {...register("taskId")}
+                      optionsArray={[
+                        { label: "Nenhuma", value: NO_TASK_VALUE },
+                        ...taskOptions.map((task) => ({
+                          label: task.title,
+                          value: task.id,
+                        })),
+                      ]}
+                    />
+                  </Input.Wrapper>
+                </Input.Root>
+              )}
+            </Form.Wrapper>
+
+            {submitError && <Feedback>{submitError}</Feedback>}
+
+            <Button loading={isSubmitting}>Salvar Alterações</Button>
+          </Form.Root>
+        </Modal>
+      )}
+    </>
+  );
+}

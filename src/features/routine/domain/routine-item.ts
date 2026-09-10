@@ -1,0 +1,12 @@
+export interface IRoutineItem {
+  id: string;
+  // Dono do item de rotina. Nunca vem do cliente — sempre resolvido no
+  // servidor a partir da sessão autenticada (ver `requireUserId()`).
+  userId: string;
+  time: string; // "HH:MM"
+  title: string;
+  // Vínculo opcional com uma tarefa real do dia (ver `src/features/tasks`).
+  // Null = item de rotina "solto", sem tarefa associada.
+  taskId?: string | null;
+  createdAt: Date;
+}
