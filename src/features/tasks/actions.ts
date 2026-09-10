@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import * as domain from "@/features/tasks/domain";
-import { LocalTask } from "@/features/tasks/data";
+import { getTaskFetcher } from "@/features/tasks/data/get-task-fetcher";
 
 import { requireUserId } from "@/lib/require-user-id";
 import { deleteCalendarEventForTask } from "@/lib/google-calendar";
@@ -13,27 +13,24 @@ import { syncTaskToGoogle } from "./sync";
 /**
  * Server Actions de Task.
  *
- * `LocalTask` usa Drizzle + @libsql/client, que só existem no servidor — por
- * isso os Client Components (AddTask, EditTask, o Card com o botão de
- * excluir) não chamam mais o repositório diretamente e passam a chamar
- * estas actions, que rodam sempre no servidor e resolvem o usuário dono dos
- * dados a partir da sessão (nunca de um valor vindo do formulário).
+ * `LocalTask` (via `getTaskFetcher`) usa Drizzle + o driver `postgres`, que
+ * só existem no servidor — por isso os Client Components (AddTask, EditTask,
+ * o Card com o botão de excluir) não chamam mais o repositório diretamente
+ * e passam a chamar estas actions, que rodam sempre no servidor e resolvem
+ * o usuário dono dos dados a partir da sessão (nunca de um valor vindo do
+ * formulário).
  *
  * A sincronização com o Google Agenda (ver `./sync.ts`) acontece DEPOIS da
  * tarefa já estar salva localmente — uma falha ali nunca desfaz nem
  * impede a operação local, só fica registrada em `syncStatus`/`syncError`.
  */
-function getTaskRepository() {
-  return new LocalTask();
-}
-
 type ActionResult = { error: string | null };
 
 export async function createTaskAction(
   data: domain.CreateTask.Params
 ): Promise<ActionResult> {
   try {
-    const repo = getTaskRepository();
+    const repo = getTaskFetcher();
     const userId = await requireUserId();
     const { id } = await repo.create(data);
 
@@ -65,7 +62,7 @@ export async function updateTaskAction(
   data: domain.UpdateTask.Params
 ): Promise<ActionResult> {
   try {
-    const repo = getTaskRepository();
+    const repo = getTaskFetcher();
     const userId = await requireUserId();
     const previousTask = await repo.getById(data.id);
 
@@ -101,7 +98,7 @@ export async function deleteTaskAction(
   params: domain.DeleteTask.Params
 ): Promise<ActionResult> {
   try {
-    const repo = getTaskRepository();
+    const repo = getTaskFetcher();
     const userId = await requireUserId();
     const existingTask = await repo.getById(params.id);
 
@@ -133,7 +130,7 @@ export async function retryTaskSyncAction(
   params: domain.DeleteTask.Params
 ): Promise<ActionResult> {
   try {
-    const repo = getTaskRepository();
+    const repo = getTaskFetcher();
     const task = await repo.getById(params.id);
 
     if (!task) {

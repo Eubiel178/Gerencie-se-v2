@@ -2,12 +2,13 @@ import "server-only";
 
 import { LocalEvent } from "@/features/events/data";
 
-// Não é um React Hook (apesar do nome do arquivo) — é só uma factory que
-// devolve a implementação local do repositório de eventos, segura de
-// chamar em qualquer função síncrona ou assíncrona. Só pode ser usado em
-// Server Components (ex.: `Event`) ou dentro de Server Actions — `LocalEvent`
-// depende do driver `postgres`. Client Components chamam as Server Actions em
-// `src/features/events/actions.ts` em vez disso.
+// Não é um React Hook (apesar do nome do arquivo) — é a única factory do
+// repositório de eventos, usada tanto pelo Server Component `Event` quanto
+// pelas Server Actions em `actions.ts` (antes havia uma segunda cópia
+// dessa mesma factory ali, removida — uma única fonte de verdade para
+// "como obter um LocalEvent"). Só pode ser usada no servidor — `LocalEvent`
+// depende do driver `postgres`. Client Components chamam as Server Actions
+// em vez disso.
 export function getEventFetcher() {
-  return { fetcher: new LocalEvent() };
+  return new LocalEvent();
 }

@@ -7,7 +7,7 @@ import { getTaskFetcher } from "./data/get-task-fetcher";
 import { Section, TasksList, TasksListHeader } from "./components";
 
 export async function Home() {
-  const { fetcher } = getTaskFetcher();
+  const fetcher = getTaskFetcher();
 
   const userId = await requireUserId();
   const isGoogleConnected = await isGoogleCalendarConnected(userId);

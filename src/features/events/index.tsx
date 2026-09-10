@@ -4,7 +4,7 @@ import { getEventFetcher } from "./data/get-event-fetcher";
 import styles from "@/styles/workspace.module.css";
 
 export async function Event() {
-  const { fetcher } = getEventFetcher();
+  const fetcher = getEventFetcher();
 
   const eventsList = await fetcher.loadAll();
 

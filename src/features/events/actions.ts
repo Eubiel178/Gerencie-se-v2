@@ -3,28 +3,25 @@
 import { revalidatePath } from "next/cache";
 
 import * as domain from "@/features/events/domain";
-import { LocalEvent } from "@/features/events/data";
+import { getEventFetcher } from "@/features/events/data/get-event-fetcher";
 
 /**
  * Server Actions de Event.
  *
- * `LocalEvent` usa Drizzle + @libsql/client, que só existem no servidor —
- * por isso os Client Components (AddEvent, EditEvent, o Card com o botão de
- * excluir) não chamam mais o repositório diretamente e passam a chamar
- * estas actions, que rodam sempre no servidor e resolvem o usuário dono dos
- * dados a partir da sessão (nunca de um valor vindo do formulário).
+ * `LocalEvent` (via `getEventFetcher`) usa Drizzle + o driver `postgres`,
+ * que só existem no servidor — por isso os Client Components (AddEvent,
+ * EditEvent, o Card com o botão de excluir) não chamam mais o repositório
+ * diretamente e passam a chamar estas actions, que rodam sempre no servidor
+ * e resolvem o usuário dono dos dados a partir da sessão (nunca de um valor
+ * vindo do formulário).
  */
-function getEventRepository() {
-  return new LocalEvent();
-}
-
 type ActionResult = { error: string | null };
 
 export async function createEventAction(
   data: domain.CreateEvent.Params
 ): Promise<ActionResult> {
   try {
-    await getEventRepository().create(data);
+    await getEventFetcher().create(data);
     revalidatePath("/home/event");
 
     return { error: null };
@@ -37,7 +34,7 @@ export async function updateEventAction(
   data: domain.UpdateEvent.Params
 ): Promise<ActionResult> {
   try {
-    await getEventRepository().update(data);
+    await getEventFetcher().update(data);
     revalidatePath("/home/event");
 
     return { error: null };
@@ -52,7 +49,7 @@ export async function deleteEventAction(
   params: domain.DeleteEvent.Params
 ): Promise<ActionResult> {
   try {
-    await getEventRepository().delete(params);
+    await getEventFetcher().delete(params);
     revalidatePath("/home/event");
 
     return { error: null };
