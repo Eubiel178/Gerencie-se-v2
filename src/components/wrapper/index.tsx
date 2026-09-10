@@ -1,7 +1,7 @@
 import { VariantProps, tv } from "tailwind-variants";
 
 const wrapperStyles = tv({
-  base: " text-blacks",
+  base: "text-[var(--color-text)]",
 
   variants: {
     flex: {
@@ -21,8 +21,8 @@ const wrapperStyles = tv({
     },
 
     background: {
-      light: "bg-white",
-      dark: "bg-gray-500",
+      light: "bg-[var(--color-surface)]",
+      dark: "bg-[var(--color-surface-elevated)]",
       transparent: "bg-transparent",
     },
 

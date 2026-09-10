@@ -1,1 +1,1 @@
-export * from "./remote-event";
+export * from "./local-event";

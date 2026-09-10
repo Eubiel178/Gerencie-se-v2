@@ -2,7 +2,7 @@ import Link from "next/link";
 import { VariantProps, tv } from "tailwind-variants";
 
 const linkStyles = tv({
-  base: "text-[#0000ff] hover:text-red-700 hover:underline",
+  base: "text-[var(--color-highlight)] hover:underline",
 
   variants: {
     display: {

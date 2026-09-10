@@ -2,19 +2,26 @@
 
 import { useState } from "react";
 
+import { useRouter } from "next/navigation";
+
 import { useForm } from "react-hook-form";
 import { MdClose } from "react-icons/md";
 import { FaEdit } from "react-icons/fa";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { validationSchema } from "@/validation/eventSchema";
+import { validationSchema } from "@/validation/event-schema";
 
-import { Form, Modal, Input, Button, Wrapper } from "@/components";
+import { Form, Modal, Input, Button, Wrapper, Feedback } from "@/components";
+
+import { updateEventAction } from "@/features/events/actions";
 
 import { FormData, IModalProps } from "./interfaces";
 
 export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const router = useRouter();
+
   const {
     handleSubmit,
     formState: { errors, isSubmitting },
@@ -29,7 +36,7 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
       start: eventBeingEdited.start,
       end: eventBeingEdited.end,
       url: eventBeingEdited.url,
-      backgroundColor: "#3788d8",
+      backgroundColor: eventBeingEdited.backgroundColor || "#3788d8",
     },
   });
 
@@ -37,17 +44,20 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
     setIsOpen(false);
   }
 
-  function handleFormSubmit(data: FormData) {
-    reset({
-      title: "",
-      description: "",
-      start: "",
-      end: "",
-      url: "",
-      backgroundColor: "#3788d8",
-    });
+  async function handleFormSubmit(data: FormData) {
+    // TODO(fase 7 — Zustand): trocar por update otimista assim que a store
+    // de eventos existir; hoje o `router.refresh()` refaz o fetch no server.
+    setSubmitError(null);
+
+    const result = await updateEventAction({ ...eventBeingEdited, ...data });
+
+    if (result.error) {
+      setSubmitError(result.error);
+      return;
+    }
 
     closeModal();
+    router.refresh();
   }
 
   return (
@@ -56,6 +66,7 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
         color="secondary"
         background="transparent"
         size="xlarge"
+        aria-label={`Editar evento ${eventBeingEdited.title}`}
         onClick={function () {
           setIsOpen(true);
         }}
@@ -72,6 +83,7 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
               background="transparent"
               color="secondary"
               size="xlarge"
+              aria-label="Fechar"
               onClick={closeModal}
             >
               <MdClose />
@@ -158,6 +170,8 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
                 </Input.HelperText>
               </Input.Root>
             </Form.Wrapper>
+
+            {submitError && <Feedback>{submitError}</Feedback>}
 
             <Button loading={isSubmitting}>Salvar Alterações</Button>
           </Form.Root>

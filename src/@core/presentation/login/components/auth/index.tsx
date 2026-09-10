@@ -1,11 +1,17 @@
 "use client";
 
+import { useState } from "react";
+
+import { signIn } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { validationSchema } from "@/validation/loginSchema";
+import { validationSchema } from "@/validation/login-schema";
 
-import { tv } from "tailwind-variants";
+import styles from "../../../auth-page.module.css";
+
+import { FaGoogle } from "react-icons/fa";
 
 import {
   Form,
@@ -14,15 +20,29 @@ import {
   Wrapper,
   Paragraph,
   DefaultLink,
+  Feedback,
 } from "@/components";
 
-const styles = tv({
-  base: "p-8 flex flex-col gap-16",
-});
+import { loginAction } from "@/features/auth/actions";
+import { authErrorMessage } from "@/lib/auth-error-messages";
 
 type FormData = z.infer<typeof validationSchema>;
 
 export function Auth() {
+  const searchParams = useSearchParams();
+
+  // O Auth.js redireciona de volta pra cá com `?error=...` quando o login
+  // com Google falha (ex.: usuário cancelou, ou o e-mail já tem conta
+  // criada de outra forma). Nunca deixamos essa tela sem explicação nesses
+  // casos, e nunca criamos uma sessão inválida. Calculado como estado
+  // inicial (não via efeito): esse redirecionamento é sempre um carregamento
+  // de página novo, então o valor de `searchParams` no primeiro render já é
+  // o definitivo — não há necessidade de sincronizar depois.
+  const [formError, setFormError] = useState<string | null>(() =>
+    authErrorMessage(searchParams.get("error"))
+  );
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+
   const {
     handleSubmit,
     formState: { errors, isSubmitting },
@@ -37,12 +57,23 @@ export function Auth() {
     },
   });
 
-  const handleOnSubmit = (data: FormData) => {
-    console.log(data);
+  const handleOnSubmit = async (data: FormData) => {
+    setFormError(null);
+
+    const result = await loginAction(data);
+
+    if (result.error) {
+      setFormError(result.error);
+    }
   };
 
+  function handleGoogleSignIn() {
+    setIsGoogleLoading(true);
+    signIn("google", { callbackUrl: "/home" });
+  }
+
   return (
-    <section className={styles()}>
+    <section className={styles.formCard}>
       <h1>Login</h1>
 
       <Form.Root onSubmit={handleSubmit(handleOnSubmit)}>
@@ -89,8 +120,22 @@ export function Auth() {
           </Input.Root>
         </Form.Wrapper>
 
+        {formError && <Feedback>{formError}</Feedback>}
+
         <Button loading={isSubmitting}>Entrar</Button>
       </Form.Root>
+
+      <Button
+        type="button"
+        background="secondary"
+        loading={isGoogleLoading}
+        onClick={handleGoogleSignIn}
+      >
+        <Wrapper align="center" gap="small" background="transparent">
+          <FaGoogle aria-hidden="true" />
+          <span>Continuar com Google</span>
+        </Wrapper>
+      </Button>
 
       <Wrapper align="center" gap="small">
         <Paragraph>Ainda não tem conta?</Paragraph>

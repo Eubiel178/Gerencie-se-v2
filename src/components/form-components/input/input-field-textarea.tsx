@@ -1,14 +1,14 @@
 import { forwardRef } from "react";
 import { VariantProps, tv } from "tailwind-variants";
-import { useInputRootContext } from "@/providers/InputRootContext";
+import { useInputRootContext } from "@/providers/input-root-context";
 
 const inputStyles = tv({
-  base: "w-full border border-solid p-2",
+  base: "w-full border border-solid border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] p-2",
 
   variants: {
     incorrect: {
-      true: "border-red-500 placeholder-red-500",
-      false: "border-stone-200",
+      true: "border-[var(--color-danger)] placeholder:text-[var(--color-danger)]",
+      false: "border-[var(--color-border)]",
     },
   },
 });

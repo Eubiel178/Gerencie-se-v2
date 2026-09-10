@@ -1,7 +1,13 @@
-import { GerenciSe, GerenciseTypes } from "@/@core/container";
+import "server-only";
 
-import { RemoteTask } from "@/@core/data";
+import { LocalTask } from "@/@core/data";
 
-export function useTask() {
-  return { fetcher: GerenciSe.get<RemoteTask>(GerenciseTypes.RemoteTask) };
+// Não é um React Hook (apesar do nome do arquivo) — é só uma factory que
+// devolve a implementação local do repositório de tarefas, segura de
+// chamar em qualquer função síncrona ou assíncrona. Só pode ser usado em
+// Server Components (ex.: `Home`) ou dentro de Server Actions — `LocalTask`
+// depende de `@libsql/client`. Client Components chamam as Server Actions em
+// `src/features/tasks/actions.ts` em vez disso.
+export function getTaskFetcher() {
+  return { fetcher: new LocalTask() };
 }

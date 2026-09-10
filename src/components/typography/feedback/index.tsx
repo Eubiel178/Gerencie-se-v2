@@ -1,14 +1,14 @@
 import { VariantProps, tv } from "tailwind-variants";
 
 const feedbackStyles = tv({
-  base: "text-gray-500",
+  base: "text-[var(--color-text-muted)]",
 
   variants: {
     type: {
-      error: "text-red-500",
-      success: "text-green-500",
+      error: "text-[var(--color-danger)]",
+      success: "text-[var(--color-success)]",
       warning: "text-yellow-500",
-      info: "text-gray-500",
+      info: "text-[var(--color-info)]",
     },
 
     size: {

@@ -1,37 +1,54 @@
 "use client";
 
-import { useFormTags, useParamsUrl } from "@/@core/presentation/hooks";
+import { useEffect } from "react";
+
+import { useFormTags } from "@/@core/presentation/hooks/use-form-tags";
+import { useParamsUrl } from "@/@core/presentation/hooks/use-params-url";
 
 import { List, Wrapper, Feedback } from "@/components";
 import { Card } from "./card";
 
 import { ITask } from "@/@core/domain";
+import styles from "../../home-dashboard.module.css";
+import { useTaskStore } from "@/features/tasks/task-store";
 
-export function TasksList({ tasksList }: { tasksList: ITask[] }) {
+interface TasksListProps {
+  tasksList: ITask[];
+  isGoogleConnected: boolean;
+}
+
+export function TasksList({ tasksList, isGoogleConnected }: TasksListProps) {
   const paramsUrl = useParamsUrl();
   const formTags = useFormTags();
+  const tasks = useTaskStore((state) => state.tasks);
+  const setTasks = useTaskStore((state) => state.setTasks);
+
+  useEffect(() => {
+    setTasks(tasksList);
+  }, [setTasks, tasksList]);
 
   const tag = formTags.tagExists(paramsUrl.get("tag") || "");
   const tasksFiltred =
     tag !== "all"
-      ? tasksList.filter((task) => task.tag === tag)
-      : [...tasksList];
+      ? tasks.filter((task) => task.tag === tag)
+      : [...tasks];
   const thereAreTasks = tasksFiltred.length > 0;
 
   return (
     <>
       {thereAreTasks ? (
-        <List direction="row" wrap="wrap">
+        <List className={styles.taskGrid} direction="row" wrap="wrap">
           {tasksFiltred.map((task) => (
             <Card
               key={task.id}
-              {...task}
-              tag={"#" + formTags.tagsLabels[task.tag]}
+              task={task}
+              tagLabel={"#" + formTags.tagsLabels[task.tag]}
+              isGoogleConnected={isGoogleConnected}
             />
           ))}
         </List>
       ) : (
-        <Wrapper>
+        <Wrapper className={styles.empty}>
           <Feedback>Nenhuma tarefa adicionada</Feedback>
         </Wrapper>
       )}

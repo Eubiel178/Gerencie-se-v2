@@ -4,15 +4,15 @@ import { VariantProps, tv } from "tailwind-variants";
 
 const listItemStyles = tv({
   slots: {
-    base: "flex hover:bg-gray-700 duration-200",
+    base: "flex hover:bg-[var(--color-surface-elevated)] duration-200",
     link: "flex-1 flex items-center gap-2 px-1.5 py-2 ",
-    paragraph: "bg-gray-700 p-2 border shadow",
+    paragraph: "bg-[var(--color-surface-elevated)] p-2 border border-[var(--color-border)] shadow",
   },
 
   variants: {
     currentRoute: {
       true: {
-        base: "bg-gray-700 shadow",
+        base: "bg-[var(--color-surface-elevated)] shadow",
       },
     },
   },

@@ -1,15 +1,14 @@
 "use client";
 
-import { Wrapper } from "@/components";
-
 import { AddEvent } from "../modal";
+import styles from "../../../workspace.module.css";
 
 export function EventListHeader() {
   return (
-    <Wrapper align="center" justify="between">
-      <h3 className="text-base">Eventos</h3>
+    <header className={styles.eventToolbar}>
+      <h2>Próximos eventos</h2>
 
       <AddEvent buttonText="Novo" />
-    </Wrapper>
+    </header>
   );
 }

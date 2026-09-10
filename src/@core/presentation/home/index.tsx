@@ -1,17 +1,34 @@
-import { useTask } from "../hooks/use-task";
+import { requireUserId } from "@/lib/require-user-id";
+import { isGoogleCalendarConnected } from "@/lib/google-calendar";
+import { syncTasksFromGoogle } from "@/features/tasks/sync";
+
+import { getTaskFetcher } from "../hooks/use-task";
 
 import { Section, TasksList, TasksListHeader } from "./components";
 
 export async function Home() {
-  const { fetcher } = useTask();
+  const { fetcher } = getTaskFetcher();
 
-  const tasksList = await fetcher.loadAll({ id: "1" });
+  const userId = await requireUserId();
+  const isGoogleConnected = await isGoogleCalendarConnected(userId);
+
+  // Sincronização Google→App: feita aqui, a cada carregamento da Home,
+  // porque o app roda localmente sem domínio público pra receber webhooks
+  // do Google (decisão de polling já aprovada no plano). Só tarefas com
+  // vínculo prévio (`googleEventId`) são checadas — nunca importamos a
+  // agenda inteira do usuário.
+  if (isGoogleConnected) {
+    const tasksBeforeSync = await fetcher.loadAll();
+    await syncTasksFromGoogle(tasksBeforeSync, fetcher);
+  }
+
+  const tasksList = await fetcher.loadAll();
 
   return (
     <Section>
-      <TasksListHeader />
+      <TasksListHeader isGoogleConnected={isGoogleConnected} />
 
-      <TasksList tasksList={tasksList} />
+      <TasksList tasksList={tasksList} isGoogleConnected={isGoogleConnected} />
     </Section>
   );
 }

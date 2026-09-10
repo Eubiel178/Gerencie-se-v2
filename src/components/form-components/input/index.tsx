@@ -1,5 +1,5 @@
 import { InputField } from "./input-field";
-import { InputButton } from "./Input-button";
+import { InputButton } from "./input-button";
 import { InputFieldPassword } from "./input-field-password";
 import { InputFieldSelect } from "./input-field-select";
 import { InputFieldTextarea } from "./input-field-textarea";

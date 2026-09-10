@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { validationSchema } from "@/validation/eventSchema";
+import { validationSchema } from "@/validation/event-schema";
 
 import { IEvent } from "@/@core/domain";
 

@@ -1,11 +1,16 @@
 "use client";
 
+import { useState } from "react";
+
+import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { validationSchema } from "@/validation/registerSchema";
+import { validationSchema } from "@/validation/register-schema";
 
-import { tv } from "tailwind-variants";
+import styles from "../../../auth-page.module.css";
+
+import { FaGoogle } from "react-icons/fa";
 
 import {
   Form,
@@ -14,15 +19,17 @@ import {
   Wrapper,
   Paragraph,
   DefaultLink,
+  Feedback,
 } from "@/components";
 
-const styles = tv({
-  base: "p-8 flex flex-col gap-16",
-});
+import { registerAction } from "@/features/auth/actions";
 
 type FormData = z.input<typeof validationSchema>;
 
 export function Auth() {
+  const [formError, setFormError] = useState<string | null>(null);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+
   const {
     handleSubmit,
     formState: { errors, isSubmitting },
@@ -39,11 +46,22 @@ export function Auth() {
   });
 
   const handleOnSubmit = async (data: FormData) => {
-    console.log(data);
+    setFormError(null);
+
+    const result = await registerAction(data);
+
+    if (result.error) {
+      setFormError(result.error);
+    }
   };
 
+  function handleGoogleSignIn() {
+    setIsGoogleLoading(true);
+    signIn("google", { callbackUrl: "/home" });
+  }
+
   return (
-    <section className={styles()}>
+    <section className={styles.formCard}>
       <h1>Cadastre-se</h1>
 
       <Form.Root onSubmit={handleSubmit(handleOnSubmit)}>
@@ -99,8 +117,22 @@ export function Auth() {
           </Input.Root>
         </Form.Wrapper>
 
+        {formError && <Feedback>{formError}</Feedback>}
+
         <Button loading={isSubmitting}>Cadastrar</Button>
       </Form.Root>
+
+      <Button
+        type="button"
+        background="secondary"
+        loading={isGoogleLoading}
+        onClick={handleGoogleSignIn}
+      >
+        <Wrapper align="center" gap="small" background="transparent">
+          <FaGoogle aria-hidden="true" />
+          <span>Continuar com Google</span>
+        </Wrapper>
+      </Button>
 
       <Wrapper align="center" gap="small">
         <Paragraph>Já tem uma conta?</Paragraph>

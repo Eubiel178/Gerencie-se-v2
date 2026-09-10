@@ -1,12 +1,8 @@
 import { ComponentProps } from "react";
-import { tv } from "tailwind-variants";
-
-const styles = tv({
-  base: "flex flex-col gap-10",
-});
+import styles from "../../home-dashboard.module.css";
 
 type SectionProps = ComponentProps<"section">;
 
 export function Section({ children }: SectionProps) {
-  return <section className={styles()}>{children}</section>;
+  return <section className={styles.section}>{children}</section>;
 }

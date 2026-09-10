@@ -2,15 +2,15 @@
 
 import { forwardRef } from "react";
 import { VariantProps, tv } from "tailwind-variants";
-import { useInputRootContext } from "@/providers/InputRootContext";
+import { useInputRootContext } from "@/providers/input-root-context";
 
 const selectStyles = tv({
-  base: "appearance-none w-full border border-solid border-stone-200 p-2",
+  base: "appearance-none w-full border border-solid border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] p-2",
 
   variants: {
     incorrect: {
-      true: "border-red-500 placeholder-red-500",
-      false: "border-stone-200",
+      true: "border-[var(--color-danger)]",
+      false: "border-[var(--color-border)]",
     },
   },
 });

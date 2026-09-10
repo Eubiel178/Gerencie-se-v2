@@ -1,46 +1,19 @@
 import { Header } from "@/components";
-import { tv } from "tailwind-variants";
+import styles from "./home-layout.module.css";
 
-const styles = tv(
-  {
-    slots: {
-      pageContainer: "",
-      mainContainer: "relative gap-10 p-5",
-    },
-
-    variants: {
-      responsive: {
-        desktop: {
-          pageContainer: "flex-row",
-        },
-      },
-    },
-
-    compoundSlots: [
-      {
-        slots: ["pageContainer", "mainContainer"],
-        className: "flex-1 flex flex-col",
-      },
-    ],
-  },
-
-  {
-    responsiveVariants: ["sm"],
-  }
-);
+// As tarefas e eventos são dados dinâmicos e específicos de cada usuário —
+// não fazem sentido pré-renderizados estaticamente no build. Isso também
+// evita que uma falha de API no momento do build derrube o `next build`
+// inteiro (o build só falharia se a API estivesse fora do ar em tempo de
+// requisição real, e aí o `error.tsx` entra em ação).
+export const dynamic = "force-dynamic";
 
 const HomeLayout = ({ children }: { children: React.ReactNode }) => {
-  const tv = styles({
-    responsive: {
-      sm: "desktop",
-    },
-  });
-
   return (
-    <div className={tv.pageContainer()}>
+    <div className={styles.shell}>
       <Header />
 
-      <main className={tv.mainContainer()}>{children}</main>
+      <main className={styles.main}>{children}</main>
     </div>
   );
 };

@@ -2,21 +2,25 @@
 
 import { useState } from "react";
 
+import { useRouter } from "next/navigation";
+
 import { useForm } from "react-hook-form";
 import { MdClose } from "react-icons/md";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEvent } from "@/@core/presentation/hooks";
 
-import { validationSchema } from "@/validation/eventSchema";
+import { validationSchema } from "@/validation/event-schema";
 
-import { Form, Input, Modal, Button, Wrapper } from "@/components";
+import { Form, Input, Modal, Button, Wrapper, Feedback } from "@/components";
+
+import { createEventAction } from "@/features/events/actions";
 
 import { FormData, IModalProps } from "./interfaces";
 
 export const AddEvent = ({ buttonText }: IModalProps) => {
-  const { fetcher } = useEvent();
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
     handleSubmit,
@@ -36,10 +40,19 @@ export const AddEvent = ({ buttonText }: IModalProps) => {
     },
   });
 
-  const handleFormSubmit = (data: FormData) => {
-    const response = fetcher.create(data);
+  const handleFormSubmit = async (data: FormData) => {
+    setSubmitError(null);
+
+    const result = await createEventAction(data);
+
+    if (result.error) {
+      setSubmitError(result.error);
+      return;
+    }
 
     reset();
+    closeModal();
+    router.refresh();
   };
 
   const closeModal = () => {
@@ -152,6 +165,8 @@ export const AddEvent = ({ buttonText }: IModalProps) => {
                 </Input.HelperText>
               </Input.Root>
             </Form.Wrapper>
+
+            {submitError && <Feedback>{submitError}</Feedback>}
 
             <Button loading={isSubmitting}>Novo Evento</Button>
           </Form.Root>

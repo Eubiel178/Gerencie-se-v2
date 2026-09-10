@@ -1,4 +1,4 @@
-import { InputRootProvider, SharedProps } from "@/providers/InputRootContext";
+import { InputRootProvider, SharedProps } from "@/providers/input-root-context";
 import { VariantProps, tv } from "tailwind-variants";
 
 const rootStyles = tv({

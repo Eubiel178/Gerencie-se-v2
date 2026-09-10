@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Cores e fonte vêm de src/design-system/tokens (importado antes deste
+ * arquivo em src/app/layout.tsx) — nada de cor solta aqui. `color-scheme`
+ * avisa o navegador para colorir scrollbar/inputs nativos de acordo com o
+ * tema atual.
+ */
+:root {
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+  }
+}
+
+html,
+body {
+  min-height: 100vh;
+  width: 100%;
+  font-family: var(--font-sans);
+  color: var(--color-text);
+
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  background-color: var(--color-background);
+}
+
+body::-webkit-scrollbar {
+  display: none;
+}
+
+input,
+select,
+textarea {
+  outline: none;
+  border: none;
+}
+
+.no-scroll {
+  overflow-y: hidden;
+}
+
+@layer utilities {
+}

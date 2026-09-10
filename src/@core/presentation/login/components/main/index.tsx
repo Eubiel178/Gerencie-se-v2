@@ -1,11 +1,7 @@
-import { tv } from "tailwind-variants";
-
-const styles = tv({
-  base: "flex-1 flex items-center justify-center bg-white",
-});
+import styles from "../../../auth-page.module.css";
 
 type MainProps = React.ComponentProps<"main">;
 
 export function Main({ children }: MainProps) {
-  return <main className={styles()}>{children}</main>;
+  return <main className={styles.main}>{children}</main>;
 }

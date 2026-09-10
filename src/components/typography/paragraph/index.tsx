@@ -5,10 +5,10 @@ const paragraphStyles = tv({
 
   variants: {
     color: {
-      primary: "text-gray-600",
-      secondary: "text-gray-700",
-      tertiary: "text-gray-800",
-      quarternary: "text-black",
+      primary: "text-[var(--color-text-muted)]",
+      secondary: "text-[var(--color-text-muted)]",
+      tertiary: "text-[var(--color-text)]",
+      quarternary: "text-[var(--color-text)]",
       highlight: "text-[#00b8ff]",
     },
 

@@ -1,19 +1,19 @@
 import { VariantProps, tv } from "tailwind-variants";
 
 const buttonStyles = tv({
-  base: "text-white p-2 border-hidden",
+  base: "text-[var(--color-on-info)] p-2 border-hidden",
 
   variants: {
     color: {
-      primary: "text-white",
-      secondary: "text-black",
-      danger: "text-red-500",
+      primary: "text-[var(--color-on-info)]",
+      secondary: "text-[var(--color-on-success)]",
+      danger: "text-[var(--color-danger)]",
     },
 
     background: {
       transparent: "bg-transparent",
-      primary: "bg-sky-600",
-      secondary: "bg-green-600",
+      primary: "bg-[var(--color-highlight)]",
+      secondary: "bg-[var(--color-success)]",
     },
 
     radius: {
@@ -25,7 +25,7 @@ const buttonStyles = tv({
     },
 
     disabled: {
-      true: "opacity-50 bg-gray-500 pointer-events-none",
+      true: "opacity-50 bg-[var(--color-text-muted)] pointer-events-none",
       false: "",
     },
 
@@ -61,16 +61,20 @@ export const Button = ({
   className,
   ...rest
 }: ButtonProps) => {
+  const isDisabled = loading || disabled;
+
   return (
     <button
       className={buttonStyles({
         color,
         background,
         radius,
-        disabled: loading,
+        disabled: isDisabled,
         size,
         className,
       })}
+      disabled={isDisabled}
+      aria-busy={loading}
       {...rest}
     >
       {loading ? "Carregando..." : children}

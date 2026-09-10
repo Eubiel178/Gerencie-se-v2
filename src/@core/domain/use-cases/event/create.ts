@@ -5,5 +5,7 @@ export type CreateEvent = {
 };
 
 export namespace CreateEvent {
-  export type Params = Omit<IEvent, "id">;
+  // "userId" nunca vem do chamador: é resolvido no servidor a partir da
+  // sessão autenticada dentro da implementação (ver `LocalEvent`).
+  export type Params = Omit<IEvent, "id" | "userId">;
 }

@@ -3,10 +3,15 @@
 import { useRouter, usePathname } from "next/navigation";
 import { useParamsUrl } from "@/@core/presentation/hooks/use-params-url";
 
-import { Input, Wrapper } from "@/components";
+import { Input } from "@/components";
 import { AddTask } from "../modal";
+import styles from "../../home-dashboard.module.css";
 
-export function TasksListHeader() {
+export function TasksListHeader({
+  isGoogleConnected,
+}: {
+  isGoogleConnected: boolean;
+}) {
   const router = useRouter();
   const pathaname = usePathname();
   const paramsUrl = useParamsUrl();
@@ -26,7 +31,12 @@ export function TasksListHeader() {
   ];
 
   return (
-    <Wrapper justify="between" align="stretch">
+    <header className={styles.toolbar}>
+      <div>
+        <h1 className={styles.heading}>Suas tarefas</h1>
+        <p className={styles.subheading}>Escolha a próxima ação e avance no seu ritmo.</p>
+      </div>
+      <div className={styles.filters}>
       <Input.Root>
         <Input.Wrapper>
           <Input.FieldSelect
@@ -36,8 +46,8 @@ export function TasksListHeader() {
           />
         </Input.Wrapper>
       </Input.Root>
-
-      <AddTask buttonText="Nova Tarefa" />
-    </Wrapper>
+      <AddTask buttonText="Nova Tarefa" isGoogleConnected={isGoogleConnected} />
+      </div>
+    </header>
   );
 }

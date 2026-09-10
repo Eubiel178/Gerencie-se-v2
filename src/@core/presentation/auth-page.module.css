@@ -1,0 +1,9 @@
+.authPage{display:grid;grid-template-columns:minmax(20rem,.9fr) minmax(24rem,1.1fr);width:100%;min-height:100vh;background:var(--color-background)}
+.visual{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:var(--space-7);background:var(--color-surface-elevated)}
+.visual::before{position:absolute;width:28rem;height:28rem;border:1px solid var(--color-border);border-radius:50%;content:""}.visual::after{position:absolute;width:18rem;height:18rem;border:1px solid var(--color-border);border-radius:50%;content:""}
+.image{position:relative;z-index:1;width:min(100%,33rem);height:auto;filter:drop-shadow(0 1.5rem 2rem var(--color-shadow))}
+.main{display:flex;align-items:center;justify-content:center;padding:clamp(var(--space-5),6vw,var(--space-8));color:var(--color-text);background:var(--color-surface)}
+.formCard{width:min(100%,27rem);display:flex;flex-direction:column;gap:var(--space-5)}
+.formCard h1{margin:0;color:var(--color-text);font-size:clamp(2rem,4vw,2.7rem);line-height:var(--line-height-tight);letter-spacing:-.055em}
+.formCard h1::after{display:block;width:2.5rem;height:.22rem;margin-top:var(--space-3);border-radius:var(--radius-full);background:var(--color-highlight);content:""}
+@media(max-width:760px){.authPage{display:block}.visual{display:none}.main{min-height:100vh;padding:var(--space-5)}.formCard{max-width:30rem}}

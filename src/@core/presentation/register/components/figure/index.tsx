@@ -1,41 +1,16 @@
-import { tv } from "tailwind-variants";
-
-const styles = tv(
-  {
-    slots: {
-      figure: "bg-sky-600",
-      image: "w-10/12",
-    },
-
-    variants: {
-      responsive: {
-        mobile: {
-          figure: "hidden",
-        },
-        medium: {
-          figure: "flex-1 flex items-center justify-center",
-        },
-      },
-    },
-  },
-
-  { responsiveVariants: ["md"] }
-);
+import Image from "next/image";
+import styles from "../../../auth-page.module.css";
 
 export function Figure() {
-  const tv = styles({
-    responsive: {
-      initial: "mobile",
-      md: "medium",
-    },
-  });
-
   return (
-    <figure className={tv.figure()}>
-      <img
-        className={tv.image()}
+    <figure className={styles.visual}>
+      <Image
+        className={styles.image}
         src="/images/register.png"
-        alt="Figura de usuário entrando"
+        alt="Figura de usuário se cadastrando"
+        width={2000}
+        height={2000}
+        priority
       />
     </figure>
   );

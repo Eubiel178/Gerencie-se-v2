@@ -1,7 +1,7 @@
 import { VariantProps, tv } from "tailwind-variants";
 
 const buttonStyles = tv({
-  base: "bg-stone-200 p-1.5",
+  base: "bg-[var(--color-surface-elevated)] text-[var(--color-text)] p-1.5",
 });
 
 type InputButtonProps = React.ComponentProps<"button"> &

@@ -17,8 +17,6 @@ export function useFormTags() {
   };
 
   function tagExists(tag: string) {
-    console.log(tag);
-
     if (tags.includes(tag)) {
       return tag;
     }

@@ -2,26 +2,34 @@
 
 import { useState } from "react";
 
+import { useRouter } from "next/navigation";
+
 import { MdClose } from "react-icons/md";
-import { useForm } from "react-hook-form";
-import { useFormTags, useTask } from "@/@core/presentation/hooks";
+import { useForm, useWatch } from "react-hook-form";
+import { useFormTags } from "@/@core/presentation/hooks/use-form-tags";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { validationSchema } from "@/validation/taskSchema";
+import { validationSchema } from "@/validation/task-schema";
 
-import { Form, Input, Modal, Button, Wrapper } from "@/components";
+import { Form, Input, Modal, Button, Wrapper, Feedback } from "@/components";
 
+import { createTaskAction } from "@/features/tasks/actions";
+
+import { SyncWithGoogle } from "../sync-with-google";
 import { FormData, IAddTaskProps } from "../interfaces";
 
-export function AddTask({ buttonText }: IAddTaskProps) {
+export function AddTask({ buttonText, isGoogleConnected }: IAddTaskProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const { fetcher } = useTask();
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const router = useRouter();
 
   const formTags = useFormTags();
 
   const {
     reset,
     register,
+    setValue,
+    control,
     formState: { errors, isSubmitting },
     handleSubmit,
   } = useForm<FormData>({
@@ -31,8 +39,12 @@ export function AddTask({ buttonText }: IAddTaskProps) {
       tag: "",
       title: "",
       description: "",
+      scheduledAt: "",
+      syncEnabled: false,
     },
   });
+
+  const syncEnabled = useWatch({ control, name: "syncEnabled" });
 
   function closeModal() {
     setIsOpen(false);
@@ -40,11 +52,17 @@ export function AddTask({ buttonText }: IAddTaskProps) {
   }
 
   async function handleOnSubmit(data: FormData) {
-    try {
-      const response = await fetcher.create(data);
+    setSubmitError(null);
 
-      closeModal();
-    } catch (error) {}
+    const result = await createTaskAction(data);
+
+    if (result.error) {
+      setSubmitError(result.error);
+      return;
+    }
+
+    closeModal();
+    router.refresh();
   }
 
   return (
@@ -111,7 +129,17 @@ export function AddTask({ buttonText }: IAddTaskProps) {
 
                 <Input.HelperText />
               </Input.Root>
+
+              <SyncWithGoogle
+                register={register}
+                setValue={setValue}
+                isChecked={!!syncEnabled}
+                isGoogleConnected={isGoogleConnected}
+                scheduledAtError={errors.scheduledAt?.message}
+              />
             </Form.Wrapper>
+
+            {submitError && <Feedback>{submitError}</Feedback>}
 
             <Button loading={isSubmitting}>Nova Tarefa</Button>
           </Form.Root>

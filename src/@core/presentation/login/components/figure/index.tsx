@@ -1,41 +1,17 @@
-import { tv } from "tailwind-variants";
-
-const styles = tv(
-  {
-    slots: {
-      figure: "bg-sky-600",
-      image: "w-10/12",
-    },
-
-    variants: {
-      responsive: {
-        mobile: {
-          figure: "hidden",
-        },
-        medium: {
-          figure: "flex-1 flex items-center justify-center",
-        },
-      },
-    },
-  },
-
-  { responsiveVariants: ["md"] }
-);
+import styles from "../../../auth-page.module.css";
 
 export function Figure() {
-  const tv = styles({
-    responsive: {
-      initial: "mobile",
-      md: "medium",
-    },
-  });
-
   return (
-    <figure className={tv.figure()}>
+    <figure className={styles.visual}>
+      {/* eslint-disable-next-line @next/next/no-img-element --
+          SVG vetorial de ~6KB: não passa pelo otimizador de imagens do
+          Next (que só ajuda com raster) e não sofre de LCP/banda. */}
       <img
-        className={tv.image()}
+        className={styles.image}
         src="/images/login.svg"
         alt="Figura de usuário entrando"
+        width={870}
+        height={520}
       />
     </figure>
   );

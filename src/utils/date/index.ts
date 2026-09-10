@@ -1,2 +1,2 @@
-export { dateFormatedToFront } from "./dateFormatedToFront";
-export { dateIsValid } from "./dateIsValid";
+export { dateFormatedToFront } from "./date-formated-to-front";
+export { dateIsValid } from "./date-is-valid";

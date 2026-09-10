@@ -1,29 +1,21 @@
-import { Wrapper } from "@/components";
-
 import { Calendar, EventList, EventListHeader } from "./components";
 
-import { useEvent } from "../hooks";
+import { getEventFetcher } from "../hooks/use-event";
+import styles from "../workspace.module.css";
 
 export async function Event() {
-  const { fetcher } = useEvent();
+  const { fetcher } = getEventFetcher();
 
-  const eventsList = await fetcher.loadAll({ id: "1" });
+  const eventsList = await fetcher.loadAll();
 
   return (
-    <>
-      <Calendar eventsList={eventsList} />
-
-      <Wrapper
-        direction="column"
-        gap="xlarge"
-        background="light"
-        shadow="small"
-        padding="small"
-      >
+    <section className={styles.page}>
+      <div><h1 className={styles.title}>Calendário</h1><p className={styles.subtitle}>Organize compromissos e proteja o seu tempo.</p></div>
+      <div className={`${styles.panel} ${styles.calendar}`}><Calendar eventsList={eventsList} /></div>
+      <div className={styles.panel}>
         <EventListHeader />
-
         <EventList eventsList={eventsList} />
-      </Wrapper>
-    </>
+      </div>
+    </section>
   );
 }

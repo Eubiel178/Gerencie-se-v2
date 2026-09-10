@@ -1,36 +1,66 @@
-import { tv } from "tailwind-variants";
+"use client";
 
-import { FaTrash } from "react-icons/fa";
+import { useState } from "react";
 
-import { useTask } from "@/@core/presentation/hooks/use-task";
+import { useRouter } from "next/navigation";
 
-import { Button, Paragraph, Wrapper, DefaultLink } from "@/components";
+import { FaTrash, FaSyncAlt } from "react-icons/fa";
+
+import { deleteTaskAction, retryTaskSyncAction } from "@/features/tasks/actions";
+
+import { Button, Feedback, Paragraph, Wrapper } from "@/components";
 import { EditTask } from "../../modal";
 
 import { ITask } from "@/@core/domain";
 
-const styles = tv({
-  slots: {
-    container: "bg-white flex flex-col flex-1 max-w-xs h-96 shadow",
-    title: "text-base font-medium",
-  },
-});
+import styles from "../../../home-dashboard.module.css";
+import { useTaskStore } from "@/features/tasks/task-store";
 
-export function Card(task: ITask) {
-  const tv = styles();
+interface CardProps {
+  task: ITask;
+  // Rótulo de exibição da tag (ex.: "#Estudo") — mantido separado de
+  // `task.tag` (que continua sendo o valor real, ex.: "studie") para que o
+  // formulário de edição sempre receba a tarefa original, nunca a versão
+  // formatada só para exibição.
+  tagLabel: string;
+  isGoogleConnected: boolean;
+}
 
-  const { fetcher } = useTask();
+export function Card({ task, tagLabel, isGoogleConnected }: CardProps) {
+  const router = useRouter();
+  const [isRemoving, setIsRemoving] = useState(false);
+  const [isRetrying, setIsRetrying] = useState(false);
+  const removeTask = useTaskStore((state) => state.removeTask);
 
-  function handleTaskRemove() {
-    fetcher.delete({ id: task.id });
+  async function handleTaskRemove() {
+    setIsRemoving(true);
+
+    try {
+      const result = await deleteTaskAction({ id: task.id });
+      if (!result.error) removeTask(task.id);
+      router.refresh();
+    } finally {
+      setIsRemoving(false);
+    }
+  }
+
+  async function handleRetrySync() {
+    setIsRetrying(true);
+
+    try {
+      await retryTaskSyncAction({ id: task.id });
+      router.refresh();
+    } finally {
+      setIsRetrying(false);
+    }
   }
 
   return (
-    <li key={task.id} className={tv.container()}>
+    <li key={task.id} className={styles.taskCard}>
       <Wrapper align="start" background="dark" className="h-32">
         <Wrapper flex="flex1" justify="between" align="center" padding="small">
           <Paragraph color="highlight" size="small">
-            {task.tag}
+            {tagLabel}
           </Paragraph>
 
           <Wrapper gap="medium">
@@ -38,12 +68,14 @@ export function Card(task: ITask) {
               color="danger"
               background="transparent"
               size="xlarge"
+              aria-label={`Excluir tarefa ${task.title}`}
+              loading={isRemoving}
               onClick={handleTaskRemove}
             >
               <FaTrash />
             </Button>
 
-            <EditTask taskBeingEdited={task} />
+            <EditTask taskBeingEdited={task} isGoogleConnected={isGoogleConnected} />
           </Wrapper>
         </Wrapper>
       </Wrapper>
@@ -55,14 +87,43 @@ export function Card(task: ITask) {
         padding="medium"
       >
         <Wrapper direction="column" gap="medium">
-          <h3 className={tv.title()}>{task.title}</h3>
+          <h3 className={styles.taskTitle}>{task.title}</h3>
 
           <Paragraph color="secondary" size="small">
             {task.description}
           </Paragraph>
         </Wrapper>
 
-        <DefaultLink href={"/home/" + task.id}>Acessar</DefaultLink>
+        {task.syncEnabled && (
+          <Wrapper direction="column" gap="small">
+            {task.syncStatus === "SYNCED" && (
+              <Feedback type="success" size="xSmall">
+                Sincronizado com o Google Agenda
+              </Feedback>
+            )}
+
+            {task.syncStatus === "ERROR" && (
+              <>
+                <Feedback type="error" size="xSmall">
+                  {task.syncError || "Falha ao sincronizar com o Google Agenda."}
+                </Feedback>
+
+                <Button
+                  type="button"
+                  size="xsmall"
+                  background="secondary"
+                  loading={isRetrying}
+                  onClick={handleRetrySync}
+                >
+                  <Wrapper align="center" gap="xsmall" background="transparent">
+                    <FaSyncAlt aria-hidden="true" />
+                    <span>Tentar novamente</span>
+                  </Wrapper>
+                </Button>
+              </>
+            )}
+          </Wrapper>
+        )}
       </Wrapper>
     </li>
   );

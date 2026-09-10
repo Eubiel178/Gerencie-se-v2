@@ -1,7 +1,13 @@
-import { GerenciSe, GerenciseTypes } from "@/@core/container";
+import "server-only";
 
-import { RemoteEvent } from "@/@core/data";
+import { LocalEvent } from "@/@core/data";
 
-export function useEvent() {
-  return { fetcher: GerenciSe.get<RemoteEvent>(GerenciseTypes.RemoteEvent) };
+// Não é um React Hook (apesar do nome do arquivo) — é só uma factory que
+// devolve a implementação local do repositório de eventos, segura de
+// chamar em qualquer função síncrona ou assíncrona. Só pode ser usado em
+// Server Components (ex.: `Event`) ou dentro de Server Actions — `LocalEvent`
+// depende de `@libsql/client`. Client Components chamam as Server Actions em
+// `src/features/events/actions.ts` em vez disso.
+export function getEventFetcher() {
+  return { fetcher: new LocalEvent() };
 }

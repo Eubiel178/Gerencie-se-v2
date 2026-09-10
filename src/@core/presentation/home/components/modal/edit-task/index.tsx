@@ -2,36 +2,50 @@
 
 import { useState } from "react";
 
+import { useRouter } from "next/navigation";
+
 import { FaEdit } from "react-icons/fa";
 import { MdClose } from "react-icons/md";
-import { useForm } from "react-hook-form";
-import { useFormTags, useTask } from "@/@core/presentation/hooks";
+import { useForm, useWatch } from "react-hook-form";
+import { useFormTags } from "@/@core/presentation/hooks/use-form-tags";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { validationSchema } from "@/validation/taskSchema";
+import { validationSchema } from "@/validation/task-schema";
 
-import { Form, Modal, Input, Button, Wrapper } from "@/components";
+import { Form, Modal, Input, Button, Wrapper, Feedback } from "@/components";
 
+import { updateTaskAction } from "@/features/tasks/actions";
+
+import { SyncWithGoogle } from "../sync-with-google";
 import { FormData, IEditTaskProps } from "../interfaces";
 
-export function EditTask({ taskBeingEdited }: IEditTaskProps) {
-  const { fetcher } = useTask();
+export function EditTask({ taskBeingEdited, isGoogleConnected }: IEditTaskProps) {
+  const router = useRouter();
 
   const [isOpen, setIsOpen] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const formTags = useFormTags();
 
   const {
     reset,
     register,
+    setValue,
+    control,
     formState: { errors, isSubmitting },
     handleSubmit,
   } = useForm<FormData>({
     mode: "onChange",
     resolver: zodResolver(validationSchema),
     defaultValues: {
-      ...taskBeingEdited,
+      tag: taskBeingEdited.tag,
+      title: taskBeingEdited.title,
+      description: taskBeingEdited.description,
+      scheduledAt: taskBeingEdited.scheduledAt || "",
+      syncEnabled: taskBeingEdited.syncEnabled,
     },
   });
+
+  const syncEnabled = useWatch({ control, name: "syncEnabled" });
 
   const closeModal = () => {
     setIsOpen(false);
@@ -39,10 +53,20 @@ export function EditTask({ taskBeingEdited }: IEditTaskProps) {
   };
 
   const handleFormSubmit = async (data: FormData) => {
-    try {
-      // const response = await fetcher.update(data);
-      // closeModal();
-    } catch (error) {}
+    setSubmitError(null);
+
+    const result = await updateTaskAction({
+      ...data,
+      id: taskBeingEdited.id,
+    });
+
+    if (result.error) {
+      setSubmitError(result.error);
+      return;
+    }
+
+    closeModal();
+    router.refresh();
   };
 
   return (
@@ -51,6 +75,7 @@ export function EditTask({ taskBeingEdited }: IEditTaskProps) {
         color="primary"
         background="transparent"
         size="xlarge"
+        aria-label={`Editar tarefa ${taskBeingEdited.title}`}
         onClick={function () {
           setIsOpen(true);
         }}
@@ -67,6 +92,7 @@ export function EditTask({ taskBeingEdited }: IEditTaskProps) {
               background="transparent"
               color="secondary"
               size="xlarge"
+              aria-label="Fechar"
               onClick={closeModal}
             >
               <MdClose />
@@ -111,7 +137,17 @@ export function EditTask({ taskBeingEdited }: IEditTaskProps) {
 
                 <Input.HelperText />
               </Input.Root>
+
+              <SyncWithGoogle
+                register={register}
+                setValue={setValue}
+                isChecked={!!syncEnabled}
+                isGoogleConnected={isGoogleConnected}
+                scheduledAtError={errors.scheduledAt?.message}
+              />
             </Form.Wrapper>
+
+            {submitError && <Feedback>{submitError}</Feedback>}
 
             <Button loading={isSubmitting}>Salvar Alterações</Button>
           </Form.Root>
