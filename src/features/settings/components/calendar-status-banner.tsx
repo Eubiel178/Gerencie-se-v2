@@ -8,7 +8,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   connect_failed:
     "Não foi possível concluir a conexão com o Google Agenda agora. Tente novamente em instantes.",
   not_configured:
-    "A integração com o Google Agenda ainda não foi configurada neste ambiente. Veja GOOGLE_SETUP.md.",
+    "A integração com o Google Agenda ainda não foi configurada neste ambiente. Veja docs/GOOGLE_SETUP.md.",
 };
 
 interface CalendarStatusBannerProps {

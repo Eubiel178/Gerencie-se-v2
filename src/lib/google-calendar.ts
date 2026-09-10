@@ -11,7 +11,7 @@ import { googleConnections } from "@/db/schema";
  * `src/lib/auth.config.ts`, que só pede `openid email profile`).
  *
  * Escopos confirmados na documentação oficial do Google (ver
- * GOOGLE_SETUP.md para as fontes): o menor conjunto que permite criar/ler/
+ * docs/GOOGLE_SETUP.md para as fontes): o menor conjunto que permite criar/ler/
  * editar/excluir eventos e listar os calendários do usuário pra ele
  * escolher qual sincronizar — nada de configurações, compartilhamento ou
  * outros dados do Google.
@@ -47,7 +47,7 @@ function getOAuth2Client() {
 
   if (!clientId || !clientSecret || !redirectUri) {
     throw new Error(
-      "Integração com o Google Agenda não configurada (faltam variáveis de ambiente GOOGLE_CALENDAR_*). Veja GOOGLE_SETUP.md."
+      "Integração com o Google Agenda não configurada (faltam variáveis de ambiente GOOGLE_CALENDAR_*). Veja docs/GOOGLE_SETUP.md."
     );
   }
 

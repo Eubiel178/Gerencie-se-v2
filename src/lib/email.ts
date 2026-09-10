@@ -31,7 +31,7 @@ export async function sendEmail(params: SendEmailParams): Promise<{ error: strin
   if (!resend) {
     return {
       error:
-        "Envio de e-mail não configurado (RESEND_API_KEY ausente). Veja EMAIL_SETUP.md.",
+        "Envio de e-mail não configurado (RESEND_API_KEY ausente). Veja docs/EMAIL_SETUP.md.",
     };
   }
 

@@ -39,3 +39,9 @@ npm install
 
 npm run dev
 ```
+
+## Documentação adicional
+
+Guias de configuração e deploy ficam em [`docs/`](./docs): integração com
+Google (`GOOGLE_SETUP.md`), e-mail transacional (`EMAIL_SETUP.md`) e
+publicação em produção (`DEPLOY.md`).

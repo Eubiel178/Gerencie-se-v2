@@ -29,7 +29,7 @@ export async function GET(request: Request) {
     authUrl = getGoogleCalendarAuthUrl(state);
   } catch {
     // Faltam as variáveis de ambiente GOOGLE_CALENDAR_* (Google Cloud não
-    // configurado ainda — ver GOOGLE_SETUP.md). Isso nunca deve derrubar a
+    // configurado ainda — ver docs/GOOGLE_SETUP.md). Isso nunca deve derrubar a
     // aplicação com um erro 500: o usuário só não consegue conectar a
     // Agenda agora, mas o resto do app continua funcionando normalmente.
     const settingsUrl = new URL("/home/settings", request.url);
