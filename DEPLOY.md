@@ -46,6 +46,8 @@ valores de produção:
 | `GOOGLE_CALENDAR_CLIENT_ID` | Pode reaproveitar o mesmo Client ID acima |
 | `GOOGLE_CALENDAR_CLIENT_SECRET` | Pode reaproveitar o mesmo Client Secret acima |
 | `GOOGLE_CALENDAR_REDIRECT_URI` | `https://SEU-DOMINIO.com/api/google-calendar/callback` (com o domínio real, não localhost) |
+| `RESEND_API_KEY` | Chave da conta Resend (ver `EMAIL_SETUP.md`) — opcional; sem ela, o convite de compartilhamento é criado normalmente, só o e-mail não é enviado |
+| `NEXT_PUBLIC_APP_URL` | `https://SEU-DOMINIO.com` (usado para montar o link dentro do e-mail de convite) |
 
 Na Vercel: **Project Settings → Environment Variables**. Em outro host,
 procure por "Environment Variables" ou "Config Vars" no painel.
@@ -127,6 +129,7 @@ o banco for para uso de verdade.
 1. Criar Postgres hospedado (Neon/Supabase/Railway) → copiar `DATABASE_URL`.
 2. Gerar novo `AUTH_SECRET` para produção.
 3. Adicionar URIs de redirecionamento de produção no Google Cloud Console.
-4. Configurar as 6 variáveis de ambiente no painel do host.
+4. Configurar as 8 variáveis de ambiente no painel do host (as 6 de
+   sempre + `RESEND_API_KEY`/`NEXT_PUBLIC_APP_URL`, ver `EMAIL_SETUP.md`).
 5. Rodar `npm run db:migrate` apontando para o banco de produção.
 6. Deploy (push para o GitHub + importar na Vercel, ou equivalente).
