@@ -78,6 +78,7 @@ export function AddRoutineItem({ buttonText, taskOptions }: IAddRoutineItemProps
             <Button
               color="secondary"
               size="xlarge"
+              aria-label="Fechar"
               onClick={closeModal}
               background="transparent"
             >

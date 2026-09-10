@@ -101,6 +101,7 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
           <Input.Field
             type="number"
             min={1}
+            aria-label="Meta diária de hidratação em mililitros"
             value={goalInput}
             onChange={(event) => setGoalInput(event.target.value)}
           />
@@ -139,6 +140,7 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
           type="number"
           min={1}
           placeholder="ml"
+          aria-label="Quantidade em mililitros"
           value={customAmount}
           onChange={(event) => setCustomAmount(event.target.value)}
         />

@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { Button, Input } from "@/components";
+import { Button, Feedback, Input } from "@/components";
 
 import { createHealthCheckupAction } from "@/features/health/actions";
 
@@ -16,6 +16,7 @@ export function AddForm() {
   const [category, setCategory] = useState("");
   const [intervalDays, setIntervalDays] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -25,14 +26,20 @@ export function AddForm() {
     if (!trimmedTitle || !trimmedCategory) return;
 
     setIsSubmitting(true);
+    setError(null);
 
     try {
-      await createHealthCheckupAction({
+      const result = await createHealthCheckupAction({
         title: trimmedTitle,
         category: trimmedCategory,
         intervalDays: intervalDays ? Number(intervalDays) : null,
         notes: null,
       });
+
+      if (result.error) {
+        setError(result.error);
+        return;
+      }
 
       setTitle("");
       setCategory("");
@@ -46,11 +53,13 @@ export function AddForm() {
   return (
     <form className={styles.addForm} onSubmit={handleSubmit}>
       <Input.Field
+        aria-label="Nome do cuidado"
         placeholder="Ex.: Exame de vista"
         value={title}
         onChange={(event) => setTitle(event.target.value)}
       />
       <Input.Field
+        aria-label="Categoria"
         placeholder="Categoria (ex.: Check-up)"
         value={category}
         onChange={(event) => setCategory(event.target.value)}
@@ -58,6 +67,7 @@ export function AddForm() {
       <Input.Field
         type="number"
         min={1}
+        aria-label="Intervalo em dias entre repetições"
         placeholder="A cada quantos dias (opcional)"
         value={intervalDays}
         onChange={(event) => setIntervalDays(event.target.value)}
@@ -65,6 +75,8 @@ export function AddForm() {
       <Button type="submit" loading={isSubmitting}>
         Adicionar
       </Button>
+
+      {error && <Feedback type="error">{error}</Feedback>}
     </form>
   );
 }

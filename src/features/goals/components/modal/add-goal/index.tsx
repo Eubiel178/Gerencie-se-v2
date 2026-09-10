@@ -80,6 +80,7 @@ export function AddGoal({ buttonText }: IAddGoalProps) {
             <Button
               color="secondary"
               size="xlarge"
+              aria-label="Fechar"
               onClick={closeModal}
               background="transparent"
             >

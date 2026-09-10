@@ -22,23 +22,35 @@ const STATUS_OPTIONS = [
 export function Item({ item }: { item: IReadingItem }) {
   const router = useRouter();
   const [isRemoving, setIsRemoving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleStatusChange(event: React.ChangeEvent<HTMLSelectElement>) {
     const status = event.target.value as ReadingStatus;
     const progressPercent = status === "finished" ? 100 : item.progressPercent;
 
-    await updateReadingItemAction({ id: item.id, status, progressPercent });
+    const result = await updateReadingItemAction({ id: item.id, status, progressPercent });
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
+
     router.refresh();
   }
 
   async function handleProgressChange(event: React.ChangeEvent<HTMLInputElement>) {
     const progressPercent = Number(event.target.value);
 
-    await updateReadingItemAction({
+    const result = await updateReadingItemAction({
       id: item.id,
       status: progressPercent >= 100 ? "finished" : "reading",
       progressPercent,
     });
+
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
+
     router.refresh();
   }
 
@@ -75,6 +87,7 @@ export function Item({ item }: { item: IReadingItem }) {
 
       <div className={styles.itemControls}>
         <Input.FieldSelect
+          aria-label={`Status de leitura de ${item.title}`}
           value={item.status}
           onChange={handleStatusChange}
           optionsArray={STATUS_OPTIONS}
@@ -90,12 +103,15 @@ export function Item({ item }: { item: IReadingItem }) {
               type="range"
               min={0}
               max={100}
+              aria-label={`Progresso de leitura de ${item.title}`}
               value={item.progressPercent}
               onChange={handleProgressChange}
             />
           </>
         )}
       </div>
+
+      {error && <Feedback type="error">{error}</Feedback>}
     </li>
   );
 }

@@ -140,11 +140,18 @@ export function Card({ goal }: CardProps) {
 
       <form className={styles.addStepForm} onSubmit={handleAddStep}>
         <Input.Field
+          aria-label="Título da nova etapa"
           placeholder="Nova etapa..."
           value={newStepTitle}
           onChange={(event) => setNewStepTitle(event.target.value)}
         />
-        <Button type="submit" background="secondary" size="small" loading={isAddingStep}>
+        <Button
+          type="submit"
+          background="secondary"
+          size="small"
+          aria-label="Adicionar etapa"
+          loading={isAddingStep}
+        >
           <FaPlus aria-hidden="true" />
         </Button>
       </form>

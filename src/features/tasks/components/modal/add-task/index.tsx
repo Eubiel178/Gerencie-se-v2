@@ -85,6 +85,7 @@ export function AddTask({ buttonText, isGoogleConnected }: IAddTaskProps) {
             <Button
               color="secondary"
               size="xlarge"
+              aria-label="Fechar"
               onClick={closeModal}
               background="transparent"
             >

@@ -80,6 +80,7 @@ export const AddEvent = ({ buttonText }: IModalProps) => {
               background="transparent"
               color="secondary"
               size="xlarge"
+              aria-label="Fechar"
               onClick={closeModal}
             >
               <MdClose />

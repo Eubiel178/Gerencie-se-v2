@@ -19,3 +19,4 @@
 .itemDate{color:var(--color-text-muted);font-size:var(--font-size-xs)}
 .itemMain{color:var(--color-text);font-size:var(--font-size-sm)}
 .sourceTag{color:var(--color-text-muted);font-size:var(--font-size-xs)}
+@media(max-width:420px){.totals,.liveStats{grid-template-columns:1fr;text-align:center}.fieldsRow{flex-direction:column}}

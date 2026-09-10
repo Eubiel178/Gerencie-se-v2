@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { Button, Input } from "@/components";
+import { Button, Feedback, Input } from "@/components";
 
 import { createReadingItemAction } from "@/features/reading/actions";
 
@@ -15,6 +15,7 @@ export function AddForm() {
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -23,9 +24,19 @@ export function AddForm() {
     if (!trimmedTitle) return;
 
     setIsSubmitting(true);
+    setError(null);
 
     try {
-      await createReadingItemAction({ title: trimmedTitle, author: author.trim() || null });
+      const result = await createReadingItemAction({
+        title: trimmedTitle,
+        author: author.trim() || null,
+      });
+
+      if (result.error) {
+        setError(result.error);
+        return;
+      }
+
       setTitle("");
       setAuthor("");
       router.refresh();
@@ -37,11 +48,13 @@ export function AddForm() {
   return (
     <form className={styles.addForm} onSubmit={handleSubmit}>
       <Input.Field
+        aria-label="Título do livro"
         placeholder="Título do livro"
         value={title}
         onChange={(event) => setTitle(event.target.value)}
       />
       <Input.Field
+        aria-label="Autor"
         placeholder="Autor (opcional)"
         value={author}
         onChange={(event) => setAuthor(event.target.value)}
@@ -49,6 +62,8 @@ export function AddForm() {
       <Button type="submit" loading={isSubmitting}>
         Adicionar
       </Button>
+
+      {error && <Feedback type="error">{error}</Feedback>}
     </form>
   );
 }

@@ -87,6 +87,7 @@ export function AddHabit({ buttonText }: IAddHabitProps) {
             <Button
               color="secondary"
               size="xlarge"
+              aria-label="Fechar"
               onClick={closeModal}
               background="transparent"
             >
