@@ -1,4 +1,5 @@
 import { Header } from "@/components";
+import { Assistant } from "@/features/assistant";
 import styles from "./home-layout.module.css";
 
 // As tarefas e eventos são dados dinâmicos e específicos de cada usuário —
@@ -14,6 +15,8 @@ const HomeLayout = ({ children }: { children: React.ReactNode }) => {
       <Header />
 
       <main className={styles.main}>{children}</main>
+
+      <Assistant />
     </div>
   );
 };

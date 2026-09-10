@@ -5,6 +5,9 @@ import { getGoogleConnection, listUserCalendars } from "@/lib/google-calendar";
 import { Paragraph, Wrapper } from "@/components";
 import { ThemeToggle } from "@/design-system/theme/theme-toggle";
 
+import { PreferencesPanel } from "@/features/assistant/components/preferences-panel";
+import { getAssistantPreferencesFetcher } from "@/features/assistant/data/get-assistant-preferences-fetcher";
+
 import { CalendarStatusBanner } from "./components/calendar-status-banner";
 import { ConnectionCard } from "./components/connection-card";
 import styles from "@/styles/workspace.module.css";
@@ -21,9 +24,10 @@ export async function Settings({ searchParams }: SettingsProps) {
   // `account` do Auth.js); "Integrações" é sobre o Google Agenda estar
   // conectado ou não (tabela própria `google_connection`). Uma nunca
   // implica a outra — por isso ficam em blocos visualmente distintos.
-  const [isGoogleLogin, connection] = await Promise.all([
+  const [isGoogleLogin, connection, assistantPreferences] = await Promise.all([
     isGoogleAccountLinked(userId),
     getGoogleConnection(userId),
+    getAssistantPreferencesFetcher().getPreferences(),
   ]);
   const calendars = connection ? await listUserCalendars(userId) : [];
 
@@ -50,6 +54,18 @@ export async function Settings({ searchParams }: SettingsProps) {
         </Wrapper>
 
         <ThemeToggle />
+      </section>
+
+      <section className={styles.settingPanel}>
+        <Wrapper direction="column" gap="small">
+          <h2>Assistente</h2>
+          <Paragraph size="small" color="secondary">
+            O JARVIS aparece discretamente na tela com sugestões baseadas
+            no que você tem pendente.
+          </Paragraph>
+        </Wrapper>
+
+        <PreferencesPanel preferences={assistantPreferences} />
       </section>
 
       <section className={styles.settingPanel}>
