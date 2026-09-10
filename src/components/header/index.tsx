@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { FaHome, FaSignOutAlt, FaFire, FaBullseye, FaTint, FaRunning, FaBook, FaHeartbeat, FaCalendarCheck } from "react-icons/fa";
+import { FaHome, FaSignOutAlt, FaFire, FaBullseye, FaTint, FaRunning, FaBook, FaHeartbeat, FaCalendarCheck, FaListUl } from "react-icons/fa";
 import { MdEvent, MdSettings, MdTimer } from "react-icons/md";
 import { MdOutlineSchedule } from "react-icons/md";
 
@@ -11,6 +11,7 @@ import styles from "@/app/home/home-layout.module.css";
 
 const links = [
   { href: "/home", label: "Visão geral", icon: FaHome },
+  { href: "/home/tasks", label: "Tarefas", icon: FaListUl },
   { href: "/home/routine", label: "Rotina", icon: MdOutlineSchedule },
   { href: "/home/habits", label: "Hábitos", icon: FaFire },
   { href: "/home/goals", label: "Objetivos", icon: FaBullseye },

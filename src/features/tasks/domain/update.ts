@@ -18,5 +18,7 @@ export namespace UpdateTask {
     | "syncError"
     | "googleEventId"
     | "googleEventUpdatedAt"
+    | "completed"
+    | "completedAt"
   >;
 }

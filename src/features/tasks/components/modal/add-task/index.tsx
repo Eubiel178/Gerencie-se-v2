@@ -16,7 +16,7 @@ import { Form, Input, Modal, Button, Wrapper, Feedback } from "@/components";
 import { createTaskAction } from "@/features/tasks/actions";
 
 import { SyncWithGoogle } from "../sync-with-google";
-import { FormData, IAddTaskProps } from "../interfaces";
+import { FormData, IAddTaskProps, PRIORITY_OPTIONS } from "../interfaces";
 
 export function AddTask({ buttonText, isGoogleConnected }: IAddTaskProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -39,6 +39,7 @@ export function AddTask({ buttonText, isGoogleConnected }: IAddTaskProps) {
       tag: "",
       title: "",
       description: "",
+      priority: "media",
       scheduledAt: "",
       syncEnabled: false,
     },
@@ -123,6 +124,19 @@ export function AddTask({ buttonText, isGoogleConnected }: IAddTaskProps) {
                     {...register("description")}
                     rows={5}
                     placeholder="Descrição da Tarefa"
+                  />
+                </Input.Wrapper>
+
+                <Input.HelperText />
+              </Input.Root>
+
+              <Input.Root sharedProps={{ error: errors.priority?.message }}>
+                <Input.Label>Prioridade</Input.Label>
+
+                <Input.Wrapper>
+                  <Input.FieldSelect
+                    {...register("priority")}
+                    optionsArray={PRIORITY_OPTIONS}
                   />
                 </Input.Wrapper>
 

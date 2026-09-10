@@ -19,3 +19,17 @@ export interface IAddTaskProps {
   buttonText: string;
   isGoogleConnected: boolean;
 }
+
+export const PRIORITY_OPTIONS = [
+  { label: "Baixa", value: "baixa" },
+  { label: "Média", value: "media" },
+  { label: "Alta", value: "alta" },
+  { label: "Crítica", value: "critica" },
+];
+
+export const PRIORITY_LABELS: Record<string, string> = {
+  baixa: "Baixa",
+  media: "Média",
+  alta: "Alta",
+  critica: "Crítica",
+};

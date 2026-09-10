@@ -31,7 +31,8 @@ export class LocalTask
     domain.CreateTask,
     domain.LoadAllTasks,
     domain.UpdateTask,
-    domain.DeleteTask
+    domain.DeleteTask,
+    domain.ToggleTaskComplete
 {
   async create(params: domain.CreateTask.Params) {
     const userId = await requireUserId();
@@ -43,6 +44,7 @@ export class LocalTask
       tag: params.tag,
       title: params.title,
       description: params.description,
+      priority: params.priority,
       scheduledAt: params.scheduledAt || null,
       syncEnabled: params.syncEnabled,
     });
@@ -60,7 +62,7 @@ export class LocalTask
 
   async update(params: domain.UpdateTask.Params) {
     const userId = await requireUserId();
-    const { id, tag, title, description, scheduledAt, syncEnabled } = params;
+    const { id, tag, title, description, priority, scheduledAt, syncEnabled } = params;
 
     await db
       .update(tasks)
@@ -68,11 +70,42 @@ export class LocalTask
         tag,
         title,
         description,
+        priority,
         scheduledAt: scheduledAt || null,
         syncEnabled,
         updatedAt: new Date(),
       })
       .where(and(eq(tasks.id, id), eq(tasks.userId, userId)));
+  }
+
+  /** Alterna conclusão — não passa pelo formulário de edição geral (mesmo
+   * raciocínio de `updateSyncState` abaixo: estado gerido por uma ação
+   * dedicada). Lê o estado atual e inverte, em vez de aceitar um valor
+   * explícito do chamador — evita o formulário de edição sobrescrever
+   * silenciosamente uma conclusão feita por outra aba/dispositivo. */
+  async toggleComplete(
+    params: domain.ToggleTaskComplete.Params
+  ): Promise<domain.ToggleTaskComplete.Result> {
+    const userId = await requireUserId();
+
+    const [row] = await db
+      .select({ completed: tasks.completed })
+      .from(tasks)
+      .where(and(eq(tasks.id, params.id), eq(tasks.userId, userId)))
+      .limit(1);
+
+    if (!row) {
+      throw new Error("Tarefa não encontrada.");
+    }
+
+    const completed = !row.completed;
+
+    await db
+      .update(tasks)
+      .set({ completed, completedAt: completed ? new Date() : null })
+      .where(and(eq(tasks.id, params.id), eq(tasks.userId, userId)));
+
+    return { completed };
   }
 
   async delete(params: domain.DeleteTask.Params) {
@@ -171,6 +204,9 @@ function mapRowToTask(row: typeof tasks.$inferSelect): domain.ITask {
     tag: row.tag,
     title: row.title,
     description: row.description,
+    priority: row.priority as domain.TaskPriority,
+    completed: row.completed,
+    completedAt: row.completedAt,
     scheduledAt: row.scheduledAt ?? undefined,
     syncEnabled: row.syncEnabled,
     syncStatus: row.syncStatus as TaskSyncStatus,

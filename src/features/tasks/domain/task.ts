@@ -1,4 +1,5 @@
 export type TaskSyncStatus = "NONE" | "PENDING" | "SYNCED" | "ERROR";
+export type TaskPriority = "baixa" | "media" | "alta" | "critica";
 
 export interface ITask {
   id: string;
@@ -9,6 +10,13 @@ export interface ITask {
   tag: string;
   title: string;
   description: string;
+  priority: TaskPriority;
+
+  // Conclusão — alternada por `ToggleTaskComplete`, nunca pelo formulário
+  // de edição geral (mesmo raciocínio de `syncStatus` abaixo: um estado
+  // gerido por uma ação dedicada, não por um campo de formulário comum).
+  completed: boolean;
+  completedAt?: Date | null;
 
   // Data/hora agendada (formato de `<input type="datetime-local">`, ex.
   // "2026-10-01T14:30"). Opcional para uma tarefa comum; obrigatória no

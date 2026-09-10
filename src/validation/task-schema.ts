@@ -17,6 +17,7 @@ export const validationSchema = z
     description: z
       .string()
       .max(165, "A descricão deve ter no máximo 165 caracteres"),
+    priority: z.enum(["baixa", "media", "alta", "critica"]),
     scheduledAt: z.string().optional(),
     // Sincronizar com o Google Agenda é opcional — mas se marcado, o
     // evento no Google precisa de uma data/hora, então passamos a exigir

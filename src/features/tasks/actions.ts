@@ -41,6 +41,9 @@ export async function createTaskAction(
         tag: data.tag,
         title: data.title,
         description: data.description,
+        priority: data.priority,
+        completed: false,
+        completedAt: null,
         scheduledAt: data.scheduledAt,
         syncEnabled: data.syncEnabled,
         syncStatus: "NONE",
@@ -51,6 +54,7 @@ export async function createTaskAction(
     );
 
     revalidatePath("/home");
+    revalidatePath("/home/tasks");
 
     return { error: null };
   } catch {
@@ -75,6 +79,9 @@ export async function updateTaskAction(
         tag: data.tag,
         title: data.title,
         description: data.description,
+        priority: data.priority,
+        completed: previousTask?.completed ?? false,
+        completedAt: previousTask?.completedAt ?? null,
         scheduledAt: data.scheduledAt,
         syncEnabled: data.syncEnabled,
         syncStatus: previousTask?.syncStatus ?? "NONE",
@@ -85,6 +92,7 @@ export async function updateTaskAction(
     );
 
     revalidatePath("/home");
+    revalidatePath("/home/tasks");
 
     return { error: null };
   } catch {
@@ -116,10 +124,27 @@ export async function deleteTaskAction(
     }
 
     revalidatePath("/home");
+    revalidatePath("/home/tasks");
 
     return { error: null };
   } catch {
     return { error: "Não foi possível excluir a tarefa. Tente novamente." };
+  }
+}
+
+export async function toggleTaskCompleteAction(
+  params: domain.ToggleTaskComplete.Params
+): Promise<ActionResult & { completed?: boolean }> {
+  try {
+    const repo = getTaskFetcher();
+    const result = await repo.toggleComplete(params);
+
+    revalidatePath("/home");
+    revalidatePath("/home/tasks");
+
+    return { error: null, completed: result.completed };
+  } catch {
+    return { error: "Não foi possível atualizar a tarefa. Tente novamente." };
   }
 }
 
@@ -139,6 +164,7 @@ export async function retryTaskSyncAction(
 
     await syncTaskToGoogle(task, repo);
     revalidatePath("/home");
+    revalidatePath("/home/tasks");
 
     return { error: null };
   } catch {

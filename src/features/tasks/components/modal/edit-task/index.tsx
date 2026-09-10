@@ -17,7 +17,7 @@ import { Form, Modal, Input, Button, Wrapper, Feedback } from "@/components";
 import { updateTaskAction } from "@/features/tasks/actions";
 
 import { SyncWithGoogle } from "../sync-with-google";
-import { FormData, IEditTaskProps } from "../interfaces";
+import { FormData, IEditTaskProps, PRIORITY_OPTIONS } from "../interfaces";
 
 export function EditTask({ taskBeingEdited, isGoogleConnected }: IEditTaskProps) {
   const router = useRouter();
@@ -40,6 +40,7 @@ export function EditTask({ taskBeingEdited, isGoogleConnected }: IEditTaskProps)
       tag: taskBeingEdited.tag,
       title: taskBeingEdited.title,
       description: taskBeingEdited.description,
+      priority: taskBeingEdited.priority,
       scheduledAt: taskBeingEdited.scheduledAt || "",
       syncEnabled: taskBeingEdited.syncEnabled,
     },
@@ -131,6 +132,19 @@ export function EditTask({ taskBeingEdited, isGoogleConnected }: IEditTaskProps)
                     {...register("description")}
                     rows={5}
                     placeholder="Descrição da Tarefa"
+                  />
+                </Input.Wrapper>
+
+                <Input.HelperText />
+              </Input.Root>
+
+              <Input.Root sharedProps={{ error: errors.priority?.message }}>
+                <Input.Label>Prioridade</Input.Label>
+
+                <Input.Wrapper>
+                  <Input.FieldSelect
+                    {...register("priority")}
+                    optionsArray={PRIORITY_OPTIONS}
                   />
                 </Input.Wrapper>
 
