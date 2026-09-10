@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { FaHome, FaSignOutAlt, FaFire, FaBullseye, FaTint, FaRunning, FaBook, FaHeartbeat, FaCalendarCheck, FaListUl } from "react-icons/fa";
+import { FaHome, FaSignOutAlt, FaFire, FaBullseye, FaTint, FaRunning, FaBook, FaHeartbeat, FaCalendarCheck, FaListUl, FaChartBar } from "react-icons/fa";
 import { MdEvent, MdSettings, MdTimer } from "react-icons/md";
 import { MdOutlineSchedule } from "react-icons/md";
 
@@ -22,6 +22,7 @@ const links = [
   { href: "/home/health", label: "Saúde", icon: FaHeartbeat },
   { href: "/home/menstrual-cycle", label: "Ciclo", icon: FaCalendarCheck },
   { href: "/home/event", label: "Calendário", icon: MdEvent },
+  { href: "/home/stats", label: "Estatísticas", icon: FaChartBar },
   { href: "/home/settings", label: "Configurações", icon: MdSettings },
 ];
 
