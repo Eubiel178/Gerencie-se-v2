@@ -1,8 +1,8 @@
-import { Icon, IconName } from "../icons";
+import { Icon, IconName, IconProps } from "../icons";
 
 import styles from "./styles.module.css";
 
-type ButtonIconProps = Omit<React.ComponentProps<typeof Icon>, "name"> & {
+type ButtonIconProps = Omit<IconProps, "name"> & {
   icon: IconName;
 };
 
