@@ -1,16 +1,17 @@
-import Image from "next/image";
 import styles from "../../../auth-page.module.css";
 
 export function Figure() {
   return (
     <figure className={styles.visual}>
-      <Image
+      {/* eslint-disable-next-line @next/next/no-img-element --
+          SVG vetorial de ~2KB: não passa pelo otimizador de imagens do
+          Next (que só ajuda com raster) e não sofre de LCP/banda. */}
+      <img
         className={styles.image}
-        src="/images/register.png"
-        alt="Figura de usuário se cadastrando"
-        width={2000}
-        height={2000}
-        priority
+        src="/images/auth-visual.svg"
+        alt=""
+        width={520}
+        height={480}
       />
     </figure>
   );

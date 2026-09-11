@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 480">
+  <defs>
+    <linearGradient id="badgeGradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#38bdf8" />
+      <stop offset="1" stop-color="#0369a1" />
+    </linearGradient>
+  </defs>
+
+  <circle cx="120" cy="90" r="8" fill="#38bdf8" opacity="0.35" />
+  <circle cx="460" cy="130" r="12" fill="#38bdf8" opacity="0.25" />
+  <circle cx="440" cy="380" r="7" fill="#38bdf8" opacity="0.35" />
+  <circle cx="70" cy="360" r="10" fill="#38bdf8" opacity="0.25" />
+
+  <rect x="70" y="60" width="380" height="360" rx="28" fill="#1f2233" />
+  <rect x="70" y="60" width="380" height="360" rx="28" fill="none" stroke="#2a2d45" stroke-width="1.5" />
+
+  <circle cx="130" cy="122" r="18" fill="#2a2d45" />
+  <rect x="162" y="106" width="120" height="10" rx="5" fill="#3a3d58" />
+  <rect x="162" y="124" width="80" height="8" rx="4" fill="#2a2d45" />
+
+  <line x1="102" y1="168" x2="418" y2="168" stroke="#2a2d45" stroke-width="1.5" />
+
+  <rect x="102" y="196" width="316" height="56" rx="14" fill="#23253a" />
+  <circle cx="132" cy="224" r="13" fill="#38bdf8" />
+  <path d="M126 224 l4.5 5 9-10" fill="none" stroke="#051d2c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+  <rect x="158" y="215" width="150" height="10" rx="5" fill="#4a4d68" />
+  <rect x="158" y="232" width="90" height="7" rx="3.5" fill="#33364d" />
+
+  <rect x="102" y="264" width="316" height="56" rx="14" fill="#23253a" />
+  <circle cx="132" cy="292" r="13" fill="#38bdf8" />
+  <path d="M126 292 l4.5 5 9-10" fill="none" stroke="#051d2c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+  <rect x="158" y="283" width="170" height="10" rx="5" fill="#4a4d68" />
+  <rect x="158" y="300" width="110" height="7" rx="3.5" fill="#33364d" />
+
+  <rect x="102" y="332" width="316" height="56" rx="14" fill="#181a29" />
+  <circle cx="132" cy="360" r="13" fill="none" stroke="#4a4d68" stroke-width="2" />
+  <rect x="158" y="351" width="130" height="10" rx="5" fill="#33364d" />
+  <rect x="158" y="368" width="70" height="7" rx="3.5" fill="#282a3d" />
+
+  <g transform="translate(388, 30)">
+    <circle cx="34" cy="34" r="34" fill="url(#badgeGradient)" />
+    <circle cx="34" cy="34" r="34" fill="none" stroke="#0c4a6e" stroke-width="1.5" />
+    <path
+      d="M20 35 L29 44 L48 24"
+      fill="none"
+      stroke="#f5f7fa"
+      stroke-width="5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </g>
+</svg>
