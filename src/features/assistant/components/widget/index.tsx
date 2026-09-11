@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useSyncExternalStore } from "react";
+import { useRouter } from "next/navigation";
 import { Icon } from "@/components/icon";
 
-import { IAssistantMessage, IAssistantPreferences } from "@/features/assistant/domain";
-import { PreferencesPanel } from "@/features/assistant/components/preferences-panel";
+import { IAssistantMessage } from "@/features/assistant/domain";
 
 import styles from "./widget.module.css";
 
@@ -27,7 +27,6 @@ const MOOD_EMOJI: Record<Mood, string> = {
 interface WidgetProps {
   initialMessage: IAssistantMessage | null;
   reducedPresence: boolean;
-  preferences: IAssistantPreferences;
 }
 
 const DISMISSED_KEY = "assistant-dismissed-message";
@@ -66,10 +65,10 @@ function getDismissedServerSnapshot(): string | null {
  * abertura/fechamento manual pelo avatar, que sempre pode sobrepor essa
  * regra (mesmo com presença reduzida ou mensagem já dispensada).
  */
-export function Widget({ initialMessage, reducedPresence, preferences }: WidgetProps) {
+export function Widget({ initialMessage, reducedPresence }: WidgetProps) {
+  const router = useRouter();
   const [message, setMessage] = useState(initialMessage);
   const [manuallyToggled, setManuallyToggled] = useState<boolean | null>(null);
-  const [isPreferencesOpen, setIsPreferencesOpen] = useState(false);
 
   const dismissedText = useSyncExternalStore(
     subscribeNoop,
@@ -82,15 +81,15 @@ export function Widget({ initialMessage, reducedPresence, preferences }: WidgetP
   const mood = moodFor(message);
 
   // O avatar nunca pode virar um botão morto: sem mensagem no momento, o
-  // clique abre as preferências em vez de não fazer nada (antes disso, sem
-  // mensagem == impossível interagir com o JARVIS de jeito nenhum).
+  // clique leva pra seção do assistente em Configurações (onde ficam as
+  // preferências de verdade) em vez de não fazer nada.
   function handleAvatarClick() {
     if (message) {
       setManuallyToggled(!isOpen);
       return;
     }
 
-    setIsPreferencesOpen((current) => !current);
+    router.push("/home/settings#assistente");
   }
 
   function handleDismiss() {
@@ -124,20 +123,6 @@ export function Widget({ initialMessage, reducedPresence, preferences }: WidgetP
         </div>
       )}
 
-      {isPreferencesOpen && !message && (
-        <div className={styles.bubble} role="dialog" aria-label="Preferências do assistente">
-          <button
-            type="button"
-            className={styles.dismiss}
-            aria-label="Fechar preferências"
-            onClick={() => setIsPreferencesOpen(false)}
-          >
-            <Icon name="MdClose" aria-hidden="true" />
-          </button>
-          <PreferencesPanel preferences={preferences} />
-        </div>
-      )}
-
       <button
         type="button"
         className={styles.avatar}
@@ -147,9 +132,9 @@ export function Widget({ initialMessage, reducedPresence, preferences }: WidgetP
             ? isOpen
               ? "Fechar mensagem do JARVIS"
               : "Abrir mensagem do JARVIS"
-            : "Preferências do JARVIS"
+            : "Ir para as preferências do assistente"
         }
-        aria-expanded={message ? isOpen : isPreferencesOpen}
+        aria-expanded={message ? isOpen : undefined}
         onClick={handleAvatarClick}
       >
         <span aria-hidden="true">{MOOD_EMOJI[mood]}</span>

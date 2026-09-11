@@ -62,7 +62,7 @@ export async function Settings({ searchParams }: SettingsProps) {
         <ThemeToggle />
       </section>
 
-      <section className={styles.settingPanel}>
+      <section id="assistente" className={styles.settingPanel}>
         <div className={styles.panelHeader}>
           <h2>Assistente</h2>
           <p className={styles.panelText}>
