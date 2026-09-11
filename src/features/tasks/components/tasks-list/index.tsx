@@ -11,6 +11,7 @@ import { ITask } from "@/features/tasks/domain";
 import { LoadAcceptedConnections } from "@/features/connections/domain";
 import styles from "../../home-dashboard.module.css";
 import { useTaskStore } from "@/features/tasks/task-store";
+import { filterTasks } from "@/features/tasks/filter-tasks";
 
 interface TasksListProps {
   tasksList: ITask[];
@@ -23,16 +24,17 @@ export function TasksList({ tasksList, isGoogleConnected, connections }: TasksLi
   const formTags = useFormTags();
   const tasks = useTaskStore((state) => state.tasks);
   const setTasks = useTaskStore((state) => state.setTasks);
+  const searchQuery = useTaskStore((state) => state.searchQuery);
+  const statusFilter = useTaskStore((state) => state.statusFilter);
+  const priorityFilter = useTaskStore((state) => state.priorityFilter);
 
   useEffect(() => {
     setTasks(tasksList);
   }, [setTasks, tasksList]);
 
   const tag = formTags.tagExists(paramsUrl.get("tag") || "");
-  const tasksFiltred =
-    tag !== "all"
-      ? tasks.filter((task) => task.tag === tag)
-      : [...tasks];
+  const tasksByTag = tag !== "all" ? tasks.filter((task) => task.tag === tag) : tasks;
+  const tasksFiltred = filterTasks(tasksByTag, { searchQuery, statusFilter, priorityFilter });
   const thereAreTasks = tasksFiltred.length > 0;
 
   return (
