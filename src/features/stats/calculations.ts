@@ -15,8 +15,13 @@ export interface TaskStats {
 
 /** Cada número aqui responde uma pergunta específica (nunca decorativo,
  * ver item 41 do briefing): quanto foi concluído na semana, quanto está
- * atrasado agora, e a taxa de conclusão histórica geral. */
-export function calculateTaskStats(tasks: ITask[], now: Dayjs = dayjs()): TaskStats {
+ * atrasado agora, e a taxa de conclusão histórica geral. Tipo estrutural
+ * mínimo (não `ITask[]` inteiro) pra também funcionar com a consulta
+ * direta do resumo semanal por e-mail, que só busca essas 3 colunas. */
+export function calculateTaskStats(
+  tasks: Pick<ITask, "completed" | "completedAt" | "scheduledAt">[],
+  now: Dayjs = dayjs()
+): TaskStats {
   const weekStart = now.subtract(STATS_WINDOW_DAYS, "day");
 
   const completedThisWeek = tasks.filter(
@@ -36,7 +41,10 @@ export function calculateTaskStats(tasks: ITask[], now: Dayjs = dayjs()): TaskSt
 /** Soma só sessões CONCLUÍDAS (nunca canceladas) dos últimos 7 dias,
  * arredondada para 1 casa decimal — horas, não segundos, porque é o que
  * faz sentido comunicar numa tela de estatísticas. */
-export function calculateWeeklyFocusHours(sessions: IFocusSession[], now: Dayjs = dayjs()): number {
+export function calculateWeeklyFocusHours(
+  sessions: Pick<IFocusSession, "status" | "startedAt" | "actualDurationSeconds">[],
+  now: Dayjs = dayjs()
+): number {
   const weekStart = now.subtract(STATS_WINDOW_DAYS, "day");
 
   const totalSeconds = sessions
@@ -152,7 +160,7 @@ export interface WeeklyRunningStats {
  * `IRunningTotals` (que é all-time) porque a tela de estatísticas é
  * sempre "últimos 7 dias", e misturar as duas janelas confundiria. */
 export function calculateWeeklyRunningStats(
-  sessions: IRunningSession[],
+  sessions: Pick<IRunningSession, "startedAt" | "distanceMeters">[],
   now: Dayjs = dayjs()
 ): WeeklyRunningStats {
   const weekStart = now.subtract(STATS_WINDOW_DAYS, "day");

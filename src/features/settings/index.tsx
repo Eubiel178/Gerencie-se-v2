@@ -1,3 +1,4 @@
+import { auth } from "@/lib/auth";
 import { requireUserId } from "@/lib/require-user-id";
 import { isGoogleAccountLinked } from "@/lib/auth";
 import { getGoogleConnection, listUserCalendars } from "@/lib/google-calendar";
@@ -11,6 +12,8 @@ import { PeoplePanel } from "@/features/connections/components/people-panel";
 import { getConnectionFetcher } from "@/features/connections/data/get-connection-fetcher";
 import { MascotSettings } from "@/features/focus/components/mascot-settings";
 import { getMascotFetcher } from "@/features/focus/data/get-focus-fetcher";
+import { WeeklySummaryPanel } from "@/features/weekly-summary/components/weekly-summary-panel";
+import { getWeeklySummaryEnabled } from "@/features/weekly-summary/get-preference";
 
 import { CalendarStatusBanner } from "./components/calendar-status-banner";
 import { ConnectionCard } from "./components/connection-card";
@@ -28,13 +31,16 @@ export async function Settings({ searchParams }: SettingsProps) {
   // `account` do Auth.js); "Integrações" é sobre o Google Agenda estar
   // conectado ou não (tabela própria `google_connection`). Uma nunca
   // implica a outra — por isso ficam em blocos visualmente distintos.
-  const [isGoogleLogin, connection, assistantPreferences, connections, mascot] = await Promise.all([
-    isGoogleAccountLinked(userId),
-    getGoogleConnection(userId),
-    getAssistantPreferencesFetcher().getPreferences(),
-    getConnectionFetcher().loadAll(),
-    getMascotFetcher().getMascot(),
-  ]);
+  const [isGoogleLogin, connection, assistantPreferences, connections, mascot, weeklySummaryEnabled, session] =
+    await Promise.all([
+      isGoogleAccountLinked(userId),
+      getGoogleConnection(userId),
+      getAssistantPreferencesFetcher().getPreferences(),
+      getConnectionFetcher().loadAll(),
+      getMascotFetcher().getMascot(),
+      getWeeklySummaryEnabled(),
+      auth(),
+    ]);
   const calendars = connection ? await listUserCalendars(userId) : [];
 
   const connected = typeof searchParams.google_calendar_connected === "string"
@@ -82,6 +88,14 @@ export async function Settings({ searchParams }: SettingsProps) {
         </div>
 
         <NotificationsToggle />
+      </section>
+
+      <section className={styles.settingPanel}>
+        <div className={styles.panelHeader}>
+          <h2>Resumo semanal</h2>
+        </div>
+
+        <WeeklySummaryPanel enabled={weeklySummaryEnabled} email={session?.user?.email ?? null} />
       </section>
 
       <section className={styles.settingPanel}>

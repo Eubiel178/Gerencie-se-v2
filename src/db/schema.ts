@@ -377,6 +377,10 @@ export const userPreferences = pgTable("user_preference", {
   gender: text("gender", { enum: ["feminino", "masculino", "nao_informado"] })
     .notNull()
     .default("nao_informado"),
+  // Desligado por padrão de propósito: e-mail é uma ação que sai do app,
+  // nunca deve começar a disparar sozinho sem o usuário pedir (ver
+  // `features/weekly-summary`).
+  weeklySummaryEnabled: boolean("weekly_summary_enabled").notNull().default(false),
 });
 
 export const hydrationLogs = pgTable("hydration_log", {
