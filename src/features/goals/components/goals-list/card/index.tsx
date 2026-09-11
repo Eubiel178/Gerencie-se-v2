@@ -137,6 +137,17 @@ export function Card({ goal, connections }: CardProps) {
         <span className={styles.progressLabel}>{goal.progressPercent}%</span>
       </div>
 
+      {goal.steps.length > 0 ? (
+        <p className={styles.progressHint}>
+          {goal.steps.filter((step) => step.completed).length} de {goal.steps.length} etapas concluídas
+          — progresso calculado automaticamente.
+        </p>
+      ) : (
+        <p className={styles.progressHint}>
+          Adicione etapas abaixo para o progresso ser calculado automaticamente.
+        </p>
+      )}
+
       {goal.steps.length > 0 && (
         <ul className={styles.steps}>
           {goal.steps.map((step) => (
