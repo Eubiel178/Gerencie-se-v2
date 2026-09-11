@@ -79,7 +79,7 @@ export function AddRoutineItem({ buttonText, taskOptions, connections }: IAddRou
           <ModalHeader title="Novo Item de Rotina" onClose={closeModal} />
 
           <Form.Root onSubmit={handleSubmit(handleOnSubmit)}>
-            <Form.Wrapper gap="xsmall">
+            <Form.Wrapper>
               <Input.Root sharedProps={{ error: errors.time?.message }}>
                 <Input.Label>Horário</Input.Label>
 

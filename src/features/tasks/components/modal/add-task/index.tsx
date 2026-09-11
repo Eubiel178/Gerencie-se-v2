@@ -90,7 +90,7 @@ export function AddTask({ buttonText, isGoogleConnected, connections }: IAddTask
           <ModalHeader title="Nova Tarefa" onClose={closeModal} />
 
           <Form.Root onSubmit={handleSubmit(handleOnSubmit)}>
-            <Form.Wrapper gap="xsmall">
+            <Form.Wrapper>
               <Input.Root sharedProps={{ error: errors.tag?.message }}>
                 <Input.Label>Tipo de Tarefa</Input.Label>
 

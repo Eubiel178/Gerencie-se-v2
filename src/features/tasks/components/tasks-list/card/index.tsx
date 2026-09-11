@@ -13,6 +13,7 @@ import {
 } from "@/features/tasks/actions";
 
 import { Button } from "@/components";
+import { SharedBadge } from "@/features/connections/components/shared-badge";
 import { EditTask } from "../../modal";
 import { PRIORITY_LABELS } from "../../modal/interfaces";
 
@@ -102,9 +103,7 @@ export function Card({ task, tagLabel, isGoogleConnected, connections }: CardPro
           <div className={styles.headerActions}>
             {!task.isSharedWithMe && (
               <Button
-                variant="ghost"
-                tone="danger"
-                size="xlarge"
+                className={styles.deleteButton}
                 aria-label={`Excluir tarefa ${task.title}`}
                 loading={isRemoving}
                 onClick={handleTaskRemove}
@@ -151,15 +150,13 @@ export function Card({ task, tagLabel, isGoogleConnected, connections }: CardPro
 
           <p className={styles.description}>{task.description}</p>
 
-          {task.isSharedWithMe ? (
-            <p className={styles.sharedBadge}>
-              Compartilhada por {task.ownerLabel}
-            </p>
-          ) : (
-            task.sharedWithUserId && (
-              <p className={styles.sharedBadge}>Compartilhada</p>
-            )
-          )}
+          <SharedBadge
+            isSharedWithMe={task.isSharedWithMe}
+            ownerLabel={task.ownerLabel}
+            isShared={!!task.sharedWithUserId}
+            label="Compartilhada"
+            className={styles.sharedBadge}
+          />
         </div>
 
         {task.syncEnabled && (
@@ -178,8 +175,7 @@ export function Card({ task, tagLabel, isGoogleConnected, connections }: CardPro
 
                 <Button
                   type="button"
-                  size="xsmall"
-                  variant="secondary"
+                  className={styles.retryButton}
                   loading={isRetrying}
                   onClick={handleRetrySync}
                 >

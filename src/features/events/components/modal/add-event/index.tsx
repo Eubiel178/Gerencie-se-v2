@@ -11,7 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { validationSchema } from "@/validation/event-schema";
 
 import { Form, Input, Modal, ModalHeader, Button } from "@/components";
-import inputStyles from "@/components/form-components/input/styles.module.css";
+import inputStyles from "@/components/form/input/styles.module.css";
 
 import { createEventAction } from "@/features/events/actions";
 
@@ -77,7 +77,7 @@ export const AddEvent = ({ buttonText }: IModalProps) => {
           <ModalHeader title="Novo Evento" onClose={closeModal} />
 
           <Form.Root onSubmit={handleSubmit(handleFormSubmit)}>
-            <Form.Wrapper gap="small">
+            <Form.Wrapper className={styles.formWrapper}>
               <Input.Root sharedProps={{ error: errors.title?.message }}>
                 <Input.Wrapper>
                   <Input.Field

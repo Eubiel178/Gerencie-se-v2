@@ -105,8 +105,12 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
             value={goalInput}
             onChange={(event) => setGoalInput(event.target.value)}
           />
-          <Button type="submit" size="small">Salvar</Button>
-          <Button type="button" variant="secondary" size="small" onClick={() => setIsEditingGoal(false)}>
+          <Button type="submit" className={styles.smallButton}>Salvar</Button>
+          <Button
+            type="button"
+            className={`${styles.smallButton} ${styles.secondaryButton}`}
+            onClick={() => setIsEditingGoal(false)}
+          >
             Cancelar
           </Button>
         </form>
@@ -129,7 +133,12 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
 
       <div className={styles.quickAdd}>
         {QUICK_AMOUNTS.map((amount) => (
-          <Button key={amount} variant="secondary" loading={isBusy} onClick={() => handleLog(amount)}>
+          <Button
+            key={amount}
+            className={styles.secondaryButton}
+            loading={isBusy}
+            onClick={() => handleLog(amount)}
+          >
             +{amount} ml
           </Button>
         ))}
@@ -144,7 +153,7 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
           value={customAmount}
           onChange={(event) => setCustomAmount(event.target.value)}
         />
-        <Button type="submit" variant="secondary" loading={isBusy}>
+        <Button type="submit" className={styles.secondaryButton} loading={isBusy}>
           Adicionar
         </Button>
       </form>
@@ -160,9 +169,7 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
                 )}
               </span>
               <Button
-                variant="ghost"
-                tone="danger"
-                size="small"
+                className={styles.deleteLogButton}
                 aria-label="Remover registro"
                 onClick={() => handleDelete(log.id)}
               >

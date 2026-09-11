@@ -1,6 +1,6 @@
 import { MdClose } from "react-icons/md";
 
-import { Button } from "../form-components/button";
+import { Button } from "../button";
 
 import styles from "./modal-header.module.css";
 
@@ -16,13 +16,7 @@ export function ModalHeader({ title, onClose }: ModalHeaderProps) {
     <div className={styles.header}>
       <h3>{title}</h3>
 
-      <Button
-        variant="ghost"
-        tone="muted"
-        size="xlarge"
-        aria-label="Fechar"
-        onClick={onClose}
-      >
+      <Button className={styles.closeButton} aria-label="Fechar" onClick={onClose}>
         <MdClose />
       </Button>
     </div>

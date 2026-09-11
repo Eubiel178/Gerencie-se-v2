@@ -60,7 +60,7 @@ export function SyncWithGoogle({
           <div className={styles.buttonsRow}>
             <Button
               type="button"
-              size="small"
+              className={styles.smallButton}
               onClick={() => router.push("/home/settings")}
             >
               Conectar Google Agenda
@@ -68,8 +68,7 @@ export function SyncWithGoogle({
 
             <Button
               type="button"
-              size="small"
-              variant="ghost"
+              className={`${styles.smallButton} ${styles.ghostButton}`}
               onClick={() => setValue("syncEnabled", false)}
             >
               Continuar sem sincronizar

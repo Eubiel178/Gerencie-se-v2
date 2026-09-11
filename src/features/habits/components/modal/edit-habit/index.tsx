@@ -14,6 +14,7 @@ import { Form, Modal, ModalHeader, Input, Button } from "@/components";
 
 import { updateHabitAction } from "@/features/habits/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
+import { ShareReadOnlyNote } from "@/features/connections/components/share-readonly-note";
 
 import { FormData, IEditHabitProps, NO_GOAL_VALUE } from "../interfaces";
 
@@ -79,9 +80,7 @@ export function EditHabit({ habitBeingEdited, connections, goalOptions }: IEditH
   return (
     <>
       <Button
-        variant="ghost"
-        tone="highlight"
-        size="xlarge"
+        className={styles.editButton}
         aria-label={`Editar hábito ${habitBeingEdited.title}`}
         onClick={function () {
           setIsOpen(true);
@@ -95,7 +94,7 @@ export function EditHabit({ habitBeingEdited, connections, goalOptions }: IEditH
           <ModalHeader title="Editar Hábito" onClose={closeModal} />
 
           <Form.Root onSubmit={handleSubmit(handleFormSubmit)}>
-            <Form.Wrapper gap="xsmall">
+            <Form.Wrapper>
               <Input.Root sharedProps={{ error: errors.title?.message }}>
                 <Input.Wrapper>
                   <Input.Field

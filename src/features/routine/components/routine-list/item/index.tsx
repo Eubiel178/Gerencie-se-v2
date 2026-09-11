@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { FaTrash } from "react-icons/fa";
 
 import { Button } from "@/components";
+import { SharedBadge } from "@/features/connections/components/shared-badge";
 
 import { deleteRoutineItemAction } from "@/features/routine/actions";
 import { EditRoutineItem } from "../../modal";
@@ -48,11 +49,12 @@ export function RoutineListItem({ item, taskOptions, connections, linkedTaskTitl
         {linkedTaskTitle && (
           <p className={styles.linkedTask}>Vinculado a: {linkedTaskTitle}</p>
         )}
-        {item.isSharedWithMe ? (
-          <p className={styles.sharedBadge}>Compartilhado por {item.ownerLabel}</p>
-        ) : (
-          item.sharedWithUserId && <p className={styles.sharedBadge}>Compartilhado</p>
-        )}
+        <SharedBadge
+          isSharedWithMe={item.isSharedWithMe}
+          ownerLabel={item.ownerLabel}
+          isShared={!!item.sharedWithUserId}
+          className={styles.sharedBadge}
+        />
       </div>
 
       <div className={styles.actions}>
@@ -60,9 +62,7 @@ export function RoutineListItem({ item, taskOptions, connections, linkedTaskTitl
 
         {!item.isSharedWithMe && (
           <Button
-            variant="ghost"
-            tone="danger"
-            size="xlarge"
+            className={styles.deleteButton}
             aria-label={`Remover ${item.title} da rotina`}
             loading={isRemoving}
             onClick={handleRemove}

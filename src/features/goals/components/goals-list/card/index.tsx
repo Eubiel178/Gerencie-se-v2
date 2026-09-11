@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { FaTrash, FaPlus } from "react-icons/fa";
 
 import { Button, Input } from "@/components";
+import { SharedBadge } from "@/features/connections/components/shared-badge";
 
 import {
   createGoalStepAction,
@@ -93,9 +94,7 @@ export function Card({ goal, connections }: CardProps) {
 
           {!goal.isSharedWithMe && (
             <Button
-              variant="ghost"
-              tone="danger"
-              size="xlarge"
+              className={styles.deleteButton}
               aria-label={`Excluir objetivo ${goal.title}`}
               loading={isRemoving}
               onClick={handleRemoveGoal}
@@ -106,11 +105,12 @@ export function Card({ goal, connections }: CardProps) {
         </div>
       </div>
 
-      {goal.isSharedWithMe ? (
-        <p className={styles.sharedBadge}>Compartilhado por {goal.ownerLabel}</p>
-      ) : (
-        goal.sharedWithUserId && <p className={styles.sharedBadge}>Compartilhado</p>
-      )}
+      <SharedBadge
+        isSharedWithMe={goal.isSharedWithMe}
+        ownerLabel={goal.ownerLabel}
+        isShared={!!goal.sharedWithUserId}
+        className={styles.sharedBadge}
+      />
 
       {goal.description && <p className={styles.description}>{goal.description}</p>}
 
@@ -135,9 +135,7 @@ export function Card({ goal, connections }: CardProps) {
                 {step.title}
               </span>
               <Button
-                variant="ghost"
-                tone="danger"
-                size="small"
+                className={styles.deleteStepButton}
                 aria-label={`Remover etapa ${step.title}`}
                 onClick={() => handleRemoveStep(step.id)}
               >
@@ -157,8 +155,7 @@ export function Card({ goal, connections }: CardProps) {
         />
         <Button
           type="submit"
-          variant="secondary"
-          size="small"
+          className={styles.addStepButton}
           aria-label="Adicionar etapa"
           loading={isAddingStep}
         >

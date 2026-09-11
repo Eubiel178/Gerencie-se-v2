@@ -81,7 +81,7 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
           <ModalHeader title="Novo Objetivo" onClose={closeModal} />
 
           <Form.Root onSubmit={handleSubmit(handleOnSubmit)}>
-            <Form.Wrapper gap="xsmall">
+            <Form.Wrapper>
               <Input.Root sharedProps={{ error: errors.title?.message }}>
                 <Input.Wrapper>
                   <Input.Field

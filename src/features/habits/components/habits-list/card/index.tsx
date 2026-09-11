@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { FaFire, FaTrash, FaCheck } from "react-icons/fa";
 
 import { Button } from "@/components";
+import { SharedBadge } from "@/features/connections/components/shared-badge";
 
 import { deleteHabitAction, toggleHabitLogAction } from "@/features/habits/actions";
 import { EditHabit } from "../../modal";
@@ -65,9 +66,7 @@ export function Card({ habit, today, connections, goalOptions, linkedGoalTitle }
 
           {!habit.isSharedWithMe && (
             <Button
-              variant="ghost"
-              tone="danger"
-              size="xlarge"
+              className={styles.deleteButton}
               aria-label={`Excluir hábito ${habit.title}`}
               loading={isRemoving}
               onClick={handleRemove}
@@ -78,11 +77,12 @@ export function Card({ habit, today, connections, goalOptions, linkedGoalTitle }
         </div>
       </div>
 
-      {habit.isSharedWithMe ? (
-        <p className={styles.sharedBadge}>Compartilhado por {habit.ownerLabel}</p>
-      ) : (
-        habit.sharedWithUserId && <p className={styles.sharedBadge}>Compartilhado</p>
-      )}
+      <SharedBadge
+        isSharedWithMe={habit.isSharedWithMe}
+        ownerLabel={habit.ownerLabel}
+        isShared={!!habit.sharedWithUserId}
+        className={styles.sharedBadge}
+      />
 
       {linkedGoalTitle && <p className={styles.linkedGoal}>Vinculado a: {linkedGoalTitle}</p>}
 
@@ -107,8 +107,7 @@ export function Card({ habit, today, connections, goalOptions, linkedGoalTitle }
       </div>
 
       <Button
-        className={styles.toggleButton}
-        variant={habit.completedToday ? "secondary" : "primary"}
+        className={`${styles.toggleButton} ${habit.completedToday ? styles.secondaryButton : ""}`}
         loading={isToggling}
         onClick={handleToggleToday}
       >

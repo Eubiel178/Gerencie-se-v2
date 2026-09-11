@@ -45,9 +45,7 @@ export function History({ entries }: { entries: ICycleEntry[] }) {
           </div>
 
           <Button
-            variant="ghost"
-            tone="danger"
-            size="xlarge"
+            className={styles.deleteButton}
             aria-label="Remover registro"
             loading={removingId === entry.id}
             onClick={() => handleDelete(entry.id)}

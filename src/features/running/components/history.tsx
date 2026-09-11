@@ -53,9 +53,7 @@ export function History({ sessions }: HistoryProps) {
           </div>
 
           <Button
-            variant="ghost"
-            tone="danger"
-            size="xlarge"
+            className={styles.deleteButton}
             aria-label="Excluir corrida"
             loading={removingId === session.id}
             onClick={() => handleDelete(session.id)}

@@ -1,0 +1,78 @@
+/* Estilo único e fixo: botão cheio "primário" (o caso mais comum — CTA
+   de formulário). Qualquer tela que precise de outra aparência (ícone
+   sem fundo, botão secundário, tingir de vermelho etc.) passa sua
+   própria classe local via `className`.
+   Toda propriedade "de aparência" (fundo/cor/borda/sombra/tamanho, em
+   repouso E no hover/active) fica dentro de `:where(...)` —
+   especificidade zerada — pra uma classe local SEMPRE vencer o padrão,
+   não importa em qual arquivo/ordem o CSS de cada um é carregado no
+   bundle final. O que fica fora do `:where` é só estrutura/
+   comportamento (layout, cursor, transições, foco, disabled), que
+   nenhuma classe local deveria precisar sobrescrever. */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    filter var(--duration-fast) var(--easing-standard),
+    opacity var(--duration-fast) var(--easing-standard),
+    transform var(--duration-fast) var(--easing-standard),
+    box-shadow var(--duration-fast) var(--easing-standard),
+    background-color var(--duration-fast) var(--easing-standard),
+    border-color var(--duration-fast) var(--easing-standard);
+}
+
+:where(.button) {
+  padding: 0.7rem var(--space-5);
+  border: 1px solid transparent;
+  background: var(--color-highlight);
+  color: var(--color-on-highlight);
+  font-size: var(--font-size-md);
+  box-shadow: 0 1px 2px var(--color-shadow);
+}
+
+:where(.button):hover:not(:disabled) {
+  filter: brightness(1.08);
+  box-shadow: 0 0.35rem 0.85rem var(--color-shadow);
+  transform: translateY(-1px);
+}
+
+:where(.button):active:not(:disabled) {
+  box-shadow: none;
+  transform: scale(0.97);
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--color-highlight);
+  outline-offset: 2px;
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.spinner {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  animation: spin 700ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

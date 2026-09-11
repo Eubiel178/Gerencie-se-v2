@@ -1,1 +1,2 @@
 .formError{margin:0;font-family:var(--font-sans);font-size:var(--font-size-md);color:var(--color-info)}
+.formWrapper{gap:var(--space-5)}

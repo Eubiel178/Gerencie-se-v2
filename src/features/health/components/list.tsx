@@ -72,8 +72,7 @@ export function List({ checkups }: { checkups: IHealthCheckup[] }) {
 
           <div className={styles.actions}>
             <Button
-              variant="secondary"
-              size="small"
+              className={styles.markDoneButton}
               loading={busyId === checkup.id}
               aria-label={`Marcar ${checkup.title} como feito hoje`}
               onClick={() => handleMarkDone(checkup.id)}
@@ -82,9 +81,7 @@ export function List({ checkups }: { checkups: IHealthCheckup[] }) {
             </Button>
 
             <Button
-              variant="ghost"
-              tone="danger"
-              size="xlarge"
+              className={styles.deleteButton}
               aria-label={`Excluir ${checkup.title}`}
               loading={busyId === checkup.id}
               onClick={() => handleDelete(checkup.id)}

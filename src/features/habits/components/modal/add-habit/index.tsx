@@ -89,7 +89,7 @@ export function AddHabit({ buttonText, connections, goalOptions }: IAddHabitProp
           <ModalHeader title="Novo Hábito" onClose={closeModal} />
 
           <Form.Root onSubmit={handleSubmit(handleOnSubmit)}>
-            <Form.Wrapper gap="xsmall">
+            <Form.Wrapper>
               <Input.Root sharedProps={{ error: errors.title?.message }}>
                 <Input.Wrapper>
                   <Input.Field

@@ -21,4 +21,8 @@
 .sourceTag{color:var(--color-text-muted);font-size:var(--font-size-xs)}
 .emptyMessage{margin:0;font-family:var(--font-sans);color:var(--color-info);font-size:var(--font-size-md)}
 .inlineMessage{margin:0;font-family:var(--font-sans);color:var(--color-info);font-size:var(--font-size-md)}
+.deleteButton{background:transparent;border-color:transparent;color:var(--color-danger);box-shadow:none;padding:var(--space-2);font-size:var(--font-size-xl)}
+.deleteButton:hover:not(:disabled){background:var(--color-surface-elevated);color:var(--color-danger);filter:none;box-shadow:none;transform:none}
+.tabButton{background:var(--color-surface-elevated);border-color:var(--color-border);color:var(--color-text);box-shadow:0 1px 2px var(--color-shadow)}
+.finishButton{background:var(--color-surface-elevated);border-color:var(--color-border);color:var(--color-danger);box-shadow:0 1px 2px var(--color-shadow)}
 @media(max-width:420px){.totals,.liveStats{grid-template-columns:1fr;text-align:center}.fieldsRow{flex-direction:column}}

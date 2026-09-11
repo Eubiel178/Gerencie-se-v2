@@ -11,7 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { validationSchema } from "@/validation/event-schema";
 
 import { Form, Modal, ModalHeader, Input, Button } from "@/components";
-import inputStyles from "@/components/form-components/input/styles.module.css";
+import inputStyles from "@/components/form/input/styles.module.css";
 
 import { updateEventAction } from "@/features/events/actions";
 import { useEventStore } from "@/features/events/event-store";
@@ -67,9 +67,7 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
   return (
     <>
       <Button
-        variant="ghost"
-        tone="muted"
-        size="xlarge"
+        className={styles.editButton}
         aria-label={`Editar evento ${eventBeingEdited.title}`}
         onClick={function () {
           setIsOpen(true);

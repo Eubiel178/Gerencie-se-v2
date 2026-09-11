@@ -14,6 +14,7 @@ import { Form, Modal, ModalHeader, Input, Button } from "@/components";
 
 import { updateGoalAction } from "@/features/goals/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
+import { ShareReadOnlyNote } from "@/features/connections/components/share-readonly-note";
 
 import { FormData, IEditGoalProps, PRIORITY_OPTIONS } from "../interfaces";
 
@@ -71,9 +72,7 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
   return (
     <>
       <Button
-        variant="ghost"
-        tone="highlight"
-        size="xlarge"
+        className={styles.editButton}
         aria-label={`Editar objetivo ${goalBeingEdited.title}`}
         onClick={function () {
           setIsOpen(true);
@@ -87,7 +86,7 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
           <ModalHeader title="Editar Objetivo" onClose={closeModal} />
 
           <Form.Root onSubmit={handleSubmit(handleFormSubmit)}>
-            <Form.Wrapper gap="xsmall">
+            <Form.Wrapper>
               <Input.Root sharedProps={{ error: errors.title?.message }}>
                 <Input.Wrapper>
                   <Input.Field {...register("title")} placeholder="Ex.: Estudar inglês" />
@@ -146,9 +145,7 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
               </Input.Root>
 
               {goalBeingEdited.isSharedWithMe && (
-                <p className={styles.readOnlyNote}>
-                  Só quem compartilhou este objetivo pode mudar isso.
-                </p>
+                <ShareReadOnlyNote noun="este objetivo" className={styles.readOnlyNote} />
               )}
             </Form.Wrapper>
 

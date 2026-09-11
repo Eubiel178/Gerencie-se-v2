@@ -1,1 +1,3 @@
 .formError{margin:0;font-family:var(--font-sans);font-size:var(--font-size-md);color:var(--color-info)}
+.editButton{padding:var(--space-2);font-size:var(--font-size-xl);background:transparent;border-color:transparent;color:var(--color-text-muted);box-shadow:none}
+.editButton:hover:not(:disabled){background:var(--color-surface-elevated);color:var(--color-text-muted);filter:none;box-shadow:none;transform:none}

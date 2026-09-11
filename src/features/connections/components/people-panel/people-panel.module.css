@@ -68,3 +68,31 @@
   gap: var(--space-2);
   flex-shrink: 0;
 }
+
+.smallButton {
+  padding: 0.45rem var(--space-3);
+  font-size: var(--font-size-sm);
+}
+.declineButton {
+  padding: 0.45rem var(--space-3);
+  font-size: var(--font-size-sm);
+  background: var(--color-surface-elevated);
+  border-color: var(--color-border);
+  color: var(--color-text);
+  box-shadow: 0 1px 2px var(--color-shadow);
+}
+.removeButton {
+  padding: 0.45rem var(--space-3);
+  font-size: var(--font-size-sm);
+  background: transparent;
+  border-color: transparent;
+  color: var(--color-danger);
+  box-shadow: none;
+}
+.removeButton:hover:not(:disabled) {
+  background: var(--color-surface-elevated);
+  color: var(--color-danger);
+  filter: none;
+  box-shadow: none;
+  transform: none;
+}

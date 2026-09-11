@@ -218,8 +218,6 @@ export function Timer({ initialSession, mascot }: TimerProps) {
       {session && (
         <Button
           type="button"
-          variant="ghost"
-          size="small"
           className={styles.fullscreenToggle}
           aria-label={isFullscreen ? "Sair da tela cheia" : "Modo foco em tela cheia"}
           onClick={handleToggleFullscreen}
@@ -239,10 +237,14 @@ export function Timer({ initialSession, mascot }: TimerProps) {
           <span className={styles.clock}>{formatClock(remaining)}</span>
 
           <div className={styles.controls}>
-            <Button variant="secondary" loading={isBusy} onClick={handleComplete}>
+            <Button className={styles.secondaryButton} loading={isBusy} onClick={handleComplete}>
               Concluir agora
             </Button>
-            <Button variant="secondary" tone="danger" loading={isBusy} onClick={handleCancel}>
+            <Button
+              className={`${styles.secondaryButton} ${styles.dangerButton}`}
+              loading={isBusy}
+              onClick={handleCancel}
+            >
               Cancelar
             </Button>
           </div>
@@ -254,7 +256,7 @@ export function Timer({ initialSession, mascot }: TimerProps) {
               <Button
                 key={minutes}
                 type="button"
-                variant={plannedMinutes === minutes ? "primary" : "secondary"}
+                className={plannedMinutes === minutes ? undefined : styles.secondaryButton}
                 onClick={() => setPlannedMinutes(minutes)}
               >
                 {minutes} min

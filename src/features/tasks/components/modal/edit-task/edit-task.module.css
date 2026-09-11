@@ -1,3 +1,19 @@
+.editButton {
+  padding: var(--space-2);
+  font-size: var(--font-size-xl);
+  color: var(--color-highlight);
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+.editButton:hover:not(:disabled) {
+  background: var(--color-surface-elevated);
+  color: var(--color-highlight);
+  filter: none;
+  box-shadow: none;
+  transform: none;
+}
+
 .formError {
   margin: 0;
   font-family: var(--font-sans);

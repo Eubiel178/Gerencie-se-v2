@@ -74,9 +74,7 @@ export function Item({ item }: { item: IReadingItem }) {
         </div>
 
         <Button
-          variant="ghost"
-          tone="danger"
-          size="xlarge"
+          className={styles.deleteButton}
           aria-label={`Remover ${item.title}`}
           loading={isRemoving}
           onClick={handleRemove}

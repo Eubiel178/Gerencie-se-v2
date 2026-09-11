@@ -16,6 +16,7 @@ import { Form, Modal, ModalHeader, Input, Button } from "@/components";
 import { updateTaskAction } from "@/features/tasks/actions";
 
 import { ShareSelect } from "@/features/connections/components/share-select";
+import { ShareReadOnlyNote } from "@/features/connections/components/share-readonly-note";
 
 import { SyncWithGoogle } from "../sync-with-google";
 import { ReminderFields } from "../reminder-fields";
@@ -81,9 +82,7 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
   return (
     <>
       <Button
-        variant="ghost"
-        tone="highlight"
-        size="xlarge"
+        className={styles.editButton}
         aria-label={`Editar tarefa ${taskBeingEdited.title}`}
         onClick={function () {
           setIsOpen(true);
@@ -97,7 +96,7 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
           <ModalHeader title="Editar Tarefa" onClose={closeModal} />
 
           <Form.Root onSubmit={handleSubmit(handleFormSubmit)}>
-            <Form.Wrapper gap="xsmall">
+            <Form.Wrapper>
               <Input.Root sharedProps={{ error: errors.tag?.message }}>
                 <Input.Label>Tipo de Tarefa</Input.Label>
 
@@ -168,9 +167,7 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
               </Input.Root>
 
               {taskBeingEdited.isSharedWithMe && (
-                <p className={styles.mutedNote}>
-                  Só quem compartilhou esta tarefa pode mudar isso.
-                </p>
+                <ShareReadOnlyNote noun="esta tarefa" className={styles.mutedNote} />
               )}
 
               <SyncWithGoogle

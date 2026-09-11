@@ -39,12 +39,15 @@ export function RunningTracker() {
     <div>
       <div className={styles.tabs}>
         <Button
-          variant={tab === "manual" ? "primary" : "secondary"}
+          className={tab === "manual" ? undefined : styles.tabButton}
           onClick={() => setTab("manual")}
         >
           Registro manual
         </Button>
-        <Button variant={tab === "gps" ? "primary" : "secondary"} onClick={() => setTab("gps")}>
+        <Button
+          className={tab === "gps" ? undefined : styles.tabButton}
+          onClick={() => setTab("gps")}
+        >
           GPS ao vivo
         </Button>
       </div>
@@ -272,7 +275,7 @@ function LiveTracker({ onSaved }: { onSaved: () => void }) {
 
       <div className={styles.liveControls}>
         {isTracking ? (
-          <Button variant="secondary" tone="danger" loading={isSaving} onClick={handleFinish}>
+          <Button className={styles.finishButton} loading={isSaving} onClick={handleFinish}>
             Finalizar Corrida
           </Button>
         ) : (

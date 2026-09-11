@@ -14,6 +14,7 @@ import { Form, Modal, ModalHeader, Input, Button } from "@/components";
 
 import { updateRoutineItemAction } from "@/features/routine/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
+import { ShareReadOnlyNote } from "@/features/connections/components/share-readonly-note";
 
 import { FormData, IEditRoutineItemProps, NO_TASK_VALUE } from "../interfaces";
 
@@ -69,9 +70,7 @@ export function EditRoutineItem({ itemBeingEdited, taskOptions, connections }: I
   return (
     <>
       <Button
-        variant="ghost"
-        tone="highlight"
-        size="xlarge"
+        className={styles.editButton}
         aria-label={`Editar item de rotina ${itemBeingEdited.title}`}
         onClick={function () {
           setIsOpen(true);
@@ -85,7 +84,7 @@ export function EditRoutineItem({ itemBeingEdited, taskOptions, connections }: I
           <ModalHeader title="Editar Item de Rotina" onClose={closeModal} />
 
           <Form.Root onSubmit={handleSubmit(handleFormSubmit)}>
-            <Form.Wrapper gap="xsmall">
+            <Form.Wrapper>
               <Input.Root sharedProps={{ error: errors.time?.message }}>
                 <Input.Label>Horário</Input.Label>
 
@@ -141,9 +140,7 @@ export function EditRoutineItem({ itemBeingEdited, taskOptions, connections }: I
               </Input.Root>
 
               {itemBeingEdited.isSharedWithMe && (
-                <p className={styles.mutedNote}>
-                  Só quem compartilhou este item pode mudar isso.
-                </p>
+                <ShareReadOnlyNote noun="este item" className={styles.mutedNote} />
               )}
             </Form.Wrapper>
 

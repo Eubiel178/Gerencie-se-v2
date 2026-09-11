@@ -117,8 +117,7 @@ export function ConnectionCard({
       <div className={styles.buttonRow}>
         <Button
           type="button"
-          variant="secondary"
-          tone="danger"
+          className={styles.disconnectButton}
           loading={isDisconnecting}
           onClick={handleDisconnect}
         >
