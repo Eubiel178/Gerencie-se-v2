@@ -47,8 +47,14 @@ export function ButtonRoot({
       aria-busy={loading || undefined}
       {...rest}
     >
-      {loading && <span className={styles.spinner} aria-hidden="true" />}
-      {children}
+      {loading ? (
+        <>
+          <span className={styles.content}>{children}</span>
+          <span className={styles.spinner} aria-hidden="true" />
+        </>
+      ) : (
+        children
+      )}
     </button>
   );
 }

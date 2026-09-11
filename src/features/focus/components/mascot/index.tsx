@@ -10,11 +10,35 @@ interface MascotProps {
   mood: MascotEvent;
 }
 
-function speak(text: string) {
+function speakNative(text: string) {
   if (!("speechSynthesis" in window)) return;
 
   window.speechSynthesis.cancel();
   window.speechSynthesis.speak(new SpeechSynthesisUtterance(text));
+}
+
+/** Tenta a voz mais natural do Edge TTS (via `/api/mascot-speech`, sem
+ * custo, mas API não-oficial e sem garantia de uptime); se falhar por
+ * qualquer motivo, cai pro `speechSynthesis` nativo do navegador. */
+async function speak(text: string) {
+  try {
+    const response = await fetch("/api/mascot-speech", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
+    });
+
+    if (!response.ok) {
+      speakNative(text);
+      return;
+    }
+
+    const blob = await response.blob();
+    const audio = new Audio(URL.createObjectURL(blob));
+    audio.play();
+  } catch {
+    speakNative(text);
+  }
 }
 
 /** Criatura original do Focus Timer — não é uma árvore, de propósito.

@@ -19,6 +19,7 @@
   padding: var(--space-5);
   border-right: 1px solid var(--color-border);
   background: var(--color-surface);
+  overflow-y: auto;
 }
 .brand {
   display: flex;
@@ -47,6 +48,7 @@
 }
 .navigation a,
 .signOut {
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   gap: var(--space-3);
