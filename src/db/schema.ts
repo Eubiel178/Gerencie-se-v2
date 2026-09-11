@@ -1,5 +1,14 @@
 import { relations } from "drizzle-orm";
-import { boolean, integer, pgTable, primaryKey, text, timestamp } from "drizzle-orm/pg-core";
+import { boolean, customType, integer, pgTable, primaryKey, text, timestamp } from "drizzle-orm/pg-core";
+
+// O driver `postgres` mapeia `bytea` <-> `Buffer` nativamente — só falta
+// dizer ao Drizzle que tipo de coluna SQL essa é (não existe um builder
+// pronto pra binário no `pg-core`, ao contrário de `text`/`integer`).
+const bytea = customType<{ data: Buffer }>({
+  dataType() {
+    return "bytea";
+  },
+});
 
 /**
  * Tabelas exigidas pelo Auth.js (login). O pacote `@auth/drizzle-adapter`
@@ -192,6 +201,35 @@ export const tasks = pgTable("task", {
   // só é lida no navegador do próprio usuário — não precisa de tabela
   // própria. `null` = sem lembrete configurado.
   reminderOffsetsMinutes: text("reminder_offsets_minutes"),
+});
+
+/**
+ * Anexos de tarefa. Conteúdo guardado como `bytea` direto no Postgres —
+ * sem storage externo (S3, blob, etc.), mesma base de dados que já
+ * guarda todo o resto do app. É exatamente por essa escolha que existe
+ * um teto de tamanho por arquivo (ver `MAX_ATTACHMENT_SIZE_BYTES` em
+ * `src/lib/upload-limits.ts`).
+ */
+export const taskAttachments = pgTable("task_attachment", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  taskId: text("task_id")
+    .notNull()
+    .references(() => tasks.id, { onDelete: "cascade" }),
+  // Quem enviou o anexo — pode ser o dono da tarefa ou um colaborador
+  // (tarefa compartilhada). Usado em `LocalTaskAttachment.deleteAttachment`
+  // pra decidir quem pode remover.
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  fileName: text("file_name").notNull(),
+  mimeType: text("mime_type").notNull(),
+  sizeBytes: integer("size_bytes").notNull(),
+  content: bytea("content").notNull(),
+  createdAt: timestamp("created_at", { mode: "date" })
+    .notNull()
+    .$defaultFn(() => new Date()),
 });
 
 export const events = pgTable("event", {

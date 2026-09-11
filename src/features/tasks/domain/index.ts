@@ -1,4 +1,5 @@
 export * from "./task";
+export * from "./attachment";
 export * from "./create";
 export * from "./update";
 export * from "./delete";

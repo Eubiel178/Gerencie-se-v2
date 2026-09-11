@@ -19,6 +19,7 @@ import { ShareReadOnlyNote } from "@/features/connections/components/share-reado
 
 import { SyncWithGoogle } from "../sync-with-google";
 import { ReminderFields } from "../reminder-fields";
+import { AttachmentsField } from "../../attachments-field";
 import { FormData, IEditTaskProps, PRIORITY_OPTIONS } from "../interfaces";
 
 import styles from "./edit-task.module.css";
@@ -177,6 +178,11 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
                 isChecked={!!syncEnabled}
                 isGoogleConnected={isGoogleConnected}
               />
+
+              <Input.Root>
+                <Input.Label>Anexos</Input.Label>
+                <AttachmentsField taskId={taskBeingEdited.id} />
+              </Input.Root>
             </Form.Wrapper>
 
             {submitError && <p className={styles.formError}>{submitError}</p>}

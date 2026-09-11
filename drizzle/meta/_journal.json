@@ -64,6 +64,13 @@
       "when": 1789167474771,
       "tag": "0008_round_millenium_guard",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1789168556735,
+      "tag": "0009_wise_angel",
+      "breakpoints": true
     }
   ]
 }
