@@ -15,19 +15,27 @@ export function ThemeToggle() {
 
   return (
     <div className={styles.group} role="group" aria-label="Tema da interface">
-      {OPTIONS.map((option) => (
-        <button
-          key={option.value}
-          type="button"
-          className={[styles.option, preference === option.value ? styles.optionActive : ""]
-            .filter(Boolean)
-            .join(" ")}
-          aria-pressed={preference === option.value}
-          onClick={() => setPreference(option.value)}
-        >
-          {option.label}
-        </button>
-      ))}
+      {OPTIONS.map((option) => {
+        const isActive = preference === option.value;
+
+        let classNames = styles.option;
+
+        if (isActive) {
+          classNames = classNames + " " + styles.optionActive;
+        }
+
+        return (
+          <button
+            key={option.value}
+            type="button"
+            className={classNames}
+            aria-pressed={isActive}
+            onClick={() => setPreference(option.value)}
+          >
+            {option.label}
+          </button>
+        );
+      })}
     </div>
   );
 }
