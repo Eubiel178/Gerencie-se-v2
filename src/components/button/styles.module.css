@@ -120,8 +120,16 @@
   animation: spin 700ms linear infinite;
 }
 
+/* A animação precisa repetir o `translate(-50%, -50%)` de centralização
+   do `.spinner` — só `rotate(360deg)` aqui substituiria esse transform
+   inteiro (não compõe automaticamente com o que está fora do
+   keyframe), fazendo o círculo "escorregar" até o canto em vez de girar
+   no lugar. */
 @keyframes spin {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
   to {
-    transform: rotate(360deg);
+    transform: translate(-50%, -50%) rotate(360deg);
   }
 }
