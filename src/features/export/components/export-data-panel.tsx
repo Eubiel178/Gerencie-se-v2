@@ -44,8 +44,8 @@ export function ExportDataPanel() {
 
         <a
           className={styles.linkButton}
-          href={`/api/export?format=csv&entity=${entity}`}
-          download={`gerencie-se-${entity}.csv`}
+          href={`/api/export?format=xlsx&entity=${entity}`}
+          download={`gerencie-se-${entity}.xlsx`}
         >
           Baixar planilha
         </a>

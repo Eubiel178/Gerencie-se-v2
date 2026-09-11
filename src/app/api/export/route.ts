@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { requireUserId } from "@/lib/require-user-id";
 import { toCsv } from "@/lib/csv";
+import { toXlsx } from "@/lib/xlsx";
 
 import { getTaskFetcher } from "@/features/tasks/data/get-task-fetcher";
 import { getHabitFetcher } from "@/features/habits/data/get-habit-fetcher";
@@ -125,7 +126,8 @@ export async function GET(request: Request) {
   await requireUserId();
 
   const { searchParams } = new URL(request.url);
-  const format = searchParams.get("format") === "csv" ? "csv" : "json";
+  const formatParam = searchParams.get("format");
+  const format = formatParam === "csv" || formatParam === "xlsx" ? formatParam : "json";
 
   const data = await gatherExportData();
 
@@ -146,7 +148,20 @@ export async function GET(request: Request) {
     );
   }
 
-  const csv = toCsv(toCsvRows(entityParam, data));
+  const rows = toCsvRows(entityParam, data);
+
+  if (format === "xlsx") {
+    const xlsx = await toXlsx(rows, entityParam);
+
+    return new NextResponse(new Uint8Array(xlsx), {
+      headers: {
+        "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "Content-Disposition": `attachment; filename="gerencie-se-${entityParam}.xlsx"`,
+      },
+    });
+  }
+
+  const csv = toCsv(rows);
 
   return new NextResponse(csv, {
     headers: {
