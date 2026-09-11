@@ -1,0 +1,16 @@
+.canvasWrapper {
+  position: relative;
+  width: 12rem;
+  height: 8rem;
+}
+
+.canvasWrapper[data-size="sm"] {
+  width: 2.75rem;
+  height: 2.75rem;
+}
+
+.canvasWrapper canvas {
+  display: block;
+  outline: none;
+  touch-action: none;
+}

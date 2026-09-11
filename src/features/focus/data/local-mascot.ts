@@ -65,6 +65,7 @@ function mapRowToMascot(row: typeof mascotStates.$inferSelect): domain.IMascotSt
     name: row.name,
     personality: row.personality,
     species: row.species,
+    renderMode: row.renderMode,
     totalXp: row.totalXp,
     level,
     xpIntoCurrentLevel,

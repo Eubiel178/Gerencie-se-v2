@@ -3,7 +3,7 @@
 import { Button } from "@/components";
 import { IMascotState, MascotEvent, getMascotLine } from "@/features/focus/domain";
 import { useSpeak } from "@/lib/speak-text";
-import { MascotCreature } from "./creature";
+import { MascotVisual } from "@/features/focus/components/mascot-3d";
 
 import styles from "./mascot.module.css";
 
@@ -39,7 +39,13 @@ export function Mascot({ mascot, mood }: MascotProps) {
         />
       </div>
 
-      <MascotCreature species={mascot.species} mood={mood} roaming />
+      <MascotVisual
+        species={mascot.species}
+        mood={mood}
+        level={mascot.level}
+        renderMode={mascot.renderMode}
+        roaming
+      />
 
       <p className={styles.name}>{mascot.name}</p>
       <p className={styles.level}>Nível {mascot.level}</p>

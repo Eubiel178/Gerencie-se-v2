@@ -357,6 +357,12 @@ export const mascotStates = pgTable("mascot_state", {
   species: text("species", { enum: ["blob", "gato", "cachorro"] })
     .notNull()
     .default("blob"),
+  // O mascote 3D é opt-in: o desenho em CSS continua sendo o padrão pra
+  // quem já usa o app, e só quem escolher explicitamente em Configurações
+  // passa a ver a versão em Three.js.
+  renderMode: text("render_mode", { enum: ["2d", "3d"] })
+    .notNull()
+    .default("2d"),
   totalXp: integer("total_xp").notNull().default(0),
   updatedAt: timestamp("updated_at", { mode: "date" })
     .notNull()
