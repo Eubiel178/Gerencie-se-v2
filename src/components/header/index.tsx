@@ -97,7 +97,15 @@ function initials(name: string | null): string {
 export const Header = ({ user, overview }: HeaderProps) => {
   const pathname = usePathname();
   const [isConfirmingSignOut, setIsConfirmingSignOut] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  function handleSignOut() {
+    if (isSigningOut) return;
+
+    setIsSigningOut(true);
+    signOut({ callbackUrl: "/login" });
+  }
   const navGroups = visibleNavGroups(user.gender);
 
   // Começa aberto só o grupo (se houver) que contém a página atual — o
@@ -237,7 +245,8 @@ export const Header = ({ user, overview }: HeaderProps) => {
               root={{
                 tone: "danger",
                 "aria-label": "Confirmar saída",
-                onClick: () => signOut({ callbackUrl: "/login" }),
+                loading: isSigningOut,
+                onClick: handleSignOut,
               }}
             />
           </div>

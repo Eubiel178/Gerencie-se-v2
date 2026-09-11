@@ -31,6 +31,9 @@ export function Card({ goal, connections }: CardProps) {
   const [isRemoving, setIsRemoving] = useState(false);
   const [newStepTitle, setNewStepTitle] = useState("");
   const [isAddingStep, setIsAddingStep] = useState(false);
+  // Uma etapa ocupada por vez — as outras continuam clicáveis normalmente,
+  // só a que está em requisição fica travada contra clique repetido.
+  const [busyStepId, setBusyStepId] = useState<string | null>(null);
 
   async function handleRemoveGoal() {
     setIsRemoving(true);
@@ -44,13 +47,27 @@ export function Card({ goal, connections }: CardProps) {
   }
 
   async function handleToggleStep(stepId: string, completed: boolean) {
-    await updateGoalStepAction({ id: stepId, completed });
-    router.refresh();
+    if (busyStepId) return;
+
+    setBusyStepId(stepId);
+    try {
+      await updateGoalStepAction({ id: stepId, completed });
+      router.refresh();
+    } finally {
+      setBusyStepId(null);
+    }
   }
 
   async function handleRemoveStep(stepId: string) {
-    await deleteGoalStepAction({ id: stepId });
-    router.refresh();
+    if (busyStepId) return;
+
+    setBusyStepId(stepId);
+    try {
+      await deleteGoalStepAction({ id: stepId });
+      router.refresh();
+    } finally {
+      setBusyStepId(null);
+    }
   }
 
   async function handleAddStep(event: React.FormEvent) {
@@ -127,6 +144,7 @@ export function Card({ goal, connections }: CardProps) {
               <input
                 type="checkbox"
                 checked={step.completed}
+                disabled={busyStepId === step.id}
                 onChange={(event) => handleToggleStep(step.id, event.target.checked)}
                 aria-label={step.title}
               />
@@ -139,6 +157,7 @@ export function Card({ goal, connections }: CardProps) {
                   tone: "danger",
                   className: styles.smallButton,
                   "aria-label": `Remover etapa ${step.title}`,
+                  loading: busyStepId === step.id,
                   onClick: () => handleRemoveStep(step.id),
                 }}
               />

@@ -29,6 +29,7 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
   const [isEditingGoal, setIsEditingGoal] = useState(false);
   const [goalInput, setGoalInput] = useState(String(today.goalMl));
   const [actionError, setActionError] = useState<string | null>(null);
+  const [deletingLogId, setDeletingLogId] = useState<string | null>(null);
 
   async function handleLog(amountMl: number) {
     if (amountMl <= 0) return;
@@ -58,15 +59,22 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
   }
 
   async function handleDelete(id: string) {
+    if (deletingLogId) return;
+
     setActionError(null);
+    setDeletingLogId(id);
 
-    const result = await deleteHydrationLogAction({ id });
-    if (result.error) {
-      setActionError(result.error);
-      return;
+    try {
+      const result = await deleteHydrationLogAction({ id });
+      if (result.error) {
+        setActionError(result.error);
+        return;
+      }
+
+      router.refresh();
+    } finally {
+      setDeletingLogId(null);
     }
-
-    router.refresh();
   }
 
   async function handleSaveGoal(event: React.FormEvent) {
@@ -173,6 +181,7 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
                   tone: "danger",
                   className: styles.smallButton,
                   "aria-label": "Remover registro",
+                  loading: deletingLogId === log.id,
                   onClick: () => handleDelete(log.id),
                 }}
               />

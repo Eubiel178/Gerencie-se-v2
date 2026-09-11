@@ -3,6 +3,7 @@ import dayjs from "dayjs";
 import { IAssistantMessage } from "@/features/assistant/domain";
 
 import { IAssistantContext } from "./context";
+import { InsightFact, phraseInsight } from "./insight-phrasing";
 
 /**
  * Interface do "cérebro" do assistente — trocável no futuro (ex.: um
@@ -28,7 +29,15 @@ const DEADLINE_WARNING_DAYS = 3;
 export class RuleBasedAssistantProvider implements IAssistantProvider {
   buildMessages(context: IAssistantContext): IAssistantMessage[] {
     const now = dayjs(context.now ?? new Date());
+    const personality = context.mascot.personality;
     const messages: IAssistantMessage[] = [];
+
+    // Mesmo `id`/`tone` de sempre pra decidir prioridade (`pickTopMessage`)
+    // — só o `text` muda de acordo com a personalidade (ver
+    // `insight-phrasing.ts`), nunca o fato por trás dele.
+    function push(id: string, tone: IAssistantMessage["tone"], fact: InsightFact) {
+      messages.push({ id, tone, text: phraseInsight(fact, personality) });
+    }
 
     const pendingTasks = context.tasks.filter((task) => !task.completed);
     const overdueTasks = pendingTasks.filter(
@@ -36,13 +45,10 @@ export class RuleBasedAssistantProvider implements IAssistantProvider {
     );
 
     if (overdueTasks.length > 0) {
-      messages.push({
-        id: "overdue-tasks",
-        tone: "warning",
-        text:
-          overdueTasks.length === 1
-            ? `A tarefa "${overdueTasks[0].title}" está atrasada.`
-            : `Você tem ${overdueTasks.length} tarefas atrasadas. A mais antiga é "${overdueTasks[0].title}".`,
+      push("overdue-tasks", "warning", {
+        kind: "overdue-tasks",
+        count: overdueTasks.length,
+        oldestTitle: overdueTasks[0].title,
       });
     }
 
@@ -54,26 +60,21 @@ export class RuleBasedAssistantProvider implements IAssistantProvider {
       const donePriority = priorityTasks.filter((task) => task.completed).length;
 
       if (donePriority === priorityTasks.length) {
-        messages.push({
-          id: "priority-tasks-done",
-          tone: "success",
-          text: `Você concluiu todas as ${priorityTasks.length} tarefas prioritárias de hoje.`,
+        push("priority-tasks-done", "success", {
+          kind: "priority-tasks-done",
+          count: priorityTasks.length,
         });
       } else if (donePriority > 0) {
-        messages.push({
-          id: "priority-tasks-progress",
-          tone: "info",
-          text: `Você já concluiu ${donePriority} das ${priorityTasks.length} tarefas prioritárias.`,
+        push("priority-tasks-progress", "info", {
+          kind: "priority-tasks-progress",
+          done: donePriority,
+          total: priorityTasks.length,
         });
       }
     }
 
     if (pendingTasks.length > OVERLOAD_THRESHOLD) {
-      messages.push({
-        id: "task-overload",
-        tone: "warning",
-        text: `Você tem ${pendingTasks.length} tarefas pendentes — talvez seja hora de reorganizar prioridades.`,
-      });
+      push("task-overload", "warning", { kind: "task-overload", count: pendingTasks.length });
     }
 
     const bestStreak = context.habits
@@ -81,10 +82,10 @@ export class RuleBasedAssistantProvider implements IAssistantProvider {
       .sort((a, b) => b.currentStreak - a.currentStreak)[0];
 
     if (bestStreak && bestStreak.currentStreak >= STREAK_HIGHLIGHT_MIN) {
-      messages.push({
-        id: "habit-streak-at-risk",
-        tone: "warning",
-        text: `Sua sequência em "${bestStreak.title}" está em ${bestStreak.currentStreak} dias — não perca hoje.`,
+      push("habit-streak-at-risk", "warning", {
+        kind: "habit-streak-at-risk",
+        title: bestStreak.title,
+        streak: bestStreak.currentStreak,
       });
     }
 
@@ -96,13 +97,11 @@ export class RuleBasedAssistantProvider implements IAssistantProvider {
 
     if (urgentGoal) {
       const { goal, daysLeft } = urgentGoal;
-      messages.push({
-        id: "goal-deadline-near",
-        tone: "warning",
-        text:
-          daysLeft === 0
-            ? `O prazo de "${goal.title}" é hoje e o progresso está em ${goal.progressPercent}%.`
-            : `O prazo de "${goal.title}" é em ${daysLeft} dia(s) e o progresso está em ${goal.progressPercent}%.`,
+      push("goal-deadline-near", "warning", {
+        kind: "goal-deadline-near",
+        title: goal.title,
+        daysLeft,
+        progress: goal.progressPercent,
       });
     }
 
@@ -112,19 +111,15 @@ export class RuleBasedAssistantProvider implements IAssistantProvider {
       .sort((a, b) => a.time.localeCompare(b.time))[0];
 
     if (nextRoutineItem && messages.length === 0) {
-      messages.push({
-        id: "next-routine-item",
-        tone: "info",
-        text: `Próximo da rotina: ${nextRoutineItem.time} — ${nextRoutineItem.title}.`,
+      push("next-routine-item", "info", {
+        kind: "next-routine-item",
+        time: nextRoutineItem.time,
+        title: nextRoutineItem.title,
       });
     }
 
     if (messages.length === 0 && pendingTasks.length === 0) {
-      messages.push({
-        id: "all-clear",
-        tone: "success",
-        text: "Nenhuma tarefa pendente agora — bom momento para planejar ou descansar.",
-      });
+      push("all-clear", "success", { kind: "all-clear" });
     }
 
     return messages;
