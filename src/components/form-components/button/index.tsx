@@ -1,6 +1,10 @@
 import styles from "./styles.module.css";
 
 type ButtonProps = React.ComponentProps<"button"> & {
+  // Sem valor: a cor do texto/ícone vem do `background` escolhido (ver
+  // `.background*` no CSS) — cada fundo já define uma cor legível própria.
+  // Só passe `color` para forçar uma cor específica (ex.: um ícone
+  // "danger" dentro de um botão transparente).
   color?: "primary" | "secondary" | "danger";
   background?: "transparent" | "primary" | "secondary";
   radius?: "square" | "rounded" | "lg" | "md" | "sm";
@@ -13,11 +17,11 @@ const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slic
 export const Button = ({
   loading = false,
   children,
-  color = "primary",
+  color,
   background = "primary",
-  radius = "square",
+  radius = "md",
   disabled,
-  size,
+  size = "medium",
   className,
   ...rest
 }: ButtonProps) => {
@@ -25,8 +29,11 @@ export const Button = ({
 
   const classNames = [
     styles.button,
-    styles[`color${capitalize(color)}`],
     styles[`background${capitalize(background)}`],
+    // A cor padrão de cada fundo vive numa regra `:where(...)` no CSS
+    // (especificidade zerada) — por isso esta classe, quando passada,
+    // sempre vence, não importa a ordem no arquivo ou no array acima.
+    color && styles[`color${capitalize(color)}`],
     styles[`radius${capitalize(radius)}`],
     size && styles[`size${capitalize(size)}`],
     className,

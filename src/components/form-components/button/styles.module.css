@@ -3,13 +3,20 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  border: none;
+  border: 1px solid transparent;
   font-family: var(--font-sans);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  white-space: nowrap;
   cursor: pointer;
   transition:
     filter var(--duration-fast) var(--easing-standard),
     opacity var(--duration-fast) var(--easing-standard),
-    transform var(--duration-fast) var(--easing-standard);
+    transform var(--duration-fast) var(--easing-standard),
+    box-shadow var(--duration-fast) var(--easing-standard),
+    background-color var(--duration-fast) var(--easing-standard),
+    border-color var(--duration-fast) var(--easing-standard);
 }
 
 .button:active:not(:disabled) {
@@ -27,30 +34,63 @@
   pointer-events: none;
 }
 
-/* Cor do texto/ícone */
-.colorPrimary {
-  color: var(--color-on-highlight);
-}
-.colorSecondary {
-  color: var(--color-on-success);
-}
-.colorDanger {
-  color: var(--color-danger);
-}
-
-/* Fundo */
+/* Fundo. */
 .backgroundTransparent {
   background: transparent;
 }
+.backgroundTransparent:hover:not(:disabled) {
+  background: var(--color-surface-elevated);
+}
 .backgroundPrimary {
   background: var(--color-highlight);
+  box-shadow: 0 1px 2px var(--color-shadow);
 }
 .backgroundSecondary {
   background: var(--color-surface-elevated);
+  border-color: var(--color-border);
+  box-shadow: 0 1px 2px var(--color-shadow);
 }
 .backgroundPrimary:hover:not(:disabled),
 .backgroundSecondary:hover:not(:disabled) {
   filter: brightness(1.08);
+  box-shadow: 0 0.35rem 0.85rem var(--color-shadow);
+  transform: translateY(-1px);
+}
+.backgroundPrimary:active:not(:disabled),
+.backgroundSecondary:active:not(:disabled) {
+  box-shadow: none;
+}
+
+/*
+ * Cor do texto/ícone.
+ *
+ * Cada fundo tem uma cor padrão "mais usada" (dentro de `:where(...)`,
+ * que zera a especificidade dessas regras pra 0). Quando o componente
+ * passa um `color` explícito, a classe `.color*` correspondente tem
+ * especificidade normal e por isso SEMPRE vence o padrão — não importa
+ * a ordem das regras no arquivo, nem a ordem das classes no elemento.
+ * Isso evita depender de "quem vem por último no CSS ganha".
+ */
+:where(.backgroundPrimary) {
+  color: var(--color-on-highlight);
+}
+:where(.backgroundSecondary),
+:where(.backgroundTransparent) {
+  color: var(--color-text);
+}
+
+.colorPrimary {
+  color: var(--color-on-highlight);
+}
+/* Não é "cor de sucesso" — é a cor de texto/ícone discreta, usada pelo
+   botão "Fechar" (X) de todos os modais. Antes usava
+   --color-on-success (pensado pra texto sobre fundo verde, que este
+   botão nunca tem) e ficava quase invisível nos dois temas. */
+.colorSecondary {
+  color: var(--color-text-muted);
+}
+.colorDanger {
+  color: var(--color-danger);
 }
 
 /* Raio */
@@ -70,21 +110,24 @@
   border-radius: var(--radius-sm);
 }
 
-/* Tamanho (afeta o texto/ícone, o padding acompanha proporcionalmente) */
+/* Tamanho (afeta o texto/ícone, o padding acompanha proporcionalmente).
+   Botões de texto (não os quadrados de ícone abaixo) ganham mais
+   respiro horizontal que vertical — fica com cara de botão, não de
+   chip. */
 .sizeXsmall {
-  padding: var(--space-1);
+  padding: var(--space-1) var(--space-2);
   font-size: var(--font-size-xs);
 }
 .sizeSmall {
-  padding: var(--space-1) var(--space-2);
+  padding: 0.45rem var(--space-3);
   font-size: var(--font-size-sm);
 }
 .sizeMedium {
-  padding: var(--space-2);
+  padding: 0.7rem var(--space-5);
   font-size: var(--font-size-md);
 }
 .sizeLarge {
-  padding: var(--space-2) var(--space-3);
+  padding: 0.85rem var(--space-6);
   font-size: var(--font-size-lg);
 }
 .sizeXlarge {
