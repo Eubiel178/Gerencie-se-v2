@@ -10,6 +10,12 @@ export type LoadWeekHydration = {
   loadWeek: () => Promise<IHydrationDay[]>;
 };
 
+// Generalização de `loadWeek` pra qualquer janela de dias — usada pela
+// navegação por semanas anteriores em Estatísticas.
+export type LoadHydrationRange = {
+  loadRange: (days: number) => Promise<IHydrationDay[]>;
+};
+
 export type UpdateHydrationGoal = {
   updateGoal: (dailyGoalMl: number) => Promise<void>;
 };

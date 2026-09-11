@@ -33,7 +33,8 @@ export class LocalHabit
     domain.LoadAllHabits,
     domain.UpdateHabit,
     domain.DeleteHabit,
-    domain.ToggleHabitLog
+    domain.ToggleHabitLog,
+    domain.LoadHabitCompletionsInRange
 {
   async create(params: domain.CreateHabit.Params) {
     const userId = await requireUserId();
@@ -227,6 +228,35 @@ export class LocalHabit
 
       throw error;
     }
+  }
+
+  /** Datas de conclusão de qualquer hábito ativo (dono ou compartilhado)
+   * dentro do período — só pro gráfico agregado de Estatísticas, não
+   * precisa saber qual hábito foi marcado em cada data. */
+  async loadCompletionDatesInRange(since: Date): Promise<string[]> {
+    const userId = await requireUserId();
+
+    const habitRows = await db
+      .select({ id: habits.id })
+      .from(habits)
+      .where(
+        and(
+          or(eq(habits.userId, userId), eq(habits.sharedWithUserId, userId)),
+          eq(habits.archived, false)
+        )
+      );
+
+    if (habitRows.length === 0) return [];
+
+    const habitIds = habitRows.map((row) => row.id);
+    const sinceDate = dayjs(since).format("YYYY-MM-DD");
+
+    const logRows = await db
+      .select({ date: habitLogs.date })
+      .from(habitLogs)
+      .where(and(inArray(habitLogs.habitId, habitIds), gte(habitLogs.date, sinceDate)));
+
+    return logRows.map((row) => row.date);
   }
 }
 

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, gte } from "drizzle-orm";
 
 import * as domain from "@/features/running/domain";
 
@@ -9,7 +9,11 @@ import { runningSessions } from "@/db/schema";
 import { requireUserId } from "@/lib/require-user-id";
 
 export class LocalRunning
-  implements domain.CreateRunningSession, domain.DeleteRunningSession, domain.LoadAllRunningSessions
+  implements
+    domain.CreateRunningSession,
+    domain.DeleteRunningSession,
+    domain.LoadAllRunningSessions,
+    domain.LoadRunningHistoryInRange
 {
   async create(params: domain.CreateRunningSession.Params) {
     const userId = await requireUserId();
@@ -56,6 +60,18 @@ export class LocalRunning
     );
 
     return { sessions, totals };
+  }
+
+  async loadHistoryInRange(since: Date): Promise<domain.IRunningSession[]> {
+    const userId = await requireUserId();
+
+    const rows = await db
+      .select()
+      .from(runningSessions)
+      .where(and(eq(runningSessions.userId, userId), gte(runningSessions.startedAt, since)))
+      .orderBy(desc(runningSessions.startedAt));
+
+    return rows.map(mapRowToSession);
   }
 }
 

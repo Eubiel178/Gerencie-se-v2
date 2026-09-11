@@ -5,3 +5,4 @@ export * from "./delete";
 export * from "./load-all";
 export * from "./toggle-log";
 export * from "./streak";
+export * from "./load-completions-range";

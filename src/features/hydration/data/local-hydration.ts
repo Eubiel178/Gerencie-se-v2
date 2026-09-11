@@ -17,6 +17,7 @@ export class LocalHydration
     domain.DeleteHydrationLog,
     domain.GetTodayHydration,
     domain.LoadWeekHydration,
+    domain.LoadHydrationRange,
     domain.UpdateHydrationGoal
 {
   async logWater(params: domain.LogWater.Params) {
@@ -64,9 +65,16 @@ export class LocalHydration
   }
 
   async loadWeek(): Promise<domain.IHydrationDay[]> {
+    return this.loadRange(HISTORY_WINDOW_DAYS);
+  }
+
+  /** Generalização de `loadWeek` pra qualquer janela de dias — usada pela
+   * navegação por semanas anteriores em Estatísticas (`days` pode passar
+   * de várias semanas). */
+  async loadRange(days: number): Promise<domain.IHydrationDay[]> {
     const userId = await requireUserId();
     const windowStart = dayjs()
-      .subtract(HISTORY_WINDOW_DAYS - 1, "day")
+      .subtract(days - 1, "day")
       .format("YYYY-MM-DD");
 
     const rows = await db
@@ -79,13 +87,13 @@ export class LocalHydration
       totalsByDate.set(row.date, (totalsByDate.get(row.date) ?? 0) + row.amountMl);
     }
 
-    const days: domain.IHydrationDay[] = [];
-    for (let i = HISTORY_WINDOW_DAYS - 1; i >= 0; i--) {
+    const result: domain.IHydrationDay[] = [];
+    for (let i = days - 1; i >= 0; i--) {
       const date = dayjs().subtract(i, "day").format("YYYY-MM-DD");
-      days.push({ date, totalMl: totalsByDate.get(date) ?? 0 });
+      result.push({ date, totalMl: totalsByDate.get(date) ?? 0 });
     }
 
-    return days;
+    return result;
   }
 
   async updateGoal(dailyGoalMl: number) {

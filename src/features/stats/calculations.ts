@@ -84,8 +84,63 @@ export function calculateHydrationAdherence(week: IHydrationDay[], goalMl: numbe
   return week.filter((day) => day.totalMl >= goalMl).length;
 }
 
+/** Mesma ideia de `calculateWeeklyFocusHoursByWeek`, pra hidratação: quantos
+ * dias bateram a meta em cada uma das `weeksBack` semanas (mais antiga
+ * primeiro). `days` precisa cobrir toda a janela pedida (ver
+ * `LocalHydration.loadRange`). */
+export function calculateHydrationAdherenceByWeek(
+  days: IHydrationDay[],
+  goalMl: number,
+  weeksBack: number = 4,
+  now: Dayjs = dayjs()
+): number[] {
+  if (goalMl <= 0) return new Array(weeksBack).fill(0);
+
+  const weeks: number[] = [];
+
+  for (let i = weeksBack - 1; i >= 0; i--) {
+    const weekEnd = now.subtract(i * STATS_WINDOW_DAYS, "day");
+    const weekStart = weekEnd.subtract(STATS_WINDOW_DAYS, "day");
+
+    const hitCount = days.filter((day) => {
+      const date = dayjs(day.date);
+      return date.isAfter(weekStart) && !date.isAfter(weekEnd) && day.totalMl >= goalMl;
+    }).length;
+
+    weeks.push(hitCount);
+  }
+
+  return weeks;
+}
+
 export function calculateBestHabitStreak(habits: { currentStreak: number }[]): number {
   return habits.reduce((max, habit) => Math.max(max, habit.currentStreak), 0);
+}
+
+/** Quantas conclusões de hábito (somando todos os hábitos ativos)
+ * aconteceram em cada uma das `weeksBack` semanas — mesma ideia do
+ * gráfico de foco, mas contando registros de `habit_log` em vez de
+ * horas. `dates` vem de `LoadHabitCompletionsInRange`. */
+export function calculateHabitCompletionsByWeek(
+  dates: string[],
+  weeksBack: number = 4,
+  now: Dayjs = dayjs()
+): number[] {
+  const weeks: number[] = [];
+
+  for (let i = weeksBack - 1; i >= 0; i--) {
+    const weekEnd = now.subtract(i * STATS_WINDOW_DAYS, "day");
+    const weekStart = weekEnd.subtract(STATS_WINDOW_DAYS, "day");
+
+    const count = dates.filter((rawDate) => {
+      const date = dayjs(rawDate);
+      return date.isAfter(weekStart) && !date.isAfter(weekEnd);
+    }).length;
+
+    weeks.push(count);
+  }
+
+  return weeks;
 }
 
 export interface WeeklyRunningStats {
@@ -111,6 +166,29 @@ export function calculateWeeklyRunningStats(
   };
 }
 
+/** Mesma ideia de `calculateWeeklyFocusHoursByWeek`, pra corrida: distância
+ * (km) somada em cada uma das `weeksBack` semanas. */
+export function calculateWeeklyRunningDistanceByWeek(
+  sessions: { startedAt: Date; distanceMeters: number }[],
+  weeksBack: number = 4,
+  now: Dayjs = dayjs()
+): number[] {
+  const weeks: number[] = [];
+
+  for (let i = weeksBack - 1; i >= 0; i--) {
+    const weekEnd = now.subtract(i * STATS_WINDOW_DAYS, "day");
+    const weekStart = weekEnd.subtract(STATS_WINDOW_DAYS, "day");
+
+    const distanceMeters = sessions
+      .filter((session) => dayjs(session.startedAt).isAfter(weekStart) && dayjs(session.startedAt).isBefore(weekEnd))
+      .reduce((sum, session) => sum + session.distanceMeters, 0);
+
+    weeks.push(Math.round((distanceMeters / 1000) * 10) / 10);
+  }
+
+  return weeks;
+}
+
 /** Progresso médio só entre metas ATIVAS (arquivadas não contam — já
  * foram concluídas ou abandonadas, distorceriam a média). */
 export function calculateAverageGoalProgress(
@@ -120,4 +198,32 @@ export function calculateAverageGoalProgress(
   if (active.length === 0) return 0;
 
   return Math.round(active.reduce((sum, goal) => sum + goal.progressPercent, 0) / active.length);
+}
+
+/** Quantas metas (ativas — arquivadas já nem chegam de `loadAll`) foram
+ * criadas em cada uma das `weeksBack` semanas. Diferente das outras
+ * métricas de "por semana": metas não têm um valor histórico acumulável
+ * (progresso é sempre o valor ATUAL, não guardado por data — ver
+ * `calculateGoalProgress`), então "quantas foram criadas" é a única
+ * dimensão de verdade temporal e real que o dado permite. */
+export function calculateGoalsCreatedByWeek(
+  goals: { createdAt: Date }[],
+  weeksBack: number = 4,
+  now: Dayjs = dayjs()
+): number[] {
+  const weeks: number[] = [];
+
+  for (let i = weeksBack - 1; i >= 0; i--) {
+    const weekEnd = now.subtract(i * STATS_WINDOW_DAYS, "day");
+    const weekStart = weekEnd.subtract(STATS_WINDOW_DAYS, "day");
+
+    const count = goals.filter((goal) => {
+      const date = dayjs(goal.createdAt);
+      return date.isAfter(weekStart) && !date.isAfter(weekEnd);
+    }).length;
+
+    weeks.push(count);
+  }
+
+  return weeks;
 }

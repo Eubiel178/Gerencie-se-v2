@@ -6,10 +6,14 @@ import dayjs from "dayjs";
 import {
   calculateAverageGoalProgress,
   calculateBestHabitStreak,
+  calculateGoalsCreatedByWeek,
+  calculateHabitCompletionsByWeek,
   calculateHydrationAdherence,
+  calculateHydrationAdherenceByWeek,
   calculateTaskStats,
   calculateWeeklyFocusHours,
   calculateWeeklyFocusHoursByWeek,
+  calculateWeeklyRunningDistanceByWeek,
   calculateWeeklyRunningStats,
 } from "./calculations";
 
@@ -173,4 +177,43 @@ test("calculateWeeklyRunningStats: soma só corridas dentro da janela de 7 dias"
   const result = calculateWeeklyRunningStats(sessions, NOW);
   assert.equal(result.distanceKm, 5);
   assert.equal(result.sessionCount, 1);
+});
+
+test("calculateHydrationAdherenceByWeek: uma semana por posição, meta invalida zera tudo", () => {
+  const days = [
+    { date: NOW.subtract(1, "day").format("YYYY-MM-DD"), totalMl: 2000 }, // semana atual, bate
+    { date: NOW.subtract(15, "day").format("YYYY-MM-DD"), totalMl: 500 }, // 3 semanas atrás, não bate
+  ];
+
+  assert.deepEqual(calculateHydrationAdherenceByWeek(days, 2000, 4, NOW), [0, 0, 0, 1]);
+  assert.deepEqual(calculateHydrationAdherenceByWeek(days, 0, 4, NOW), [0, 0, 0, 0]);
+});
+
+test("calculateWeeklyRunningDistanceByWeek: uma semana por posição, mais antiga primeiro", () => {
+  const sessions = [
+    { startedAt: NOW.subtract(1, "day").toDate(), distanceMeters: 5000 },
+    { startedAt: NOW.subtract(15, "day").toDate(), distanceMeters: 3000 },
+  ];
+
+  assert.deepEqual(calculateWeeklyRunningDistanceByWeek(sessions, 4, NOW), [0, 3, 0, 5]);
+});
+
+test("calculateHabitCompletionsByWeek: conta conclusões por semana", () => {
+  const dates = [
+    NOW.subtract(1, "day").format("YYYY-MM-DD"),
+    NOW.subtract(2, "day").format("YYYY-MM-DD"),
+    NOW.subtract(15, "day").format("YYYY-MM-DD"),
+  ];
+
+  assert.deepEqual(calculateHabitCompletionsByWeek(dates, 4, NOW), [0, 1, 0, 2]);
+});
+
+test("calculateGoalsCreatedByWeek: conta metas criadas por semana", () => {
+  const goals = [
+    { createdAt: NOW.subtract(1, "day").toDate() },
+    { createdAt: NOW.subtract(15, "day").toDate() },
+    { createdAt: NOW.subtract(15, "day").toDate() },
+  ];
+
+  assert.deepEqual(calculateGoalsCreatedByWeek(goals, 4, NOW), [0, 2, 0, 1]);
 });

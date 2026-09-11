@@ -10,6 +10,10 @@ import { getRunningFetcher } from "@/features/running/data/get-running-fetcher";
 import { Card } from "@/features/dashboard/components/shared";
 
 import { FocusWeeksChart } from "./focus-weeks-chart";
+import { HydrationWeeksChart } from "./hydration-weeks-chart";
+import { RunningWeeksChart } from "./running-weeks-chart";
+import { HabitsWeeksChart } from "./habits-weeks-chart";
+import { GoalsWeeksChart } from "./goals-weeks-chart";
 
 import {
   calculateAverageGoalProgress,
@@ -24,20 +28,35 @@ import styles from "./stats.module.css";
 
 // 28 dias por página de gráfico (4 semanas) × 7 páginas pra trás — dá pra
 // navegar até ~6 meses de histórico sem precisar buscar tudo de uma vez.
-const FOCUS_FETCH_WEEKS_BACK = 28;
+// Mesmo horizonte pra todo gráfico "por semana" da tela, por consistência.
+const WEEKS_BACK = 28;
 
 export async function Stats() {
-  const [tasks, focusHistory, focusHistoryForChart, habits, goals, hydrationToday, hydrationWeek, running] =
-    await Promise.all([
-      getTaskFetcher().loadAll(),
-      getFocusFetcher().loadHistoryInRange(dayjs().subtract(7, "day").toDate()),
-      getFocusFetcher().loadHistoryInRange(dayjs().subtract(FOCUS_FETCH_WEEKS_BACK, "week").toDate()),
-      getHabitFetcher().loadAll(),
-      getGoalFetcher().loadAll(),
-      getHydrationFetcher().getToday(),
-      getHydrationFetcher().loadWeek(),
-      getRunningFetcher().loadAll(),
-    ]);
+  const [
+    tasks,
+    focusHistory,
+    focusHistoryForChart,
+    habits,
+    habitCompletionDates,
+    goals,
+    hydrationToday,
+    hydrationWeek,
+    hydrationHistory,
+    running,
+    runningHistoryForChart,
+  ] = await Promise.all([
+    getTaskFetcher().loadAll(),
+    getFocusFetcher().loadHistoryInRange(dayjs().subtract(7, "day").toDate()),
+    getFocusFetcher().loadHistoryInRange(dayjs().subtract(WEEKS_BACK, "week").toDate()),
+    getHabitFetcher().loadAll(),
+    getHabitFetcher().loadCompletionDatesInRange(dayjs().subtract(WEEKS_BACK, "week").toDate()),
+    getGoalFetcher().loadAll(),
+    getHydrationFetcher().getToday(),
+    getHydrationFetcher().loadWeek(),
+    getHydrationFetcher().loadRange(WEEKS_BACK * 7),
+    getRunningFetcher().loadAll(),
+    getRunningFetcher().loadHistoryInRange(dayjs().subtract(WEEKS_BACK, "week").toDate()),
+  ]);
 
   const taskStats = calculateTaskStats(tasks);
   const focusHours = calculateWeeklyFocusHours(focusHistory);
@@ -70,24 +89,32 @@ export async function Stats() {
 
         <Card title="Horas de foco (7 dias)">
           <p className={styles.bigNumber}>{focusHours}h</p>
-          <FocusWeeksChart sessions={focusHistoryForChart} fetchedWeeksBack={FOCUS_FETCH_WEEKS_BACK} />
+          <FocusWeeksChart sessions={focusHistoryForChart} fetchedWeeksBack={WEEKS_BACK} />
         </Card>
 
         <Card title="Melhor sequência de hábito">
           <p className={styles.bigNumber}>{bestStreak} {bestStreak === 1 ? "dia" : "dias"}</p>
+          <HabitsWeeksChart completionDates={habitCompletionDates} fetchedWeeksBack={WEEKS_BACK} />
         </Card>
 
         <Card title="Meta de hidratação batida">
           <p className={styles.bigNumber}>{hydrationDays}/7 dias</p>
+          <HydrationWeeksChart
+            days={hydrationHistory}
+            goalMl={hydrationToday.goalMl}
+            fetchedWeeksBack={WEEKS_BACK}
+          />
         </Card>
 
         <Card title="Progresso médio das metas ativas">
           <p className={styles.bigNumber}>{avgGoalProgress}%</p>
+          <GoalsWeeksChart goals={goals} />
         </Card>
 
         <Card title="Corrida (7 dias)">
           <p className={styles.bigNumber}>{weeklyRunning.distanceKm} km</p>
           <p className={styles.hint}>{weeklyRunning.sessionCount} corrida(s)</p>
+          <RunningWeeksChart sessions={runningHistoryForChart} fetchedWeeksBack={WEEKS_BACK} />
         </Card>
       </div>
     </section>
