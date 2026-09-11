@@ -41,7 +41,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="pt-BR" suppressHydrationWarning>
+    <html lang="pt-BR" suppressHydrationWarning data-scroll-behavior="smooth">
       <body>
         {/* Aplica o tema salvo assim que o app monta no cliente — ver
             design-system/theme/theme-init.tsx pra entender por que isso

@@ -92,8 +92,12 @@ export function Mascot({ mascot, mood }: MascotProps) {
         <p className={styles.speechBubble}>{line}</p>
 
         <Button.Preset
-          icon={{ name: "FaVolumeUp" }}
-          root={{ "aria-label": "Ouvir a fala do mascote", loading: isSpeaking, onClick: handleSpeak }}
+          icon={{ name: "FaVolumeUp", className: isSpeaking ? styles.speakingIcon : undefined }}
+          root={{
+            "aria-label": isSpeaking ? "Falando" : "Ouvir a fala do mascote",
+            disabled: isSpeaking,
+            onClick: handleSpeak,
+          }}
         />
       </div>
 
