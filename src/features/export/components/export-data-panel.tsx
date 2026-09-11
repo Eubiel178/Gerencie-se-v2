@@ -26,19 +26,15 @@ export function ExportDataPanel() {
   return (
     <div className={styles.panel}>
       <p className={styles.note}>
-        Baixe uma cópia dos seus próprios dados. O JSON traz tudo de uma vez;
-        o CSV traz uma lista por vez, pra abrir numa planilha.
+        Baixe uma cópia dos seus próprios dados, uma lista por vez, em um
+        arquivo que abre direto numa planilha (Excel, Google Planilhas).
       </p>
-
-      <a className={styles.linkButton} href="/api/export?format=json" download="gerencie-se-dados.json">
-        Baixar tudo em JSON
-      </a>
 
       <div className={styles.csvRow}>
         <Input.Root>
           <Input.Wrapper>
             <Input.FieldSelect
-              aria-label="Escolher lista para exportar em CSV"
+              aria-label="Escolher lista para exportar"
               optionsArray={ENTITY_OPTIONS}
               value={entity}
               onChange={(event) => setEntity(event.target.value)}
@@ -47,13 +43,17 @@ export function ExportDataPanel() {
         </Input.Root>
 
         <a
-          className={`${styles.linkButton} ${styles.secondary}`}
+          className={styles.linkButton}
           href={`/api/export?format=csv&entity=${entity}`}
           download={`gerencie-se-${entity}.csv`}
         >
-          Baixar CSV
+          Baixar planilha
         </a>
       </div>
+
+      <a className={styles.advancedLink} href="/api/export?format=json" download="gerencie-se-dados.json">
+        Baixar tudo em um arquivo técnico (JSON), pra quem sabe usar
+      </a>
     </div>
   );
 }

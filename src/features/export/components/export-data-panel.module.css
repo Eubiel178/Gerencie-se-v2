@@ -40,3 +40,17 @@
 .csvRow .linkButton {
   align-self: auto;
 }
+
+/* De propósito discreto (link pequeno, não um botão) — a maioria das
+   pessoas não sabe o que é um JSON, então essa opção fica disponível
+   sem competir visualmente com a planilha, que é o caminho recomendado. */
+.advancedLink {
+  align-self: flex-start;
+  color: var(--color-text-muted);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  text-decoration: underline;
+}
+.advancedLink:hover {
+  color: var(--color-text);
+}

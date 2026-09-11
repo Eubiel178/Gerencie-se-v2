@@ -57,111 +57,141 @@ export async function Settings({ searchParams }: SettingsProps) {
 
       <CalendarStatusBanner connected={connected} error={error} />
 
-      <div className={styles.settingGrid}>
-      <section className={styles.settingPanel}>
-        <div className={styles.panelHeader}>
-          <h2>Aparência</h2>
-          <p className={styles.panelText}>
-            Escolha entre o tema do sistema, claro ou escuro.
-          </p>
-        </div>
+      <div className={styles.settingGroups}>
+        <section className={styles.settingGroup}>
+          <h2 className={styles.settingGroupTitle}>Perfil</h2>
 
-        <ThemeToggle />
-      </section>
+          <div className={styles.settingGrid}>
+            <section id="conta" className={styles.settingPanel}>
+              <h3>Conta</h3>
 
-      <section className={styles.settingPanel}>
-        <div className={styles.panelHeader}>
-          <h2>Assistente</h2>
-          <p className={styles.panelText}>
-            {mascot.name} aparece discretamente na tela com sugestões
-            baseadas no que você tem pendente — é o mesmo mascote de
-            Foco, com o nome, a espécie e a personalidade escolhidos
-            abaixo.
-          </p>
-        </div>
+              <p className={styles.panelText}>
+                {isGoogleLogin
+                  ? "Você está conectado com Google"
+                  : "Você acessa com e-mail e senha."}
+              </p>
+            </section>
 
-        <PreferencesPanel preferences={assistantPreferences} mascotName={mascot.name} />
-      </section>
+            <section className={styles.settingPanel}>
+              <div className={styles.panelHeader}>
+                <h3>Aparência</h3>
+                <p className={styles.panelText}>
+                  Escolha entre o tema do sistema, claro ou escuro.
+                </p>
+              </div>
 
-      <section className={styles.settingPanel}>
-        <div className={styles.panelHeader}>
-          <h2>Lembretes</h2>
-        </div>
+              <ThemeToggle />
+            </section>
+          </div>
+        </section>
 
-        <NotificationsToggle />
-      </section>
+        <section className={styles.settingGroup}>
+          <h2 className={styles.settingGroupTitle}>Mascote e assistente</h2>
 
-      <section className={styles.settingPanel}>
-        <div className={styles.panelHeader}>
-          <h2>Resumo semanal</h2>
-        </div>
+          <div className={styles.settingGrid}>
+            <section className={styles.settingPanel}>
+              <div className={styles.panelHeader}>
+                <h3>Mascote</h3>
+                <p className={styles.panelText}>
+                  Escolha o nome, a espécie e a personalidade do mascote
+                  que te acompanha no Foco e também como assistente pelo
+                  resto do app.
+                </p>
+              </div>
 
-        <WeeklySummaryPanel enabled={weeklySummaryEnabled} email={session?.user?.email ?? null} />
-      </section>
+              <MascotSettings mascot={mascot} />
+            </section>
 
-      <section className={styles.settingPanel}>
-        <div className={styles.panelHeader}>
-          <h2>Pessoas</h2>
-          <p className={styles.panelText}>
-            Conecte alguém (ex.: parceiro(a), família) para poder
-            compartilhar tarefas, rotina, hábitos ou metas específicos.
-            Hidratação, Corrida, Saúde e Ciclo Menstrual continuam sempre
-            privados, sem opção de compartilhar.
-          </p>
-        </div>
+            <section className={styles.settingPanel}>
+              <div className={styles.panelHeader}>
+                <h3>Assistente</h3>
+                <p className={styles.panelText}>
+                  {mascot.name} aparece discretamente na tela com
+                  sugestões baseadas no que você tem pendente — é o mesmo
+                  mascote escolhido ao lado.
+                </p>
+              </div>
 
-        <PeoplePanel connections={connections} />
-      </section>
+              <PreferencesPanel preferences={assistantPreferences} mascotName={mascot.name} />
+            </section>
+          </div>
+        </section>
 
-      <section className={styles.settingPanel}>
-        <div className={styles.panelHeader}>
-          <h2>Mascote</h2>
-          <p className={styles.panelText}>
-            Escolha o nome, a espécie e a personalidade do mascote que te
-            acompanha no Foco e também como assistente pelo resto do app.
-          </p>
-        </div>
+        <section className={styles.settingGroup}>
+          <h2 className={styles.settingGroupTitle}>Notificações</h2>
 
-        <MascotSettings mascot={mascot} />
-      </section>
+          <div className={styles.settingGrid}>
+            <section className={styles.settingPanel}>
+              <h3>Lembretes</h3>
 
-      <section id="conta" className={styles.settingPanel}>
-        <h2>Conta</h2>
+              <NotificationsToggle />
+            </section>
 
-        <p className={styles.panelText}>
-          {isGoogleLogin
-            ? "Você está conectado com Google"
-            : "Você acessa com e-mail e senha."}
-        </p>
-      </section>
+            <section className={styles.settingPanel}>
+              <h3>Resumo semanal</h3>
 
-      <section className={styles.settingPanel}>
-        <div className={styles.panelHeader}>
-          <h2>Exportar dados</h2>
-        </div>
+              <WeeklySummaryPanel enabled={weeklySummaryEnabled} email={session?.user?.email ?? null} />
+            </section>
+          </div>
+        </section>
 
-        <ExportDataPanel />
-      </section>
+        <section className={styles.settingGroup}>
+          <h2 className={styles.settingGroupTitle}>Compartilhamento</h2>
 
-      <section className={styles.settingPanel}>
-        <div className={styles.panelHeaderTight}>
-          <h2>Integrações</h2>
-          <h3>Google Agenda</h3>
+          <div className={styles.settingGrid}>
+            <section className={styles.settingPanel}>
+              <div className={styles.panelHeader}>
+                <h3>Pessoas</h3>
+                <p className={styles.panelText}>
+                  Conecte alguém (ex.: parceiro(a), família) para poder
+                  compartilhar tarefas, rotina, hábitos ou metas
+                  específicos. Hidratação, Corrida, Saúde e Ciclo
+                  Menstrual continuam sempre privados, sem opção de
+                  compartilhar.
+                </p>
+              </div>
 
-          <p className={styles.panelText}>
-            {connection
-              ? "Suas tarefas marcadas para sincronizar aparecem no calendário selecionado abaixo."
-              : "Conecte sua agenda para sincronizar suas tarefas. Isso é opcional e independente do seu login — mesmo quem entra com Google não tem a agenda conectada automaticamente."}
-          </p>
-        </div>
+              <PeoplePanel connections={connections} />
+            </section>
+          </div>
+        </section>
 
-        <ConnectionCard
-          isConnected={!!connection}
-          googleAccountEmail={connection?.googleAccountEmail}
-          selectedCalendarId={connection?.calendarId}
-          calendars={calendars}
-        />
-      </section>
+        <section className={styles.settingGroup}>
+          <h2 className={styles.settingGroupTitle}>Integrações</h2>
+
+          <div className={styles.settingGrid}>
+            <section className={styles.settingPanel}>
+              <div className={styles.panelHeaderTight}>
+                <h3>Google Agenda</h3>
+
+                <p className={styles.panelText}>
+                  {connection
+                    ? "Suas tarefas marcadas para sincronizar aparecem no calendário selecionado abaixo."
+                    : "Conecte sua agenda para sincronizar suas tarefas. Isso é opcional e independente do seu login — mesmo quem entra com Google não tem a agenda conectada automaticamente."}
+                </p>
+              </div>
+
+              <ConnectionCard
+                isConnected={!!connection}
+                googleAccountEmail={connection?.googleAccountEmail}
+                selectedCalendarId={connection?.calendarId}
+                calendars={calendars}
+              />
+            </section>
+          </div>
+        </section>
+
+        <section className={styles.settingGroup}>
+          <h2 className={styles.settingGroupTitle}>Dados</h2>
+
+          <div className={styles.settingGrid}>
+            <section className={styles.settingPanel}>
+              <h3>Exportar dados</h3>
+
+              <ExportDataPanel />
+            </section>
+          </div>
+        </section>
       </div>
     </section>
   );
