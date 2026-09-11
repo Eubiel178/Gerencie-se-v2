@@ -5,7 +5,7 @@ import { MdFullscreen, MdFullscreenExit } from "react-icons/md";
 
 import { useRouter } from "next/navigation";
 
-import { Button, IconButton } from "@/components";
+import { Button } from "@/components";
 
 import {
   cancelFocusSessionAction,
@@ -216,13 +216,13 @@ export function Timer({ initialSession, mascot }: TimerProps) {
   return (
     <div ref={panelRef} className={styles.panel} data-fullscreen={isFullscreen}>
       {session && (
-        <IconButton
+        <Button.IconButtonPreset
           className={styles.fullscreenToggle}
           aria-label={isFullscreen ? "Sair da tela cheia" : "Modo foco em tela cheia"}
           onClick={handleToggleFullscreen}
         >
           {isFullscreen ? <MdFullscreenExit /> : <MdFullscreen />}
-        </IconButton>
+        </Button.IconButtonPreset>
       )}
 
       <Mascot mascot={mascot} mood={mood} />

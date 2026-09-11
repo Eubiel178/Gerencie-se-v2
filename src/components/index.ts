@@ -16,5 +16,4 @@ export { Modal } from "./modal";
 export { ModalHeader } from "./modal/modal-header";
 export { Form } from "./form";
 export { Button } from "./button";
-export { IconButton } from "./icon-button";
 export { Input } from "./form/input";

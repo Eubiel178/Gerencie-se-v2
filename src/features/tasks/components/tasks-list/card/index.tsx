@@ -12,7 +12,7 @@ import {
   toggleTaskCompleteAction,
 } from "@/features/tasks/actions";
 
-import { Button, IconButton } from "@/components";
+import { Button } from "@/components";
 import { SharedBadge } from "@/features/connections/components/shared-badge";
 import { EditTask } from "../../modal";
 import { PRIORITY_LABELS } from "../../modal/interfaces";
@@ -102,14 +102,14 @@ export function Card({ task, tagLabel, isGoogleConnected, connections }: CardPro
 
           <div className={styles.headerActions}>
             {!task.isSharedWithMe && (
-              <IconButton
+              <Button.IconButtonPreset
                 tone="danger"
                 aria-label={`Excluir tarefa ${task.title}`}
                 loading={isRemoving}
                 onClick={handleTaskRemove}
               >
                 <FaTrash />
-              </IconButton>
+              </Button.IconButtonPreset>
             )}
 
             <EditTask taskBeingEdited={task} isGoogleConnected={isGoogleConnected} connections={connections} />

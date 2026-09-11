@@ -10,7 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/routine-schema";
 
-import { Form, Modal, ModalHeader, Input, Button, IconButton } from "@/components";
+import { Form, Modal, ModalHeader, Input, Button } from "@/components";
 
 import { updateRoutineItemAction } from "@/features/routine/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
@@ -69,7 +69,7 @@ export function EditRoutineItem({ itemBeingEdited, taskOptions, connections }: I
 
   return (
     <>
-      <IconButton
+      <Button.IconButtonPreset
         tone="highlight"
         aria-label={`Editar item de rotina ${itemBeingEdited.title}`}
         onClick={function () {
@@ -77,7 +77,7 @@ export function EditRoutineItem({ itemBeingEdited, taskOptions, connections }: I
         }}
       >
         <FaEdit />
-      </IconButton>
+      </Button.IconButtonPreset>
 
       {isOpen && (
         <Modal>

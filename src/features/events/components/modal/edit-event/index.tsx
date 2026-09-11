@@ -10,7 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/event-schema";
 
-import { Form, Modal, ModalHeader, Input, Button, IconButton } from "@/components";
+import { Form, Modal, ModalHeader, Input, Button } from "@/components";
 import inputStyles from "@/components/form/input/styles.module.css";
 
 import { updateEventAction } from "@/features/events/actions";
@@ -66,7 +66,7 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
 
   return (
     <>
-      <IconButton
+      <Button.IconButtonPreset
         tone="muted"
         aria-label={`Editar evento ${eventBeingEdited.title}`}
         onClick={function () {
@@ -74,7 +74,7 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
         }}
       >
         <FaEdit />
-      </IconButton>
+      </Button.IconButtonPreset>
 
       {isOpen && (
         <Modal>

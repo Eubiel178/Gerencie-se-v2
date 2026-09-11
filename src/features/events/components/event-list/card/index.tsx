@@ -10,7 +10,7 @@ import { GoLinkExternal } from "react-icons/go";
 import { deleteEventAction } from "@/features/events/actions";
 import { dateFormatedToFront } from "@/utils";
 
-import { IconButton } from "@/components";
+import { Button } from "@/components";
 
 import { EditEvent } from "../../modal";
 
@@ -42,14 +42,14 @@ export function Card(event: IEvent) {
           <h4>{event.title}</h4>
 
           <div className={styles.eventCardActions}>
-            <IconButton
+            <Button.IconButtonPreset
               tone="danger"
               aria-label={`Excluir evento ${event.title}`}
               loading={isRemoving}
               onClick={handleRemoveEvent}
             >
               <FaTrash />
-            </IconButton>
+            </Button.IconButtonPreset>
 
             <EditEvent eventBeingEdited={event} />
           </div>

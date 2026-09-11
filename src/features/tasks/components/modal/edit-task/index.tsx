@@ -11,7 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/task-schema";
 
-import { Form, Modal, ModalHeader, Input, Button, IconButton } from "@/components";
+import { Form, Modal, ModalHeader, Input, Button } from "@/components";
 
 import { updateTaskAction } from "@/features/tasks/actions";
 
@@ -81,7 +81,7 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
 
   return (
     <>
-      <IconButton
+      <Button.IconButtonPreset
         tone="highlight"
         aria-label={`Editar tarefa ${taskBeingEdited.title}`}
         onClick={function () {
@@ -89,7 +89,7 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
         }}
       >
         <FaEdit />
-      </IconButton>
+      </Button.IconButtonPreset>
 
       {isOpen && (
         <Modal>

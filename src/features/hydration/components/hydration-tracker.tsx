@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { FaTrash } from "react-icons/fa";
-import { Button, IconButton, Input } from "@/components";
+import { Button, Input } from "@/components";
 
 import {
   deleteHydrationLogAction,
@@ -168,14 +168,14 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
                   log.loggedAt
                 )}
               </span>
-              <IconButton
+              <Button.IconButtonPreset
                 tone="danger"
                 className={styles.smallButton}
                 aria-label="Remover registro"
                 onClick={() => handleDelete(log.id)}
               >
                 <FaTrash />
-              </IconButton>
+              </Button.IconButtonPreset>
             </li>
           ))}
         </ul>
