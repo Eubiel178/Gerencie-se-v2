@@ -4,13 +4,15 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
+import dayjs from "dayjs";
+
 import { useForm } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/event-schema";
 
-import { Form, Input, Modal, ModalHeader, Button } from "@/components";
+import { Form, Input, Modal, ModalHeader, Button, SuggestionChips } from "@/components";
 import inputStyles from "@/components/form/input/styles.module.css";
 
 import { createEventAction } from "@/features/events/actions";
@@ -19,6 +21,22 @@ import { nowForDatetimeLocal } from "@/utils";
 import { FormData, IModalProps } from "./interfaces";
 
 import styles from "./add-event.module.css";
+
+const EVENT_COLORS = [
+  "#3788d8",
+  "#e11d48",
+  "#16a34a",
+  "#f59e0b",
+  "#8b5cf6",
+  "#0891b2",
+  "#64748b",
+];
+
+const DURATION_SHORTCUTS = [
+  { label: "+30min", minutes: 30 },
+  { label: "+1h", minutes: 60 },
+  { label: "+2h", minutes: 120 },
+];
 
 export const AddEvent = ({ buttonText }: IModalProps) => {
   const router = useRouter();
@@ -30,6 +48,8 @@ export const AddEvent = ({ buttonText }: IModalProps) => {
     formState: { errors, isSubmitting },
     register,
     reset,
+    setValue,
+    watch,
   } = useForm<FormData>({
     mode: "onChange",
     resolver: zodResolver(validationSchema),
@@ -42,6 +62,9 @@ export const AddEvent = ({ buttonText }: IModalProps) => {
       backgroundColor: "#3788d8",
     },
   });
+
+  const start = watch("start");
+  const backgroundColor = watch("backgroundColor");
 
   const handleFormSubmit = async (data: FormData) => {
     setSubmitError(null);
@@ -128,6 +151,20 @@ export const AddEvent = ({ buttonText }: IModalProps) => {
                   />
                 </Input.Wrapper>
 
+                <SuggestionChips
+                  label="Duração"
+                  suggestions={DURATION_SHORTCUTS.map((shortcut) => shortcut.label)}
+                  onSelect={(label) => {
+                    const shortcut = DURATION_SHORTCUTS.find((option) => option.label === label);
+                    if (!shortcut || !start) return;
+                    setValue(
+                      "end",
+                      dayjs(start).add(shortcut.minutes, "minute").format("YYYY-MM-DDTHH:mm"),
+                      { shouldValidate: true }
+                    );
+                  }}
+                />
+
                 <Input.HelperText />
               </Input.Root>
 
@@ -157,6 +194,20 @@ export const AddEvent = ({ buttonText }: IModalProps) => {
                     type="color"
                   />
                 </Input.Wrapper>
+
+                <div className={styles.colorSwatches}>
+                  {EVENT_COLORS.map((color) => (
+                    <button
+                      key={color}
+                      type="button"
+                      className={styles.colorSwatch}
+                      data-selected={backgroundColor === color}
+                      style={{ backgroundColor: color }}
+                      aria-label={`Usar a cor ${color}`}
+                      onClick={() => setValue("backgroundColor", color, { shouldValidate: true })}
+                    />
+                  ))}
+                </div>
 
                 <Input.HelperText />
               </Input.Root>

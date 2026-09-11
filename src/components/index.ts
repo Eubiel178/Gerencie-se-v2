@@ -17,3 +17,6 @@ export { ModalHeader } from "./modal/modal-header";
 export { Form } from "./form";
 export { Button } from "./button";
 export { Input } from "./form/input";
+export { ChipGroup } from "./chip-group";
+export type { ChipOption } from "./chip-group";
+export { SuggestionChips } from "./suggestion-chips";

@@ -4,12 +4,14 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
+import dayjs from "dayjs";
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/goal-schema";
 
-import { Form, Input, Modal, ModalHeader, Button } from "@/components";
+import { Form, Input, Modal, ModalHeader, Button, ChipGroup, SuggestionChips } from "@/components";
 
 import { createGoalAction } from "@/features/goals/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
@@ -17,6 +19,12 @@ import { ShareSelect } from "@/features/connections/components/share-select";
 import { FormData, IAddGoalProps, PRIORITY_OPTIONS } from "../interfaces";
 
 import styles from "./add-goal.module.css";
+
+const DEADLINE_SHORTCUTS = [
+  { label: "+1 semana", value: () => dayjs().add(1, "week").format("YYYY-MM-DD") },
+  { label: "+1 mês", value: () => dayjs().add(1, "month").format("YYYY-MM-DD") },
+  { label: "+3 meses", value: () => dayjs().add(3, "month").format("YYYY-MM-DD") },
+];
 
 export function AddGoal({ buttonText, connections }: IAddGoalProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -26,6 +34,8 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
   const {
     reset,
     register,
+    setValue,
+    watch,
     formState: { errors, isSubmitting },
     handleSubmit,
   } = useForm<FormData>({
@@ -39,6 +49,8 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
       sharedWithUserId: "",
     },
   });
+
+  const priority = watch("priority");
 
   function closeModal() {
     setIsOpen(false);
@@ -113,18 +125,27 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
                   <Input.Field {...register("deadline")} type="date" />
                 </Input.Wrapper>
 
+                <SuggestionChips
+                  label="Atalhos"
+                  suggestions={DEADLINE_SHORTCUTS.map((shortcut) => shortcut.label)}
+                  onSelect={(label) => {
+                    const shortcut = DEADLINE_SHORTCUTS.find((option) => option.label === label);
+                    if (shortcut) setValue("deadline", shortcut.value(), { shouldValidate: true });
+                  }}
+                />
+
                 <Input.HelperText />
               </Input.Root>
 
               <Input.Root sharedProps={{ error: errors.priority?.message }}>
                 <Input.Label>Prioridade</Input.Label>
 
-                <Input.Wrapper>
-                  <Input.FieldSelect
-                    {...register("priority")}
-                    optionsArray={PRIORITY_OPTIONS}
-                  />
-                </Input.Wrapper>
+                <ChipGroup
+                  aria-label="Prioridade"
+                  options={PRIORITY_OPTIONS}
+                  value={priority}
+                  onChange={(value) => setValue("priority", value as FormData["priority"], { shouldValidate: true })}
+                />
 
                 <Input.HelperText />
               </Input.Root>
