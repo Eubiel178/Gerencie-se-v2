@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { FaEdit } from "react-icons/fa";
+import { FaEdit } from "@/components/icons";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -80,14 +80,13 @@ export function EditHabit({ habitBeingEdited, connections, goalOptions }: IEditH
   return (
     <>
       <Button.IconButtonPreset
+        icon={FaEdit}
         tone="highlight"
         aria-label={`Editar hábito ${habitBeingEdited.title}`}
         onClick={function () {
           setIsOpen(true);
         }}
-      >
-        <FaEdit />
-      </Button.IconButtonPreset>
+      />
 
       {isOpen && (
         <Modal>

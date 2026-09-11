@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { FaEdit } from "react-icons/fa";
+import { FaEdit } from "@/components/icons";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -70,14 +70,13 @@ export function EditRoutineItem({ itemBeingEdited, taskOptions, connections }: I
   return (
     <>
       <Button.IconButtonPreset
+        icon={FaEdit}
         tone="highlight"
         aria-label={`Editar item de rotina ${itemBeingEdited.title}`}
         onClick={function () {
           setIsOpen(true);
         }}
-      >
-        <FaEdit />
-      </Button.IconButtonPreset>
+      />
 
       {isOpen && (
         <Modal>

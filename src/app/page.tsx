@@ -7,7 +7,7 @@ import {
   FiHeart,
   FiTarget,
   FiZap,
-} from "react-icons/fi";
+} from "@/components/icons";
 import { ThemeToggle } from "@/design-system/theme/theme-toggle";
 import styles from "./landing-page.module.css";
 

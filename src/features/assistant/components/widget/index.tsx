@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MdClose } from "react-icons/md";
+import { MdClose } from "@/components/icons";
 
 import { IAssistantMessage } from "@/features/assistant/domain";
 

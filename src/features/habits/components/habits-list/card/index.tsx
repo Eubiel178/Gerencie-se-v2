@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { FaFire, FaCheck, FaTrash } from "react-icons/fa";
+import { FaFire, FaCheck, FaTrash } from "@/components/icons";
 
 import { Button } from "@/components";
 import { SharedBadge } from "@/features/connections/components/shared-badge";
@@ -66,13 +66,12 @@ export function Card({ habit, today, connections, goalOptions, linkedGoalTitle }
 
           {!habit.isSharedWithMe && (
             <Button.IconButtonPreset
+              icon={FaTrash}
               tone="danger"
               aria-label={`Excluir hábito ${habit.title}`}
               loading={isRemoving}
               onClick={handleRemove}
-            >
-              <FaTrash />
-            </Button.IconButtonPreset>
+            />
           )}
         </div>
       </div>

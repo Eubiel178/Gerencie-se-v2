@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { useForm } from "react-hook-form";
-import { FaEdit } from "react-icons/fa";
+import { FaEdit } from "@/components/icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/event-schema";
@@ -67,14 +67,13 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
   return (
     <>
       <Button.IconButtonPreset
+        icon={FaEdit}
         tone="muted"
         aria-label={`Editar evento ${eventBeingEdited.title}`}
         onClick={function () {
           setIsOpen(true);
         }}
-      >
-        <FaEdit />
-      </Button.IconButtonPreset>
+      />
 
       {isOpen && (
         <Modal>

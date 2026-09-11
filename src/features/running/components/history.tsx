@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { FaTrash } from "react-icons/fa";
+import { FaTrash } from "@/components/icons";
 
 import { Button } from "@/components";
 
@@ -53,13 +53,12 @@ export function History({ sessions }: HistoryProps) {
           </div>
 
           <Button.IconButtonPreset
+            icon={FaTrash}
             tone="danger"
             aria-label="Excluir corrida"
             loading={removingId === session.id}
             onClick={() => handleDelete(session.id)}
-          >
-            <FaTrash />
-          </Button.IconButtonPreset>
+          />
         </li>
       ))}
     </ul>

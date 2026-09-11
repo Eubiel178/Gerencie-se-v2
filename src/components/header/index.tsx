@@ -3,9 +3,23 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { FaHome, FaSignOutAlt, FaFire, FaBullseye, FaTint, FaRunning, FaBook, FaHeartbeat, FaCalendarCheck, FaListUl, FaChartBar } from "react-icons/fa";
-import { MdEvent, MdSettings, MdTimer } from "react-icons/md";
-import { MdOutlineSchedule } from "react-icons/md";
+import {
+  FaHome,
+  FaSignOutAlt,
+  FaFire,
+  FaBullseye,
+  FaTint,
+  FaRunning,
+  FaBook,
+  FaHeartbeat,
+  FaCalendarCheck,
+  FaListUl,
+  FaChartBar,
+  MdEvent,
+  MdSettings,
+  MdTimer,
+  MdOutlineSchedule,
+} from "@/components/icons";
 
 import styles from "@/app/home/home-layout.module.css";
 

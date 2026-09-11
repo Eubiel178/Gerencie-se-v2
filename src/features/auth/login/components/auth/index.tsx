@@ -12,7 +12,7 @@ import { validationSchema } from "@/validation/login-schema";
 
 import styles from "../../../auth-page.module.css";
 
-import { FaGoogle } from "react-icons/fa";
+import { FaGoogle } from "@/components/icons";
 
 import { Form, Input, Button } from "@/components";
 

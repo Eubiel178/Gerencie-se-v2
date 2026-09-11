@@ -1,9 +1,17 @@
-import type { IconBaseProps } from "react-icons";
+import type { IconType } from "react-icons";
 
 import styles from "./styles.module.css";
 
-export type IconElement = React.ReactElement<IconBaseProps>;
+type ButtonIconProps = {
+  icon: IconType;
+};
 
-export function ButtonIcon({ children }: { children: IconElement }) {
-  return <span className={styles.icon}>{children}</span>;
+export function ButtonIcon({ icon }: ButtonIconProps) {
+  const Icon = icon;
+
+  return (
+    <span className={styles.icon}>
+      <Icon />
+    </span>
+  );
 }

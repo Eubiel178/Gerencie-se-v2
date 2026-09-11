@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { FaEdit } from "react-icons/fa";
+import { FaEdit } from "@/components/icons";
 import { useForm, useWatch } from "react-hook-form";
 import { useFormTags } from "@/features/tasks/hooks/use-form-tags";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -82,14 +82,13 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
   return (
     <>
       <Button.IconButtonPreset
+        icon={FaEdit}
         tone="highlight"
         aria-label={`Editar tarefa ${taskBeingEdited.title}`}
         onClick={function () {
           setIsOpen(true);
         }}
-      >
-        <FaEdit />
-      </Button.IconButtonPreset>
+      />
 
       {isOpen && (
         <Modal>

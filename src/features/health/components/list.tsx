@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { FaCheck, FaTrash } from "react-icons/fa";
+import { FaCheck, FaTrash } from "@/components/icons";
 
 import { Button } from "@/components";
 
@@ -81,13 +81,12 @@ export function List({ checkups }: { checkups: IHealthCheckup[] }) {
             </Button.Root>
 
             <Button.IconButtonPreset
+              icon={FaTrash}
               tone="danger"
               aria-label={`Excluir ${checkup.title}`}
               loading={busyId === checkup.id}
               onClick={() => handleDelete(checkup.id)}
-            >
-              <FaTrash />
-            </Button.IconButtonPreset>
+            />
           </div>
         </li>
       ))}
