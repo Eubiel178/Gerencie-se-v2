@@ -20,12 +20,12 @@ export const InputFieldPassword = forwardRef<
 
   const [isVisible, setVisible] = useState(false);
 
-  const classNames = [styles.field, incorrect && styles.incorrect]
+  const classNames = [styles.field, styles.passwordField, incorrect && styles.incorrect]
     .filter(Boolean)
     .join(" ");
 
   return (
-    <>
+    <div className={styles.passwordWrapper}>
       <input
         {...rest}
         className={classNames}
@@ -37,12 +37,12 @@ export const InputFieldPassword = forwardRef<
       />
 
       <InputButton
-        type="button"
+        className={styles.passwordToggle}
         aria-label={isVisible ? "Ocultar senha" : "Mostrar senha"}
         onClick={() => setVisible(!isVisible)}
       >
         <InputIcon>{isVisible ? <FaEyeSlash /> : <FaEye />}</InputIcon>
       </InputButton>
-    </>
+    </div>
   );
 });

@@ -2,9 +2,11 @@ import styles from "./styles.module.css";
 
 type InputButtonProps = React.ComponentProps<"button">;
 
-export const InputButton = ({ children, ...rest }: InputButtonProps) => {
+export const InputButton = ({ children, className, ...rest }: InputButtonProps) => {
+  const classNames = [styles.button, className].filter(Boolean).join(" ");
+
   return (
-    <button {...rest} type="button" className={styles.button}>
+    <button {...rest} type="button" className={classNames}>
       {children}
     </button>
   );
