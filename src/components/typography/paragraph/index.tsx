@@ -1,12 +1,34 @@
 import styles from "./styles.module.css";
 
+type ParagraphColor = "muted" | "default" | "highlight";
+type ParagraphWeight = "bold" | "medium" | "regular" | "light";
+type ParagraphSize = "xsmall" | "small" | "medium" | "large";
+
 type ParagraphProps = React.ComponentProps<"p"> & {
-  color?: "muted" | "default" | "highlight";
-  weight?: "bold" | "medium" | "regular" | "light";
-  size?: "xsmall" | "small" | "medium" | "large";
+  color?: ParagraphColor;
+  weight?: ParagraphWeight;
+  size?: ParagraphSize;
 };
 
-const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
+const COLOR_CLASSES: Record<ParagraphColor, string> = {
+  muted: styles.colorMuted,
+  default: styles.colorDefault,
+  highlight: styles.colorHighlight,
+};
+
+const WEIGHT_CLASSES: Record<ParagraphWeight, string> = {
+  bold: styles.weightBold,
+  medium: styles.weightMedium,
+  regular: styles.weightRegular,
+  light: styles.weightLight,
+};
+
+const SIZE_CLASSES: Record<ParagraphSize, string> = {
+  xsmall: styles.sizeXsmall,
+  small: styles.sizeSmall,
+  medium: styles.sizeMedium,
+  large: styles.sizeLarge,
+};
 
 export const Paragraph = ({
   children,
@@ -17,9 +39,9 @@ export const Paragraph = ({
 }: ParagraphProps) => {
   const classNames = [
     styles.paragraph,
-    styles[`color${capitalize(color)}`],
-    weight && styles[`weight${capitalize(weight)}`],
-    size && styles[`size${capitalize(size)}`],
+    COLOR_CLASSES[color],
+    weight && WEIGHT_CLASSES[weight],
+    size && SIZE_CLASSES[size],
     className,
   ]
     .filter(Boolean)

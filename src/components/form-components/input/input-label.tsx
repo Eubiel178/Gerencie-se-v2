@@ -1,15 +1,19 @@
 import styles from "./styles.module.css";
 
+type InputLabelSize = "small" | "medium" | "large";
+
 type InputLabelProps = React.ComponentProps<"label"> & {
-  size?: "small" | "medium" | "large";
+  size?: InputLabelSize;
 };
 
-const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
+const SIZE_CLASSES: Record<InputLabelSize, string> = {
+  small: styles.labelSmall,
+  medium: styles.labelMedium,
+  large: styles.labelLarge,
+};
 
 export const InputLabel = ({ children, htmlFor, size }: InputLabelProps) => {
-  const classNames = [styles.label, size && styles[`label${capitalize(size)}`]]
-    .filter(Boolean)
-    .join(" ");
+  const classNames = [styles.label, size && SIZE_CLASSES[size]].filter(Boolean).join(" ");
 
   return (
     <label className={classNames} htmlFor={htmlFor}>

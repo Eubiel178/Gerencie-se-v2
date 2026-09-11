@@ -2,13 +2,30 @@ import Link from "next/link";
 
 import styles from "./styles.module.css";
 
+type DefaultLinkDisplay = "flex" | "block";
+type DefaultLinkSize = "small" | "medium" | "large";
+type DefaultLinkWidth = "fit";
+
 type DefaultLinkProps = React.ComponentProps<typeof Link> & {
-  display?: "flex" | "block";
-  size?: "small" | "medium" | "large";
-  width?: "fit";
+  display?: DefaultLinkDisplay;
+  size?: DefaultLinkSize;
+  width?: DefaultLinkWidth;
 };
 
-const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
+const DISPLAY_CLASSES: Record<DefaultLinkDisplay, string> = {
+  flex: styles.displayFlex,
+  block: styles.displayBlock,
+};
+
+const SIZE_CLASSES: Record<DefaultLinkSize, string> = {
+  small: styles.sizeSmall,
+  medium: styles.sizeMedium,
+  large: styles.sizeLarge,
+};
+
+const WIDTH_CLASSES: Record<DefaultLinkWidth, string> = {
+  fit: styles.widthFit,
+};
 
 export const DefaultLink = ({
   size,
@@ -21,9 +38,9 @@ export const DefaultLink = ({
 }: DefaultLinkProps) => {
   const classNames = [
     styles.link,
-    styles[`display${capitalize(display)}`],
-    size && styles[`size${capitalize(size)}`],
-    width && styles[`width${capitalize(width)}`],
+    DISPLAY_CLASSES[display],
+    size && SIZE_CLASSES[size],
+    width && WIDTH_CLASSES[width],
     className,
   ]
     .filter(Boolean)

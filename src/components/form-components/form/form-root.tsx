@@ -1,13 +1,41 @@
 import styles from "./styles.module.css";
 
+type FormRootDirection = "column" | "row";
+type FormRootJustify = "center" | "between" | "stretch";
+type FormRootAlign = "start" | "center" | "end" | "stretch";
+type FormRootGap = "xsmall" | "small" | "medium" | "large";
+
 type FormRootProps = React.ComponentProps<"form"> & {
-  direction?: "column" | "row";
-  justify?: "center" | "between" | "stretch";
-  align?: "start" | "center" | "end" | "stretch";
-  gap?: "xsmall" | "small" | "medium" | "large";
+  direction?: FormRootDirection;
+  justify?: FormRootJustify;
+  align?: FormRootAlign;
+  gap?: FormRootGap;
 };
 
-const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
+const DIRECTION_CLASSES: Record<FormRootDirection, string> = {
+  column: styles.directionColumn,
+  row: styles.directionRow,
+};
+
+const JUSTIFY_CLASSES: Record<FormRootJustify, string> = {
+  center: styles.justifyCenter,
+  between: styles.justifyBetween,
+  stretch: styles.justifyStretch,
+};
+
+const ALIGN_CLASSES: Record<FormRootAlign, string> = {
+  start: styles.alignStart,
+  center: styles.alignCenter,
+  end: styles.alignEnd,
+  stretch: styles.alignStretch,
+};
+
+const GAP_CLASSES: Record<FormRootGap, string> = {
+  xsmall: styles.gapXsmall,
+  small: styles.gapSmall,
+  medium: styles.gapMedium,
+  large: styles.gapLarge,
+};
 
 export const FormRoot = ({
   children,
@@ -20,10 +48,10 @@ export const FormRoot = ({
 }: FormRootProps) => {
   const classNames = [
     styles.root,
-    styles[`direction${capitalize(direction)}`],
-    justify && styles[`justify${capitalize(justify)}`],
-    align && styles[`align${capitalize(align)}`],
-    styles[`gap${capitalize(gap)}`],
+    DIRECTION_CLASSES[direction],
+    justify && JUSTIFY_CLASSES[justify],
+    align && ALIGN_CLASSES[align],
+    GAP_CLASSES[gap],
     className,
   ]
     .filter(Boolean)

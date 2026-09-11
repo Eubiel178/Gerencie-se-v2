@@ -1,11 +1,22 @@
 import styles from "./styles.module.css";
 
+type FormWrapperDirection = "column" | "row";
+type FormWrapperGap = "xsmall" | "small";
+
 type FormWrapperProps = React.ComponentProps<"div"> & {
-  direction?: "column" | "row";
-  gap?: "xsmall" | "small";
+  direction?: FormWrapperDirection;
+  gap?: FormWrapperGap;
 };
 
-const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
+const DIRECTION_CLASSES: Record<FormWrapperDirection, string> = {
+  column: styles.directionColumn,
+  row: styles.directionRow,
+};
+
+const GAP_CLASSES: Record<FormWrapperGap, string> = {
+  xsmall: styles.gapXsmall,
+  small: styles.gapSmall,
+};
 
 export const FormWrapper = ({
   children,
@@ -15,8 +26,8 @@ export const FormWrapper = ({
 }: FormWrapperProps) => {
   const classNames = [
     styles.wrapper,
-    styles[`direction${capitalize(direction)}`],
-    styles[`gap${capitalize(gap)}`],
+    DIRECTION_CLASSES[direction],
+    GAP_CLASSES[gap],
     className,
   ]
     .filter(Boolean)

@@ -2,14 +2,34 @@ import { InputRootProvider, SharedProps } from "@/providers/input-root-context";
 
 import styles from "./styles.module.css";
 
+type InputRootDirection = "row" | "col";
+type InputRootJustify = "center" | "between" | "stretch";
+type InputRootAlign = "start" | "center" | "end" | "stretch";
+
 type InputRootProps = React.ComponentProps<"div"> &
   SharedProps & {
-    direction?: "row" | "col";
-    justify?: "center" | "between" | "stretch";
-    align?: "start" | "center" | "end" | "stretch";
+    direction?: InputRootDirection;
+    justify?: InputRootJustify;
+    align?: InputRootAlign;
   };
 
-const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
+const DIRECTION_CLASSES: Record<InputRootDirection, string> = {
+  row: styles.directionRow,
+  col: styles.directionCol,
+};
+
+const JUSTIFY_CLASSES: Record<InputRootJustify, string> = {
+  center: styles.justifyCenter,
+  between: styles.justifyBetween,
+  stretch: styles.justifyStretch,
+};
+
+const ALIGN_CLASSES: Record<InputRootAlign, string> = {
+  start: styles.alignStart,
+  center: styles.alignCenter,
+  end: styles.alignEnd,
+  stretch: styles.alignStretch,
+};
 
 export const InputRoot = ({
   children,
@@ -20,9 +40,9 @@ export const InputRoot = ({
 }: InputRootProps) => {
   const classNames = [
     styles.root,
-    styles[`direction${capitalize(direction)}`],
-    justify && styles[`justify${capitalize(justify)}`],
-    align && styles[`align${capitalize(align)}`],
+    DIRECTION_CLASSES[direction],
+    justify && JUSTIFY_CLASSES[justify],
+    align && ALIGN_CLASSES[align],
   ]
     .filter(Boolean)
     .join(" ");

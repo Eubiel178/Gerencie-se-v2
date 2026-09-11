@@ -1,11 +1,22 @@
 import styles from "./styles.module.css";
 
+type ListDirection = "row" | "column";
+type ListWrap = "nowrap" | "wrap";
+
 type ListProps = React.ComponentProps<"ul"> & {
-  direction?: "row" | "column";
-  wrap?: "nowrap" | "wrap";
+  direction?: ListDirection;
+  wrap?: ListWrap;
 };
 
-const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
+const DIRECTION_CLASSES: Record<ListDirection, string> = {
+  row: styles.directionRow,
+  column: styles.directionColumn,
+};
+
+const WRAP_CLASSES: Record<ListWrap, string> = {
+  nowrap: styles.wrapNowrap,
+  wrap: styles.wrapWrap,
+};
 
 export const List = ({
   children,
@@ -16,8 +27,8 @@ export const List = ({
 }: ListProps) => {
   const classNames = [
     styles.list,
-    direction && styles[`direction${capitalize(direction)}`],
-    styles[`wrap${capitalize(wrap)}`],
+    direction && DIRECTION_CLASSES[direction],
+    WRAP_CLASSES[wrap],
     className,
   ]
     .filter(Boolean)
