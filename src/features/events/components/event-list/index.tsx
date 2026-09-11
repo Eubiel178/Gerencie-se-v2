@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-import { List, Feedback } from "@/components";
+import { Feedback } from "@/components";
 
 import { Card } from "./card";
 
@@ -23,13 +23,11 @@ export function EventList({ eventsList }: { eventsList: IEvent[] }) {
   return (
     <>
       {thereAreEvents ? (
-        <>
-          <List className={styles.eventList} direction="column" wrap="nowrap">
-            {events.map((event) => (
-              <Card {...event} key={event.id} />
-            ))}
-          </List>
-        </>
+        <ul className={styles.eventList}>
+          {events.map((event) => (
+            <Card {...event} key={event.id} />
+          ))}
+        </ul>
       ) : (
         <Feedback>Nenhum evento adicionado</Feedback>
       )}

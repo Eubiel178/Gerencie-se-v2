@@ -11,7 +11,6 @@
  * manter só uma biblioteca de componentes (esta), evitando duas fontes de
  * verdade para o mesmo tipo de peça de UI.
  */
-export { List } from "./list";
 export { Header } from "./header";
 export { Modal } from "./modal";
 export { Form } from "./form-components/form";
