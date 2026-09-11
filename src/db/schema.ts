@@ -381,6 +381,10 @@ export const userPreferences = pgTable("user_preference", {
   // nunca deve começar a disparar sozinho sem o usuário pedir (ver
   // `features/weekly-summary`).
   weeklySummaryEnabled: boolean("weekly_summary_enabled").notNull().default(false),
+  // Marcado quando o usuário fecha ou pula o checklist de primeiro acesso
+  // (ver `features/onboarding`) — nunca reaparece depois disso, mesmo que
+  // algum item continue incompleto.
+  onboardingDismissed: boolean("onboarding_dismissed").notNull().default(false),
 });
 
 export const hydrationLogs = pgTable("hydration_log", {

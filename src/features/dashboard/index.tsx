@@ -8,6 +8,8 @@ import { getHabitFetcher } from "@/features/habits/data/get-habit-fetcher";
 import { getGoalFetcher } from "@/features/goals/data/get-goal-fetcher";
 import { getMascotFetcher } from "@/features/focus/data/get-focus-fetcher";
 import { getHydrationFetcher } from "@/features/hydration/data/get-hydration-fetcher";
+import { getOnboardingStatus } from "@/features/onboarding/get-onboarding-status";
+import { OnboardingChecklist } from "@/features/onboarding/components/onboarding-checklist";
 
 import {
   GoalsProgress,
@@ -36,6 +38,8 @@ export async function Dashboard() {
     getHydrationFetcher().getToday(),
   ]);
 
+  const onboarding = await getOnboardingStatus({ tasks, habits, goals, mascot });
+
   const firstName = session?.user?.name?.split(" ")[0] ?? null;
 
   const nextAction = buildNextAction({ tasks, routine, habits });
@@ -62,6 +66,12 @@ export async function Dashboard() {
 
   return (
     <div className={styles.grid}>
+      {!onboarding.dismissed && !onboarding.allDone && (
+        <div className={styles.onboarding}>
+          <OnboardingChecklist items={onboarding.items} />
+        </div>
+      )}
+
       <div className={styles.hero}>
         <Greeting
           text={greetingForHour(now.hour(), firstName)}

@@ -6,6 +6,10 @@
   margin: 0 auto;
 }
 
+.onboarding {
+  grid-column: 1 / -1;
+}
+
 .hero {
   grid-column: 1 / -1;
   display: flex;
