@@ -1,0 +1,5 @@
+Sprites do mascote (galinha.png, vaca.png, porco.png, cabra.png)
+
+Fonte: "Animal Pack Remastered" by Kenney (kenney.nl)
+Licença: CC0 1.0 (domínio público) — https://creativecommons.org/publicdomain/zero/1.0/
+Atribuição não é obrigatória, mas é dada aqui por boa prática.

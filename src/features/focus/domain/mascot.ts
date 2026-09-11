@@ -4,15 +4,15 @@
 export const XP_PER_LEVEL = 100;
 
 export type MascotPersonality = "afetuoso" | "sarcastico" | "engracado" | "motivador" | "zen";
-export type MascotSpecies = "blob" | "gato" | "cachorro";
-export type MascotRenderMode = "2d" | "3d";
+// Sprites de animal de fazenda (CC0, ver public/mascot/CREDITS.txt) —
+// cada valor aqui precisa ter um PNG correspondente em public/mascot/.
+export type MascotSpecies = "galinha" | "vaca" | "porco" | "cabra";
 
 export interface IMascotState {
   userId: string;
   name: string;
   personality: MascotPersonality;
   species: MascotSpecies;
-  renderMode: MascotRenderMode;
   totalXp: number;
   // Calculado a partir de `totalXp` (nunca guardado — mesma lógica de
   // "progresso calculado, nunca persistido" usada em Goals/Habits).

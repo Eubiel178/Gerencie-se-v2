@@ -3,7 +3,7 @@
 import { Button } from "@/components";
 import { IMascotState, MascotEvent, getMascotLine } from "@/features/focus/domain";
 import { useSpeak } from "@/lib/speak-text";
-import { MascotVisual } from "@/features/focus/components/mascot-3d";
+import { MascotSprite } from "@/features/focus/components/mascot-sprite";
 
 import styles from "./mascot.module.css";
 
@@ -12,14 +12,14 @@ interface MascotProps {
   mood: MascotEvent;
 }
 
-/** Criatura original do Focus Timer — não é uma árvore, de propósito.
- * Estados visuais (olhos + bochechas + brilhos) mudam com `mood`:
- * idle (parada), working (concentrada, olhos semicerrados), happy
- * (acabou de completar uma sessão, ganha XP). A fala no balão muda de
- * acordo com a personalidade escolhida em Configurações. Esse mesmo
- * personagem (nome/espécie/personalidade/voz) também é quem "fala" no
- * widget do assistente (JARVIS) espalhado pelo resto do app — são o
- * mesmo ser, não dois bichinhos diferentes. */
+/** Mascote do Focus Timer — um animal de fazenda (sprite estático + CSS,
+ * ver `MascotSprite`), não uma criatura abstrata. Estados visuais mudam
+ * com `mood`: idle (respirando), working (respirando mais rápido),
+ * happy (pulinho + brilhos, acabou de completar uma sessão e ganhar XP).
+ * A fala no balão muda de acordo com a personalidade escolhida em
+ * Configurações. Esse mesmo personagem (nome/espécie/personalidade/voz)
+ * também é quem "fala" no widget do assistente (JARVIS) espalhado pelo
+ * resto do app — são o mesmo ser, não dois bichinhos diferentes. */
 export function Mascot({ mascot, mood }: MascotProps) {
   const line = getMascotLine(mascot.personality, mood, mascot);
   const { isSpeaking, speak: handleSpeak } = useSpeak();
@@ -39,13 +39,7 @@ export function Mascot({ mascot, mood }: MascotProps) {
         />
       </div>
 
-      <MascotVisual
-        species={mascot.species}
-        mood={mood}
-        level={mascot.level}
-        renderMode={mascot.renderMode}
-        roaming
-      />
+      <MascotSprite species={mascot.species} mood={mood} roaming />
 
       <p className={styles.name}>{mascot.name}</p>
       <p className={styles.level}>Nível {mascot.level}</p>

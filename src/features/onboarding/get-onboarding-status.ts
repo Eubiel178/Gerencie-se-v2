@@ -48,7 +48,7 @@ export async function getOnboardingStatus(data: {
 
   const mascotCustomized =
     data.mascot.name !== "Chunchumaru" ||
-    data.mascot.species !== "blob" ||
+    data.mascot.species !== "galinha" ||
     data.mascot.personality !== "afetuoso";
 
   const items: OnboardingItem[] = [

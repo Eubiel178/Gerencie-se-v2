@@ -5,9 +5,10 @@ import { IMascotState, MascotSpecies } from "@/features/focus/domain";
 import styles from "./mascot-card.module.css";
 
 const SPECIES_EMOJI: Record<MascotSpecies, string> = {
-  blob: "🐣",
-  gato: "🐱",
-  cachorro: "🐶",
+  galinha: "🐔",
+  vaca: "🐄",
+  porco: "🐖",
+  cabra: "🐐",
 };
 
 export function MascotCard({ mascot }: { mascot: IMascotState }) {

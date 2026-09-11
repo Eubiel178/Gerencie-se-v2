@@ -71,6 +71,13 @@
       "when": 1789168556735,
       "tag": "0009_wise_angel",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1789170543493,
+      "tag": "0010_cool_blob",
+      "breakpoints": true
     }
   ]
 }

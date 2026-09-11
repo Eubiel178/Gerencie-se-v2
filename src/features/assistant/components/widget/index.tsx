@@ -7,7 +7,7 @@ import { Icon } from "@/components/icon";
 
 import { IAssistantMessage } from "@/features/assistant/domain";
 import { IMascotState, MascotEvent } from "@/features/focus/domain";
-import { MascotCreature } from "@/features/focus/components/mascot/creature";
+import { MascotSprite } from "@/features/focus/components/mascot-sprite";
 import { useSpeak } from "@/lib/speak-text";
 
 import styles from "./widget.module.css";
@@ -147,7 +147,7 @@ export function Widget({ initialMessage, reducedPresence, mascot }: WidgetProps)
         aria-expanded={isOpen}
         onClick={handleAvatarClick}
       >
-        <MascotCreature species={mascot.species} mood={creatureMoodFor(mood)} size="sm" />
+        <MascotSprite species={mascot.species} mood={creatureMoodFor(mood)} size="sm" />
         {!isOpen && message && (
           <span className={styles.pingDot} aria-hidden="true" />
         )}

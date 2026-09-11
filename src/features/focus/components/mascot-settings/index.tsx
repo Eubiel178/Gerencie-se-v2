@@ -11,8 +11,8 @@ import { Form, Input, Button } from "@/components";
 import { useToast } from "@/providers/toast-context";
 
 import { updateMascotAction } from "@/features/focus/actions";
-import { IMascotState, MascotPersonality, MascotRenderMode, MascotSpecies } from "@/features/focus/domain";
-import { MascotVisual } from "@/features/focus/components/mascot-3d";
+import { IMascotState, MascotPersonality, MascotSpecies } from "@/features/focus/domain";
+import { MascotSprite } from "@/features/focus/components/mascot-sprite";
 
 import styles from "./mascot-settings.module.css";
 
@@ -20,7 +20,6 @@ interface FormData {
   name: string;
   personality: MascotPersonality;
   species: MascotSpecies;
-  renderMode: MascotRenderMode;
 }
 
 const PERSONALITY_OPTIONS = [
@@ -32,14 +31,10 @@ const PERSONALITY_OPTIONS = [
 ];
 
 const SPECIES_OPTIONS = [
-  { label: "Bolinha", value: "blob" },
-  { label: "Gato", value: "gato" },
-  { label: "Cachorro", value: "cachorro" },
-];
-
-const RENDER_MODE_OPTIONS = [
-  { label: "Desenho (CSS)", value: "2d" },
-  { label: "3D (beta)", value: "3d" },
+  { label: "Galinha", value: "galinha" },
+  { label: "Vaca", value: "vaca" },
+  { label: "Porco", value: "porco" },
+  { label: "Cabra", value: "cabra" },
 ];
 
 export function MascotSettings({ mascot }: { mascot: IMascotState }) {
@@ -59,12 +54,10 @@ export function MascotSettings({ mascot }: { mascot: IMascotState }) {
       name: mascot.name,
       personality: mascot.personality,
       species: mascot.species,
-      renderMode: mascot.renderMode,
     },
   });
 
   const previewSpecies = watch("species");
-  const previewRenderMode = watch("renderMode");
 
   async function handleFormSubmit(data: FormData) {
     setSubmitError(null);
@@ -83,7 +76,7 @@ export function MascotSettings({ mascot }: { mascot: IMascotState }) {
   return (
     <Form.Root onSubmit={handleSubmit(handleFormSubmit)} className={styles.form}>
       <div className={styles.preview}>
-        <MascotVisual species={previewSpecies} mood="idle" level={mascot.level} renderMode={previewRenderMode} />
+        <MascotSprite species={previewSpecies} mood="idle" />
       </div>
 
       <Form.Wrapper>
@@ -108,17 +101,6 @@ export function MascotSettings({ mascot }: { mascot: IMascotState }) {
           <Input.Wrapper>
             <Input.FieldSelect {...register("species")} optionsArray={SPECIES_OPTIONS} />
           </Input.Wrapper>
-          <Input.HelperText />
-        </Input.Root>
-
-        <Input.Root sharedProps={{ error: errors.renderMode?.message }}>
-          <Input.Label>Visual</Input.Label>
-          <Input.Wrapper>
-            <Input.FieldSelect {...register("renderMode")} optionsArray={RENDER_MODE_OPTIONS} />
-          </Input.Wrapper>
-          <p className={styles.hint}>
-            O 3D é opcional — se o navegador não suportar, o desenho original aparece no lugar.
-          </p>
           <Input.HelperText />
         </Input.Root>
       </Form.Wrapper>

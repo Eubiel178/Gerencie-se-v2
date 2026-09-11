@@ -9,68 +9,7 @@
 @media (prefers-reduced-motion: reduce){.speakingIcon{animation:none}}
 .speechBubble{position:relative;margin:0;padding:var(--space-2) var(--space-3);border:1px solid var(--color-border);border-radius:var(--radius-md);background:var(--color-surface-elevated);color:var(--color-text);font-size:var(--font-size-sm)}
 
-/* `.stage` é a "pista" onde o mascote anda de um lado pro outro; `.roamer`
-   é quem se move dentro dela (translateX), e `.creature` continua com sua
-   própria animação de respirar — as duas nunca competem pelo mesmo
-   `transform`. Sem `data-roaming`, o `.roamer` fica parado (usado na
-   pré-visualização de Configurações). */
-.stage{position:relative;width:12rem;height:8rem}
-.roamer{position:absolute;top:0;left:0;width:8rem;height:8rem}
-.stage[data-roaming="true"] .roamer{animation:roam 9s ease-in-out infinite}
-/* Sem roaming não precisa da pista larga (só existe pra dar espaço pro
-   vai-e-vem) — encolhe pro tamanho exato da criatura, senão ela fica
-   descentralizada (encostada na esquerda) dentro de quem a centraliza. */
-.stage[data-roaming="false"]{width:8rem}
-
-/* Avatar pequeno do widget do assistente: mesmo desenho, só encolhido
-   via transform (nunca duplicar o CSS da criatura). */
-.stage[data-size="sm"]{width:2.75rem;height:2.75rem;overflow:hidden}
-.stage[data-size="sm"] .roamer{transform:scale(0.34);transform-origin:top left}
-
-/* Forma simétrica e arredondada de propósito — a versão anterior (bordas
-   bem irregulares/assimétricas + olhos numa cor quase preta) lia como
-   "estranho/tenebroso" em vez de fofo. Um oval bem redondo + rosto claro
-   é o que faz ler como kawaii. */
-.creature{position:relative;width:8rem;height:8rem;border-radius:50% 50% 46% 46%/56% 56% 44% 44%;background:linear-gradient(160deg,var(--color-highlight-soft),var(--color-highlight));box-shadow:0 .75rem 1.5rem var(--color-shadow);animation:breathe 3.2s ease-in-out infinite}
-.creature[data-mood="working"]{animation:breathe 1.6s ease-in-out infinite}
-
-/* Espécie: só enfeites em cima do mesmo blob base — sem asset novo. */
-.ear{position:absolute;top:-0.85rem;width:0;height:0;border-left:0.85rem solid transparent;border-right:0.85rem solid transparent;border-bottom:1.2rem solid var(--color-highlight)}
-.earLeft{left:1rem;transform:rotate(-10deg)}
-.earRight{right:1rem;transform:rotate(10deg) scaleX(-1)}
-.tail{position:absolute;bottom:0.3rem;right:-1rem;width:0.5rem;height:2.4rem;border-radius:999px;background:var(--color-highlight);transform:rotate(25deg)}
-
-.floppyEar{position:absolute;top:0.4rem;width:1.2rem;height:2.1rem;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;background:var(--color-highlight-soft)}
-.floppyEarLeft{left:-0.4rem;transform:rotate(-15deg)}
-.floppyEarRight{right:-0.4rem;transform:rotate(15deg) scaleX(-1)}
-.snout{position:absolute;bottom:1.5rem;left:50%;transform:translateX(-50%);width:2.1rem;height:1.3rem;border-radius:50%;background:var(--color-highlight-soft)}
-
-.eyes{position:absolute;top:42%;left:50%;transform:translate(-50%,-50%);display:flex;gap:1.4rem}
-.eye{position:relative;width:.85rem;height:.85rem;border-radius:50%;background:#2b2b33}
-/* Brilho no canto do olho — é o que mais faz um rosto simples ler como
-   "fofo" em vez de um círculo sólido encarando de volta. Só no estado
-   parado (nos outros dois o olho vira um traço/arco, sem espaço pro
-   brilho). */
-.creature[data-mood="idle"] .eye::after{content:"";position:absolute;top:.1rem;left:.1rem;width:.25rem;height:.25rem;border-radius:50%;background:#fff;opacity:.9}
-.creature[data-mood="working"] .eye{width:.85rem;height:.5rem;background:transparent;border-top:.16rem solid #2b2b33;border-radius:999px 999px 0 0/999px 999px 0 0}
-.creature[data-mood="happy"] .eye{width:.85rem;height:.55rem;border-radius:0 0 999px 999px/0 0 999px 999px;background:transparent;border-bottom:.2rem solid #2b2b33}
-.mouth{position:absolute;top:56%;left:50%;transform:translateX(-50%);width:.65rem;height:.4rem;border-bottom:.16rem solid #2b2b33;border-radius:0 0 999px 999px;opacity:.75}
-.cheeks{position:absolute;top:56%;left:50%;transform:translateX(-50%);display:flex;gap:3rem}
-.cheek{width:.7rem;height:.45rem;border-radius:50%;background:#ff9db8;opacity:.7}
-.sparkle{position:absolute;font-size:1.1rem;animation:pop .6s ease-out}
-.sparkleOne{top:-.5rem;right:.5rem}
-.sparkleTwo{bottom:-.25rem;left:-.5rem;animation-delay:.15s}
 .name{margin:0;color:var(--color-text);font-weight:600;font-size:var(--font-size-md)}
 .level{margin:0;color:var(--color-text-muted);font-size:var(--font-size-sm)}
 .xpTrack{width:10rem;height:.4rem;border-radius:var(--radius-full);background:var(--color-border);overflow:hidden}
 .xpFill{height:100%;background:var(--color-highlight);border-radius:var(--radius-full);transition:width var(--duration-base) var(--easing-standard)}
-@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
-@keyframes pop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
-@keyframes roam{
-  0%{transform:translateX(0) scaleX(1)}
-  45%{transform:translateX(4rem) scaleX(1)}
-  50%{transform:translateX(4rem) scaleX(-1)}
-  95%{transform:translateX(0) scaleX(-1)}
-  100%{transform:translateX(0) scaleX(1)}
-}
-@media (prefers-reduced-motion: reduce){.creature{animation:none}.sparkle{animation:none}.roamer{animation:none!important}}

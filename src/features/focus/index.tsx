@@ -9,8 +9,7 @@ import styles from "./focus.module.css";
 export * from "./domain";
 export * from "./actions";
 export { getFocusFetcher, getMascotFetcher } from "./data/get-focus-fetcher";
-export { MascotCreature } from "./components/mascot/creature";
-export { MascotVisual } from "./components/mascot-3d";
+export { MascotSprite } from "./components/mascot-sprite";
 export { MascotSettings } from "./components/mascot-settings";
 
 export async function Focus() {
