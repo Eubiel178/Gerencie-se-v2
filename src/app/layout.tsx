@@ -42,18 +42,18 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
-      <head>
+      <body>
         {/* Aplica o tema salvo antes da primeira pintura — evita flash do
             tema errado. Ver design-system/theme/theme-script.ts.
             `next/script` com `beforeInteractive` (em vez de uma tag
-            <script> crua) porque só ele garante execução síncrona antes
-            da hidratação nesta versão do Next — uma <script> renderizada
-            direto pelo componente não é executada pelo navegador. */}
+            <script> crua, ou de um <head> escrito à mão): o próprio Next
+            reposiciona esse script para dentro do <head> e o executa
+            antes da hidratação — não importa onde ele apareça no JSX
+            (colocá-lo dentro de um <head> manual conflita com esse
+            mecanismo e faz o React tratá-lo como uma <script> comum). */}
         <Script id="theme-init" strategy="beforeInteractive">
           {themeInitScript}
         </Script>
-      </head>
-      <body>
         <SessionProvider>{children}</SessionProvider>
         <ServiceWorkerRegistration />
       </body>
