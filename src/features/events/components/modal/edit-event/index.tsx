@@ -4,12 +4,14 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
+import dayjs from "dayjs";
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/event-schema";
 
-import { Form, Modal, ModalHeader, Input, Button } from "@/components";
+import { Form, Modal, ModalHeader, Input, Button, SuggestionChips } from "@/components";
 import inputStyles from "@/components/form/input/styles.module.css";
 
 import { updateEventAction } from "@/features/events/actions";
@@ -18,6 +20,22 @@ import { useEventStore } from "@/features/events/event-store";
 import { FormData, IModalProps } from "./interfaces";
 
 import styles from "./edit-event.module.css";
+
+const EVENT_COLORS = [
+  "#3788d8",
+  "#e11d48",
+  "#16a34a",
+  "#f59e0b",
+  "#8b5cf6",
+  "#0891b2",
+  "#64748b",
+];
+
+const DURATION_SHORTCUTS = [
+  { label: "+30min", minutes: 30 },
+  { label: "+1h", minutes: 60 },
+  { label: "+2h", minutes: 120 },
+];
 
 export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -30,6 +48,8 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
     formState: { errors, isSubmitting },
     register,
     reset,
+    setValue,
+    watch,
   } = useForm<FormData>({
     mode: "onChange",
     resolver: zodResolver(validationSchema),
@@ -42,6 +62,9 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
       backgroundColor: eventBeingEdited.backgroundColor || "#3788d8",
     },
   });
+
+  const start = watch("start");
+  const backgroundColor = watch("backgroundColor");
 
   function closeModal() {
     setIsOpen(false);
@@ -125,6 +148,20 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
                   />
                 </Input.Wrapper>
 
+                <SuggestionChips
+                  label="Duração até o fim"
+                  suggestions={DURATION_SHORTCUTS.map((shortcut) => shortcut.label)}
+                  onSelect={(label) => {
+                    const shortcut = DURATION_SHORTCUTS.find((option) => option.label === label);
+                    if (!shortcut || !start) return;
+                    setValue(
+                      "end",
+                      dayjs(start).add(shortcut.minutes, "minute").format("YYYY-MM-DDTHH:mm"),
+                      { shouldValidate: true }
+                    );
+                  }}
+                />
+
                 <Input.HelperText />
               </Input.Root>
 
@@ -154,6 +191,22 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
                     type="color"
                   />
                 </Input.Wrapper>
+
+                <span className={styles.colorSwatchesLabel}>Cores prontas — clique para preencher</span>
+
+                <div className={styles.colorSwatches} role="group" aria-label="Cores prontas">
+                  {EVENT_COLORS.map((color) => (
+                    <button
+                      key={color}
+                      type="button"
+                      className={styles.colorSwatch}
+                      data-selected={backgroundColor === color}
+                      style={{ backgroundColor: color }}
+                      aria-label={`Usar a cor ${color}`}
+                      onClick={() => setValue("backgroundColor", color, { shouldValidate: true })}
+                    />
+                  ))}
+                </div>
 
                 <Input.HelperText />
               </Input.Root>

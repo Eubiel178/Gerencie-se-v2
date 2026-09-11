@@ -10,7 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/task-schema";
 
-import { Form, Modal, ModalHeader, Input, Button } from "@/components";
+import { Form, Modal, ModalHeader, Input, Button, ChipGroup } from "@/components";
 
 import { updateTaskAction } from "@/features/tasks/actions";
 
@@ -55,6 +55,7 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
 
   const syncEnabled = useWatch({ control, name: "syncEnabled" });
   const scheduledAt = useWatch({ control, name: "scheduledAt" });
+  const priority = useWatch({ control, name: "priority" });
 
   const closeModal = () => {
     setIsOpen(false);
@@ -136,12 +137,12 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
               <Input.Root sharedProps={{ error: errors.priority?.message }}>
                 <Input.Label>Prioridade</Input.Label>
 
-                <Input.Wrapper>
-                  <Input.FieldSelect
-                    {...register("priority")}
-                    optionsArray={PRIORITY_OPTIONS}
-                  />
-                </Input.Wrapper>
+                <ChipGroup
+                  aria-label="Prioridade"
+                  options={PRIORITY_OPTIONS}
+                  value={priority}
+                  onChange={(value) => setValue("priority", value as FormData["priority"], { shouldValidate: true })}
+                />
 
                 <Input.HelperText />
               </Input.Root>

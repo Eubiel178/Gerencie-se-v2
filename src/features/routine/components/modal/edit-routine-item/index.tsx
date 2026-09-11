@@ -9,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/routine-schema";
 
-import { Form, Modal, ModalHeader, Input, Button } from "@/components";
+import { Form, Modal, ModalHeader, Input, Button, SuggestionChips } from "@/components";
 
 import { updateRoutineItemAction } from "@/features/routine/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
@@ -18,6 +18,9 @@ import { ShareReadOnlyNote } from "@/features/connections/components/share-reado
 import { FormData, IEditRoutineItemProps, NO_TASK_VALUE } from "../interfaces";
 
 import styles from "./edit-routine-item.module.css";
+
+const TITLE_SUGGESTIONS = ["Acordar", "Café da manhã", "Estudar", "Exercício", "Dormir"];
+const TIME_SUGGESTIONS = ["07:00", "12:00", "18:00", "22:00"];
 
 export function EditRoutineItem({ itemBeingEdited, taskOptions, connections }: IEditRoutineItemProps) {
   const router = useRouter();
@@ -28,6 +31,7 @@ export function EditRoutineItem({ itemBeingEdited, taskOptions, connections }: I
   const {
     reset,
     register,
+    setValue,
     formState: { errors, isSubmitting },
     handleSubmit,
   } = useForm<FormData>({
@@ -92,6 +96,12 @@ export function EditRoutineItem({ itemBeingEdited, taskOptions, connections }: I
                   <Input.Field {...register("time")} type="time" />
                 </Input.Wrapper>
 
+                <SuggestionChips
+                  label="Horários comuns"
+                  suggestions={TIME_SUGGESTIONS}
+                  onSelect={(value) => setValue("time", value, { shouldValidate: true })}
+                />
+
                 <Input.HelperText />
               </Input.Root>
 
@@ -102,6 +112,12 @@ export function EditRoutineItem({ itemBeingEdited, taskOptions, connections }: I
                     placeholder="Ex.: Acordar, Estudar, Exercício..."
                   />
                 </Input.Wrapper>
+
+                <SuggestionChips
+                  label="Sugestões"
+                  suggestions={TITLE_SUGGESTIONS}
+                  onSelect={(value) => setValue("title", value, { shouldValidate: true })}
+                />
 
                 <Input.HelperText />
               </Input.Root>

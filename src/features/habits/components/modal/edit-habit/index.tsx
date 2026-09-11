@@ -9,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/habit-schema";
 
-import { Form, Modal, ModalHeader, Input, Button } from "@/components";
+import { Form, Modal, ModalHeader, Input, Button, ChipGroup, SuggestionChips } from "@/components";
 
 import { updateHabitAction } from "@/features/habits/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
@@ -24,6 +24,8 @@ const FREQUENCY_OPTIONS = [
   { label: "Algumas vezes por semana", value: "weekly" },
 ];
 
+const TITLE_SUGGESTIONS = ["Beber água", "Ler", "Meditar", "Exercício", "Dormir cedo"];
+
 export function EditHabit({ habitBeingEdited, connections, goalOptions }: IEditHabitProps) {
   const router = useRouter();
 
@@ -34,6 +36,7 @@ export function EditHabit({ habitBeingEdited, connections, goalOptions }: IEditH
     reset,
     register,
     control,
+    setValue,
     formState: { errors, isSubmitting },
     handleSubmit,
   } = useForm<FormData>({
@@ -103,18 +106,24 @@ export function EditHabit({ habitBeingEdited, connections, goalOptions }: IEditH
                   />
                 </Input.Wrapper>
 
+                <SuggestionChips
+                  label="Sugestões"
+                  suggestions={TITLE_SUGGESTIONS}
+                  onSelect={(value) => setValue("title", value, { shouldValidate: true })}
+                />
+
                 <Input.HelperText />
               </Input.Root>
 
               <Input.Root sharedProps={{ error: errors.frequency?.message }}>
                 <Input.Label>Frequência</Input.Label>
 
-                <Input.Wrapper>
-                  <Input.FieldSelect
-                    {...register("frequency")}
-                    optionsArray={FREQUENCY_OPTIONS}
-                  />
-                </Input.Wrapper>
+                <ChipGroup
+                  aria-label="Frequência"
+                  options={FREQUENCY_OPTIONS}
+                  value={frequency}
+                  onChange={(value) => setValue("frequency", value as FormData["frequency"], { shouldValidate: true })}
+                />
 
                 <Input.HelperText />
               </Input.Root>
