@@ -5,4 +5,5 @@ export * from "./cancel";
 export * from "./get-active";
 export * from "./load-history";
 export * from "./mascot";
+export * from "./mascot-lines";
 export * from "./get-mascot";

@@ -13,6 +13,7 @@ import {
   calculateHydrationAdherence,
   calculateTaskStats,
   calculateWeeklyFocusHours,
+  calculateWeeklyFocusHoursByWeek,
   calculateWeeklyRunningStats,
 } from "./calculations";
 
@@ -32,6 +33,8 @@ export async function Stats() {
 
   const taskStats = calculateTaskStats(tasks);
   const focusHours = calculateWeeklyFocusHours(focusHistory);
+  const focusHoursByWeek = calculateWeeklyFocusHoursByWeek(focusHistory);
+  const maxFocusHours = Math.max(...focusHoursByWeek, 1);
   const bestStreak = calculateBestHabitStreak(habits);
   const hydrationDays = calculateHydrationAdherence(hydrationWeek, hydrationToday.goalMl);
   const avgGoalProgress = calculateAverageGoalProgress(goals);
@@ -61,6 +64,16 @@ export async function Stats() {
 
         <Card title="Horas de foco (7 dias)">
           <p className={styles.bigNumber}>{focusHours}h</p>
+          <div className={styles.focusWeeks}>
+            {focusHoursByWeek.map((hours, index) => (
+              <div key={index} className={styles.focusWeekBar}>
+                <div
+                  className={styles.focusWeekBarFill}
+                  style={{ height: `${Math.max(2, (hours / maxFocusHours) * 100)}%` }}
+                />
+              </div>
+            ))}
+          </div>
         </Card>
 
         <Card title="Melhor sequência de hábito">

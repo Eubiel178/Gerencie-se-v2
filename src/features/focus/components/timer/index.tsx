@@ -11,8 +11,8 @@ import {
   completeFocusSessionAction,
   startFocusSessionAction,
 } from "@/features/focus/actions";
-import { IFocusSession, IMascotState } from "@/features/focus/domain";
-import { Mascot, MascotMood } from "../mascot";
+import { IFocusSession, IMascotState, MascotEvent } from "@/features/focus/domain";
+import { Mascot } from "../mascot";
 
 import styles from "./timer.module.css";
 
@@ -210,7 +210,7 @@ export function Timer({ initialSession, mascot }: TimerProps) {
     }
   }
 
-  const mood: MascotMood = celebration ? "happy" : session ? "working" : "idle";
+  const mood: MascotEvent = celebration ? "happy" : session ? "working" : "idle";
 
   return (
     <div ref={panelRef} className={styles.panel} data-fullscreen={isFullscreen}>

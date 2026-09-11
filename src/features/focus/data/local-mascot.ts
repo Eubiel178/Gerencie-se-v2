@@ -8,7 +8,7 @@ import { db } from "@/db/client";
 import { mascotStates } from "@/db/schema";
 import { requireUserId } from "@/lib/require-user-id";
 
-export class LocalMascot implements domain.GetMascotState, domain.AddMascotXp {
+export class LocalMascot implements domain.GetMascotState, domain.AddMascotXp, domain.UpdateMascot {
   async getMascot(): Promise<domain.IMascotState> {
     const userId = await requireUserId();
 
@@ -43,6 +43,18 @@ export class LocalMascot implements domain.GetMascotState, domain.AddMascotXp {
 
     return mapRowToMascot(updated);
   }
+
+  async updateMascot(patch: domain.IMascotPatch): Promise<void> {
+    const userId = await requireUserId();
+
+    await db
+      .insert(mascotStates)
+      .values({ userId, ...patch })
+      .onConflictDoUpdate({
+        target: mascotStates.userId,
+        set: patch,
+      });
+  }
 }
 
 function mapRowToMascot(row: typeof mascotStates.$inferSelect): domain.IMascotState {
@@ -51,6 +63,7 @@ function mapRowToMascot(row: typeof mascotStates.$inferSelect): domain.IMascotSt
   return {
     userId: row.userId,
     name: row.name,
+    personality: row.personality,
     totalXp: row.totalXp,
     level,
     xpIntoCurrentLevel,

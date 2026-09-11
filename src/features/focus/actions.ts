@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import * as domain from "@/features/focus/domain";
 import { getFocusFetcher, getMascotFetcher } from "@/features/focus/data/get-focus-fetcher";
+import { validationSchema as mascotSchema } from "@/validation/mascot-schema";
 
 type ActionResult = { error: string | null };
 
@@ -55,5 +56,24 @@ export async function cancelFocusSessionAction(
     return { error: null };
   } catch {
     return { error: "Não foi possível cancelar a sessão. Tente novamente." };
+  }
+}
+
+export async function updateMascotAction(patch: domain.IMascotPatch): Promise<ActionResult> {
+  const parsed = mascotSchema.partial().safeParse(patch);
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Dados inválidos." };
+  }
+
+  try {
+    await getMascotFetcher().updateMascot(parsed.data);
+    revalidatePath("/home/focus");
+    revalidatePath("/home");
+    revalidatePath("/home/settings");
+
+    return { error: null };
+  } catch {
+    return { error: "Não foi possível salvar o mascote. Tente novamente." };
   }
 }

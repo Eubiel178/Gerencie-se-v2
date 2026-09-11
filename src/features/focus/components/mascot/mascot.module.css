@@ -1,4 +1,6 @@
 .wrapper{display:flex;flex-direction:column;align-items:center;gap:var(--space-3)}
+.speechRow{display:flex;align-items:center;gap:var(--space-2);max-width:18rem}
+.speechBubble{position:relative;margin:0;padding:var(--space-2) var(--space-3);border:1px solid var(--color-border);border-radius:var(--radius-md);background:var(--color-surface-elevated);color:var(--color-text);font-size:var(--font-size-sm)}
 .creature{position:relative;width:8rem;height:8rem;border-radius:58% 42% 55% 45%/55% 45% 60% 40%;background:linear-gradient(155deg,var(--color-highlight),var(--color-highlight-soft));box-shadow:0 .75rem 1.5rem var(--color-shadow);animation:breathe 3.2s ease-in-out infinite}
 .creature[data-mood="working"]{animation:breathe 1.6s ease-in-out infinite}
 .eyes{position:absolute;top:42%;left:50%;transform:translate(-50%,-50%);display:flex;gap:1.4rem}

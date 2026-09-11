@@ -348,7 +348,10 @@ export const mascotStates = pgTable("mascot_state", {
   userId: text("user_id")
     .primaryKey()
     .references(() => users.id, { onDelete: "cascade" }),
-  name: text("name").notNull().default("Fofuxo"),
+  name: text("name").notNull().default("Chunchumaru"),
+  personality: text("personality", { enum: ["afetuoso", "sarcastico"] })
+    .notNull()
+    .default("afetuoso"),
   totalXp: integer("total_xp").notNull().default(0),
   updatedAt: timestamp("updated_at", { mode: "date" })
     .notNull()

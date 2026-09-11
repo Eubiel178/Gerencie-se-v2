@@ -1,4 +1,4 @@
-import { IMascotState } from "./mascot";
+import { IMascotState, MascotPersonality } from "./mascot";
 
 // Cria o estado do mascote na primeira chamada (linha ainda não existe
 // pra usuários que nunca focaram) — sempre devolve um estado válido,
@@ -9,4 +9,13 @@ export type GetMascotState = {
 
 export type AddMascotXp = {
   addXp: (amount: number) => Promise<IMascotState>;
+};
+
+export interface IMascotPatch {
+  name?: string;
+  personality?: MascotPersonality;
+}
+
+export type UpdateMascot = {
+  updateMascot: (patch: IMascotPatch) => Promise<void>;
 };

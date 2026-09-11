@@ -46,6 +46,38 @@ export function calculateWeeklyFocusHours(sessions: IFocusSession[], now: Dayjs 
   return Math.round((totalSeconds / 3600) * 10) / 10;
 }
 
+/** Mesma ideia de `calculateWeeklyFocusHours`, repetida por `weeksBack`
+ * janelas de 7 dias — a mais antiga primeiro, a semana atual por
+ * último (ordem de leitura de um gráfico de barras). Diferente da
+ * função acima, cada janela aqui tem início E fim (não dá pra reusar
+ * `calculateWeeklyFocusHours` direto: ela só limita o início, o que só
+ * funciona pra janela mais recente). */
+export function calculateWeeklyFocusHoursByWeek(
+  sessions: IFocusSession[],
+  weeksBack: number = 4,
+  now: Dayjs = dayjs()
+): number[] {
+  const weeks: number[] = [];
+
+  for (let i = weeksBack - 1; i >= 0; i--) {
+    const weekEnd = now.subtract(i * STATS_WINDOW_DAYS, "day");
+    const weekStart = weekEnd.subtract(STATS_WINDOW_DAYS, "day");
+
+    const totalSeconds = sessions
+      .filter(
+        (session) =>
+          session.status === "completed" &&
+          dayjs(session.startedAt).isAfter(weekStart) &&
+          dayjs(session.startedAt).isBefore(weekEnd)
+      )
+      .reduce((sum, session) => sum + (session.actualDurationSeconds ?? 0), 0);
+
+    weeks.push(Math.round((totalSeconds / 3600) * 10) / 10);
+  }
+
+  return weeks;
+}
+
 /** Quantos dos últimos 7 dias bateram a meta diária de hidratação. */
 export function calculateHydrationAdherence(week: IHydrationDay[], goalMl: number): number {
   if (goalMl <= 0) return 0;

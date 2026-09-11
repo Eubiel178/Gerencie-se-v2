@@ -1,0 +1,9 @@
+import { z } from "zod";
+
+export const validationSchema = z.object({
+  name: z
+    .string()
+    .min(1, "Campo obrigatório")
+    .max(24, "O nome deve ter no máximo 24 caracteres"),
+  personality: z.enum(["afetuoso", "sarcastico"]),
+});

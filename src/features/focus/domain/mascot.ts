@@ -3,9 +3,12 @@
 // uma progressão simples que dá sensação de avanço a cada sessão de foco.
 export const XP_PER_LEVEL = 100;
 
+export type MascotPersonality = "afetuoso" | "sarcastico";
+
 export interface IMascotState {
   userId: string;
   name: string;
+  personality: MascotPersonality;
   totalXp: number;
   // Calculado a partir de `totalXp` (nunca guardado — mesma lógica de
   // "progresso calculado, nunca persistido" usada em Goals/Habits).

@@ -36,10 +36,13 @@ function initials(name: string | null): string {
   if (!name) return "?";
 
   const parts = name.trim().split(/\s+/);
-  const first = parts[0]?.[0] ?? "";
-  const last = parts.length > 1 ? parts[parts.length - 1][0] : "";
+  let result = parts[0].slice(0, 2);
 
-  return (first + last).toUpperCase();
+  if (parts.length > 1) {
+    result = result + parts[1][0];
+  }
+
+  return result.toUpperCase();
 }
 
 export const Header = ({ user }: HeaderProps) => {
@@ -93,7 +96,7 @@ export const Header = ({ user }: HeaderProps) => {
         </ul>
       </nav>
 
-      <Link href="/home/settings" className={styles.profile}>
+      <Link href="/home/settings#conta" className={styles.profile}>
         {user.image ? (
           <Image
             src={user.image}

@@ -9,6 +9,7 @@ import {
   calculateHydrationAdherence,
   calculateTaskStats,
   calculateWeeklyFocusHours,
+  calculateWeeklyFocusHoursByWeek,
   calculateWeeklyRunningStats,
 } from "./calculations";
 
@@ -85,6 +86,31 @@ test("calculateWeeklyFocusHours: soma só sessões concluídas dentro da janela"
   ];
 
   assert.equal(calculateWeeklyFocusHours(sessions, NOW), 1);
+});
+
+test("calculateWeeklyFocusHoursByWeek: uma semana por posição, mais antiga primeiro", () => {
+  const sessions = [
+    {
+      id: "1",
+      userId: "u1",
+      startedAt: NOW.subtract(1, "day").toDate(), // semana atual
+      plannedDurationSeconds: 1500,
+      actualDurationSeconds: 3600,
+      status: "completed" as const,
+      xpEarned: 10,
+    },
+    {
+      id: "2",
+      userId: "u1",
+      startedAt: NOW.subtract(15, "day").toDate(), // 3 semanas atrás
+      plannedDurationSeconds: 1500,
+      actualDurationSeconds: 7200,
+      status: "completed" as const,
+      xpEarned: 10,
+    },
+  ];
+
+  assert.deepEqual(calculateWeeklyFocusHoursByWeek(sessions, 4, NOW), [0, 2, 0, 1]);
 });
 
 test("calculateHydrationAdherence: conta dias que bateram a meta", () => {

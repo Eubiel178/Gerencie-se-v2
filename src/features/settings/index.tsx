@@ -9,6 +9,8 @@ import { getAssistantPreferencesFetcher } from "@/features/assistant/data/get-as
 import { NotificationsToggle } from "@/features/tasks/components/reminder-scheduler/notifications-toggle";
 import { PeoplePanel } from "@/features/connections/components/people-panel";
 import { getConnectionFetcher } from "@/features/connections/data/get-connection-fetcher";
+import { MascotSettings } from "@/features/focus/components/mascot-settings";
+import { getMascotFetcher } from "@/features/focus/data/get-focus-fetcher";
 
 import { CalendarStatusBanner } from "./components/calendar-status-banner";
 import { ConnectionCard } from "./components/connection-card";
@@ -26,11 +28,12 @@ export async function Settings({ searchParams }: SettingsProps) {
   // `account` do Auth.js); "Integrações" é sobre o Google Agenda estar
   // conectado ou não (tabela própria `google_connection`). Uma nunca
   // implica a outra — por isso ficam em blocos visualmente distintos.
-  const [isGoogleLogin, connection, assistantPreferences, connections] = await Promise.all([
+  const [isGoogleLogin, connection, assistantPreferences, connections, mascot] = await Promise.all([
     isGoogleAccountLinked(userId),
     getGoogleConnection(userId),
     getAssistantPreferencesFetcher().getPreferences(),
     getConnectionFetcher().loadAll(),
+    getMascotFetcher().getMascot(),
   ]);
   const calendars = connection ? await listUserCalendars(userId) : [];
 
@@ -94,6 +97,18 @@ export async function Settings({ searchParams }: SettingsProps) {
       </section>
 
       <section className={styles.settingPanel}>
+        <div className={styles.panelHeader}>
+          <h2>Mascote</h2>
+          <p className={styles.panelText}>
+            Escolha o nome e a personalidade do mascote que te acompanha
+            no Foco.
+          </p>
+        </div>
+
+        <MascotSettings mascot={mascot} />
+      </section>
+
+      <section id="conta" className={styles.settingPanel}>
         <h2>Conta</h2>
 
         <p className={styles.panelText}>

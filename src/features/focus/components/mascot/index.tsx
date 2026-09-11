@@ -1,21 +1,41 @@
-import { IMascotState } from "@/features/focus/domain";
+"use client";
+
+import { Button } from "@/components";
+import { IMascotState, MascotEvent, getMascotLine } from "@/features/focus/domain";
 
 import styles from "./mascot.module.css";
 
-export type MascotMood = "idle" | "working" | "happy";
-
 interface MascotProps {
   mascot: IMascotState;
-  mood: MascotMood;
+  mood: MascotEvent;
+}
+
+function speak(text: string) {
+  if (!("speechSynthesis" in window)) return;
+
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(new SpeechSynthesisUtterance(text));
 }
 
 /** Criatura original do Focus Timer — não é uma árvore, de propósito.
  * Estados visuais (olhos + bochechas + brilhos) mudam com `mood`:
  * idle (parada), working (concentrada, olhos semicerrados), happy
- * (acabou de completar uma sessão, ganha XP). */
+ * (acabou de completar uma sessão, ganha XP). A fala no balão muda de
+ * acordo com a personalidade escolhida em Configurações. */
 export function Mascot({ mascot, mood }: MascotProps) {
+  const line = getMascotLine(mascot.personality, mood, mascot);
+
   return (
     <div className={styles.wrapper}>
+      <div className={styles.speechRow}>
+        <p className={styles.speechBubble}>{line}</p>
+
+        <Button.Preset
+          icon={{ name: "FaVolumeUp" }}
+          root={{ "aria-label": "Ouvir a fala do mascote", onClick: () => speak(line) }}
+        />
+      </div>
+
       <div className={styles.creature} data-mood={mood} aria-hidden="true">
         <div className={styles.eyes}>
           <span className={styles.eye} />
