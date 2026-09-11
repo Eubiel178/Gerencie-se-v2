@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { FaTrash, FaPlus } from "react-icons/fa";
 
-import { Button, Input, Feedback } from "@/components";
+import { Button, Input } from "@/components";
 
 import {
   createGoalStepAction,
@@ -107,9 +107,9 @@ export function Card({ goal, connections }: CardProps) {
       </div>
 
       {goal.isSharedWithMe ? (
-        <Feedback type="info" size="xSmall">Compartilhado por {goal.ownerLabel}</Feedback>
+        <p className={styles.sharedBadge}>Compartilhado por {goal.ownerLabel}</p>
       ) : (
-        goal.sharedWithUserId && <Feedback type="info" size="xSmall">Compartilhado</Feedback>
+        goal.sharedWithUserId && <p className={styles.sharedBadge}>Compartilhado</p>
       )}
 
       {goal.description && <p className={styles.description}>{goal.description}</p>}

@@ -14,3 +14,4 @@
 .itemInfo{display:flex;flex-direction:column;gap:var(--space-1)}
 .itemDate{color:var(--color-text);font-weight:600;font-size:var(--font-size-sm)}
 .itemMeta{color:var(--color-text-muted);font-size:var(--font-size-xs)}
+.emptyMessage{margin:0;font-family:var(--font-sans);color:var(--color-info);font-size:var(--font-size-md)}

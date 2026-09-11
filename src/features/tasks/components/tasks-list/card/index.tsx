@@ -12,7 +12,7 @@ import {
   toggleTaskCompleteAction,
 } from "@/features/tasks/actions";
 
-import { Button, Feedback, Paragraph, Wrapper } from "@/components";
+import { Button } from "@/components";
 import { EditTask } from "../../modal";
 import { PRIORITY_LABELS } from "../../modal/interfaces";
 
@@ -22,9 +22,9 @@ import { LoadAcceptedConnections } from "@/features/connections/domain";
 import styles from "../../../home-dashboard.module.css";
 import { useTaskStore } from "@/features/tasks/task-store";
 
-const HIGH_PRIORITY_FEEDBACK_TYPE = {
-  critica: "error",
-  alta: "warning",
+const HIGH_PRIORITY_BADGE_CLASS = {
+  critica: "priorityBadgeError",
+  alta: "priorityBadgeWarning",
 } as const;
 
 interface CardProps {
@@ -81,9 +81,9 @@ export function Card({ task, tagLabel, isGoogleConnected, connections }: CardPro
 
   return (
     <li key={task.id} className={styles.taskCard}>
-      <Wrapper align="start" background="dark" className={styles.taskCardHeader}>
-        <Wrapper flex="flex1" justify="between" align="center" padding="small">
-          <Wrapper gap="small" align="center">
+      <div className={styles.taskCardHeader}>
+        <div className={styles.headerInner}>
+          <div className={styles.headerLeft}>
             <button
               type="button"
               className={styles.completeCheckbox}
@@ -96,12 +96,10 @@ export function Card({ task, tagLabel, isGoogleConnected, connections }: CardPro
               {task.completed && <FaCheck aria-hidden="true" />}
             </button>
 
-            <Paragraph color="highlight" size="small">
-              {tagLabel}
-            </Paragraph>
-          </Wrapper>
+            <p className={styles.tagLabel}>{tagLabel}</p>
+          </div>
 
-          <Wrapper gap="medium">
+          <div className={styles.headerActions}>
             {!task.isSharedWithMe && (
               <Button
                 color="danger"
@@ -116,19 +114,14 @@ export function Card({ task, tagLabel, isGoogleConnected, connections }: CardPro
             )}
 
             <EditTask taskBeingEdited={task} isGoogleConnected={isGoogleConnected} connections={connections} />
-          </Wrapper>
-        </Wrapper>
-      </Wrapper>
+          </div>
+        </div>
+      </div>
 
-      <Wrapper
-        direction="column"
-        justify="between"
-        flex="flex1"
-        padding="medium"
-      >
-        <Wrapper direction="column" gap="medium">
-          <Wrapper justify="between" align="center">
-            <Wrapper gap="small" align="center">
+      <div className={styles.cardBody}>
+        <div className={styles.cardTop}>
+          <div className={styles.titleRow}>
+            <div className={styles.titleGroup}>
               <h3
                 className={styles.taskTitle}
                 data-completed={task.completed}
@@ -147,45 +140,41 @@ export function Card({ task, tagLabel, isGoogleConnected, connections }: CardPro
                   color="var(--color-text-muted)"
                 />
               )}
-            </Wrapper>
+            </div>
 
             {(task.priority === "critica" || task.priority === "alta") && (
-              <Feedback type={HIGH_PRIORITY_FEEDBACK_TYPE[task.priority]} size="xSmall">
+              <p className={styles[HIGH_PRIORITY_BADGE_CLASS[task.priority]]}>
                 {PRIORITY_LABELS[task.priority]}
-              </Feedback>
+              </p>
             )}
-          </Wrapper>
+          </div>
 
-          <Paragraph color="muted" size="small">
-            {task.description}
-          </Paragraph>
+          <p className={styles.description}>{task.description}</p>
 
           {task.isSharedWithMe ? (
-            <Feedback type="info" size="xSmall">
+            <p className={styles.sharedBadge}>
               Compartilhada por {task.ownerLabel}
-            </Feedback>
+            </p>
           ) : (
             task.sharedWithUserId && (
-              <Feedback type="info" size="xSmall">
-                Compartilhada
-              </Feedback>
+              <p className={styles.sharedBadge}>Compartilhada</p>
             )
           )}
-        </Wrapper>
+        </div>
 
         {task.syncEnabled && (
-          <Wrapper direction="column" gap="small">
+          <div className={styles.syncSection}>
             {task.syncStatus === "SYNCED" && (
-              <Feedback type="success" size="xSmall">
+              <p className={styles.syncSuccess}>
                 Sincronizado com o Google Agenda
-              </Feedback>
+              </p>
             )}
 
             {task.syncStatus === "ERROR" && (
               <>
-                <Feedback type="error" size="xSmall">
+                <p className={styles.syncError}>
                   {task.syncError || "Falha ao sincronizar com o Google Agenda."}
-                </Feedback>
+                </p>
 
                 <Button
                   type="button"
@@ -194,16 +183,16 @@ export function Card({ task, tagLabel, isGoogleConnected, connections }: CardPro
                   loading={isRetrying}
                   onClick={handleRetrySync}
                 >
-                  <Wrapper align="center" gap="xsmall" background="transparent">
+                  <span className={styles.retryButtonContent}>
                     <FaSyncAlt aria-hidden="true" />
                     <span>Tentar novamente</span>
-                  </Wrapper>
+                  </span>
                 </Button>
               </>
             )}
-          </Wrapper>
+          </div>
         )}
-      </Wrapper>
+      </div>
     </li>
   );
 }

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { FaTrash } from "react-icons/fa";
 
-import { Button, Feedback } from "@/components";
+import { Button } from "@/components";
 
 import { deleteRunningSessionAction } from "@/features/running/actions";
 import { IRunningSession } from "@/features/running/domain";
@@ -33,7 +33,7 @@ export function History({ sessions }: HistoryProps) {
   }
 
   if (sessions.length === 0) {
-    return <Feedback>Nenhuma corrida registrada ainda.</Feedback>;
+    return <p className={styles.emptyMessage}>Nenhuma corrida registrada ainda.</p>;
   }
 
   return (

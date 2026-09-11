@@ -5,7 +5,7 @@ import { MdFullscreen, MdFullscreenExit } from "react-icons/md";
 
 import { useRouter } from "next/navigation";
 
-import { Button, Feedback } from "@/components";
+import { Button } from "@/components";
 
 import {
   cancelFocusSessionAction,
@@ -230,9 +230,9 @@ export function Timer({ initialSession, mascot }: TimerProps) {
 
       <Mascot mascot={mascot} mood={mood} />
 
-      {celebration && <Feedback type="success">{celebration}</Feedback>}
-      {actionError && <Feedback type="error">{actionError}</Feedback>}
-      {awayNudge && <Feedback type="info">{awayNudge}</Feedback>}
+      {celebration && <p className={styles.celebrationMessage}>{celebration}</p>}
+      {actionError && <p className={styles.errorMessage}>{actionError}</p>}
+      {awayNudge && <p className={styles.awayNudgeMessage}>{awayNudge}</p>}
 
       {session ? (
         <>

@@ -8,7 +8,7 @@ import {
   updateSelectedCalendarAction,
 } from "@/features/google-calendar/actions";
 
-import { Button, Feedback, Input, Paragraph, Wrapper } from "@/components";
+import { Button, Input } from "@/components";
 
 import type { GoogleCalendarOption } from "@/lib/google-calendar";
 
@@ -71,29 +71,29 @@ export function ConnectionCard({
 
   if (!isConnected) {
     return (
-      <Wrapper direction="column" gap="small">
-        <Wrapper align="center" gap="small">
+      <div className={styles.panel}>
+        <div className={styles.statusRow}>
           <span aria-hidden="true">○</span>
-          <Paragraph>Não conectado</Paragraph>
-        </Wrapper>
+          <p className={styles.statusText}>Não conectado</p>
+        </div>
 
         <a href="/api/google-calendar/connect" className={styles.connectLink}>
           Conectar Google Agenda
         </a>
-      </Wrapper>
+      </div>
     );
   }
 
   return (
-    <Wrapper direction="column" gap="small">
-      <Wrapper align="center" gap="small">
+    <div className={styles.panel}>
+      <div className={styles.statusRow}>
         <span aria-hidden="true">●</span>
-        <Paragraph>Conectado</Paragraph>
-      </Wrapper>
+        <p className={styles.statusText}>Conectado</p>
+      </div>
 
-      <Paragraph size="small" color="muted">
+      <p className={styles.mutedText}>
         Conta: {googleAccountEmail}
-      </Paragraph>
+      </p>
 
       <Input.Root>
         <Input.Label htmlFor="calendarId">Calendário</Input.Label>
@@ -112,9 +112,9 @@ export function ConnectionCard({
         </Input.Wrapper>
       </Input.Root>
 
-      {actionError && <Feedback type="error">{actionError}</Feedback>}
+      {actionError && <p className={styles.error}>{actionError}</p>}
 
-      <Wrapper>
+      <div className={styles.buttonRow}>
         <Button
           type="button"
           color="danger"
@@ -124,7 +124,7 @@ export function ConnectionCard({
         >
           Desconectar
         </Button>
-      </Wrapper>
-    </Wrapper>
+      </div>
+    </div>
   );
 }

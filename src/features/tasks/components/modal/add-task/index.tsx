@@ -11,7 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/task-schema";
 
-import { Form, Input, Modal, Button, Wrapper, Feedback } from "@/components";
+import { Form, Input, Modal, Button } from "@/components";
 
 import { createTaskAction } from "@/features/tasks/actions";
 
@@ -20,6 +20,8 @@ import { ShareSelect } from "@/features/connections/components/share-select";
 import { SyncWithGoogle } from "../sync-with-google";
 import { ReminderFields } from "../reminder-fields";
 import { FormData, IAddTaskProps, PRIORITY_OPTIONS } from "../interfaces";
+
+import styles from "./add-task.module.css";
 
 export function AddTask({ buttonText, isGoogleConnected, connections }: IAddTaskProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -86,7 +88,7 @@ export function AddTask({ buttonText, isGoogleConnected, connections }: IAddTask
 
       {isOpen && (
         <Modal>
-          <Wrapper justify="between" align="center">
+          <div className={styles.modalHeader}>
             <h3>Nova Tarefa</h3>
 
             <Button
@@ -98,7 +100,7 @@ export function AddTask({ buttonText, isGoogleConnected, connections }: IAddTask
             >
               <MdClose />
             </Button>
-          </Wrapper>
+          </div>
 
           <Form.Root onSubmit={handleSubmit(handleOnSubmit)}>
             <Form.Wrapper gap="xsmall">
@@ -175,7 +177,7 @@ export function AddTask({ buttonText, isGoogleConnected, connections }: IAddTask
               />
             </Form.Wrapper>
 
-            {submitError && <Feedback>{submitError}</Feedback>}
+            {submitError && <p className={styles.formError}>{submitError}</p>}
 
             <Button loading={isSubmitting}>Nova Tarefa</Button>
           </Form.Root>

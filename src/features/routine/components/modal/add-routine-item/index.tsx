@@ -10,12 +10,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/routine-schema";
 
-import { Form, Input, Modal, Button, Wrapper, Feedback } from "@/components";
+import { Form, Input, Modal, Button } from "@/components";
 
 import { createRoutineItemAction } from "@/features/routine/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
 
 import { FormData, IAddRoutineItemProps, NO_TASK_VALUE } from "../interfaces";
+
+import styles from "./add-routine-item.module.css";
 
 export function AddRoutineItem({ buttonText, taskOptions, connections }: IAddRoutineItemProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -75,7 +77,7 @@ export function AddRoutineItem({ buttonText, taskOptions, connections }: IAddRou
 
       {isOpen && (
         <Modal>
-          <Wrapper justify="between" align="center">
+          <div className={styles.modalHeader}>
             <h3>Novo Item de Rotina</h3>
 
             <Button
@@ -87,7 +89,7 @@ export function AddRoutineItem({ buttonText, taskOptions, connections }: IAddRou
             >
               <MdClose />
             </Button>
-          </Wrapper>
+          </div>
 
           <Form.Root onSubmit={handleSubmit(handleOnSubmit)}>
             <Form.Wrapper gap="xsmall">
@@ -142,7 +144,7 @@ export function AddRoutineItem({ buttonText, taskOptions, connections }: IAddRou
               </Input.Root>
             </Form.Wrapper>
 
-            {submitError && <Feedback>{submitError}</Feedback>}
+            {submitError && <p className={styles.formError}>{submitError}</p>}
 
             <Button loading={isSubmitting}>Adicionar à Rotina</Button>
           </Form.Root>

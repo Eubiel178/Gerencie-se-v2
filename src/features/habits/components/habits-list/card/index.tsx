@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { FaFire, FaTrash, FaCheck } from "react-icons/fa";
 
-import { Button, Feedback } from "@/components";
+import { Button } from "@/components";
 
 import { deleteHabitAction, toggleHabitLogAction } from "@/features/habits/actions";
 import { EditHabit } from "../../modal";
@@ -79,9 +79,9 @@ export function Card({ habit, today, connections, goalOptions, linkedGoalTitle }
       </div>
 
       {habit.isSharedWithMe ? (
-        <Feedback type="info" size="xSmall">Compartilhado por {habit.ownerLabel}</Feedback>
+        <p className={styles.sharedBadge}>Compartilhado por {habit.ownerLabel}</p>
       ) : (
-        habit.sharedWithUserId && <Feedback type="info" size="xSmall">Compartilhado</Feedback>
+        habit.sharedWithUserId && <p className={styles.sharedBadge}>Compartilhado</p>
       )}
 
       {linkedGoalTitle && <p className={styles.linkedGoal}>Vinculado a: {linkedGoalTitle}</p>}

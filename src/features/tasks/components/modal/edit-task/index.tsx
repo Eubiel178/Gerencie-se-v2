@@ -12,7 +12,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/task-schema";
 
-import { Form, Modal, Input, Button, Wrapper, Feedback, Paragraph } from "@/components";
+import { Form, Modal, Input, Button } from "@/components";
 
 import { updateTaskAction } from "@/features/tasks/actions";
 
@@ -21,6 +21,8 @@ import { ShareSelect } from "@/features/connections/components/share-select";
 import { SyncWithGoogle } from "../sync-with-google";
 import { ReminderFields } from "../reminder-fields";
 import { FormData, IEditTaskProps, PRIORITY_OPTIONS } from "../interfaces";
+
+import styles from "./edit-task.module.css";
 
 export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IEditTaskProps) {
   const router = useRouter();
@@ -93,7 +95,7 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
 
       {isOpen && (
         <Modal>
-          <Wrapper justify="between" align="center">
+          <div className={styles.modalHeader}>
             <h3>Editar Tarefa</h3>
 
             <Button
@@ -105,7 +107,7 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
             >
               <MdClose />
             </Button>
-          </Wrapper>
+          </div>
 
           <Form.Root onSubmit={handleSubmit(handleFormSubmit)}>
             <Form.Wrapper gap="xsmall">
@@ -179,9 +181,9 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
               </Input.Root>
 
               {taskBeingEdited.isSharedWithMe && (
-                <Paragraph size="xsmall" color="muted">
+                <p className={styles.mutedNote}>
                   Só quem compartilhou esta tarefa pode mudar isso.
-                </Paragraph>
+                </p>
               )}
 
               <SyncWithGoogle
@@ -192,7 +194,7 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
               />
             </Form.Wrapper>
 
-            {submitError && <Feedback>{submitError}</Feedback>}
+            {submitError && <p className={styles.formError}>{submitError}</p>}
 
             <Button loading={isSubmitting}>Salvar Alterações</Button>
           </Form.Root>

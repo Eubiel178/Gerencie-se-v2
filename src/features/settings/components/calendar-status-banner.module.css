@@ -1,0 +1,11 @@
+.banner {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-md);
+}
+.success {
+  color: var(--color-success);
+}
+.error {
+  color: var(--color-danger);
+}

@@ -10,12 +10,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/goal-schema";
 
-import { Form, Input, Modal, Button, Wrapper, Feedback } from "@/components";
+import { Form, Input, Modal, Button } from "@/components";
 
 import { createGoalAction } from "@/features/goals/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
 
 import { FormData, IAddGoalProps, PRIORITY_OPTIONS } from "../interfaces";
+
+import styles from "./add-goal.module.css";
 
 export function AddGoal({ buttonText, connections }: IAddGoalProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -77,7 +79,7 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
 
       {isOpen && (
         <Modal>
-          <Wrapper justify="between" align="center">
+          <div className={styles.modalHeader}>
             <h3>Novo Objetivo</h3>
 
             <Button
@@ -89,7 +91,7 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
             >
               <MdClose />
             </Button>
-          </Wrapper>
+          </div>
 
           <Form.Root onSubmit={handleSubmit(handleOnSubmit)}>
             <Form.Wrapper gap="xsmall">
@@ -151,7 +153,7 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
               </Input.Root>
             </Form.Wrapper>
 
-            {submitError && <Feedback>{submitError}</Feedback>}
+            {submitError && <p className={styles.formError}>{submitError}</p>}
 
             <Button loading={isSubmitting}>Criar Objetivo</Button>
           </Form.Root>

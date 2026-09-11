@@ -19,4 +19,6 @@
 .itemDate{color:var(--color-text-muted);font-size:var(--font-size-xs)}
 .itemMain{color:var(--color-text);font-size:var(--font-size-sm)}
 .sourceTag{color:var(--color-text-muted);font-size:var(--font-size-xs)}
+.emptyMessage{margin:0;font-family:var(--font-sans);color:var(--color-info);font-size:var(--font-size-md)}
+.inlineMessage{margin:0;font-family:var(--font-sans);color:var(--color-info);font-size:var(--font-size-md)}
 @media(max-width:420px){.totals,.liveStats{grid-template-columns:1fr;text-align:center}.fieldsRow{flex-direction:column}}

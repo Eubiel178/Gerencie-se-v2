@@ -1,9 +1,9 @@
-import { Wrapper, Paragraph } from "@/components";
+import styles from "./state-message.module.css";
 
 export default function HomeLoading() {
   return (
-    <Wrapper direction="column" align="center" gap="medium" padding="xlarge">
-      <Paragraph>Carregando...</Paragraph>
-    </Wrapper>
+    <div className={styles.wrapper}>
+      <p className={styles.message}>Carregando...</p>
+    </div>
   );
 }

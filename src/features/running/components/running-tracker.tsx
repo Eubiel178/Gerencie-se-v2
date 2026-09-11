@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { Button, Input, Feedback } from "@/components";
+import { Button, Input } from "@/components";
 
 import { createRunningSessionAction } from "@/features/running/actions";
 
@@ -133,7 +133,7 @@ function ManualEntry({ onSaved }: { onSaved: () => void }) {
         </Input.Root>
       </div>
 
-      {error && <Feedback>{error}</Feedback>}
+      {error && <p className={styles.inlineMessage}>{error}</p>}
 
       <Button loading={isSubmitting}>Salvar Corrida</Button>
     </form>
@@ -253,7 +253,7 @@ function LiveTracker({ onSaved }: { onSaved: () => void }) {
 
   return (
     <div className={styles.panel}>
-      {permissionError && <Feedback>{permissionError}</Feedback>}
+      {permissionError && <p className={styles.inlineMessage}>{permissionError}</p>}
 
       <div className={styles.liveStats}>
         <div>

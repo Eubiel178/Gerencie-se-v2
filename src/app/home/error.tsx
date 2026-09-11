@@ -2,7 +2,9 @@
 
 import { useEffect } from "react";
 
-import { Wrapper, Paragraph, Button } from "@/components";
+import { Button } from "@/components";
+
+import styles from "./state-message.module.css";
 
 export default function HomeError({
   error,
@@ -17,13 +19,13 @@ export default function HomeError({
   }, [error]);
 
   return (
-    <Wrapper direction="column" align="center" gap="medium" padding="xlarge">
-      <Paragraph>
+    <div className={styles.wrapper}>
+      <p className={styles.message}>
         Não conseguimos carregar suas informações agora. Verifique sua
         conexão e tente novamente.
-      </Paragraph>
+      </p>
 
       <Button onClick={reset}>Tentar novamente</Button>
-    </Wrapper>
+    </div>
   );
 }

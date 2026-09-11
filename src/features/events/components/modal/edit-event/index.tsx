@@ -11,13 +11,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/event-schema";
 
-import { Form, Modal, Input, Button, Wrapper, Feedback } from "@/components";
+import { Form, Modal, Input, Button } from "@/components";
 import inputStyles from "@/components/form-components/input/styles.module.css";
 
 import { updateEventAction } from "@/features/events/actions";
 import { useEventStore } from "@/features/events/event-store";
 
 import { FormData, IModalProps } from "./interfaces";
+
+import styles from "./edit-event.module.css";
 
 export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -79,7 +81,7 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
 
       {isOpen && (
         <Modal>
-          <Wrapper justify="between" align="center">
+          <div className={styles.modalHeader}>
             <h3>Editando Evento</h3>
 
             <Button
@@ -91,7 +93,7 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
             >
               <MdClose />
             </Button>
-          </Wrapper>
+          </div>
 
           <Form.Root onSubmit={handleSubmit(handleFormSubmit)}>
             <Form.Wrapper>
@@ -172,7 +174,7 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
               </Input.Root>
             </Form.Wrapper>
 
-            {submitError && <Feedback>{submitError}</Feedback>}
+            {submitError && <p className={styles.formError}>{submitError}</p>}
 
             <Button loading={isSubmitting}>Salvar Alterações</Button>
           </Form.Root>

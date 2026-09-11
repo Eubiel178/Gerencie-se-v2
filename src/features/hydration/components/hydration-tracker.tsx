@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { FaTrash } from "react-icons/fa";
 
-import { Button, Input, Feedback } from "@/components";
+import { Button, Input } from "@/components";
 
 import {
   deleteHydrationLogAction,
@@ -94,7 +94,7 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
     <div className={styles.panel}>
       <span className={styles.amount}>{today.totalMl} ml</span>
 
-      {actionError && <Feedback type="error">{actionError}</Feedback>}
+      {actionError && <p className={styles.actionError}>{actionError}</p>}
 
       {isEditingGoal ? (
         <form className={styles.goalForm} onSubmit={handleSaveGoal}>
@@ -177,7 +177,7 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
         <h2 className={styles.sectionTitle}>Últimos 7 dias</h2>
 
         {week.every((day) => day.totalMl === 0) ? (
-          <Feedback>Sem registros ainda nos últimos 7 dias.</Feedback>
+          <p className={styles.weekEmptyMessage}>Sem registros ainda nos últimos 7 dias.</p>
         ) : (
           <div className={styles.week}>
             {week.map((day) => (

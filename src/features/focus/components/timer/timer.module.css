@@ -5,3 +5,6 @@
 .presets{display:flex;gap:var(--space-2);flex-wrap:wrap;justify-content:center}
 .controls{display:flex;gap:var(--space-3)}
 .message{color:var(--color-success);font-weight:600}
+.celebrationMessage{margin:0;font-family:var(--font-sans);color:var(--color-success);font-size:var(--font-size-md)}
+.errorMessage{margin:0;font-family:var(--font-sans);color:var(--color-danger);font-size:var(--font-size-md)}
+.awayNudgeMessage{margin:0;font-family:var(--font-sans);color:var(--color-info);font-size:var(--font-size-md)}

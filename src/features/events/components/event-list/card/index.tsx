@@ -12,7 +12,7 @@ import { GoLinkExternal } from "react-icons/go";
 import { deleteEventAction } from "@/features/events/actions";
 import { dateFormatedToFront } from "@/utils";
 
-import { Button, Paragraph, Wrapper } from "@/components";
+import { Button } from "@/components";
 
 import { EditEvent } from "../../modal";
 
@@ -39,11 +39,11 @@ export function Card(event: IEvent) {
 
   return (
     <li key={event.id} className={styles.eventCard}>
-      <Wrapper direction="column">
-        <Wrapper direction="row" justify="between">
+      <div className={styles.eventCardBody}>
+        <div className={styles.eventCardHeader}>
           <h4>{event.title}</h4>
 
-          <Wrapper direction="row" gap="medium">
+          <div className={styles.eventCardActions}>
             <Button
               color="danger"
               background="transparent"
@@ -56,25 +56,25 @@ export function Card(event: IEvent) {
             </Button>
 
             <EditEvent eventBeingEdited={event} />
-          </Wrapper>
-        </Wrapper>
+          </div>
+        </div>
 
-        <Wrapper direction="column" gap="small">
-          <Wrapper direction="column">
-            <Paragraph color="muted" size="medium">
+        <div className={styles.eventCardDetails}>
+          <div className={styles.eventCardDates}>
+            <p className={styles.eventDateText}>
               Início: {dateFormatedToFront(event.start)}
-            </Paragraph>
+            </p>
 
             {event.end && (
-              <Paragraph color="muted" size="medium">
+              <p className={styles.eventDateText}>
                 Fim: {dateFormatedToFront(event.end)}
-              </Paragraph>
+              </p>
             )}
-          </Wrapper>
+          </div>
 
-          <Paragraph size="medium">{event.description}</Paragraph>
-        </Wrapper>
-      </Wrapper>
+          <p className={styles.eventDescription}>{event.description}</p>
+        </div>
+      </div>
 
       {event.url && (
         <a href={event.url} target="_blank" rel="noopener noreferrer">

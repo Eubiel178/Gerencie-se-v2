@@ -4,3 +4,4 @@
 .duration{color:var(--color-text);font-size:var(--font-size-sm)}
 .xp{color:var(--color-highlight);font-weight:600;font-size:var(--font-size-sm)}
 .statusCancelled{color:var(--color-text-muted);font-style:italic}
+.emptyMessage{margin:0;font-family:var(--font-sans);color:var(--color-info);font-size:var(--font-size-md)}

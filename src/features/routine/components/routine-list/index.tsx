@@ -1,5 +1,3 @@
-import { Feedback, Wrapper } from "@/components";
-
 import { IRoutineItem } from "@/features/routine/domain";
 import { LoadAcceptedConnections } from "@/features/connections/domain";
 import { TaskOption } from "../modal/interfaces";
@@ -16,11 +14,11 @@ interface RoutineListProps {
 export function RoutineList({ items, taskOptions, connections }: RoutineListProps) {
   if (items.length === 0) {
     return (
-      <Wrapper className={styles.empty}>
-        <Feedback>
+      <div className={styles.empty}>
+        <p className={styles.emptyMessage}>
           Sua rotina ainda está vazia. Adicione o primeiro horário do seu dia.
-        </Feedback>
-      </Wrapper>
+        </p>
+      </div>
     );
   }
 

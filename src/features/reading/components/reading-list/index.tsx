@@ -1,5 +1,3 @@
-import { Feedback } from "@/components";
-
 import { IReadingItem } from "@/features/reading/domain";
 import { AddForm } from "./add-form";
 import { Item } from "./item";
@@ -16,7 +14,7 @@ export function ReadingList({ items }: ReadingListProps) {
       <AddForm />
 
       {items.length === 0 ? (
-        <Feedback>Sua lista de leitura está vazia.</Feedback>
+        <p className={styles.emptyMessage}>Sua lista de leitura está vazia.</p>
       ) : (
         <ul className={styles.list}>
           {items.map((item) => (

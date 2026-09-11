@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { FaTrash } from "react-icons/fa";
 
-import { Button, Feedback } from "@/components";
+import { Button } from "@/components";
 
 import { deleteRoutineItemAction } from "@/features/routine/actions";
 import { EditRoutineItem } from "../../modal";
@@ -49,9 +49,9 @@ export function RoutineListItem({ item, taskOptions, connections, linkedTaskTitl
           <p className={styles.linkedTask}>Vinculado a: {linkedTaskTitle}</p>
         )}
         {item.isSharedWithMe ? (
-          <Feedback type="info" size="xSmall">Compartilhado por {item.ownerLabel}</Feedback>
+          <p className={styles.sharedBadge}>Compartilhado por {item.ownerLabel}</p>
         ) : (
-          item.sharedWithUserId && <Feedback type="info" size="xSmall">Compartilhado</Feedback>
+          item.sharedWithUserId && <p className={styles.sharedBadge}>Compartilhado</p>
         )}
       </div>
 

@@ -10,12 +10,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/habit-schema";
 
-import { Form, Input, Modal, Button, Wrapper, Feedback } from "@/components";
+import { Form, Input, Modal, Button } from "@/components";
 
 import { createHabitAction } from "@/features/habits/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
 
 import { FormData, IAddHabitProps, NO_GOAL_VALUE } from "../interfaces";
+
+import styles from "./add-habit.module.css";
 
 const FREQUENCY_OPTIONS = [
   { label: "Todo dia", value: "daily" },
@@ -85,7 +87,7 @@ export function AddHabit({ buttonText, connections, goalOptions }: IAddHabitProp
 
       {isOpen && (
         <Modal>
-          <Wrapper justify="between" align="center">
+          <div className={styles.modalHeader}>
             <h3>Novo Hábito</h3>
 
             <Button
@@ -97,7 +99,7 @@ export function AddHabit({ buttonText, connections, goalOptions }: IAddHabitProp
             >
               <MdClose />
             </Button>
-          </Wrapper>
+          </div>
 
           <Form.Root onSubmit={handleSubmit(handleOnSubmit)}>
             <Form.Wrapper gap="xsmall">
@@ -170,7 +172,7 @@ export function AddHabit({ buttonText, connections, goalOptions }: IAddHabitProp
               </Input.Root>
             </Form.Wrapper>
 
-            {submitError && <Feedback>{submitError}</Feedback>}
+            {submitError && <p className={styles.formError}>{submitError}</p>}
 
             <Button loading={isSubmitting}>Adicionar Hábito</Button>
           </Form.Root>

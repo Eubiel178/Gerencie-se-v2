@@ -13,14 +13,7 @@ import styles from "../../../auth-page.module.css";
 
 import { FaGoogle } from "react-icons/fa";
 
-import {
-  Form,
-  Input,
-  Button,
-  Wrapper,
-  Paragraph,
-  Feedback,
-} from "@/components";
+import { Form, Input, Button } from "@/components";
 
 import { registerAction } from "@/features/auth/actions";
 
@@ -117,7 +110,7 @@ export function Auth() {
           </Input.Root>
         </Form.Wrapper>
 
-        {formError && <Feedback>{formError}</Feedback>}
+        {formError && <p className={styles.formError}>{formError}</p>}
 
         <Button loading={isSubmitting}>Cadastrar</Button>
       </Form.Root>
@@ -128,17 +121,17 @@ export function Auth() {
         loading={isGoogleLoading}
         onClick={handleGoogleSignIn}
       >
-        <Wrapper align="center" gap="small" background="transparent">
+        <span className={styles.googleButtonContent}>
           <FaGoogle aria-hidden="true" />
           <span>Continuar com Google</span>
-        </Wrapper>
+        </span>
       </Button>
 
-      <Wrapper align="center" gap="small">
-        <Paragraph>Já tem uma conta?</Paragraph>
+      <div className={styles.authSwitch}>
+        <p className={styles.authSwitchText}>Já tem uma conta?</p>
 
         <Link className={styles.link} href="/login">Logar</Link>
-      </Wrapper>
+      </div>
     </section>
   );
 }

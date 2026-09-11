@@ -2,8 +2,6 @@
 
 import { useEffect } from "react";
 
-import { Feedback } from "@/components";
-
 import { Card } from "./card";
 
 import { IEvent } from "@/features/events/domain";
@@ -29,7 +27,7 @@ export function EventList({ eventsList }: { eventsList: IEvent[] }) {
           ))}
         </ul>
       ) : (
-        <Feedback>Nenhum evento adicionado</Feedback>
+        <p className={styles.emptyState}>Nenhum evento adicionado</p>
       )}
     </>
   );

@@ -3,8 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { Feedback, Paragraph, Wrapper } from "@/components";
-
 import { updateAssistantPreferencesAction } from "@/features/assistant/actions";
 import { IAssistantPreferences } from "@/features/assistant/domain";
 
@@ -31,7 +29,7 @@ export function PreferencesPanel({ preferences }: { preferences: IAssistantPrefe
   }
 
   return (
-    <Wrapper direction="column" gap="small">
+    <div className={styles.panel}>
       <label className={styles.row}>
         <input
           type="checkbox"
@@ -52,12 +50,12 @@ export function PreferencesPanel({ preferences }: { preferences: IAssistantPrefe
         <span>Presença reduzida (não abrir mensagens sozinho)</span>
       </label>
 
-      <Paragraph size="small" color="muted">
+      <p className={styles.note}>
         O assistente observa suas tarefas, hábitos e metas para sugerir o
         que fazer a seguir — nunca acessa nada fora disso.
-      </Paragraph>
+      </p>
 
-      {error && <Feedback type="error">{error}</Feedback>}
-    </Wrapper>
+      {error && <p className={styles.error}>{error}</p>}
+    </div>
   );
 }

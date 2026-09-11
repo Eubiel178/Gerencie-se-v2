@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 
-import { Button, Feedback, Paragraph, Wrapper } from "@/components";
+import { Button } from "@/components";
+
+import styles from "./notifications-toggle.module.css";
 
 type PermissionState = NotificationPermission | "unsupported";
 
@@ -32,43 +34,43 @@ export function NotificationsToggle() {
 
   if (permission === "unsupported") {
     return (
-      <Paragraph size="small" color="muted">
+      <p className={styles.mutedText}>
         Seu navegador não aceita notificações.
-      </Paragraph>
+      </p>
     );
   }
 
   if (permission === "granted") {
     return (
-      <Feedback type="success" size="small">
+      <p className={styles.enabledMessage}>
         Notificações de lembrete ativadas.
-      </Feedback>
+      </p>
     );
   }
 
   if (permission === "denied") {
     return (
-      <Paragraph size="small" color="muted">
+      <p className={styles.mutedText}>
         Notificações bloqueadas para este site. Para ativar, permita
         notificações do Gerencie-se nas configurações do seu navegador.
-      </Paragraph>
+      </p>
     );
   }
 
   return (
-    <Wrapper direction="column" gap="small">
-      <Paragraph size="small" color="muted">
+    <div className={styles.container}>
+      <p className={styles.mutedText}>
         Ative para receber lembretes de tarefas enquanto o Gerencie-se
         estiver aberto no navegador — fechar o navegador cancela os
         lembretes pendentes, já que não há um servidor de notificações
         por trás disso.
-      </Paragraph>
+      </p>
 
-      <Wrapper>
+      <div className={styles.buttonRow}>
         <Button type="button" size="small" onClick={handleEnable}>
           Ativar notificações de lembrete
         </Button>
-      </Wrapper>
-    </Wrapper>
+      </div>
+    </div>
   );
 }

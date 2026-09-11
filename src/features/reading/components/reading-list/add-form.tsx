@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { Button, Feedback, Input } from "@/components";
+import { Button, Input } from "@/components";
 
 import { createReadingItemAction } from "@/features/reading/actions";
 
@@ -63,7 +63,7 @@ export function AddForm() {
         Adicionar
       </Button>
 
-      {error && <Feedback type="error">{error}</Feedback>}
+      {error && <p className={styles.formError}>{error}</p>}
     </form>
   );
 }

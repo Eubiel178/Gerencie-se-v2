@@ -1,0 +1,20 @@
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--color-text);
+}
+
+.formError {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--color-info);
+  font-size: var(--font-size-md);
+}
+
+.mutedNote {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}

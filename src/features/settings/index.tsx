@@ -2,7 +2,6 @@ import { requireUserId } from "@/lib/require-user-id";
 import { isGoogleAccountLinked } from "@/lib/auth";
 import { getGoogleConnection, listUserCalendars } from "@/lib/google-calendar";
 
-import { Paragraph, Wrapper } from "@/components";
 import { ThemeToggle } from "@/design-system/theme/theme-toggle";
 
 import { PreferencesPanel } from "@/features/assistant/components/preferences-panel";
@@ -50,46 +49,46 @@ export async function Settings({ searchParams }: SettingsProps) {
 
       <div className={styles.settingGrid}>
       <section className={styles.settingPanel}>
-        <Wrapper direction="column" gap="small">
+        <div className={styles.panelHeader}>
           <h2>Aparência</h2>
-          <Paragraph size="small" color="muted">
+          <p className={styles.panelText}>
             Escolha entre o tema do sistema, claro ou escuro.
-          </Paragraph>
-        </Wrapper>
+          </p>
+        </div>
 
         <ThemeToggle />
       </section>
 
       <section className={styles.settingPanel}>
-        <Wrapper direction="column" gap="small">
+        <div className={styles.panelHeader}>
           <h2>Assistente</h2>
-          <Paragraph size="small" color="muted">
+          <p className={styles.panelText}>
             O JARVIS aparece discretamente na tela com sugestões baseadas
             no que você tem pendente.
-          </Paragraph>
-        </Wrapper>
+          </p>
+        </div>
 
         <PreferencesPanel preferences={assistantPreferences} />
       </section>
 
       <section className={styles.settingPanel}>
-        <Wrapper direction="column" gap="small">
+        <div className={styles.panelHeader}>
           <h2>Lembretes</h2>
-        </Wrapper>
+        </div>
 
         <NotificationsToggle />
       </section>
 
       <section className={styles.settingPanel}>
-        <Wrapper direction="column" gap="small">
+        <div className={styles.panelHeader}>
           <h2>Pessoas</h2>
-          <Paragraph size="small" color="muted">
+          <p className={styles.panelText}>
             Conecte alguém (ex.: parceiro(a), família) para poder
             compartilhar tarefas, rotina, hábitos ou metas específicos.
             Hidratação, Corrida, Saúde e Ciclo Menstrual continuam sempre
             privados, sem opção de compartilhar.
-          </Paragraph>
-        </Wrapper>
+          </p>
+        </div>
 
         <PeoplePanel connections={connections} />
       </section>
@@ -97,24 +96,24 @@ export async function Settings({ searchParams }: SettingsProps) {
       <section className={styles.settingPanel}>
         <h2>Conta</h2>
 
-        <Paragraph size="small" color="muted">
+        <p className={styles.panelText}>
           {isGoogleLogin
             ? "Você está conectado com Google"
             : "Você acessa com e-mail e senha."}
-        </Paragraph>
+        </p>
       </section>
 
       <section className={styles.settingPanel}>
-        <Wrapper direction="column">
+        <div className={styles.panelHeaderTight}>
           <h2>Integrações</h2>
           <h3>Google Agenda</h3>
 
-          <Paragraph size="small" color="muted">
+          <p className={styles.panelText}>
             {connection
               ? "Suas tarefas marcadas para sincronizar aparecem no calendário selecionado abaixo."
               : "Conecte sua agenda para sincronizar suas tarefas. Isso é opcional e independente do seu login — mesmo quem entra com Google não tem a agenda conectada automaticamente."}
-          </Paragraph>
-        </Wrapper>
+          </p>
+        </div>
 
         <ConnectionCard
           isConnected={!!connection}

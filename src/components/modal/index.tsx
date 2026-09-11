@@ -1,21 +1,15 @@
-import { Wrapper } from "..";
-
 import styles from "./styles.module.css";
 
-type ModalProps = React.ComponentProps<typeof Wrapper>;
+type ModalProps = React.ComponentProps<"div">;
 
-export const Modal = ({ children, ...rest }: ModalProps) => {
+export const Modal = ({ children, className, ...rest }: ModalProps) => {
+  const classNames = [styles.modal, className].filter(Boolean).join(" ");
+
   return (
     <div className={styles.overlay}>
-      <Wrapper
-        className={styles.modal}
-        direction="column"
-        gap="large"
-        padding="large"
-        {...rest}
-      >
+      <div className={classNames} {...rest}>
         {children}
-      </Wrapper>
+      </div>
     </div>
   );
 };

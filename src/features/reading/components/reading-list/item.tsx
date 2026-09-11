@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { FaTrash } from "react-icons/fa";
 
-import { Button, Input, Feedback } from "@/components";
+import { Button, Input } from "@/components";
 
 import { deleteReadingItemAction, updateReadingItemAction } from "@/features/reading/actions";
 import { IReadingItem, ReadingStatus } from "@/features/reading/domain";
@@ -98,7 +98,7 @@ export function Item({ item }: { item: IReadingItem }) {
             <div className={styles.progressTrack}>
               <div className={styles.progressFill} style={{ width: `${item.progressPercent}%` }} />
             </div>
-            <Feedback size="small">{item.progressPercent}%</Feedback>
+            <p className={styles.progressPercent}>{item.progressPercent}%</p>
             <input
               type="range"
               min={0}
@@ -111,7 +111,7 @@ export function Item({ item }: { item: IReadingItem }) {
         )}
       </div>
 
-      {error && <Feedback type="error">{error}</Feedback>}
+      {error && <p className={styles.itemError}>{error}</p>}
     </li>
   );
 }

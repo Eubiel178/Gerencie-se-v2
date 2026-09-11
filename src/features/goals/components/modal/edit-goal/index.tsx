@@ -11,12 +11,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/goal-schema";
 
-import { Form, Modal, Input, Button, Wrapper, Feedback, Paragraph } from "@/components";
+import { Form, Modal, Input, Button } from "@/components";
 
 import { updateGoalAction } from "@/features/goals/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
 
 import { FormData, IEditGoalProps, PRIORITY_OPTIONS } from "../interfaces";
+
+import styles from "./edit-goal.module.css";
 
 export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
   const router = useRouter();
@@ -83,7 +85,7 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
 
       {isOpen && (
         <Modal>
-          <Wrapper justify="between" align="center">
+          <div className={styles.modalHeader}>
             <h3>Editar Objetivo</h3>
 
             <Button
@@ -95,7 +97,7 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
             >
               <MdClose />
             </Button>
-          </Wrapper>
+          </div>
 
           <Form.Root onSubmit={handleSubmit(handleFormSubmit)}>
             <Form.Wrapper gap="xsmall">
@@ -157,13 +159,13 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
               </Input.Root>
 
               {goalBeingEdited.isSharedWithMe && (
-                <Paragraph size="xsmall" color="muted">
+                <p className={styles.readOnlyNote}>
                   Só quem compartilhou este objetivo pode mudar isso.
-                </Paragraph>
+                </p>
               )}
             </Form.Wrapper>
 
-            {submitError && <Feedback>{submitError}</Feedback>}
+            {submitError && <p className={styles.formError}>{submitError}</p>}
 
             <Button loading={isSubmitting}>Salvar Alterações</Button>
           </Form.Root>

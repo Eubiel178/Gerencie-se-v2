@@ -11,12 +11,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/event-schema";
 
-import { Form, Input, Modal, Button, Wrapper, Feedback } from "@/components";
+import { Form, Input, Modal, Button } from "@/components";
 import inputStyles from "@/components/form-components/input/styles.module.css";
 
 import { createEventAction } from "@/features/events/actions";
 
 import { FormData, IModalProps } from "./interfaces";
+
+import styles from "./add-event.module.css";
 
 export const AddEvent = ({ buttonText }: IModalProps) => {
   const router = useRouter();
@@ -73,7 +75,7 @@ export const AddEvent = ({ buttonText }: IModalProps) => {
 
       {isOpen && (
         <Modal>
-          <Wrapper justify="between" align="center">
+          <div className={styles.modalHeader}>
             <h3>Novo Evento</h3>
 
             <Button
@@ -85,7 +87,7 @@ export const AddEvent = ({ buttonText }: IModalProps) => {
             >
               <MdClose />
             </Button>
-          </Wrapper>
+          </div>
 
           <Form.Root onSubmit={handleSubmit(handleFormSubmit)}>
             <Form.Wrapper gap="small">
@@ -166,7 +168,7 @@ export const AddEvent = ({ buttonText }: IModalProps) => {
               </Input.Root>
             </Form.Wrapper>
 
-            {submitError && <Feedback>{submitError}</Feedback>}
+            {submitError && <p className={styles.formError}>{submitError}</p>}
 
             <Button loading={isSubmitting}>Novo Evento</Button>
           </Form.Root>

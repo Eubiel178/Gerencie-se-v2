@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { Button, Feedback, Input, Paragraph, Wrapper } from "@/components";
+import { Button, Input } from "@/components";
 
 import {
   deleteConnectionAction,
@@ -82,7 +82,7 @@ export function PeoplePanel({ connections }: { connections: IConnection[] }) {
   }
 
   return (
-    <Wrapper direction="column" gap="small">
+    <div className={styles.panel}>
       <form className={styles.form} onSubmit={handleInvite}>
         <Input.Wrapper>
           <Input.Field
@@ -100,13 +100,13 @@ export function PeoplePanel({ connections }: { connections: IConnection[] }) {
         </Button>
       </form>
 
-      {error && <Feedback type="error">{error}</Feedback>}
+      {error && <p className={styles.error}>{error}</p>}
 
       {connections.length === 0 ? (
-        <Paragraph size="small" color="muted">
+        <p className={styles.empty}>
           Ninguém conectado ainda. Convide alguém pra compartilhar tarefas,
           rotina, hábitos ou metas.
-        </Paragraph>
+        </p>
       ) : (
         <ul className={styles.list}>
           {connections.map((connection) => (
@@ -161,6 +161,6 @@ export function PeoplePanel({ connections }: { connections: IConnection[] }) {
           ))}
         </ul>
       )}
-    </Wrapper>
+    </div>
   );
 }

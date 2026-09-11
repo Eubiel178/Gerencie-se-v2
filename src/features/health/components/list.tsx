@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { FaCheck, FaTrash } from "react-icons/fa";
 
-import { Button, Feedback } from "@/components";
+import { Button } from "@/components";
 
 import { deleteHealthCheckupAction, markHealthCheckupDoneAction } from "@/features/health/actions";
 import { IHealthCheckup } from "@/features/health/domain";
@@ -40,7 +40,7 @@ export function List({ checkups }: { checkups: IHealthCheckup[] }) {
   }
 
   if (checkups.length === 0) {
-    return <Feedback>Nenhum cuidado preventivo cadastrado ainda.</Feedback>;
+    return <p className={styles.emptyMessage}>Nenhum cuidado preventivo cadastrado ainda.</p>;
   }
 
   return (

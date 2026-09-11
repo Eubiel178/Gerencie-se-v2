@@ -3,9 +3,11 @@
 import { useRouter } from "next/navigation";
 import type { UseFormRegister, UseFormSetValue } from "react-hook-form";
 
-import { Button, Input, Paragraph, Wrapper } from "@/components";
+import { Button, Input } from "@/components";
 
 import { FormData } from "../interfaces";
+
+import styles from "./sync-with-google.module.css";
 
 interface SyncWithGoogleProps {
   register: UseFormRegister<FormData>;
@@ -33,8 +35,8 @@ export function SyncWithGoogle({
   const router = useRouter();
 
   return (
-    <Wrapper direction="column" gap="small">
-      <Wrapper gap="small" align="center">
+    <div className={styles.container}>
+      <div className={styles.checkboxRow}>
         <Input.Wrapper>
           <Input.Field
             {...register("syncEnabled")}
@@ -46,16 +48,16 @@ export function SyncWithGoogle({
         <Input.Label htmlFor="syncEnabled">
           Sincronizar com Google Agenda
         </Input.Label>
-      </Wrapper>
+      </div>
 
       {isChecked && !isGoogleConnected && (
-        <Wrapper direction="column" gap="small" background="dark" padding="small">
-          <Paragraph size="small">
+        <div className={styles.notConnectedPanel}>
+          <p className={styles.noticeText}>
             Para sincronizar esta tarefa com o Google Agenda, conecte sua
             conta Google.
-          </Paragraph>
+          </p>
 
-          <Wrapper gap="small" align="center">
+          <div className={styles.buttonsRow}>
             <Button
               type="button"
               size="small"
@@ -72,9 +74,9 @@ export function SyncWithGoogle({
             >
               Continuar sem sincronizar
             </Button>
-          </Wrapper>
-        </Wrapper>
+          </div>
+        </div>
       )}
-    </Wrapper>
+    </div>
   );
 }

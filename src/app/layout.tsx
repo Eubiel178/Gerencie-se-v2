@@ -1,12 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import { SessionProvider } from "next-auth/react";
-import Script from "next/script";
 
 import "@/design-system/tokens/tokens.css";
 import "@/design-system/tokens/motion.css";
 import "@/styles/global-style.css";
 
-import { themeInitScript } from "@/design-system/theme/theme-script";
+import { ThemeInit } from "@/design-system/theme/theme-init";
 import { ServiceWorkerRegistration } from "@/features/pwa/service-worker-registration";
 
 export const metadata: Metadata = {
@@ -43,17 +42,10 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <body>
-        {/* Aplica o tema salvo antes da primeira pintura — evita flash do
-            tema errado. Ver design-system/theme/theme-script.ts.
-            `next/script` com `beforeInteractive` (em vez de uma tag
-            <script> crua, ou de um <head> escrito à mão): o próprio Next
-            reposiciona esse script para dentro do <head> e o executa
-            antes da hidratação — não importa onde ele apareça no JSX
-            (colocá-lo dentro de um <head> manual conflita com esse
-            mecanismo e faz o React tratá-lo como uma <script> comum). */}
-        <Script id="theme-init" strategy="beforeInteractive">
-          {themeInitScript}
-        </Script>
+        {/* Aplica o tema salvo assim que o app monta no cliente — ver
+            design-system/theme/theme-init.tsx pra entender por que isso
+            não usa mais next/script com beforeInteractive. */}
+        <ThemeInit />
         <SessionProvider>{children}</SessionProvider>
         <ServiceWorkerRegistration />
       </body>

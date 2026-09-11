@@ -1,4 +1,4 @@
-import { Feedback } from "@/components";
+import styles from "./calendar-status-banner.module.css";
 
 const ERROR_MESSAGES: Record<string, string> = {
   access_denied:
@@ -24,14 +24,18 @@ export function CalendarStatusBanner({
   error,
 }: CalendarStatusBannerProps) {
   if (connected) {
-    return <Feedback type="success">Google Agenda conectado com sucesso.</Feedback>;
+    return (
+      <p className={`${styles.banner} ${styles.success}`}>
+        Google Agenda conectado com sucesso.
+      </p>
+    );
   }
 
   if (error) {
     return (
-      <Feedback type="error">
+      <p className={`${styles.banner} ${styles.error}`}>
         {ERROR_MESSAGES[error] ?? "Não foi possível conectar ao Google Agenda."}
-      </Feedback>
+      </p>
     );
   }
 

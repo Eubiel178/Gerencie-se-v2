@@ -1,42 +1,36 @@
-.option {
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  color: var(--color-text);
+}
+
+.checkboxRow {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
-  font-size: var(--font-size-sm);
-  color: var(--color-text);
-  cursor: pointer;
-}
-
-.option input {
-  width: 1rem;
-  height: 1rem;
-  accent-color: var(--color-highlight);
-}
-
-.fields {
-  display: flex;
-  flex-direction: column;
   gap: var(--space-2);
   color: var(--color-text);
 }
 
-.reminderGroup {
+.notConnectedPanel {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+  padding: var(--space-2);
+  background: var(--color-surface-elevated);
   color: var(--color-text);
 }
 
-.reminderLabel {
+.noticeText {
   margin: 0;
   font-family: var(--font-sans);
   color: var(--color-text);
   font-size: var(--font-size-sm);
 }
 
-.optionsRow {
+.buttonsRow {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2);
   color: var(--color-text);
 }

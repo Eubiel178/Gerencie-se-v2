@@ -11,12 +11,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/habit-schema";
 
-import { Form, Modal, Input, Button, Wrapper, Feedback, Paragraph } from "@/components";
+import { Form, Modal, Input, Button } from "@/components";
 
 import { updateHabitAction } from "@/features/habits/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
 
 import { FormData, IEditHabitProps, NO_GOAL_VALUE } from "../interfaces";
+
+import styles from "./edit-habit.module.css";
 
 const FREQUENCY_OPTIONS = [
   { label: "Todo dia", value: "daily" },
@@ -91,7 +93,7 @@ export function EditHabit({ habitBeingEdited, connections, goalOptions }: IEditH
 
       {isOpen && (
         <Modal>
-          <Wrapper justify="between" align="center">
+          <div className={styles.modalHeader}>
             <h3>Editar Hábito</h3>
 
             <Button
@@ -103,7 +105,7 @@ export function EditHabit({ habitBeingEdited, connections, goalOptions }: IEditH
             >
               <MdClose />
             </Button>
-          </Wrapper>
+          </div>
 
           <Form.Root onSubmit={handleSubmit(handleFormSubmit)}>
             <Form.Wrapper gap="xsmall">
@@ -179,13 +181,13 @@ export function EditHabit({ habitBeingEdited, connections, goalOptions }: IEditH
               </Input.Root>
 
               {habitBeingEdited.isSharedWithMe && (
-                <Paragraph size="xsmall" color="muted">
+                <p className={styles.readOnlyNote}>
                   Só quem compartilhou este hábito pode mudar isso.
-                </Paragraph>
+                </p>
               )}
             </Form.Wrapper>
 
-            {submitError && <Feedback>{submitError}</Feedback>}
+            {submitError && <p className={styles.formError}>{submitError}</p>}
 
             <Button loading={isSubmitting}>Salvar Alterações</Button>
           </Form.Root>

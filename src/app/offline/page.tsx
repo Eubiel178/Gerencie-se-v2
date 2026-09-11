@@ -1,24 +1,24 @@
 "use client";
 
-import { Button, Paragraph, Wrapper } from "@/components";
+import { Button } from "@/components";
 
 import styles from "./offline.module.css";
 
 export default function OfflinePage() {
   return (
-    <Wrapper direction="column" align="center" justify="center" gap="medium" padding="xlarge">
+    <div className={styles.wrapper}>
       <span className={styles.icon} aria-hidden="true">
         📡
       </span>
 
-      <Paragraph size="large">Você está sem conexão</Paragraph>
+      <p className={styles.title}>Você está sem conexão</p>
 
-      <Paragraph color="muted" size="small">
+      <p className={styles.description}>
         O Gerencie-se precisa de internet para carregar suas tarefas,
         hábitos e metas. Assim que a conexão voltar, tente novamente.
-      </Paragraph>
+      </p>
 
       <Button onClick={() => window.location.reload()}>Tentar novamente</Button>
-    </Wrapper>
+    </div>
   );
 }

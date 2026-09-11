@@ -11,12 +11,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/routine-schema";
 
-import { Form, Modal, Input, Button, Wrapper, Feedback, Paragraph } from "@/components";
+import { Form, Modal, Input, Button } from "@/components";
 
 import { updateRoutineItemAction } from "@/features/routine/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
 
 import { FormData, IEditRoutineItemProps, NO_TASK_VALUE } from "../interfaces";
+
+import styles from "./edit-routine-item.module.css";
 
 export function EditRoutineItem({ itemBeingEdited, taskOptions, connections }: IEditRoutineItemProps) {
   const router = useRouter();
@@ -81,7 +83,7 @@ export function EditRoutineItem({ itemBeingEdited, taskOptions, connections }: I
 
       {isOpen && (
         <Modal>
-          <Wrapper justify="between" align="center">
+          <div className={styles.modalHeader}>
             <h3>Editar Item de Rotina</h3>
 
             <Button
@@ -93,7 +95,7 @@ export function EditRoutineItem({ itemBeingEdited, taskOptions, connections }: I
             >
               <MdClose />
             </Button>
-          </Wrapper>
+          </div>
 
           <Form.Root onSubmit={handleSubmit(handleFormSubmit)}>
             <Form.Wrapper gap="xsmall">
@@ -152,13 +154,13 @@ export function EditRoutineItem({ itemBeingEdited, taskOptions, connections }: I
               </Input.Root>
 
               {itemBeingEdited.isSharedWithMe && (
-                <Paragraph size="xsmall" color="muted">
+                <p className={styles.mutedNote}>
                   Só quem compartilhou este item pode mudar isso.
-                </Paragraph>
+                </p>
               )}
             </Form.Wrapper>
 
-            {submitError && <Feedback>{submitError}</Feedback>}
+            {submitError && <p className={styles.formError}>{submitError}</p>}
 
             <Button loading={isSubmitting}>Salvar Alterações</Button>
           </Form.Root>

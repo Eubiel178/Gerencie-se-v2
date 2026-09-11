@@ -2,7 +2,7 @@
 
 import type { UseFormRegister } from "react-hook-form";
 
-import { Input, Paragraph, Wrapper } from "@/components";
+import { Input } from "@/components";
 
 import { FormData } from "../interfaces";
 
@@ -38,7 +38,7 @@ interface ReminderFieldsProps {
  */
 export function ReminderFields({ register, scheduledAtError, hasScheduledAt }: ReminderFieldsProps) {
   return (
-    <Wrapper direction="column" gap="small">
+    <div className={styles.fields}>
       <Input.Root sharedProps={{ error: scheduledAtError }}>
         <Input.Label htmlFor="scheduledAt">Data e hora (opcional)</Input.Label>
 
@@ -51,10 +51,10 @@ export function ReminderFields({ register, scheduledAtError, hasScheduledAt }: R
 
       {hasScheduledAt && (
         <>
-          <Wrapper direction="column" gap="small">
-            <Paragraph size="small">Lembrar</Paragraph>
+          <div className={styles.reminderGroup}>
+            <p className={styles.reminderLabel}>Lembrar</p>
 
-            <Wrapper gap="medium" align="center">
+            <div className={styles.optionsRow}>
               {REMINDER_OPTIONS.map((option) => (
                 <label key={option.value} className={styles.option}>
                   <input
@@ -65,8 +65,8 @@ export function ReminderFields({ register, scheduledAtError, hasScheduledAt }: R
                   {option.label}
                 </label>
               ))}
-            </Wrapper>
-          </Wrapper>
+            </div>
+          </div>
 
           <Input.Root>
             <Input.Label htmlFor="recurrence">Repetição</Input.Label>
@@ -81,6 +81,6 @@ export function ReminderFields({ register, scheduledAtError, hasScheduledAt }: R
           </Input.Root>
         </>
       )}
-    </Wrapper>
+    </div>
   );
 }

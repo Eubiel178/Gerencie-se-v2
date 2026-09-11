@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { FaTrash } from "react-icons/fa";
 
-import { Button, Feedback } from "@/components";
+import { Button } from "@/components";
 
 import { deleteCycleEntryAction } from "@/features/menstrual-cycle/actions";
 import { ICycleEntry } from "@/features/menstrual-cycle/domain";
@@ -29,7 +29,7 @@ export function History({ entries }: { entries: ICycleEntry[] }) {
   }
 
   if (entries.length === 0) {
-    return <Feedback>Nenhum registro ainda.</Feedback>;
+    return <p className={styles.emptyMessage}>Nenhum registro ainda.</p>;
   }
 
   return (

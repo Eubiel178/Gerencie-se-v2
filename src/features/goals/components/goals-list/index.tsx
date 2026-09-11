@@ -1,5 +1,3 @@
-import { Feedback, Wrapper } from "@/components";
-
 import { IGoal } from "@/features/goals/domain";
 import { LoadAcceptedConnections } from "@/features/connections/domain";
 import { Card } from "./card";
@@ -14,11 +12,11 @@ interface GoalsListProps {
 export function GoalsList({ goalsList, connections }: GoalsListProps) {
   if (goalsList.length === 0) {
     return (
-      <Wrapper className={styles.empty}>
-        <Feedback>
+      <div className={styles.empty}>
+        <p className={styles.emptyState}>
           Você ainda não tem objetivos. Crie o primeiro e divida em etapas pequenas.
-        </Feedback>
-      </Wrapper>
+        </p>
+      </div>
     );
   }
 
