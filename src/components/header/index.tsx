@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { Icon } from "@/components/icon";
 
-import { Modal, ModalHeader, Button } from "@/components";
+import { Button } from "@/components";
 import { ProfileModal } from "./profile-modal";
 import { ProfileOverview } from "@/features/profile/get-profile-overview";
 
@@ -126,31 +126,39 @@ export const Header = ({ user, overview }: HeaderProps) => {
         <ProfileModal user={user} overview={overview} onClose={() => setIsProfileOpen(false)} />
       )}
 
-      <button
-        className={styles.signOut}
-        type="button"
-        onClick={() => setIsConfirmingSignOut(true)}
-      >
-        <Icon name="FaSignOutAlt" aria-hidden="true" />
-        Sair
-      </button>
-
-      {isConfirmingSignOut && (
-        <Modal>
-          <ModalHeader title="Sair da conta" onClose={() => setIsConfirmingSignOut(false)} />
-
-          <p>Deseja realmente sair?</p>
+      {isConfirmingSignOut ? (
+        <div className={styles.signOutConfirm}>
+          <span className={styles.signOutConfirmText}>Sair da conta?</span>
 
           <div className={styles.signOutConfirmActions}>
-            <Button.Root variant="secondary" onClick={() => setIsConfirmingSignOut(false)}>
-              Cancelar
-            </Button.Root>
+            <Button.Preset
+              icon={{ name: "MdClose" }}
+              root={{
+                tone: "muted",
+                "aria-label": "Cancelar",
+                onClick: () => setIsConfirmingSignOut(false),
+              }}
+            />
 
-            <Button.Root tone="danger" onClick={() => signOut({ callbackUrl: "/login" })}>
-              Sair
-            </Button.Root>
+            <Button.Preset
+              icon={{ name: "FaCheck" }}
+              root={{
+                tone: "danger",
+                "aria-label": "Confirmar saída",
+                onClick: () => signOut({ callbackUrl: "/login" }),
+              }}
+            />
           </div>
-        </Modal>
+        </div>
+      ) : (
+        <button
+          className={styles.signOut}
+          type="button"
+          onClick={() => setIsConfirmingSignOut(true)}
+        >
+          <Icon name="FaSignOutAlt" aria-hidden="true" />
+          Sair
+        </button>
       )}
     </aside>
   );

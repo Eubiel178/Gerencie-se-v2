@@ -2,6 +2,7 @@
 
 import { Button } from "@/components";
 import { IMascotState, MascotEvent, getMascotLine } from "@/features/focus/domain";
+import { MascotCreature } from "./creature";
 
 import styles from "./mascot.module.css";
 
@@ -60,22 +61,7 @@ export function Mascot({ mascot, mood }: MascotProps) {
         />
       </div>
 
-      <div className={styles.creature} data-mood={mood} aria-hidden="true">
-        <div className={styles.eyes}>
-          <span className={styles.eye} />
-          <span className={styles.eye} />
-        </div>
-        <div className={styles.cheeks}>
-          <span className={styles.cheek} />
-          <span className={styles.cheek} />
-        </div>
-        {mood === "happy" && (
-          <>
-            <span className={`${styles.sparkle} ${styles.sparkleOne}`}>✦</span>
-            <span className={`${styles.sparkle} ${styles.sparkleTwo}`}>✦</span>
-          </>
-        )}
-      </div>
+      <MascotCreature species={mascot.species} mood={mood} roaming />
 
       <p className={styles.name}>{mascot.name}</p>
       <p className={styles.level}>Nível {mascot.level}</p>

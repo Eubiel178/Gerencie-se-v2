@@ -1,8 +1,14 @@
 import { Card } from "@/features/dashboard/components/shared";
 
-import { IMascotState } from "@/features/focus/domain";
+import { IMascotState, MascotSpecies } from "@/features/focus/domain";
 
 import styles from "./mascot-card.module.css";
+
+const SPECIES_EMOJI: Record<MascotSpecies, string> = {
+  blob: "🐣",
+  gato: "🐱",
+  cachorro: "🐶",
+};
 
 export function MascotCard({ mascot }: { mascot: IMascotState }) {
   const percent = Math.round((mascot.xpIntoCurrentLevel / mascot.xpForNextLevel) * 100);
@@ -11,7 +17,7 @@ export function MascotCard({ mascot }: { mascot: IMascotState }) {
     <Card title="Foco" href="/home/focus" linkLabel="Iniciar foco">
       <div className={styles.row}>
         <span className={styles.mascotEmoji} aria-hidden="true">
-          🐣
+          {SPECIES_EMOJI[mascot.species]}
         </span>
 
         <div className={styles.info}>

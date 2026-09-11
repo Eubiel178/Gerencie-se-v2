@@ -11,18 +11,26 @@ import { Form, Input, Button } from "@/components";
 import { useToast } from "@/providers/toast-context";
 
 import { updateMascotAction } from "@/features/focus/actions";
-import { IMascotState, MascotPersonality } from "@/features/focus/domain";
+import { IMascotState, MascotPersonality, MascotSpecies } from "@/features/focus/domain";
+import { MascotCreature } from "@/features/focus/components/mascot/creature";
 
 import styles from "./mascot-settings.module.css";
 
 interface FormData {
   name: string;
   personality: MascotPersonality;
+  species: MascotSpecies;
 }
 
 const PERSONALITY_OPTIONS = [
   { label: "Afetuoso", value: "afetuoso" },
   { label: "Sarcástico", value: "sarcastico" },
+];
+
+const SPECIES_OPTIONS = [
+  { label: "Bolinha", value: "blob" },
+  { label: "Gato", value: "gato" },
+  { label: "Cachorro", value: "cachorro" },
 ];
 
 export function MascotSettings({ mascot }: { mascot: IMascotState }) {
@@ -33,6 +41,7 @@ export function MascotSettings({ mascot }: { mascot: IMascotState }) {
   const {
     handleSubmit,
     register,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     mode: "onChange",
@@ -40,8 +49,11 @@ export function MascotSettings({ mascot }: { mascot: IMascotState }) {
     defaultValues: {
       name: mascot.name,
       personality: mascot.personality,
+      species: mascot.species,
     },
   });
+
+  const previewSpecies = watch("species");
 
   async function handleFormSubmit(data: FormData) {
     setSubmitError(null);
@@ -59,6 +71,10 @@ export function MascotSettings({ mascot }: { mascot: IMascotState }) {
 
   return (
     <Form.Root onSubmit={handleSubmit(handleFormSubmit)} className={styles.form}>
+      <div className={styles.preview}>
+        <MascotCreature species={previewSpecies} mood="idle" />
+      </div>
+
       <Form.Wrapper>
         <Input.Root sharedProps={{ error: errors.name?.message }}>
           <Input.Label>Nome do mascote</Input.Label>
@@ -72,6 +88,14 @@ export function MascotSettings({ mascot }: { mascot: IMascotState }) {
           <Input.Label>Personalidade</Input.Label>
           <Input.Wrapper>
             <Input.FieldSelect {...register("personality")} optionsArray={PERSONALITY_OPTIONS} />
+          </Input.Wrapper>
+          <Input.HelperText />
+        </Input.Root>
+
+        <Input.Root sharedProps={{ error: errors.species?.message }}>
+          <Input.Label>Espécie</Input.Label>
+          <Input.Wrapper>
+            <Input.FieldSelect {...register("species")} optionsArray={SPECIES_OPTIONS} />
           </Input.Wrapper>
           <Input.HelperText />
         </Input.Root>

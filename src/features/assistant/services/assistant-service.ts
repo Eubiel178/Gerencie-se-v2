@@ -1,6 +1,6 @@
 import "server-only";
 
-import { IAssistantMessage } from "@/features/assistant/domain";
+import { IAssistantMessage, IAssistantPreferences } from "@/features/assistant/domain";
 import { getAssistantPreferencesFetcher } from "@/features/assistant/data/get-assistant-preferences-fetcher";
 
 import { getTaskFetcher } from "@/features/tasks/data/get-task-fetcher";
@@ -15,6 +15,7 @@ export interface IAssistantSnapshot {
   enabled: boolean;
   reducedPresence: boolean;
   message: IAssistantMessage | null;
+  preferences: IAssistantPreferences;
 }
 
 /**
@@ -34,7 +35,7 @@ export class AssistantService {
     const preferences = await getAssistantPreferencesFetcher().getPreferences();
 
     if (!preferences.enabled) {
-      return { enabled: false, reducedPresence: preferences.reducedPresence, message: null };
+      return { enabled: false, reducedPresence: preferences.reducedPresence, message: null, preferences };
     }
 
     const [tasks, habits, goals, routine, mascot] = await Promise.all([
@@ -57,6 +58,7 @@ export class AssistantService {
       enabled: true,
       reducedPresence: preferences.reducedPresence,
       message: pickTopMessage(messages),
+      preferences,
     };
   }
 }

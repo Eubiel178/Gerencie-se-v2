@@ -1,8 +1,30 @@
 .wrapper{display:flex;flex-direction:column;align-items:center;gap:var(--space-3)}
 .speechRow{display:flex;align-items:center;gap:var(--space-2);max-width:18rem}
 .speechBubble{position:relative;margin:0;padding:var(--space-2) var(--space-3);border:1px solid var(--color-border);border-radius:var(--radius-md);background:var(--color-surface-elevated);color:var(--color-text);font-size:var(--font-size-sm)}
+
+/* `.stage` é a "pista" onde o mascote anda de um lado pro outro; `.roamer`
+   é quem se move dentro dela (translateX), e `.creature` continua com sua
+   própria animação de respirar — as duas nunca competem pelo mesmo
+   `transform`. Sem `data-roaming`, o `.roamer` fica parado (usado na
+   pré-visualização de Configurações). */
+.stage{position:relative;width:12rem;height:8rem}
+.roamer{position:absolute;top:0;left:0;width:8rem;height:8rem}
+.stage[data-roaming="true"] .roamer{animation:roam 9s ease-in-out infinite}
+
 .creature{position:relative;width:8rem;height:8rem;border-radius:58% 42% 55% 45%/55% 45% 60% 40%;background:linear-gradient(155deg,var(--color-highlight),var(--color-highlight-soft));box-shadow:0 .75rem 1.5rem var(--color-shadow);animation:breathe 3.2s ease-in-out infinite}
 .creature[data-mood="working"]{animation:breathe 1.6s ease-in-out infinite}
+
+/* Espécie: só enfeites em cima do mesmo blob base — sem asset novo. */
+.ear{position:absolute;top:-0.85rem;width:0;height:0;border-left:0.85rem solid transparent;border-right:0.85rem solid transparent;border-bottom:1.2rem solid var(--color-highlight)}
+.earLeft{left:1rem;transform:rotate(-10deg)}
+.earRight{right:1rem;transform:rotate(10deg) scaleX(-1)}
+.tail{position:absolute;bottom:0.3rem;right:-1rem;width:0.5rem;height:2.4rem;border-radius:999px;background:var(--color-highlight);transform:rotate(25deg)}
+
+.floppyEar{position:absolute;top:0.4rem;width:1.2rem;height:2.1rem;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;background:var(--color-highlight-soft)}
+.floppyEarLeft{left:-0.4rem;transform:rotate(-15deg)}
+.floppyEarRight{right:-0.4rem;transform:rotate(15deg) scaleX(-1)}
+.snout{position:absolute;bottom:1.5rem;left:50%;transform:translateX(-50%);width:2.1rem;height:1.3rem;border-radius:50%;background:var(--color-highlight-soft)}
+
 .eyes{position:absolute;top:42%;left:50%;transform:translate(-50%,-50%);display:flex;gap:1.4rem}
 .eye{width:.85rem;height:.85rem;border-radius:50%;background:var(--color-on-highlight)}
 .creature[data-mood="working"] .eye{width:.85rem;height:.2rem;border-radius:var(--radius-full)}
@@ -18,4 +40,11 @@
 .xpFill{height:100%;background:var(--color-highlight);border-radius:var(--radius-full);transition:width var(--duration-base) var(--easing-standard)}
 @keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
 @keyframes pop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
-@media (prefers-reduced-motion: reduce){.creature{animation:none}.sparkle{animation:none}}
+@keyframes roam{
+  0%{transform:translateX(0) scaleX(1)}
+  45%{transform:translateX(4rem) scaleX(1)}
+  50%{transform:translateX(4rem) scaleX(-1)}
+  95%{transform:translateX(0) scaleX(-1)}
+  100%{transform:translateX(0) scaleX(1)}
+}
+@media (prefers-reduced-motion: reduce){.creature{animation:none}.sparkle{animation:none}.roamer{animation:none!important}}

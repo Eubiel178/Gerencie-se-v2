@@ -1,0 +1,1 @@
+ALTER TABLE "mascot_state" ADD COLUMN "species" text DEFAULT 'blob' NOT NULL;

@@ -12,5 +12,11 @@ export async function Assistant() {
 
   if (!snapshot.enabled) return null;
 
-  return <Widget initialMessage={snapshot.message} reducedPresence={snapshot.reducedPresence} />;
+  return (
+    <Widget
+      initialMessage={snapshot.message}
+      reducedPresence={snapshot.reducedPresence}
+      preferences={snapshot.preferences}
+    />
+  );
 }
