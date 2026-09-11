@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { FaTrash, FaSyncAlt, FaCheck, FaRedo } from "@/components/icons";
+import { FaSyncAlt, FaCheck, FaRedo } from "@/components/icons";
 
 import {
   deleteTaskAction,
@@ -103,7 +103,7 @@ export function Card({ task, tagLabel, isGoogleConnected, connections }: CardPro
           <div className={styles.headerActions}>
             {!task.isSharedWithMe && (
               <Button.IconButtonPreset
-                icon={FaTrash}
+                icon="FaTrash"
                 tone="danger"
                 aria-label={`Excluir tarefa ${task.title}`}
                 loading={isRemoving}

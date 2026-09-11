@@ -1,18 +1,17 @@
-import type { IconType } from "react-icons";
-
+import { IconName } from "../../icons";
 import { ButtonRoot, ButtonRootProps } from "../button-root";
 import { ButtonIcon } from "../button-icon";
 
 import styles from "../styles.module.css";
 
 type IconButtonPresetProps = Omit<ButtonRootProps, "variant" | "children"> & {
-  icon: IconType;
+  icon: IconName;
 };
 
 /** Botão só de ícone (excluir, editar, fechar — o mesmo visual se repetia
  * em muitos lugares do app): sempre `variant="ghost"` + tamanho de ícone,
- * o ícone entra pré-tipado por `icon` (ex.: `icon={FaTrash}`, importado
- * de `@/components/icons`) e é renderizado via `Button.Icon`. */
+ * o ícone entra por nome (ex.: `icon="FaTrash"`) e é renderizado via
+ * `Button.Icon`, que resolve o nome no componente global `Icon`. */
 export function IconButtonPreset({ tone, className, icon, ...rest }: IconButtonPresetProps) {
   const classNames = className ? `${styles.iconButton} ${className}` : styles.iconButton;
 

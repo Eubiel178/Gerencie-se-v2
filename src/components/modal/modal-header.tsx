@@ -1,5 +1,3 @@
-import { MdClose } from "@/components/icons";
-
 import { Button } from "../button";
 
 import styles from "./modal-header.module.css";
@@ -16,7 +14,7 @@ export function ModalHeader({ title, onClose }: ModalHeaderProps) {
     <div className={styles.header}>
       <h3>{title}</h3>
 
-      <Button.IconButtonPreset icon={MdClose} tone="muted" aria-label="Fechar" onClick={onClose} />
+      <Button.IconButtonPreset icon="MdClose" tone="muted" aria-label="Fechar" onClick={onClose} />
     </div>
   );
 }

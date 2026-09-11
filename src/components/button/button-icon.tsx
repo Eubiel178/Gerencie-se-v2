@@ -1,17 +1,15 @@
-import type { IconType } from "react-icons";
+import { Icon, IconName } from "../icons";
 
 import styles from "./styles.module.css";
 
 type ButtonIconProps = {
-  icon: IconType;
+  icon: IconName;
 };
 
 export function ButtonIcon({ icon }: ButtonIconProps) {
-  const Icon = icon;
-
   return (
     <span className={styles.icon}>
-      <Icon />
+      <Icon name={icon} />
     </span>
   );
 }

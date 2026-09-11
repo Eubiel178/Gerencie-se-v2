@@ -4,8 +4,6 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { FaTrash, FaPlus } from "@/components/icons";
-
 import { Button, Input } from "@/components";
 import { SharedBadge } from "@/features/connections/components/shared-badge";
 
@@ -94,7 +92,7 @@ export function Card({ goal, connections }: CardProps) {
 
           {!goal.isSharedWithMe && (
             <Button.IconButtonPreset
-              icon={FaTrash}
+              icon="FaTrash"
               tone="danger"
               aria-label={`Excluir objetivo ${goal.title}`}
               loading={isRemoving}
@@ -134,7 +132,7 @@ export function Card({ goal, connections }: CardProps) {
                 {step.title}
               </span>
               <Button.IconButtonPreset
-                icon={FaTrash}
+                icon="FaTrash"
                 tone="danger"
                 className={styles.smallButton}
                 aria-label={`Remover etapa ${step.title}`}
@@ -159,7 +157,7 @@ export function Card({ goal, connections }: CardProps) {
           aria-label="Adicionar etapa"
           loading={isAddingStep}
         >
-          <Button.Icon icon={FaPlus} />
+          <Button.Icon icon="FaPlus" />
         </Button.Root>
       </form>
     </li>

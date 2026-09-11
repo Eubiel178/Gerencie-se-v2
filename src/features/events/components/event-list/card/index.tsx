@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { FaTrash, GoLinkExternal } from "@/components/icons";
+import { GoLinkExternal } from "@/components/icons";
 
 import { deleteEventAction } from "@/features/events/actions";
 import { dateFormatedToFront } from "@/utils";
@@ -42,7 +42,7 @@ export function Card(event: IEvent) {
 
           <div className={styles.eventCardActions}>
             <Button.IconButtonPreset
-              icon={FaTrash}
+              icon="FaTrash"
               tone="danger"
               aria-label={`Excluir evento ${event.title}`}
               loading={isRemoving}
