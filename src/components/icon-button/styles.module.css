@@ -1,0 +1,24 @@
+:where(.iconButton) {
+  padding: var(--space-2);
+  font-size: var(--font-size-xl);
+  background: transparent;
+  border-color: transparent;
+  color: var(--color-text);
+  box-shadow: none;
+}
+:where(.iconButton):hover:not(:disabled) {
+  background: var(--color-surface-elevated);
+  filter: none;
+  box-shadow: none;
+  transform: none;
+}
+
+.toneDanger {
+  color: var(--color-danger);
+}
+.toneHighlight {
+  color: var(--color-highlight);
+}
+.toneMuted {
+  color: var(--color-text-muted);
+}

@@ -5,8 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { FaTrash } from "react-icons/fa";
-
-import { Button } from "@/components";
+import { IconButton } from "@/components";
 
 import { deleteCycleEntryAction } from "@/features/menstrual-cycle/actions";
 import { ICycleEntry } from "@/features/menstrual-cycle/domain";
@@ -44,14 +43,14 @@ export function History({ entries }: { entries: ICycleEntry[] }) {
             </span>
           </div>
 
-          <Button
-            className={styles.deleteButton}
+          <IconButton
+            tone="danger"
             aria-label="Remover registro"
             loading={removingId === entry.id}
             onClick={() => handleDelete(entry.id)}
           >
             <FaTrash />
-          </Button>
+          </IconButton>
         </li>
       ))}
     </ul>

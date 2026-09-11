@@ -10,7 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/goal-schema";
 
-import { Form, Modal, ModalHeader, Input, Button } from "@/components";
+import { Form, Modal, ModalHeader, Input, Button, IconButton } from "@/components";
 
 import { updateGoalAction } from "@/features/goals/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
@@ -71,15 +71,15 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
 
   return (
     <>
-      <Button
-        className={styles.editButton}
+      <IconButton
+        tone="highlight"
         aria-label={`Editar objetivo ${goalBeingEdited.title}`}
         onClick={function () {
           setIsOpen(true);
         }}
       >
         <FaEdit />
-      </Button>
+      </IconButton>
 
       {isOpen && (
         <Modal>

@@ -4,8 +4,8 @@ type ButtonProps = React.ComponentProps<"button"> & {
   loading?: boolean;
 };
 
-export const Button = ({ loading = false, children, disabled, className, ...rest }: ButtonProps) => {
-  const classNames = [styles.button, className].filter(Boolean).join(" ");
+const ButtonBase = ({ loading = false, children, disabled, className, ...rest }: ButtonProps) => {
+  const classNames = className ? `${styles.button} ${className}` : styles.button;
 
   return (
     <button
@@ -19,3 +19,9 @@ export const Button = ({ loading = false, children, disabled, className, ...rest
     </button>
   );
 };
+
+function ButtonIcon({ children }: { children: React.ReactNode }) {
+  return <span className={styles.icon}>{children}</span>;
+}
+
+export const Button = Object.assign(ButtonBase, { Icon: ButtonIcon });

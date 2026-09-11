@@ -5,8 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { FaTrash } from "react-icons/fa";
-
-import { Button } from "@/components";
+import { IconButton } from "@/components";
 import { SharedBadge } from "@/features/connections/components/shared-badge";
 
 import { deleteRoutineItemAction } from "@/features/routine/actions";
@@ -61,14 +60,14 @@ export function RoutineListItem({ item, taskOptions, connections, linkedTaskTitl
         <EditRoutineItem itemBeingEdited={item} taskOptions={taskOptions} connections={connections} />
 
         {!item.isSharedWithMe && (
-          <Button
-            className={styles.deleteButton}
+          <IconButton
+            tone="danger"
             aria-label={`Remover ${item.title} da rotina`}
             loading={isRemoving}
             onClick={handleRemove}
           >
             <FaTrash />
-          </Button>
+          </IconButton>
         )}
       </div>
     </li>

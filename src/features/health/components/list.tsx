@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { FaCheck, FaTrash } from "react-icons/fa";
 
-import { Button } from "@/components";
+import { Button, IconButton } from "@/components";
 
 import { deleteHealthCheckupAction, markHealthCheckupDoneAction } from "@/features/health/actions";
 import { IHealthCheckup } from "@/features/health/domain";
@@ -80,14 +80,14 @@ export function List({ checkups }: { checkups: IHealthCheckup[] }) {
               <FaCheck />
             </Button>
 
-            <Button
-              className={styles.deleteButton}
+            <IconButton
+              tone="danger"
               aria-label={`Excluir ${checkup.title}`}
               loading={busyId === checkup.id}
               onClick={() => handleDelete(checkup.id)}
             >
               <FaTrash />
-            </Button>
+            </IconButton>
           </div>
         </li>
       ))}

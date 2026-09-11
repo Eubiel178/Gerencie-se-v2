@@ -21,5 +21,3 @@
 .emptyMessage{margin:0;font-family:var(--font-sans);color:var(--color-info);font-size:var(--font-size-md)}
 .progressPercent{margin:0;font-family:var(--font-sans);color:var(--color-info);font-size:var(--font-size-sm)}
 .itemError{margin:0;font-family:var(--font-sans);color:var(--color-danger);font-size:var(--font-size-md)}
-.deleteButton{background:transparent;border-color:transparent;color:var(--color-danger);box-shadow:none;padding:var(--space-2);font-size:var(--font-size-xl)}
-.deleteButton:hover:not(:disabled){background:var(--color-surface-elevated);color:var(--color-danger);filter:none;box-shadow:none;transform:none}

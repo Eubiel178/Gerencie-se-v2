@@ -5,8 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { FaTrash } from "react-icons/fa";
-
-import { Button, Input } from "@/components";
+import { IconButton, Input } from "@/components";
 
 import { deleteReadingItemAction, updateReadingItemAction } from "@/features/reading/actions";
 import { IReadingItem, ReadingStatus } from "@/features/reading/domain";
@@ -73,14 +72,14 @@ export function Item({ item }: { item: IReadingItem }) {
           {item.author && <p className={styles.itemAuthor}>{item.author}</p>}
         </div>
 
-        <Button
-          className={styles.deleteButton}
+        <IconButton
+          tone="danger"
           aria-label={`Remover ${item.title}`}
           loading={isRemoving}
           onClick={handleRemove}
         >
           <FaTrash />
-        </Button>
+        </IconButton>
       </div>
 
       <div className={styles.itemControls}>

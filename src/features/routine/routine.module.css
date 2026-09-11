@@ -13,6 +13,4 @@
 .itemTitle{margin:0;color:var(--color-text);font-size:1rem}
 .linkedTask{margin:0;color:var(--color-text-muted);font-size:var(--font-size-xs)}
 .actions{display:flex;align-items:center;gap:var(--space-1)}
-.deleteButton{padding:var(--space-2);font-size:var(--font-size-xl);color:var(--color-danger);background:transparent;border-color:transparent;box-shadow:none}
-.deleteButton:hover:not(:disabled){background:var(--color-surface-elevated);color:var(--color-danger);filter:none;box-shadow:none;transform:none}
 @media(max-width:640px){.toolbar{align-items:stretch;flex-direction:column}.item{flex-wrap:wrap}}

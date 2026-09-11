@@ -5,18 +5,3 @@
   color: var(--color-text);
 }
 
-.closeButton {
-  padding: var(--space-2);
-  font-size: var(--font-size-xl);
-  color: var(--color-text-muted);
-  background: transparent;
-  box-shadow: none;
-}
-.closeButton:hover:not(:disabled) {
-  background: var(--color-surface-elevated);
-  color: var(--color-text-muted);
-  filter: none;
-  box-shadow: none;
-  transform: none;
-}
-

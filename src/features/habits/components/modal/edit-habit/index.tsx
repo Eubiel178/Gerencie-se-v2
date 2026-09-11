@@ -10,7 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/habit-schema";
 
-import { Form, Modal, ModalHeader, Input, Button } from "@/components";
+import { Form, Modal, ModalHeader, Input, Button, IconButton } from "@/components";
 
 import { updateHabitAction } from "@/features/habits/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
@@ -79,15 +79,15 @@ export function EditHabit({ habitBeingEdited, connections, goalOptions }: IEditH
 
   return (
     <>
-      <Button
-        className={styles.editButton}
+      <IconButton
+        tone="highlight"
         aria-label={`Editar hábito ${habitBeingEdited.title}`}
         onClick={function () {
           setIsOpen(true);
         }}
       >
         <FaEdit />
-      </Button>
+      </IconButton>
 
       {isOpen && (
         <Modal>

@@ -61,6 +61,11 @@
   pointer-events: none;
 }
 
+.icon {
+  display: inline-flex;
+  font-size: 1.1em;
+}
+
 .spinner {
   display: inline-block;
   width: 1em;

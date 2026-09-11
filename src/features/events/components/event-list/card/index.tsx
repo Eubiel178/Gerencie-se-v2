@@ -4,15 +4,13 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-
 import { FaTrash } from "react-icons/fa";
-
 import { GoLinkExternal } from "react-icons/go";
 
 import { deleteEventAction } from "@/features/events/actions";
 import { dateFormatedToFront } from "@/utils";
 
-import { Button } from "@/components";
+import { IconButton } from "@/components";
 
 import { EditEvent } from "../../modal";
 
@@ -44,14 +42,14 @@ export function Card(event: IEvent) {
           <h4>{event.title}</h4>
 
           <div className={styles.eventCardActions}>
-            <Button
-              className={styles.deleteEventButton}
+            <IconButton
+              tone="danger"
               aria-label={`Excluir evento ${event.title}`}
               loading={isRemoving}
               onClick={handleRemoveEvent}
             >
               <FaTrash />
-            </Button>
+            </IconButton>
 
             <EditEvent eventBeingEdited={event} />
           </div>

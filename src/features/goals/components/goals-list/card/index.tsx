@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { FaTrash, FaPlus } from "react-icons/fa";
 
-import { Button, Input } from "@/components";
+import { Button, IconButton, Input } from "@/components";
 import { SharedBadge } from "@/features/connections/components/shared-badge";
 
 import {
@@ -93,14 +93,14 @@ export function Card({ goal, connections }: CardProps) {
           <EditGoal goalBeingEdited={goal} connections={connections} />
 
           {!goal.isSharedWithMe && (
-            <Button
-              className={styles.deleteButton}
+            <IconButton
+              tone="danger"
               aria-label={`Excluir objetivo ${goal.title}`}
               loading={isRemoving}
               onClick={handleRemoveGoal}
             >
               <FaTrash />
-            </Button>
+            </IconButton>
           )}
         </div>
       </div>

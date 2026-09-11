@@ -23,5 +23,4 @@
 .weekEmptyMessage{margin:0;font-family:var(--font-sans);color:var(--color-info);font-size:var(--font-size-md)}
 .smallButton{padding:.45rem var(--space-3);font-size:var(--font-size-sm)}
 .secondaryButton{background:var(--color-surface-elevated);border-color:var(--color-border);color:var(--color-text);box-shadow:0 1px 2px var(--color-shadow)}
-.deleteLogButton{background:transparent;border-color:transparent;color:var(--color-danger);box-shadow:none;padding:.45rem var(--space-3);font-size:var(--font-size-sm)}
-.deleteLogButton:hover:not(:disabled){background:var(--color-surface-elevated);color:var(--color-danger);filter:none;box-shadow:none;transform:none}
+.deleteLogButton{padding:.45rem var(--space-3);font-size:var(--font-size-sm)}

@@ -3,7 +3,7 @@ import styles from "./styles.module.css";
 type InputLabelProps = React.ComponentProps<"label">;
 
 export const InputLabel = ({ children, htmlFor, className, ...rest }: InputLabelProps) => {
-  const classNames = [styles.label, className].filter(Boolean).join(" ");
+  const classNames = className ? `${styles.label} ${className}` : styles.label;
 
   return (
     <label className={classNames} htmlFor={htmlFor} {...rest}>

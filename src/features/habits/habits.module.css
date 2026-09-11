@@ -17,8 +17,6 @@
 .progressFill{height:100%;background:var(--color-highlight);border-radius:var(--radius-full);transition:width var(--duration-base) var(--easing-standard)}
 .toggleButton{width:100%}
 .secondaryButton{background:var(--color-surface-elevated);border-color:var(--color-border);color:var(--color-text);box-shadow:0 1px 2px var(--color-shadow)}
-.deleteButton{padding:var(--space-2);font-size:var(--font-size-xl);background:transparent;color:var(--color-danger);box-shadow:none;border-color:transparent}
-.deleteButton:hover:not(:disabled){background:var(--color-surface-elevated);color:var(--color-danger);filter:none;box-shadow:none;transform:none}
 .sharedBadge{margin:0;font-family:var(--font-sans);color:var(--color-info);font-size:var(--font-size-xs)}
 .emptyState{margin:0;font-family:var(--font-sans);color:var(--color-info);font-size:var(--font-size-md)}
 @media(max-width:640px){.toolbar{align-items:stretch;flex-direction:column}.grid{grid-template-columns:1fr}}

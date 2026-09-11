@@ -4,9 +4,9 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { FaFire, FaTrash, FaCheck } from "react-icons/fa";
+import { FaFire, FaCheck, FaTrash } from "react-icons/fa";
 
-import { Button } from "@/components";
+import { Button, IconButton } from "@/components";
 import { SharedBadge } from "@/features/connections/components/shared-badge";
 
 import { deleteHabitAction, toggleHabitLogAction } from "@/features/habits/actions";
@@ -65,14 +65,14 @@ export function Card({ habit, today, connections, goalOptions, linkedGoalTitle }
           <EditHabit habitBeingEdited={habit} connections={connections} goalOptions={goalOptions} />
 
           {!habit.isSharedWithMe && (
-            <Button
-              className={styles.deleteButton}
+            <IconButton
+              tone="danger"
               aria-label={`Excluir hábito ${habit.title}`}
               loading={isRemoving}
               onClick={handleRemove}
             >
               <FaTrash />
-            </Button>
+            </IconButton>
           )}
         </div>
       </div>
