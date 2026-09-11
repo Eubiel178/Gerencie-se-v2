@@ -1,10 +1,3 @@
-.modalHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  color: var(--color-text);
-}
-
 .formError {
   margin: 0;
   font-family: var(--font-sans);

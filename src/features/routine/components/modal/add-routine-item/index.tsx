@@ -4,13 +4,12 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { MdClose } from "react-icons/md";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/routine-schema";
 
-import { Form, Input, Modal, Button } from "@/components";
+import { Form, Input, Modal, ModalHeader, Button } from "@/components";
 
 import { createRoutineItemAction } from "@/features/routine/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
@@ -77,19 +76,7 @@ export function AddRoutineItem({ buttonText, taskOptions, connections }: IAddRou
 
       {isOpen && (
         <Modal>
-          <div className={styles.modalHeader}>
-            <h3>Novo Item de Rotina</h3>
-
-            <Button
-              variant="ghost"
-              tone="muted"
-              size="xlarge"
-              aria-label="Fechar"
-              onClick={closeModal}
-            >
-              <MdClose />
-            </Button>
-          </div>
+          <ModalHeader title="Novo Item de Rotina" onClose={closeModal} />
 
           <Form.Root onSubmit={handleSubmit(handleOnSubmit)}>
             <Form.Wrapper gap="xsmall">

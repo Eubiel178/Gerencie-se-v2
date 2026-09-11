@@ -5,13 +5,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { FaEdit } from "react-icons/fa";
-import { MdClose } from "react-icons/md";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/routine-schema";
 
-import { Form, Modal, Input, Button } from "@/components";
+import { Form, Modal, ModalHeader, Input, Button } from "@/components";
 
 import { updateRoutineItemAction } from "@/features/routine/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
@@ -83,19 +82,7 @@ export function EditRoutineItem({ itemBeingEdited, taskOptions, connections }: I
 
       {isOpen && (
         <Modal>
-          <div className={styles.modalHeader}>
-            <h3>Editar Item de Rotina</h3>
-
-            <Button
-              variant="ghost"
-              tone="muted"
-              size="xlarge"
-              aria-label="Fechar"
-              onClick={closeModal}
-            >
-              <MdClose />
-            </Button>
-          </div>
+          <ModalHeader title="Editar Item de Rotina" onClose={closeModal} />
 
           <Form.Root onSubmit={handleSubmit(handleFormSubmit)}>
             <Form.Wrapper gap="xsmall">

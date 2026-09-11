@@ -4,13 +4,12 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { MdClose } from "react-icons/md";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/habit-schema";
 
-import { Form, Input, Modal, Button } from "@/components";
+import { Form, Input, Modal, ModalHeader, Button } from "@/components";
 
 import { createHabitAction } from "@/features/habits/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
@@ -87,19 +86,7 @@ export function AddHabit({ buttonText, connections, goalOptions }: IAddHabitProp
 
       {isOpen && (
         <Modal>
-          <div className={styles.modalHeader}>
-            <h3>Novo Hábito</h3>
-
-            <Button
-              variant="ghost"
-              tone="muted"
-              size="xlarge"
-              aria-label="Fechar"
-              onClick={closeModal}
-            >
-              <MdClose />
-            </Button>
-          </div>
+          <ModalHeader title="Novo Hábito" onClose={closeModal} />
 
           <Form.Root onSubmit={handleSubmit(handleOnSubmit)}>
             <Form.Wrapper gap="xsmall">

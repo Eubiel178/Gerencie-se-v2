@@ -5,13 +5,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { useForm } from "react-hook-form";
-import { MdClose } from "react-icons/md";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/event-schema";
 
-import { Form, Input, Modal, Button } from "@/components";
+import { Form, Input, Modal, ModalHeader, Button } from "@/components";
 import inputStyles from "@/components/form-components/input/styles.module.css";
 
 import { createEventAction } from "@/features/events/actions";
@@ -75,19 +74,7 @@ export const AddEvent = ({ buttonText }: IModalProps) => {
 
       {isOpen && (
         <Modal>
-          <div className={styles.modalHeader}>
-            <h3>Novo Evento</h3>
-
-            <Button
-              variant="ghost"
-              tone="muted"
-              size="xlarge"
-              aria-label="Fechar"
-              onClick={closeModal}
-            >
-              <MdClose />
-            </Button>
-          </div>
+          <ModalHeader title="Novo Evento" onClose={closeModal} />
 
           <Form.Root onSubmit={handleSubmit(handleFormSubmit)}>
             <Form.Wrapper gap="small">

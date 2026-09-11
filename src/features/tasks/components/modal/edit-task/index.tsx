@@ -5,14 +5,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { FaEdit } from "react-icons/fa";
-import { MdClose } from "react-icons/md";
 import { useForm, useWatch } from "react-hook-form";
 import { useFormTags } from "@/features/tasks/hooks/use-form-tags";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/task-schema";
 
-import { Form, Modal, Input, Button } from "@/components";
+import { Form, Modal, ModalHeader, Input, Button } from "@/components";
 
 import { updateTaskAction } from "@/features/tasks/actions";
 
@@ -95,19 +94,7 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
 
       {isOpen && (
         <Modal>
-          <div className={styles.modalHeader}>
-            <h3>Editar Tarefa</h3>
-
-            <Button
-              variant="ghost"
-              tone="muted"
-              size="xlarge"
-              aria-label="Fechar"
-              onClick={closeModal}
-            >
-              <MdClose />
-            </Button>
-          </div>
+          <ModalHeader title="Editar Tarefa" onClose={closeModal} />
 
           <Form.Root onSubmit={handleSubmit(handleFormSubmit)}>
             <Form.Wrapper gap="xsmall">

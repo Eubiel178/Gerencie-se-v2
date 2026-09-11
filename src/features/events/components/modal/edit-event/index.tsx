@@ -5,13 +5,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { useForm } from "react-hook-form";
-import { MdClose } from "react-icons/md";
 import { FaEdit } from "react-icons/fa";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/event-schema";
 
-import { Form, Modal, Input, Button } from "@/components";
+import { Form, Modal, ModalHeader, Input, Button } from "@/components";
 import inputStyles from "@/components/form-components/input/styles.module.css";
 
 import { updateEventAction } from "@/features/events/actions";
@@ -81,19 +80,7 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
 
       {isOpen && (
         <Modal>
-          <div className={styles.modalHeader}>
-            <h3>Editando Evento</h3>
-
-            <Button
-              variant="ghost"
-              tone="muted"
-              size="xlarge"
-              aria-label="Fechar"
-              onClick={closeModal}
-            >
-              <MdClose />
-            </Button>
-          </div>
+          <ModalHeader title="Editando Evento" onClose={closeModal} />
 
           <Form.Root onSubmit={handleSubmit(handleFormSubmit)}>
             <Form.Wrapper>

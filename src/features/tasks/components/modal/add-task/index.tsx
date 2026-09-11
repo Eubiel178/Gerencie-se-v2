@@ -4,14 +4,13 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { MdClose } from "react-icons/md";
 import { useForm, useWatch } from "react-hook-form";
 import { useFormTags } from "@/features/tasks/hooks/use-form-tags";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/task-schema";
 
-import { Form, Input, Modal, Button } from "@/components";
+import { Form, Input, Modal, ModalHeader, Button } from "@/components";
 
 import { createTaskAction } from "@/features/tasks/actions";
 
@@ -88,19 +87,7 @@ export function AddTask({ buttonText, isGoogleConnected, connections }: IAddTask
 
       {isOpen && (
         <Modal>
-          <div className={styles.modalHeader}>
-            <h3>Nova Tarefa</h3>
-
-            <Button
-              variant="ghost"
-              tone="muted"
-              size="xlarge"
-              aria-label="Fechar"
-              onClick={closeModal}
-            >
-              <MdClose />
-            </Button>
-          </div>
+          <ModalHeader title="Nova Tarefa" onClose={closeModal} />
 
           <Form.Root onSubmit={handleSubmit(handleOnSubmit)}>
             <Form.Wrapper gap="xsmall">

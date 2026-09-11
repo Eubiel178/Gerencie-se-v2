@@ -5,13 +5,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { FaEdit } from "react-icons/fa";
-import { MdClose } from "react-icons/md";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/goal-schema";
 
-import { Form, Modal, Input, Button } from "@/components";
+import { Form, Modal, ModalHeader, Input, Button } from "@/components";
 
 import { updateGoalAction } from "@/features/goals/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
@@ -85,19 +84,7 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
 
       {isOpen && (
         <Modal>
-          <div className={styles.modalHeader}>
-            <h3>Editar Objetivo</h3>
-
-            <Button
-              variant="ghost"
-              tone="muted"
-              size="xlarge"
-              aria-label="Fechar"
-              onClick={closeModal}
-            >
-              <MdClose />
-            </Button>
-          </div>
+          <ModalHeader title="Editar Objetivo" onClose={closeModal} />
 
           <Form.Root onSubmit={handleSubmit(handleFormSubmit)}>
             <Form.Wrapper gap="xsmall">

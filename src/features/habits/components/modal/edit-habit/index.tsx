@@ -5,13 +5,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { FaEdit } from "react-icons/fa";
-import { MdClose } from "react-icons/md";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/habit-schema";
 
-import { Form, Modal, Input, Button } from "@/components";
+import { Form, Modal, ModalHeader, Input, Button } from "@/components";
 
 import { updateHabitAction } from "@/features/habits/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
@@ -93,19 +92,7 @@ export function EditHabit({ habitBeingEdited, connections, goalOptions }: IEditH
 
       {isOpen && (
         <Modal>
-          <div className={styles.modalHeader}>
-            <h3>Editar Hábito</h3>
-
-            <Button
-              variant="ghost"
-              tone="muted"
-              size="xlarge"
-              aria-label="Fechar"
-              onClick={closeModal}
-            >
-              <MdClose />
-            </Button>
-          </div>
+          <ModalHeader title="Editar Hábito" onClose={closeModal} />
 
           <Form.Root onSubmit={handleSubmit(handleFormSubmit)}>
             <Form.Wrapper gap="xsmall">
