@@ -9,6 +9,7 @@ import { Icon } from "@/components/icon";
 
 import { Modal, ModalHeader, Button } from "@/components";
 import { ProfileModal } from "./profile-modal";
+import { ProfileOverview } from "@/features/profile/get-profile-overview";
 
 import styles from "@/app/home/home-layout.module.css";
 
@@ -35,6 +36,7 @@ interface HeaderProps {
     email: string | null;
     image: string | null;
   };
+  overview: ProfileOverview;
 }
 
 function initials(name: string | null): string {
@@ -50,7 +52,7 @@ function initials(name: string | null): string {
   return result.toUpperCase();
 }
 
-export const Header = ({ user }: HeaderProps) => {
+export const Header = ({ user, overview }: HeaderProps) => {
   const pathname = usePathname();
   const [isConfirmingSignOut, setIsConfirmingSignOut] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -121,7 +123,7 @@ export const Header = ({ user }: HeaderProps) => {
       </button>
 
       {isProfileOpen && (
-        <ProfileModal user={user} onClose={() => setIsProfileOpen(false)} />
+        <ProfileModal user={user} overview={overview} onClose={() => setIsProfileOpen(false)} />
       )}
 
       <button

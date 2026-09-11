@@ -1,3 +1,5 @@
+import dayjs from "dayjs";
+
 import { getTaskFetcher } from "@/features/tasks/data/get-task-fetcher";
 import { getFocusFetcher } from "@/features/focus/data/get-focus-fetcher";
 import { getHabitFetcher } from "@/features/habits/data/get-habit-fetcher";
@@ -33,8 +35,18 @@ export async function Stats() {
 
   const taskStats = calculateTaskStats(tasks);
   const focusHours = calculateWeeklyFocusHours(focusHistory);
-  const focusHoursByWeek = calculateWeeklyFocusHoursByWeek(focusHistory);
+
+  const FOCUS_WEEKS_BACK = 4;
+  const focusHoursByWeek = calculateWeeklyFocusHoursByWeek(focusHistory, FOCUS_WEEKS_BACK);
   const maxFocusHours = Math.max(...focusHoursByWeek, 1);
+  const nowForFocusWeeks = dayjs();
+  const focusWeekRanges = focusHoursByWeek.map((_, index) => {
+    const weeksAgo = FOCUS_WEEKS_BACK - 1 - index;
+    const weekEnd = nowForFocusWeeks.subtract(weeksAgo * 7, "day");
+    const weekStart = weekEnd.subtract(7, "day");
+
+    return { start: weekStart.format("DD/MM"), end: weekEnd.format("DD/MM") };
+  });
   const bestStreak = calculateBestHabitStreak(habits);
   const hydrationDays = calculateHydrationAdherence(hydrationWeek, hydrationToday.goalMl);
   const avgGoalProgress = calculateAverageGoalProgress(goals);
@@ -66,7 +78,13 @@ export async function Stats() {
           <p className={styles.bigNumber}>{focusHours}h</p>
           <div className={styles.focusWeeks}>
             {focusHoursByWeek.map((hours, index) => (
-              <div key={index} className={styles.focusWeekBar}>
+              <div
+                key={index}
+                className={styles.focusWeekBar}
+                role="img"
+                aria-label={`De ${focusWeekRanges[index].start} a ${focusWeekRanges[index].end}: ${hours}h de foco`}
+                title={`${focusWeekRanges[index].start} – ${focusWeekRanges[index].end}: ${hours}h`}
+              >
                 <div
                   className={styles.focusWeekBarFill}
                   style={{ height: `${Math.max(2, (hours / maxFocusHours) * 100)}%` }}

@@ -19,6 +19,14 @@ import { FormData, IModalProps } from "./interfaces";
 
 import styles from "./add-event.module.css";
 
+// Formato exigido por <input type="datetime-local">: "AAAA-MM-DDTHH:mm".
+function nowForDatetimeLocal(): string {
+  const now = new Date();
+  const pad = (value: number) => String(value).padStart(2, "0");
+
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+}
+
 export const AddEvent = ({ buttonText }: IModalProps) => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
@@ -35,7 +43,7 @@ export const AddEvent = ({ buttonText }: IModalProps) => {
     defaultValues: {
       title: "",
       description: "",
-      start: "",
+      start: nowForDatetimeLocal(),
       end: "",
       url: "",
       backgroundColor: "#3788d8",
@@ -62,15 +70,21 @@ export const AddEvent = ({ buttonText }: IModalProps) => {
     reset();
   };
 
+  function openModal() {
+    reset({
+      title: "",
+      description: "",
+      start: nowForDatetimeLocal(),
+      end: "",
+      url: "",
+      backgroundColor: "#3788d8",
+    });
+    setIsOpen(true);
+  }
+
   return (
     <>
-      <Button.Root
-        onClick={function () {
-          setIsOpen(true);
-        }}
-      >
-        {buttonText}
-      </Button.Root>
+      <Button.Root onClick={openModal}>{buttonText}</Button.Root>
 
       {isOpen && (
         <Modal>

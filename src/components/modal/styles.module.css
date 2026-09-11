@@ -9,7 +9,7 @@
   padding: var(--space-4);
 }
 
-.modal {
+:where(.modal) {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
