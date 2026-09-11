@@ -90,7 +90,7 @@ export function EditHabit({ habitBeingEdited, connections, goalOptions }: IEditH
       />
 
       {isOpen && (
-        <Modal>
+        <Modal onClose={closeModal}>
           <ModalHeader title="Editar Hábito" onClose={closeModal} />
 
           <Form.Root onSubmit={handleSubmit(handleFormSubmit)}>

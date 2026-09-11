@@ -44,6 +44,21 @@
   color: var(--color-text-muted);
 }
 
+.focusWeeksNav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+.focusWeeksRange {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+.focusWeeksNavButtons {
+  display: flex;
+  gap: var(--space-1);
+}
 .focusWeeks {
   display: flex;
   gap: var(--space-2);

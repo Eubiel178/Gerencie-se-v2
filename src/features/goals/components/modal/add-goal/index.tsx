@@ -77,7 +77,7 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
       </Button.Root>
 
       {isOpen && (
-        <Modal>
+        <Modal onClose={closeModal}>
           <ModalHeader title="Novo Objetivo" onClose={closeModal} />
 
           <Form.Root onSubmit={handleSubmit(handleOnSubmit)}>

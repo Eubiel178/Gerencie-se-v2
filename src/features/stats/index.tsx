@@ -9,23 +9,29 @@ import { getRunningFetcher } from "@/features/running/data/get-running-fetcher";
 
 import { Card } from "@/features/dashboard/components/shared";
 
+import { FocusWeeksChart } from "./focus-weeks-chart";
+
 import {
   calculateAverageGoalProgress,
   calculateBestHabitStreak,
   calculateHydrationAdherence,
   calculateTaskStats,
   calculateWeeklyFocusHours,
-  calculateWeeklyFocusHoursByWeek,
   calculateWeeklyRunningStats,
 } from "./calculations";
 
 import styles from "./stats.module.css";
 
+// 28 dias por página de gráfico (4 semanas) × 7 páginas pra trás — dá pra
+// navegar até ~6 meses de histórico sem precisar buscar tudo de uma vez.
+const FOCUS_FETCH_WEEKS_BACK = 28;
+
 export async function Stats() {
-  const [tasks, focusHistory, habits, goals, hydrationToday, hydrationWeek, running] =
+  const [tasks, focusHistory, focusHistoryForChart, habits, goals, hydrationToday, hydrationWeek, running] =
     await Promise.all([
       getTaskFetcher().loadAll(),
-      getFocusFetcher().loadHistory(),
+      getFocusFetcher().loadHistoryInRange(dayjs().subtract(7, "day").toDate()),
+      getFocusFetcher().loadHistoryInRange(dayjs().subtract(FOCUS_FETCH_WEEKS_BACK, "week").toDate()),
       getHabitFetcher().loadAll(),
       getGoalFetcher().loadAll(),
       getHydrationFetcher().getToday(),
@@ -35,18 +41,6 @@ export async function Stats() {
 
   const taskStats = calculateTaskStats(tasks);
   const focusHours = calculateWeeklyFocusHours(focusHistory);
-
-  const FOCUS_WEEKS_BACK = 4;
-  const focusHoursByWeek = calculateWeeklyFocusHoursByWeek(focusHistory, FOCUS_WEEKS_BACK);
-  const maxFocusHours = Math.max(...focusHoursByWeek, 1);
-  const nowForFocusWeeks = dayjs();
-  const focusWeekRanges = focusHoursByWeek.map((_, index) => {
-    const weeksAgo = FOCUS_WEEKS_BACK - 1 - index;
-    const weekEnd = nowForFocusWeeks.subtract(weeksAgo * 7, "day");
-    const weekStart = weekEnd.subtract(7, "day");
-
-    return { start: weekStart.format("DD/MM"), end: weekEnd.format("DD/MM") };
-  });
   const bestStreak = calculateBestHabitStreak(habits);
   const hydrationDays = calculateHydrationAdherence(hydrationWeek, hydrationToday.goalMl);
   const avgGoalProgress = calculateAverageGoalProgress(goals);
@@ -76,22 +70,7 @@ export async function Stats() {
 
         <Card title="Horas de foco (7 dias)">
           <p className={styles.bigNumber}>{focusHours}h</p>
-          <div className={styles.focusWeeks}>
-            {focusHoursByWeek.map((hours, index) => (
-              <div
-                key={index}
-                className={styles.focusWeekBar}
-                role="img"
-                aria-label={`De ${focusWeekRanges[index].start} a ${focusWeekRanges[index].end}: ${hours}h de foco`}
-                title={`${focusWeekRanges[index].start} – ${focusWeekRanges[index].end}: ${hours}h`}
-              >
-                <div
-                  className={styles.focusWeekBarFill}
-                  style={{ height: `${Math.max(2, (hours / maxFocusHours) * 100)}%` }}
-                />
-              </div>
-            ))}
-          </div>
+          <FocusWeeksChart sessions={focusHistoryForChart} fetchedWeeksBack={FOCUS_FETCH_WEEKS_BACK} />
         </Card>
 
         <Card title="Melhor sequência de hábito">

@@ -80,7 +80,7 @@ export function EditRoutineItem({ itemBeingEdited, taskOptions, connections }: I
       />
 
       {isOpen && (
-        <Modal>
+        <Modal onClose={closeModal}>
           <ModalHeader title="Editar Item de Rotina" onClose={closeModal} />
 
           <Form.Root onSubmit={handleSubmit(handleFormSubmit)}>

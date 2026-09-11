@@ -77,7 +77,7 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
       />
 
       {isOpen && (
-        <Modal>
+        <Modal onClose={closeModal}>
           <ModalHeader title="Editando Evento" onClose={closeModal} />
 
           <Form.Root onSubmit={handleSubmit(handleFormSubmit)}>

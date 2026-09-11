@@ -85,7 +85,7 @@ export function AddHabit({ buttonText, connections, goalOptions }: IAddHabitProp
       </Button.Root>
 
       {isOpen && (
-        <Modal>
+        <Modal onClose={closeModal}>
           <ModalHeader title="Novo Hábito" onClose={closeModal} />
 
           <Form.Root onSubmit={handleSubmit(handleOnSubmit)}>

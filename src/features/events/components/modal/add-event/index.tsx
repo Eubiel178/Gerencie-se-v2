@@ -87,7 +87,7 @@ export const AddEvent = ({ buttonText }: IModalProps) => {
       <Button.Root onClick={openModal}>{buttonText}</Button.Root>
 
       {isOpen && (
-        <Modal>
+        <Modal onClose={closeModal}>
           <ModalHeader title="Novo Evento" onClose={closeModal} />
 
           <Form.Root onSubmit={handleSubmit(handleFormSubmit)}>

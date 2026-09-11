@@ -86,7 +86,7 @@ export function AddTask({ buttonText, isGoogleConnected, connections }: IAddTask
       </Button.Root>
 
       {isOpen && (
-        <Modal>
+        <Modal onClose={closeModal}>
           <ModalHeader title="Nova Tarefa" onClose={closeModal} />
 
           <Form.Root onSubmit={handleSubmit(handleOnSubmit)}>

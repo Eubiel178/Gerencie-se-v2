@@ -70,7 +70,7 @@ export function ProfileModal({ user, overview, onClose }: ProfileModalProps) {
   }
 
   return (
-    <Modal className={styles.modal}>
+    <Modal className={styles.modal} onClose={onClose}>
       <ModalHeader title="Meu perfil" onClose={onClose} />
 
       <div className={styles.identity}>

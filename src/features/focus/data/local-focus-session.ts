@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, desc, eq, ne } from "drizzle-orm";
+import { and, desc, eq, gte, ne } from "drizzle-orm";
 
 import * as domain from "@/features/focus/domain";
 
@@ -21,7 +21,8 @@ export class LocalFocusSession
     domain.CompleteFocusSession,
     domain.CancelFocusSession,
     domain.GetActiveFocusSession,
-    domain.LoadFocusHistory
+    domain.LoadFocusHistory,
+    domain.LoadFocusHistoryInRange
 {
   async start(params: domain.StartFocusSession.Params): Promise<domain.StartFocusSession.Result> {
     const userId = await requireUserId();
@@ -121,6 +122,24 @@ export class LocalFocusSession
       .where(and(eq(focusSessions.userId, userId), ne(focusSessions.status, "running")))
       .orderBy(desc(focusSessions.startedAt))
       .limit(10);
+
+    return rows.map(mapRowToFocusSession);
+  }
+
+  async loadHistoryInRange(since: Date): Promise<domain.IFocusSession[]> {
+    const userId = await requireUserId();
+
+    const rows = await db
+      .select()
+      .from(focusSessions)
+      .where(
+        and(
+          eq(focusSessions.userId, userId),
+          ne(focusSessions.status, "running"),
+          gte(focusSessions.startedAt, since)
+        )
+      )
+      .orderBy(desc(focusSessions.startedAt));
 
     return rows.map(mapRowToFocusSession);
   }

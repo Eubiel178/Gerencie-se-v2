@@ -82,7 +82,7 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
       />
 
       {isOpen && (
-        <Modal>
+        <Modal onClose={closeModal}>
           <ModalHeader title="Editar Objetivo" onClose={closeModal} />
 
           <Form.Root onSubmit={handleSubmit(handleFormSubmit)}>

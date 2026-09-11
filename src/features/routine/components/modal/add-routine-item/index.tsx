@@ -75,7 +75,7 @@ export function AddRoutineItem({ buttonText, taskOptions, connections }: IAddRou
       </Button.Root>
 
       {isOpen && (
-        <Modal>
+        <Modal onClose={closeModal}>
           <ModalHeader title="Novo Item de Rotina" onClose={closeModal} />
 
           <Form.Root onSubmit={handleSubmit(handleOnSubmit)}>

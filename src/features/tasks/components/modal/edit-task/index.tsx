@@ -92,7 +92,7 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
       />
 
       {isOpen && (
-        <Modal>
+        <Modal onClose={closeModal}>
           <ModalHeader title="Editar Tarefa" onClose={closeModal} />
 
           <Form.Root onSubmit={handleSubmit(handleFormSubmit)}>

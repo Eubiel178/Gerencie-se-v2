@@ -5,7 +5,11 @@ import { createPortal } from "react-dom";
 
 import styles from "./styles.module.css";
 
-type ModalProps = React.ComponentProps<"div">;
+type ModalProps = React.ComponentProps<"div"> & {
+  /** Clicar fora da caixa do modal (no fundo escurecido) fecha, quando
+   * informado — mesmo comportamento do X no `ModalHeader`. */
+  onClose?: () => void;
+};
 
 // `document` não existe no servidor — usa o mesmo padrão de
 // `useSyncExternalStore` já usado em `use-theme.ts`/`widget` pra saber se já
@@ -31,7 +35,7 @@ function getIsClientServerSnapshot() {
  * em vez de cobrir a tela toda. O portal escapa desse problema (e de
  * qualquer stacking context futuro) de uma vez por todas.
  */
-export const Modal = ({ children, className, ...rest }: ModalProps) => {
+export const Modal = ({ children, className, onClose, ...rest }: ModalProps) => {
   const isClient = useSyncExternalStore(
     subscribeNoop,
     getIsClientSnapshot,
@@ -43,7 +47,14 @@ export const Modal = ({ children, className, ...rest }: ModalProps) => {
   const classNames = `${styles.modal} ${className || ""}`;
 
   return createPortal(
-    <div className={styles.overlay}>
+    <div
+      className={styles.overlay}
+      onClick={(event) => {
+        // Só fecha se o clique foi no próprio fundo — nunca quando ele
+        // começa dentro da caixa do modal e "borbulha" até aqui.
+        if (event.target === event.currentTarget) onClose?.();
+      }}
+    >
       <div className={classNames} {...rest}>
         {children}
       </div>

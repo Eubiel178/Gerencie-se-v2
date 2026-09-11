@@ -1,5 +1,7 @@
 import "server-only";
 
+import dayjs from "dayjs";
+
 import { getTaskFetcher } from "@/features/tasks/data/get-task-fetcher";
 import { getFocusFetcher } from "@/features/focus/data/get-focus-fetcher";
 import { getHabitFetcher } from "@/features/habits/data/get-habit-fetcher";
@@ -23,7 +25,7 @@ export interface ProfileOverview {
 export async function getProfileOverview(): Promise<ProfileOverview> {
   const [tasks, focusHistory, habits] = await Promise.all([
     getTaskFetcher().loadAll(),
-    getFocusFetcher().loadHistory(),
+    getFocusFetcher().loadHistoryInRange(dayjs().subtract(7, "day").toDate()),
     getHabitFetcher().loadAll(),
   ]);
 
