@@ -50,6 +50,13 @@
       "when": 1789166623522,
       "tag": "0006_polite_korg",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1789166811173,
+      "tag": "0007_yielding_gideon",
+      "breakpoints": true
     }
   ]
 }

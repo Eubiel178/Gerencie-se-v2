@@ -418,6 +418,25 @@ export const runningSessions = pgTable("running_session", {
   source: text("source", { enum: ["manual", "gps"] }).notNull().default("manual"),
 });
 
+/** Uma linha por conquista já desbloqueada (ver `features/achievements`)
+ * — nunca guarda o ESTADO da condição (isso é sempre recalculado, ver
+ * comentário de `mascotStates`), só QUANDO cada uma foi desbloqueada pela
+ * primeira vez. Existir aqui é o que diferencia "acabou de desbloquear
+ * agora" (dispara o toast + XP) de "já tinha desbloqueado antes". */
+export const achievementUnlocks = pgTable(
+  "achievement_unlock",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    achievementId: text("achievement_id").notNull(),
+    unlockedAt: timestamp("unlocked_at", { mode: "date" })
+      .notNull()
+      .$defaultFn(() => new Date()),
+  },
+  (table) => [primaryKey({ columns: [table.userId, table.achievementId] })]
+);
+
 /** Lista pessoal de leitura. Recomendações/tendências (livros populares)
  * NÃO ficam aqui — são dados mockados em código (ver
  * `src/features/reading/recommendations.ts`), claramente identificados como

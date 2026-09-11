@@ -6,6 +6,8 @@ import { getHabitFetcher } from "@/features/habits/data/get-habit-fetcher";
 import { getGoalFetcher } from "@/features/goals/data/get-goal-fetcher";
 import { getHydrationFetcher } from "@/features/hydration/data/get-hydration-fetcher";
 import { getRunningFetcher } from "@/features/running/data/get-running-fetcher";
+import { listAchievements } from "@/features/achievements/get-achievements-status";
+import { AchievementsGrid } from "@/features/achievements/components/achievements-grid";
 
 import { Card } from "@/features/dashboard/components/shared";
 
@@ -57,6 +59,8 @@ export async function Stats() {
     getRunningFetcher().loadAll(),
     getRunningFetcher().loadHistoryInRange(dayjs().subtract(WEEKS_BACK, "week").toDate()),
   ]);
+
+  const achievements = await listAchievements({ tasks, habits, goals });
 
   const taskStats = calculateTaskStats(tasks);
   const focusHours = calculateWeeklyFocusHours(focusHistory);
@@ -117,6 +121,10 @@ export async function Stats() {
           <RunningWeeksChart sessions={runningHistoryForChart} fetchedWeeksBack={WEEKS_BACK} />
         </Card>
       </div>
+
+      <Card title="Conquistas">
+        <AchievementsGrid achievements={achievements} />
+      </Card>
     </section>
   );
 }

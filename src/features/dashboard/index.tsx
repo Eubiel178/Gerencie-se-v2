@@ -10,6 +10,8 @@ import { getMascotFetcher } from "@/features/focus/data/get-focus-fetcher";
 import { getHydrationFetcher } from "@/features/hydration/data/get-hydration-fetcher";
 import { getOnboardingStatus } from "@/features/onboarding/get-onboarding-status";
 import { OnboardingChecklist } from "@/features/onboarding/components/onboarding-checklist";
+import { getAchievementsStatus } from "@/features/achievements/get-achievements-status";
+import { AchievementToasts } from "@/features/achievements/components/achievement-toasts";
 
 import {
   GoalsProgress,
@@ -39,6 +41,7 @@ export async function Dashboard() {
   ]);
 
   const onboarding = await getOnboardingStatus({ tasks, habits, goals, mascot });
+  const achievementsStatus = await getAchievementsStatus({ tasks, habits, goals });
 
   const firstName = session?.user?.name?.split(" ")[0] ?? null;
 
@@ -66,6 +69,8 @@ export async function Dashboard() {
 
   return (
     <div className={styles.grid}>
+      <AchievementToasts items={achievementsStatus.newlyUnlocked} />
+
       {!onboarding.dismissed && !onboarding.allDone && (
         <div className={styles.onboarding}>
           <OnboardingChecklist items={onboarding.items} />
