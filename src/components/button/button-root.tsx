@@ -15,11 +15,11 @@ const TONE_CLASS: Record<ButtonTone, string> = {
   muted: styles.toneMuted,
 };
 
-export type ButtonRootProps = React.ComponentProps<"button"> & {
+export interface ButtonRootProps extends React.ComponentProps<"button"> {
   loading?: boolean;
   variant?: ButtonVariant;
   tone?: ButtonTone;
-};
+}
 
 export function ButtonRoot({
   loading = false,

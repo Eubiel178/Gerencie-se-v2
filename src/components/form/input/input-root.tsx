@@ -5,7 +5,7 @@ import styles from "./styles.module.css";
 type InputRootProps = React.ComponentProps<"div"> & SharedProps;
 
 export const InputRoot = ({ children, className, sharedProps, ...rest }: InputRootProps) => {
-  const classNames = className ? `${styles.root} ${className}` : styles.root;
+  const classNames = `${styles.root} ${className || ""}`;
 
   return (
     <InputRootProvider sharedProps={sharedProps}>

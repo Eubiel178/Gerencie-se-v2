@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { FaCheck, FaTrash } from "@/components/icon";
+import { Icon } from "@/components/icon";
 
 import { Button } from "@/components";
 
@@ -86,15 +86,17 @@ export function List({ checkups }: { checkups: IHealthCheckup[] }) {
               aria-label={`Marcar ${checkup.title} como feito hoje`}
               onClick={() => handleMarkDone(checkup.id)}
             >
-              <FaCheck />
+              <Icon name="FaCheck" />
             </Button.Root>
 
             <Button.IconButtonPreset
-              icon={FaTrash}
-              tone="danger"
-              aria-label={`Excluir ${checkup.title}`}
-              loading={busyId === checkup.id}
-              onClick={() => handleDelete(checkup.id)}
+              icon={{ name: "FaTrash" }}
+              root={{
+                tone: "danger",
+                "aria-label": `Excluir ${checkup.title}`,
+                loading: busyId === checkup.id,
+                onClick: () => handleDelete(checkup.id),
+              }}
             />
           </div>
         </li>

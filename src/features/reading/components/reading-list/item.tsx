@@ -4,7 +4,6 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { FaTrash } from "@/components/icon";
 import { Button, Input } from "@/components";
 
 import { deleteReadingItemAction, updateReadingItemAction } from "@/features/reading/actions";
@@ -73,11 +72,13 @@ export function Item({ item }: { item: IReadingItem }) {
         </div>
 
         <Button.IconButtonPreset
-          icon={FaTrash}
-          tone="danger"
-          aria-label={`Remover ${item.title}`}
-          loading={isRemoving}
-          onClick={handleRemove}
+          icon={{ name: "FaTrash" }}
+          root={{
+            tone: "danger",
+            "aria-label": `Remover ${item.title}`,
+            loading: isRemoving,
+            onClick: handleRemove,
+          }}
         />
       </div>
 

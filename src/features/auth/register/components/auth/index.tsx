@@ -11,7 +11,7 @@ import { validationSchema } from "@/validation/register-schema";
 
 import styles from "../../../auth-page.module.css";
 
-import { FaGoogle } from "@/components/icon";
+import { Icon } from "@/components/icon";
 
 import { Form, Input, Button } from "@/components";
 
@@ -122,7 +122,7 @@ export function Auth() {
         onClick={handleGoogleSignIn}
       >
         <span className={styles.googleButtonContent}>
-          <FaGoogle aria-hidden="true" />
+          <Icon name="FaGoogle" aria-hidden="true" />
           <span>Continuar com Google</span>
         </span>
       </Button.Root>

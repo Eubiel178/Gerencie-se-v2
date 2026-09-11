@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { FaTrash, GoLinkExternal } from "@/components/icon";
+import { Icon } from "@/components/icon";
 
 import { deleteEventAction } from "@/features/events/actions";
 import { dateFormatedToFront } from "@/utils";
@@ -42,11 +42,13 @@ export function Card(event: IEvent) {
 
           <div className={styles.eventCardActions}>
             <Button.IconButtonPreset
-              icon={FaTrash}
-              tone="danger"
-              aria-label={`Excluir evento ${event.title}`}
-              loading={isRemoving}
-              onClick={handleRemoveEvent}
+              icon={{ name: "FaTrash" }}
+              root={{
+                tone: "danger",
+                "aria-label": `Excluir evento ${event.title}`,
+                loading: isRemoving,
+                onClick: handleRemoveEvent,
+              }}
             />
 
             <EditEvent eventBeingEdited={event} />
@@ -72,7 +74,7 @@ export function Card(event: IEvent) {
 
       {event.url && (
         <a href={event.url} target="_blank" rel="noopener noreferrer">
-          Acessar <GoLinkExternal aria-hidden="true" />
+          Acessar <Icon name="GoLinkExternal" aria-hidden="true" />
         </a>
       )}
     </li>

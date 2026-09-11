@@ -5,7 +5,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { useForm, useWatch } from "react-hook-form";
-import { FaEdit } from "@/components/icon";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/habit-schema";
@@ -80,11 +79,13 @@ export function EditHabit({ habitBeingEdited, connections, goalOptions }: IEditH
   return (
     <>
       <Button.IconButtonPreset
-        icon={FaEdit}
-        tone="highlight"
-        aria-label={`Editar hábito ${habitBeingEdited.title}`}
-        onClick={function () {
-          setIsOpen(true);
+        icon={{ name: "FaEdit" }}
+        root={{
+          tone: "highlight",
+          "aria-label": `Editar hábito ${habitBeingEdited.title}`,
+          onClick: function () {
+            setIsOpen(true);
+          },
         }}
       />
 

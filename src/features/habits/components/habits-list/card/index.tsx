@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { FaFire, FaCheck, FaTrash } from "@/components/icon";
+import { Icon } from "@/components/icon";
 
 import { Button } from "@/components";
 import { SharedBadge } from "@/features/connections/components/shared-badge";
@@ -82,11 +82,13 @@ export function Card({
 
           {!habit.isSharedWithMe && (
             <Button.IconButtonPreset
-              icon={FaTrash}
-              tone="danger"
-              aria-label={`Excluir hábito ${habit.title}`}
-              loading={isRemoving}
-              onClick={handleRemove}
+              icon={{ name: "FaTrash" }}
+              root={{
+                tone: "danger",
+                "aria-label": `Excluir hábito ${habit.title}`,
+                loading: isRemoving,
+                onClick: handleRemove,
+              }}
             />
           )}
         </div>
@@ -105,7 +107,7 @@ export function Card({
 
       <div className={styles.stats}>
         <span className={styles.streak}>
-          <FaFire aria-hidden="true" />
+          <Icon name="FaFire" aria-hidden="true" />
           {habit.currentStreak > 0
             ? `${habit.currentStreak} dia${habit.currentStreak > 1 ? "s" : ""} seguido${habit.currentStreak > 1 ? "s" : ""}`
             : "Sem sequência ainda"}
@@ -134,7 +136,7 @@ export function Card({
       >
         {habit.completedToday ? (
           <>
-            <FaCheck aria-hidden="true" /> Feito hoje
+            <Icon name="FaCheck" aria-hidden="true" /> Feito hoje
           </>
         ) : (
           "Marcar hoje"

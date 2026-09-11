@@ -1,7 +1,6 @@
 "use client";
 
 import { forwardRef, useState } from "react";
-import { FaEye, FaEyeSlash } from "@/components/icon";
 
 import { useInputRootContext } from "@/providers/input-root-context";
 
@@ -20,13 +19,11 @@ export const InputFieldPassword = forwardRef<
 
   const [isVisible, setVisible] = useState(false);
 
-  const classNames = [
-    styles.field,
-    styles.passwordField,
-    incorrect && styles.incorrect,
-  ]
-    .filter(Boolean)
-    .join(" ");
+  let classNames = `${styles.field} ${styles.passwordField}`;
+
+  if (incorrect) {
+    classNames = classNames + " " + styles.incorrect;
+  }
 
   return (
     <div className={styles.passwordWrapper}>
@@ -45,7 +42,10 @@ export const InputFieldPassword = forwardRef<
         aria-label={isVisible ? "Ocultar senha" : "Mostrar senha"}
         onClick={() => setVisible(!isVisible)}
       >
-        <InputIcon>{isVisible ? <FaEyeSlash /> : <FaEye />}</InputIcon>
+        <InputIcon
+          className={styles.icon}
+          name={isVisible ? "FaEyeSlash" : "FaEye"}
+        />
       </InputButton>
     </div>
   );

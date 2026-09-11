@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MdClose } from "@/components/icon";
+import { Icon } from "@/components/icon";
 
 import { IAssistantMessage } from "@/features/assistant/domain";
 
@@ -65,7 +65,7 @@ export function Widget({ initialMessage, reducedPresence }: WidgetProps) {
             aria-label="Dispensar mensagem do assistente"
             onClick={handleDismiss}
           >
-            <MdClose aria-hidden="true" />
+            <Icon name="MdClose" aria-hidden="true" />
           </button>
         </div>
       )}

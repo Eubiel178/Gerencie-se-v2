@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { FaSyncAlt, FaCheck, FaRedo, FaTrash } from "@/components/icon";
+import { Icon } from "@/components/icon";
 
 import {
   deleteTaskAction,
@@ -99,7 +99,7 @@ export function Card({
               disabled={isToggling}
               onClick={handleToggleComplete}
             >
-              {task.completed && <FaCheck aria-hidden="true" />}
+              {task.completed && <Icon name="FaCheck" aria-hidden="true" />}
             </button>
 
             <p className={styles.tagLabel}>{tagLabel}</p>
@@ -108,11 +108,13 @@ export function Card({
           <div className={styles.headerActions}>
             {!task.isSharedWithMe && (
               <Button.IconButtonPreset
-                icon={FaTrash}
-                tone="danger"
-                aria-label={`Excluir tarefa ${task.title}`}
-                loading={isRemoving}
-                onClick={handleTaskRemove}
+                icon={{ name: "FaTrash" }}
+                root={{
+                  tone: "danger",
+                  "aria-label": `Excluir tarefa ${task.title}`,
+                  loading: isRemoving,
+                  onClick: handleTaskRemove,
+                }}
               />
             )}
 
@@ -134,7 +136,8 @@ export function Card({
               </h3>
 
               {task.recurrence !== "none" && (
-                <FaRedo
+                <Icon
+                  name="FaRedo"
                   role="img"
                   aria-label={
                     task.recurrence === "daily"
@@ -192,7 +195,7 @@ export function Card({
                   onClick={handleRetrySync}
                 >
                   <span className={styles.retryButtonContent}>
-                    <FaSyncAlt aria-hidden="true" />
+                    <Icon name="FaSyncAlt" aria-hidden="true" />
                     <span>Tentar novamente</span>
                   </span>
                 </Button.Root>

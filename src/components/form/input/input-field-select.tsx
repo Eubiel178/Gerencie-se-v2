@@ -22,14 +22,15 @@ export const InputFieldSelect = forwardRef<
   const { sharedProps } = useInputRootContext();
   const incorrect = Boolean(sharedProps?.error);
 
-  const classNames = [
-    styles.field,
-    styles.select,
-    incorrect && styles.incorrect,
-    className,
-  ]
-    .filter(Boolean)
-    .join(" ");
+  let classNames = `${styles.field} ${styles.select}`;
+
+  if (incorrect) {
+    classNames = classNames + " " + styles.incorrect;
+  }
+
+  if (className) {
+    classNames = classNames + " " + className;
+  }
 
   return (
     <select {...rest} className={classNames} name={name} id={name} ref={ref}>

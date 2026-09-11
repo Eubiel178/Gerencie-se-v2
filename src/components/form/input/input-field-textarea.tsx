@@ -13,14 +13,15 @@ export const InputFieldTextarea = forwardRef<
   const { sharedProps } = useInputRootContext();
   const incorrect = Boolean(sharedProps?.error);
 
-  const classNames = [
-    styles.field,
-    styles.textarea,
-    incorrect && styles.incorrect,
-    className,
-  ]
-    .filter(Boolean)
-    .join(" ");
+  let classNames = `${styles.field} ${styles.textarea}`;
+
+  if (incorrect) {
+    classNames = classNames + " " + styles.incorrect;
+  }
+
+  if (className) {
+    classNames = classNames + " " + className;
+  }
 
   return (
     <textarea

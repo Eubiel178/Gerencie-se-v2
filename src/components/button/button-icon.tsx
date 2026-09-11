@@ -1,5 +1,7 @@
 import { Icon, IconProps } from "../icon";
 
-export function ButtonIcon(props: IconProps) {
+export interface ButtonIconProps extends IconProps {}
+
+export function ButtonIcon(props?: ButtonIconProps) {
   return <Icon {...props} />;
 }

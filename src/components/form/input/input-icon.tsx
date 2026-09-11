@@ -1,7 +1,7 @@
-import styles from "./styles.module.css";
+import { Icon, IconProps } from "../../icon";
 
-type InputIconProps = React.ComponentProps<"p">;
+export interface InputIconProps extends IconProps {}
 
-export const InputIcon = ({ children }: InputIconProps) => {
-  return <p className={styles.icon}>{children}</p>;
-};
+export function InputIcon(props?: InputIconProps) {
+  return <Icon {...props} />;
+}

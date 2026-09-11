@@ -1,33 +1,25 @@
 import Link from "next/link";
-import {
-  FiArrowRight,
-  FiBarChart2,
-  FiCheck,
-  FiClock,
-  FiHeart,
-  FiTarget,
-  FiZap,
-} from "@/components/icon";
+import { Icon } from "@/components/icon";
 import { ThemeToggle } from "@/design-system/theme/theme-toggle";
 import styles from "./landing-page.module.css";
 
 const highlights = [
   {
-    icon: FiCheck,
+    icon: "FiCheck",
     title: "Prioridades claras",
     text: "Veja o que realmente merece sua atenção hoje.",
   },
   {
-    icon: FiClock,
+    icon: "FiClock",
     title: "Foco com intenção",
     text: "Transforme tempo protegido em progresso real.",
   },
   {
-    icon: FiHeart,
+    icon: "FiHeart",
     title: "Ritmo sustentável",
     text: "Hábitos e bem-estar sem sobrecarregar sua rotina.",
   },
-];
+] as const;
 
 export default function LandingPage() {
   return (
@@ -39,7 +31,7 @@ export default function LandingPage() {
           aria-label="Gerencie-se, página inicial"
         >
           <span className={styles.brandMark}>
-            <FiZap aria-hidden="true" />
+            <Icon name="FiZap" aria-hidden="true" />
           </span>
           Gerencie-se
         </Link>
@@ -68,7 +60,7 @@ export default function LandingPage() {
           </p>
           <div className={styles.heroActions}>
             <Link className={styles.primaryAction} href="/register">
-              Começar agora <FiArrowRight aria-hidden="true" />
+              Começar agora <Icon name="FiArrowRight" aria-hidden="true" />
             </Link>
             <a className={styles.secondaryAction} href="#como-funciona">
               Conhecer a plataforma
@@ -93,7 +85,7 @@ export default function LandingPage() {
             <article className={`${styles.previewCard} ${styles.progressCard}`}>
               <div className={styles.cardTitle}>
                 <span>Seu foco hoje</span>
-                <FiTarget aria-hidden="true" />
+                <Icon name="FiTarget" aria-hidden="true" />
               </div>
               <div className={styles.progressValue}>
                 72<small>%</small>
@@ -106,7 +98,7 @@ export default function LandingPage() {
             <article className={`${styles.previewCard} ${styles.focusCard}`}>
               <div className={styles.cardTitle}>
                 <span>Em foco</span>
-                <FiClock aria-hidden="true" />
+                <Icon name="FiClock" aria-hidden="true" />
               </div>
               <strong>24:18</strong>
               <p>Projeto pessoal</p>
@@ -122,7 +114,7 @@ export default function LandingPage() {
             </div>
             <div className={styles.task}>
               <span className={styles.done}>
-                <FiCheck aria-hidden="true" />
+                <Icon name="FiCheck" aria-hidden="true" />
               </span>
               <span>Planejar a semana</span>
               <small>09:30</small>
@@ -159,10 +151,10 @@ export default function LandingPage() {
           <h2>Produtividade não precisa ser complicada.</h2>
         </div>
         <div className={styles.featureGrid}>
-          {highlights.map(({ icon: Icon, title, text }) => (
+          {highlights.map(({ icon, title, text }) => (
             <article className={styles.feature} key={title}>
               <span className={styles.featureIcon}>
-                <Icon aria-hidden="true" />
+                <Icon name={icon} aria-hidden="true" />
               </span>
               <h3>{title}</h3>
               <p>{text}</p>
@@ -181,7 +173,7 @@ export default function LandingPage() {
             cabem no seu dia.
           </p>
           <Link className={styles.textLink} href="/register">
-            Criar minha conta <FiArrowRight aria-hidden="true" />
+            Criar minha conta <Icon name="FiArrowRight" aria-hidden="true" />
           </Link>
         </div>
         <ol className={styles.stepList}>
@@ -209,13 +201,13 @@ export default function LandingPage() {
         </ol>
       </section>
       <section className={styles.cta}>
-        <FiBarChart2 className={styles.ctaIcon} aria-hidden="true" />
+        <Icon name="FiBarChart2" className={styles.ctaIcon} aria-hidden="true" />
         <p className={styles.eyebrow}>
           <span /> Seu próximo capítulo
         </p>
         <h2>Um dia mais intencional começa agora.</h2>
         <Link className={styles.primaryAction} href="/register">
-          Criar conta grátis <FiArrowRight aria-hidden="true" />
+          Criar conta grátis <Icon name="FiArrowRight" aria-hidden="true" />
         </Link>
       </section>
       <footer className={styles.footer}>

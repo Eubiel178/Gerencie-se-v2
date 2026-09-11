@@ -1,22 +1,27 @@
-import type { IconType } from "react-icons";
+import type { IconBaseProps, IconType } from "react-icons";
 
-/**
- * Ponto único de import de ícones do app.
- *
- * As telas devem importar os ícones daqui, nunca diretamente
- * de react-icons/fa, react-icons/md, etc.
- */
-export * from "react-icons/fa";
-export * from "react-icons/md";
-export * from "react-icons/go";
-export * from "react-icons/fi";
+import * as FaIcons from "react-icons/fa";
+import * as MdIcons from "react-icons/md";
+import * as GoIcons from "react-icons/go";
+import * as FiIcons from "react-icons/fi";
 
-export interface IconProps {
-  icon: IconType;
-  size?: number;
-  color?: string;
+const icons = {
+  ...FaIcons,
+  ...MdIcons,
+  ...GoIcons,
+  ...FiIcons,
+} satisfies Record<string, IconType>;
+
+type IconName = keyof typeof icons;
+
+export interface IconProps extends IconBaseProps {
+  name?: IconName;
 }
 
-export function Icon({ icon: IconComponent, size, color }: IconProps) {
-  return <IconComponent size={size} color={color} />;
+export function Icon({ name, ...props }: IconProps) {
+  if (!name) return null;
+
+  const IconComponent = icons[name];
+
+  return <IconComponent {...props} />;
 }

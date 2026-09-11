@@ -11,9 +11,15 @@ export const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
     const { sharedProps } = useInputRootContext();
     const incorrect = Boolean(sharedProps?.error);
 
-    const classNames = [styles.field, incorrect && styles.incorrect, className]
-      .filter(Boolean)
-      .join(" ");
+    let classNames = styles.field;
+
+    if (incorrect) {
+      classNames = classNames + " " + styles.incorrect;
+    }
+
+    if (className) {
+      classNames = classNames + " " + className;
+    }
 
     return (
       <input

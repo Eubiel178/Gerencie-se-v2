@@ -1,7 +1,6 @@
-import { MdClose } from "../icon";
-import { Button } from "../button";
+import { Button } from "../../button";
 
-import styles from "./modal-header.module.css";
+import styles from "./styles.module.css";
 
 interface ModalHeaderProps {
   title: string;
@@ -15,7 +14,10 @@ export function ModalHeader({ title, onClose }: ModalHeaderProps) {
     <div className={styles.header}>
       <h3>{title}</h3>
 
-      <Button.IconButtonPreset icon={MdClose} tone="muted" aria-label="Fechar" onClick={onClose} />
+      <Button.IconButtonPreset
+        icon={{ name: "MdClose" }}
+        root={{ tone: "muted", "aria-label": "Fechar", onClick: onClose }}
+      />
     </div>
   );
 }

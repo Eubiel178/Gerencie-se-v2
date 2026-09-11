@@ -3,42 +3,26 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import {
-  FaHome,
-  FaSignOutAlt,
-  FaFire,
-  FaBullseye,
-  FaTint,
-  FaRunning,
-  FaBook,
-  FaHeartbeat,
-  FaCalendarCheck,
-  FaListUl,
-  FaChartBar,
-  MdEvent,
-  MdSettings,
-  MdTimer,
-  MdOutlineSchedule,
-} from "@/components/icon";
+import { Icon } from "@/components/icon";
 
 import styles from "@/app/home/home-layout.module.css";
 
 const links = [
-  { href: "/home", label: "Visão geral", icon: FaHome },
-  { href: "/home/tasks", label: "Tarefas", icon: FaListUl },
-  { href: "/home/routine", label: "Rotina", icon: MdOutlineSchedule },
-  { href: "/home/habits", label: "Hábitos", icon: FaFire },
-  { href: "/home/goals", label: "Objetivos", icon: FaBullseye },
-  { href: "/home/focus", label: "Foco", icon: MdTimer },
-  { href: "/home/hydration", label: "Hidratação", icon: FaTint },
-  { href: "/home/running", label: "Corrida", icon: FaRunning },
-  { href: "/home/reading", label: "Leitura", icon: FaBook },
-  { href: "/home/health", label: "Saúde", icon: FaHeartbeat },
-  { href: "/home/menstrual-cycle", label: "Ciclo", icon: FaCalendarCheck },
-  { href: "/home/event", label: "Calendário", icon: MdEvent },
-  { href: "/home/stats", label: "Estatísticas", icon: FaChartBar },
-  { href: "/home/settings", label: "Configurações", icon: MdSettings },
-];
+  { href: "/home", label: "Visão geral", icon: "FaHome" },
+  { href: "/home/tasks", label: "Tarefas", icon: "FaListUl" },
+  { href: "/home/routine", label: "Rotina", icon: "MdOutlineSchedule" },
+  { href: "/home/habits", label: "Hábitos", icon: "FaFire" },
+  { href: "/home/goals", label: "Objetivos", icon: "FaBullseye" },
+  { href: "/home/focus", label: "Foco", icon: "MdTimer" },
+  { href: "/home/hydration", label: "Hidratação", icon: "FaTint" },
+  { href: "/home/running", label: "Corrida", icon: "FaRunning" },
+  { href: "/home/reading", label: "Leitura", icon: "FaBook" },
+  { href: "/home/health", label: "Saúde", icon: "FaHeartbeat" },
+  { href: "/home/menstrual-cycle", label: "Ciclo", icon: "FaCalendarCheck" },
+  { href: "/home/event", label: "Calendário", icon: "MdEvent" },
+  { href: "/home/stats", label: "Estatísticas", icon: "FaChartBar" },
+  { href: "/home/settings", label: "Configurações", icon: "MdSettings" },
+] as const;
 
 export const Header = () => {
   const pathname = usePathname();
@@ -80,10 +64,10 @@ export const Header = () => {
       </p>
       <nav aria-label="Navegação principal">
         <ul className={styles.navigation}>
-          {links.map(({ href, label, icon: Icon }) => (
+          {links.map(({ href, label, icon }) => (
             <li key={href}>
               <Link href={href} data-active={pathname === href}>
-                <Icon aria-hidden="true" />
+                <Icon name={icon} aria-hidden="true" />
                 {label}
               </Link>
             </li>
@@ -95,7 +79,7 @@ export const Header = () => {
         type="button"
         onClick={() => signOut({ callbackUrl: "/login" })}
       >
-        <FaSignOutAlt aria-hidden="true" />
+        <Icon name="FaSignOutAlt" aria-hidden="true" />
         Sair
       </button>
     </aside>
