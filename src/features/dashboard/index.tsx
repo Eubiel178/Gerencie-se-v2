@@ -27,6 +27,11 @@ import { greetingForHour } from "./greeting";
 
 import styles from "./dashboard.module.css";
 
+// Reexports pra permitir `import { X } from "@/features/dashboard"` em
+// vez de caminhos profundos.
+export * from "./components/shared";
+export { buildNextAction } from "./next-action";
+
 const PRIORITY_RANK = { critica: 3, alta: 2, media: 1, baixa: 0 } as const;
 
 export async function Dashboard() {

@@ -4,6 +4,12 @@ import { HydrationTracker } from "./components";
 
 import styles from "./hydration.module.css";
 
+// Reexports pra permitir `import { X } from "@/features/hydration"` em
+// vez de caminhos profundos.
+export * from "./domain";
+export * from "./actions";
+export { getHydrationFetcher } from "./data/get-hydration-fetcher";
+
 export async function Hydration() {
   const fetcher = getHydrationFetcher();
 

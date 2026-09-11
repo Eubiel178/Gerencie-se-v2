@@ -9,6 +9,14 @@ import { HabitsHeader, HabitsList } from "./components";
 
 import styles from "./habits.module.css";
 
+// Reexports pra permitir `import { X } from "@/features/habits"` em vez
+// de caminhos profundos.
+export * from "./domain";
+export * from "./actions";
+export * from "./filter-habits";
+export * from "./build-habit-heatmap";
+export { getHabitFetcher } from "./data/get-habit-fetcher";
+
 // 52 semanas = ~1 ano de histórico, em 2 páginas de 26 semanas (6 meses)
 // cada no mapa de calor.
 const HEATMAP_WEEKS_BACK = 52;

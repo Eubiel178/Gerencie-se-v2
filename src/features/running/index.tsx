@@ -4,6 +4,12 @@ import { History, RunningTracker, Totals } from "./components";
 
 import styles from "./running.module.css";
 
+// Reexports pra permitir `import { X } from "@/features/running"` em
+// vez de caminhos profundos.
+export * from "./domain";
+export * from "./actions";
+export { getRunningFetcher } from "./data/get-running-fetcher";
+
 export async function Running() {
   const { sessions, totals } = await getRunningFetcher().loadAll();
 

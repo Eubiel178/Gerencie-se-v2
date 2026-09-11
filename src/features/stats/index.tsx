@@ -28,6 +28,10 @@ import {
 
 import styles from "./stats.module.css";
 
+// Reexports pra permitir `import { X } from "@/features/stats"` em vez
+// de caminhos profundos.
+export * from "./calculations";
+
 // 28 dias por página de gráfico (4 semanas) × 7 páginas pra trás — dá pra
 // navegar até ~6 meses de histórico sem precisar buscar tudo de uma vez.
 // Mesmo horizonte pra todo gráfico "por semana" da tela, por consistência.

@@ -7,6 +7,19 @@ import { getTaskFetcher } from "./data/get-task-fetcher";
 
 import { Section, TasksList, TasksListHeader } from "./components";
 
+// Reexports pra permitir `import { X } from "@/features/tasks"` em vez
+// de caminhos profundos.
+export * from "./domain";
+export * from "./actions";
+export * from "./filter-tasks";
+export * from "./task-store";
+export * from "./sync";
+export { getTaskFetcher } from "./data/get-task-fetcher";
+export { useFormTags } from "./hooks/use-form-tags";
+export { TaskReminders } from "./components/reminder-scheduler";
+export { NotificationsToggle } from "./components/reminder-scheduler/notifications-toggle";
+export { AttachmentsField } from "./components/attachments-field";
+
 export async function Home() {
   const fetcher = getTaskFetcher();
 

@@ -4,6 +4,12 @@ import { AddEntryForm, EstimatePanel, History } from "./components";
 
 import styles from "./cycle.module.css";
 
+// Reexports pra permitir `import { X } from "@/features/menstrual-cycle"`
+// em vez de caminhos profundos.
+export * from "./domain";
+export * from "./actions";
+export { getCycleFetcher } from "./data/get-cycle-fetcher";
+
 export async function MenstrualCycle() {
   const { entries, estimate } = await getCycleFetcher().loadAll();
 

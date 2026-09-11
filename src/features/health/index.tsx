@@ -4,6 +4,12 @@ import { AddForm, List } from "./components";
 
 import styles from "./health.module.css";
 
+// Reexports pra permitir `import { X } from "@/features/health"` em vez
+// de caminhos profundos.
+export * from "./domain";
+export * from "./actions";
+export { getHealthFetcher } from "./data/get-health-fetcher";
+
 export async function Health() {
   const checkups = await getHealthFetcher().loadAll();
 

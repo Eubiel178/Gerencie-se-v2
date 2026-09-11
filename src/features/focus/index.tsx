@@ -4,6 +4,15 @@ import { History, Timer } from "./components";
 
 import styles from "./focus.module.css";
 
+// Reexports pra permitir `import { X } from "@/features/focus"` em vez
+// de caminhos profundos.
+export * from "./domain";
+export * from "./actions";
+export { getFocusFetcher, getMascotFetcher } from "./data/get-focus-fetcher";
+export { MascotCreature } from "./components/mascot/creature";
+export { MascotVisual } from "./components/mascot-3d";
+export { MascotSettings } from "./components/mascot-settings";
+
 export async function Focus() {
   const focusFetcher = getFocusFetcher();
   const mascotFetcher = getMascotFetcher();

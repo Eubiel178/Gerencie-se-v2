@@ -5,6 +5,12 @@ import { GoalsHeader, GoalsList } from "./components";
 
 import styles from "./goals.module.css";
 
+// Reexports pra permitir `import { X } from "@/features/goals"` em vez
+// de caminhos profundos.
+export * from "./domain";
+export * from "./actions";
+export { getGoalFetcher } from "./data/get-goal-fetcher";
+
 export async function Goals() {
   const [goalsList, connections] = await Promise.all([
     getGoalFetcher().loadAll(),

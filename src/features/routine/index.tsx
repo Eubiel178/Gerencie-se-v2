@@ -6,6 +6,12 @@ import { RoutineHeader, RoutineList } from "./components";
 
 import styles from "./routine.module.css";
 
+// Reexports pra permitir `import { X } from "@/features/routine"` em
+// vez de caminhos profundos.
+export * from "./domain";
+export * from "./actions";
+export { getRoutineFetcher } from "./data/get-routine-fetcher";
+
 export async function Routine() {
   const routineFetcher = getRoutineFetcher();
   const taskFetcher = getTaskFetcher();
