@@ -67,14 +67,14 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
 
   return (
     <>
-      <Button
+      <Button.Root
         type="button"
         onClick={function () {
           setIsOpen(true);
         }}
       >
         {buttonText}
-      </Button>
+      </Button.Root>
 
       {isOpen && (
         <Modal>
@@ -142,7 +142,7 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
 
             {submitError && <p className={styles.formError}>{submitError}</p>}
 
-            <Button loading={isSubmitting}>Criar Objetivo</Button>
+            <Button.Root loading={isSubmitting}>Criar Objetivo</Button.Root>
           </Form.Root>
         </Modal>
       )}

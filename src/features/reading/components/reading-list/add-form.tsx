@@ -59,9 +59,9 @@ export function AddForm() {
         value={author}
         onChange={(event) => setAuthor(event.target.value)}
       />
-      <Button type="submit" loading={isSubmitting}>
+      <Button.Root type="submit" loading={isSubmitting}>
         Adicionar
-      </Button>
+      </Button.Root>
 
       {error && <p className={styles.formError}>{error}</p>}
     </form>

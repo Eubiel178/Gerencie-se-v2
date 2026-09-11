@@ -86,9 +86,9 @@ export function AddEntryForm() {
         ))}
       </div>
 
-      <Button type="submit" loading={isSubmitting}>
+      <Button.Root type="submit" loading={isSubmitting}>
         Registrar
-      </Button>
+      </Button.Root>
     </form>
   );
 }

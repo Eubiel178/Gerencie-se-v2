@@ -71,14 +71,14 @@ export function List({ checkups }: { checkups: IHealthCheckup[] }) {
           </div>
 
           <div className={styles.actions}>
-            <Button
+            <Button.Root
               className={styles.markDoneButton}
               loading={busyId === checkup.id}
               aria-label={`Marcar ${checkup.title} como feito hoje`}
               onClick={() => handleMarkDone(checkup.id)}
             >
               <FaCheck />
-            </Button>
+            </Button.Root>
 
             <IconButton
               tone="danger"

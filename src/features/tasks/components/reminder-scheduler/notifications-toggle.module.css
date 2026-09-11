@@ -10,11 +10,6 @@
   color: var(--color-text);
 }
 
-.smallButton {
-  padding: 0.45rem var(--space-3);
-  font-size: var(--font-size-sm);
-}
-
 .mutedText {
   margin: 0;
   font-family: var(--font-sans);

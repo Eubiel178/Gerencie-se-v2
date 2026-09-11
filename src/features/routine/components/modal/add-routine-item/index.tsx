@@ -65,14 +65,14 @@ export function AddRoutineItem({ buttonText, taskOptions, connections }: IAddRou
 
   return (
     <>
-      <Button
+      <Button.Root
         type="button"
         onClick={function () {
           setIsOpen(true);
         }}
       >
         {buttonText}
-      </Button>
+      </Button.Root>
 
       {isOpen && (
         <Modal>
@@ -133,7 +133,7 @@ export function AddRoutineItem({ buttonText, taskOptions, connections }: IAddRou
 
             {submitError && <p className={styles.formError}>{submitError}</p>}
 
-            <Button loading={isSubmitting}>Adicionar à Rotina</Button>
+            <Button.Root loading={isSubmitting}>Adicionar à Rotina</Button.Root>
           </Form.Root>
         </Modal>
       )}

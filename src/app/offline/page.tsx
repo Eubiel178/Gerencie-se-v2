@@ -18,7 +18,7 @@ export default function OfflinePage() {
         hábitos e metas. Assim que a conexão voltar, tente novamente.
       </p>
 
-      <Button onClick={() => window.location.reload()}>Tentar novamente</Button>
+      <Button.Root onClick={() => window.location.reload()}>Tentar novamente</Button.Root>
     </div>
   );
 }

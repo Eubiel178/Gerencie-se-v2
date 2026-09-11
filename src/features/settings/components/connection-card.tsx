@@ -115,14 +115,14 @@ export function ConnectionCard({
       {actionError && <p className={styles.error}>{actionError}</p>}
 
       <div className={styles.buttonRow}>
-        <Button
+        <Button.Root
           type="button"
           className={styles.disconnectButton}
           loading={isDisconnecting}
           onClick={handleDisconnect}
         >
           Desconectar
-        </Button>
+        </Button.Root>
       </div>
     </div>
   );

@@ -115,10 +115,10 @@ export function Auth() {
 
         {formError && <p className={styles.formError}>{formError}</p>}
 
-        <Button loading={isSubmitting}>Entrar</Button>
+        <Button.Root loading={isSubmitting}>Entrar</Button.Root>
       </Form.Root>
 
-      <Button
+      <Button.Root
         type="button"
         className={styles.googleButton}
         loading={isGoogleLoading}
@@ -128,7 +128,7 @@ export function Auth() {
           <FaGoogle aria-hidden="true" />
           <span>Continuar com Google</span>
         </span>
-      </Button>
+      </Button.Root>
 
       <div className={styles.authSwitch}>
         <p className={styles.authSwitchText}>Ainda não tem conta?</p>

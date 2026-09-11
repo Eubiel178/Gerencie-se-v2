@@ -35,21 +35,3 @@
   color: var(--color-text);
 }
 
-.smallButton {
-  padding: 0.45rem var(--space-3);
-  font-size: var(--font-size-sm);
-}
-
-.ghostButton {
-  background: transparent;
-  color: var(--color-text);
-  border-color: transparent;
-  box-shadow: none;
-}
-.ghostButton:hover:not(:disabled) {
-  background: var(--color-surface-elevated);
-  color: var(--color-text);
-  filter: none;
-  box-shadow: none;
-  transform: none;
-}

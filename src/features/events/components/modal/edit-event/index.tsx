@@ -161,7 +161,7 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
 
             {submitError && <p className={styles.formError}>{submitError}</p>}
 
-            <Button loading={isSubmitting}>Salvar Alterações</Button>
+            <Button.Root loading={isSubmitting}>Salvar Alterações</Button.Root>
           </Form.Root>
         </Modal>
       )}

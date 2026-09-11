@@ -95,9 +95,9 @@ export function PeoplePanel({ connections }: { connections: IConnection[] }) {
           />
         </Input.Wrapper>
 
-        <Button type="submit" className={styles.smallButton} loading={isSubmitting}>
+        <Button.Root type="submit" size="sm" loading={isSubmitting}>
           Convidar
-        </Button>
+        </Button.Root>
       </form>
 
       {error && <p className={styles.error}>{error}</p>}
@@ -125,33 +125,36 @@ export function PeoplePanel({ connections }: { connections: IConnection[] }) {
               <div className={styles.actions}>
                 {connection.status === "pending" && connection.direction === "received" ? (
                   <>
-                    <Button
+                    <Button.Root
                       type="button"
-                      className={styles.smallButton}
+                      size="sm"
                       loading={pendingId === connection.id}
                       onClick={() => handleRespond(connection.id, true)}
                     >
                       Aceitar
-                    </Button>
-                    <Button
+                    </Button.Root>
+                    <Button.Root
                       type="button"
-                      className={styles.declineButton}
+                      size="sm"
+                      variant="secondary"
                       loading={pendingId === connection.id}
                       onClick={() => handleRespond(connection.id, false)}
                     >
                       Recusar
-                    </Button>
+                    </Button.Root>
                   </>
                 ) : (
-                  <Button
+                  <Button.Root
                     type="button"
-                    className={styles.removeButton}
+                    size="sm"
+                    variant="ghost"
+                    tone="danger"
                     aria-label={`Remover conexão com ${connection.otherPersonEmail}`}
                     loading={pendingId === connection.id}
                     onClick={() => handleRemove(connection.id)}
                   >
                     Remover
-                  </Button>
+                  </Button.Root>
                 )}
               </div>
             </li>

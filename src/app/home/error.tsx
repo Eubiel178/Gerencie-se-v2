@@ -25,7 +25,7 @@ export default function HomeError({
         conexão e tente novamente.
       </p>
 
-      <Button onClick={reset}>Tentar novamente</Button>
+      <Button.Root onClick={reset}>Tentar novamente</Button.Root>
     </div>
   );
 }

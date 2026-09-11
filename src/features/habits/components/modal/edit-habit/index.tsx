@@ -175,7 +175,7 @@ export function EditHabit({ habitBeingEdited, connections, goalOptions }: IEditH
 
             {submitError && <p className={styles.formError}>{submitError}</p>}
 
-            <Button loading={isSubmitting}>Salvar Alterações</Button>
+            <Button.Root loading={isSubmitting}>Salvar Alterações</Button.Root>
           </Form.Root>
         </Modal>
       )}

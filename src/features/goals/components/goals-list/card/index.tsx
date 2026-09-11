@@ -134,13 +134,14 @@ export function Card({ goal, connections }: CardProps) {
               <span className={`${styles.stepTitle} ${step.completed ? styles.stepTitleDone : ""}`}>
                 {step.title}
               </span>
-              <Button
-                className={styles.deleteStepButton}
+              <IconButton
+                tone="danger"
+                size="sm"
                 aria-label={`Remover etapa ${step.title}`}
                 onClick={() => handleRemoveStep(step.id)}
               >
                 <FaTrash />
-              </Button>
+              </IconButton>
             </li>
           ))}
         </ul>
@@ -153,14 +154,15 @@ export function Card({ goal, connections }: CardProps) {
           value={newStepTitle}
           onChange={(event) => setNewStepTitle(event.target.value)}
         />
-        <Button
+        <Button.Root
           type="submit"
-          className={styles.addStepButton}
+          variant="secondary"
+          size="sm"
           aria-label="Adicionar etapa"
           loading={isAddingStep}
         >
-          <FaPlus aria-hidden="true" />
-        </Button>
+          <Button.Icon><FaPlus aria-hidden="true" /></Button.Icon>
+        </Button.Root>
       </form>
     </li>
   );

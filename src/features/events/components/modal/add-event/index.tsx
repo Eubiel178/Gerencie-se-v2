@@ -64,13 +64,13 @@ export const AddEvent = ({ buttonText }: IModalProps) => {
 
   return (
     <>
-      <Button
+      <Button.Root
         onClick={function () {
           setIsOpen(true);
         }}
       >
         {buttonText}
-      </Button>
+      </Button.Root>
 
       {isOpen && (
         <Modal>
@@ -157,7 +157,7 @@ export const AddEvent = ({ buttonText }: IModalProps) => {
 
             {submitError && <p className={styles.formError}>{submitError}</p>}
 
-            <Button loading={isSubmitting}>Novo Evento</Button>
+            <Button.Root loading={isSubmitting}>Novo Evento</Button.Root>
           </Form.Root>
         </Modal>
       )}

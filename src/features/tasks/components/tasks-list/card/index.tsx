@@ -173,7 +173,7 @@ export function Card({ task, tagLabel, isGoogleConnected, connections }: CardPro
                   {task.syncError || "Falha ao sincronizar com o Google Agenda."}
                 </p>
 
-                <Button
+                <Button.Root
                   type="button"
                   className={styles.retryButton}
                   loading={isRetrying}
@@ -183,7 +183,7 @@ export function Card({ task, tagLabel, isGoogleConnected, connections }: CardPro
                     <FaSyncAlt aria-hidden="true" />
                     <span>Tentar novamente</span>
                   </span>
-                </Button>
+                </Button.Root>
               </>
             )}
           </div>

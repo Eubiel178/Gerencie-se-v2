@@ -104,14 +104,15 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
             value={goalInput}
             onChange={(event) => setGoalInput(event.target.value)}
           />
-          <Button type="submit" className={styles.smallButton}>Salvar</Button>
-          <Button
+          <Button.Root type="submit" size="sm">Salvar</Button.Root>
+          <Button.Root
             type="button"
-            className={`${styles.smallButton} ${styles.secondaryButton}`}
+            size="sm"
+            variant="secondary"
             onClick={() => setIsEditingGoal(false)}
           >
             Cancelar
-          </Button>
+          </Button.Root>
         </form>
       ) : (
         <button
@@ -132,14 +133,14 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
 
       <div className={styles.quickAdd}>
         {QUICK_AMOUNTS.map((amount) => (
-          <Button
+          <Button.Root
             key={amount}
-            className={styles.secondaryButton}
+            variant="secondary"
             loading={isBusy}
             onClick={() => handleLog(amount)}
           >
             +{amount} ml
-          </Button>
+          </Button.Root>
         ))}
       </div>
 
@@ -152,9 +153,9 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
           value={customAmount}
           onChange={(event) => setCustomAmount(event.target.value)}
         />
-        <Button type="submit" className={styles.secondaryButton} loading={isBusy}>
+        <Button.Root type="submit" variant="secondary" loading={isBusy}>
           Adicionar
-        </Button>
+        </Button.Root>
       </form>
 
       {today.logs.length > 0 && (
@@ -169,7 +170,7 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
               </span>
               <IconButton
                 tone="danger"
-                className={styles.deleteLogButton}
+                size="sm"
                 aria-label="Remover registro"
                 onClick={() => handleDelete(log.id)}
               >

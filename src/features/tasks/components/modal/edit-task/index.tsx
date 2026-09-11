@@ -180,7 +180,7 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
 
             {submitError && <p className={styles.formError}>{submitError}</p>}
 
-            <Button loading={isSubmitting}>Salvar Alterações</Button>
+            <Button.Root loading={isSubmitting}>Salvar Alterações</Button.Root>
           </Form.Root>
         </Modal>
       )}

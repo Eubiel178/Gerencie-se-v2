@@ -75,14 +75,14 @@ export function AddHabit({ buttonText, connections, goalOptions }: IAddHabitProp
 
   return (
     <>
-      <Button
+      <Button.Root
         type="button"
         onClick={function () {
           setIsOpen(true);
         }}
       >
         {buttonText}
-      </Button>
+      </Button.Root>
 
       {isOpen && (
         <Modal>
@@ -161,7 +161,7 @@ export function AddHabit({ buttonText, connections, goalOptions }: IAddHabitProp
 
             {submitError && <p className={styles.formError}>{submitError}</p>}
 
-            <Button loading={isSubmitting}>Adicionar Hábito</Button>
+            <Button.Root loading={isSubmitting}>Adicionar Hábito</Button.Root>
           </Form.Root>
         </Modal>
       )}

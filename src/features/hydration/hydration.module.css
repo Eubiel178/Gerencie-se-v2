@@ -21,6 +21,3 @@
 .weekSection{width:100%}
 .actionError{margin:0;font-family:var(--font-sans);color:var(--color-danger);font-size:var(--font-size-md)}
 .weekEmptyMessage{margin:0;font-family:var(--font-sans);color:var(--color-info);font-size:var(--font-size-md)}
-.smallButton{padding:.45rem var(--space-3);font-size:var(--font-size-sm)}
-.secondaryButton{background:var(--color-surface-elevated);border-color:var(--color-border);color:var(--color-text);box-shadow:0 1px 2px var(--color-shadow)}
-.deleteLogButton{padding:.45rem var(--space-3);font-size:var(--font-size-sm)}

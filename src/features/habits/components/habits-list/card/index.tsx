@@ -106,8 +106,9 @@ export function Card({ habit, today, connections, goalOptions, linkedGoalTitle }
         )}
       </div>
 
-      <Button
-        className={`${styles.toggleButton} ${habit.completedToday ? styles.secondaryButton : ""}`}
+      <Button.Root
+        className={styles.toggleButton}
+        variant={habit.completedToday ? "secondary" : "primary"}
         loading={isToggling}
         onClick={handleToggleToday}
       >
@@ -118,7 +119,7 @@ export function Card({ habit, today, connections, goalOptions, linkedGoalTitle }
         ) : (
           "Marcar hoje"
         )}
-      </Button>
+      </Button.Root>
     </li>
   );
 }

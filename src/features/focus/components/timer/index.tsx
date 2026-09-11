@@ -5,7 +5,7 @@ import { MdFullscreen, MdFullscreenExit } from "react-icons/md";
 
 import { useRouter } from "next/navigation";
 
-import { Button } from "@/components";
+import { Button, IconButton } from "@/components";
 
 import {
   cancelFocusSessionAction,
@@ -216,14 +216,13 @@ export function Timer({ initialSession, mascot }: TimerProps) {
   return (
     <div ref={panelRef} className={styles.panel} data-fullscreen={isFullscreen}>
       {session && (
-        <Button
-          type="button"
+        <IconButton
           className={styles.fullscreenToggle}
           aria-label={isFullscreen ? "Sair da tela cheia" : "Modo foco em tela cheia"}
           onClick={handleToggleFullscreen}
         >
           {isFullscreen ? <MdFullscreenExit /> : <MdFullscreen />}
-        </Button>
+        </IconButton>
       )}
 
       <Mascot mascot={mascot} mood={mood} />
@@ -237,36 +236,37 @@ export function Timer({ initialSession, mascot }: TimerProps) {
           <span className={styles.clock}>{formatClock(remaining)}</span>
 
           <div className={styles.controls}>
-            <Button className={styles.secondaryButton} loading={isBusy} onClick={handleComplete}>
+            <Button.Root variant="secondary" loading={isBusy} onClick={handleComplete}>
               Concluir agora
-            </Button>
-            <Button
-              className={`${styles.secondaryButton} ${styles.dangerButton}`}
+            </Button.Root>
+            <Button.Root
+              variant="secondary"
+              tone="danger"
               loading={isBusy}
               onClick={handleCancel}
             >
               Cancelar
-            </Button>
+            </Button.Root>
           </div>
         </>
       ) : (
         <>
           <div className={styles.presets}>
             {PRESETS_MINUTES.map((minutes) => (
-              <Button
+              <Button.Root
                 key={minutes}
                 type="button"
-                className={plannedMinutes === minutes ? undefined : styles.secondaryButton}
+                variant={plannedMinutes === minutes ? "primary" : "secondary"}
                 onClick={() => setPlannedMinutes(minutes)}
               >
                 {minutes} min
-              </Button>
+              </Button.Root>
             ))}
           </div>
 
-          <Button loading={isBusy} onClick={handleStart}>
+          <Button.Root loading={isBusy} onClick={handleStart}>
             Iniciar Foco ({plannedMinutes} min)
-          </Button>
+          </Button.Root>
         </>
       )}
     </div>

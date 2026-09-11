@@ -38,18 +38,18 @@ export function RunningTracker() {
   return (
     <div>
       <div className={styles.tabs}>
-        <Button
+        <Button.Root
           className={tab === "manual" ? undefined : styles.tabButton}
           onClick={() => setTab("manual")}
         >
           Registro manual
-        </Button>
-        <Button
+        </Button.Root>
+        <Button.Root
           className={tab === "gps" ? undefined : styles.tabButton}
           onClick={() => setTab("gps")}
         >
           GPS ao vivo
-        </Button>
+        </Button.Root>
       </div>
 
       {tab === "manual" ? (
@@ -138,7 +138,7 @@ function ManualEntry({ onSaved }: { onSaved: () => void }) {
 
       {error && <p className={styles.inlineMessage}>{error}</p>}
 
-      <Button loading={isSubmitting}>Salvar Corrida</Button>
+      <Button.Root loading={isSubmitting}>Salvar Corrida</Button.Root>
     </form>
   );
 }
@@ -275,11 +275,11 @@ function LiveTracker({ onSaved }: { onSaved: () => void }) {
 
       <div className={styles.liveControls}>
         {isTracking ? (
-          <Button className={styles.finishButton} loading={isSaving} onClick={handleFinish}>
+          <Button.Root className={styles.finishButton} loading={isSaving} onClick={handleFinish}>
             Finalizar Corrida
-          </Button>
+          </Button.Root>
         ) : (
-          <Button onClick={handleStart}>Iniciar Corrida com GPS</Button>
+          <Button.Root onClick={handleStart}>Iniciar Corrida com GPS</Button.Root>
         )}
       </div>
     </div>

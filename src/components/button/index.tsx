@@ -1,11 +1,53 @@
 import styles from "./styles.module.css";
 
-type ButtonProps = React.ComponentProps<"button"> & {
-  loading?: boolean;
+type ButtonVariant = "primary" | "secondary" | "ghost";
+type ButtonSize = "md" | "sm" | "icon";
+type ButtonTone = "danger" | "highlight" | "muted";
+
+const VARIANT_CLASS: Record<ButtonVariant, string> = {
+  primary: styles.primary,
+  secondary: styles.secondary,
+  ghost: styles.ghost,
 };
 
-const ButtonBase = ({ loading = false, children, disabled, className, ...rest }: ButtonProps) => {
-  const classNames = className ? `${styles.button} ${className}` : styles.button;
+const SIZE_CLASS: Record<ButtonSize, string> = {
+  md: styles.md,
+  sm: styles.sm,
+  icon: styles.sizeIcon,
+};
+
+const TONE_CLASS: Record<ButtonTone, string> = {
+  danger: styles.toneDanger,
+  highlight: styles.toneHighlight,
+  muted: styles.toneMuted,
+};
+
+type ButtonRootProps = React.ComponentProps<"button"> & {
+  loading?: boolean;
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  tone?: ButtonTone;
+};
+
+function ButtonRoot({
+  loading = false,
+  variant = "primary",
+  size = "md",
+  tone,
+  children,
+  disabled,
+  className,
+  ...rest
+}: ButtonRootProps) {
+  let classNames = `${styles.button} ${VARIANT_CLASS[variant]} ${SIZE_CLASS[size]}`;
+
+  if (tone) {
+    classNames = classNames + " " + TONE_CLASS[tone];
+  }
+
+  if (className) {
+    classNames = classNames + " " + className;
+  }
 
   return (
     <button
@@ -18,10 +60,13 @@ const ButtonBase = ({ loading = false, children, disabled, className, ...rest }:
       {children}
     </button>
   );
-};
+}
 
 function ButtonIcon({ children }: { children: React.ReactNode }) {
   return <span className={styles.icon}>{children}</span>;
 }
 
-export const Button = Object.assign(ButtonBase, { Icon: ButtonIcon });
+export const Button = {
+  Root: ButtonRoot,
+  Icon: ButtonIcon,
+};

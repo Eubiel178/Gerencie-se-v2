@@ -76,14 +76,14 @@ export function AddTask({ buttonText, isGoogleConnected, connections }: IAddTask
 
   return (
     <>
-      <Button
+      <Button.Root
         type="button"
         onClick={function () {
           setIsOpen(true);
         }}
       >
         {buttonText}
-      </Button>
+      </Button.Root>
 
       {isOpen && (
         <Modal>
@@ -166,7 +166,7 @@ export function AddTask({ buttonText, isGoogleConnected, connections }: IAddTask
 
             {submitError && <p className={styles.formError}>{submitError}</p>}
 
-            <Button loading={isSubmitting}>Nova Tarefa</Button>
+            <Button.Root loading={isSubmitting}>Nova Tarefa</Button.Root>
           </Form.Root>
         </Modal>
       )}
