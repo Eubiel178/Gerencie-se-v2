@@ -18,5 +18,4 @@ export { Button } from "./form-components/button";
 export { Input } from "./form-components/input";
 export { Feedback } from "./typography/feedback";
 export { Paragraph } from "./typography/paragraph";
-export { DefaultLink } from "./typography/default-link";
 export { Wrapper } from "./wrapper";

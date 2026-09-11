@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -19,7 +20,6 @@ import {
   Button,
   Wrapper,
   Paragraph,
-  DefaultLink,
   Feedback,
 } from "@/components";
 
@@ -102,7 +102,7 @@ export function Auth() {
           </Input.Root>
 
           <Input.Root direction="row" justify="between" align="center">
-            <DefaultLink href="#">Esqueceu sua senha?</DefaultLink>
+            <Link className={styles.link} href="#">Esqueceu sua senha?</Link>
 
             <Input.Wrapper gap="small">
               <Input.Wrapper>
@@ -140,7 +140,7 @@ export function Auth() {
       <Wrapper align="center" gap="small">
         <Paragraph>Ainda não tem conta?</Paragraph>
 
-        <DefaultLink href="/register">Cadastre-se</DefaultLink>
+        <Link className={styles.link} href="/register">Cadastre-se</Link>
       </Wrapper>
     </section>
   );

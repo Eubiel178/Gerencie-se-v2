@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -18,7 +19,6 @@ import {
   Button,
   Wrapper,
   Paragraph,
-  DefaultLink,
   Feedback,
 } from "@/components";
 
@@ -137,7 +137,7 @@ export function Auth() {
       <Wrapper align="center" gap="small">
         <Paragraph>Já tem uma conta?</Paragraph>
 
-        <DefaultLink href="/login">Logar</DefaultLink>
+        <Link className={styles.link} href="/login">Logar</Link>
       </Wrapper>
     </section>
   );
