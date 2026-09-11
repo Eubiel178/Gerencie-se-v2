@@ -80,7 +80,7 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
 
   return (
     <>
-      <Button.IconButtonPreset
+      <Button.Preset
         icon={{ name: "FaEdit" }}
         root={{
           tone: "highlight",

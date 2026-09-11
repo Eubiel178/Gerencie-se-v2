@@ -215,7 +215,7 @@ export function Timer({ initialSession, mascot }: TimerProps) {
   return (
     <div ref={panelRef} className={styles.panel} data-fullscreen={isFullscreen}>
       {session && (
-        <Button.IconButtonPreset
+        <Button.Preset
           icon={{ name: isFullscreen ? "MdFullscreenExit" : "MdFullscreen" }}
           root={{
             className: styles.fullscreenToggle,

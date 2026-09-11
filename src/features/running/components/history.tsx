@@ -50,7 +50,7 @@ export function History({ sessions }: HistoryProps) {
             </span>
           </div>
 
-          <Button.IconButtonPreset
+          <Button.Preset
             icon={{ name: "FaTrash" }}
             root={{
               tone: "danger",

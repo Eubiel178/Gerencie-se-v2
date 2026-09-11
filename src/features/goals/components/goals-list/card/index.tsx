@@ -91,7 +91,7 @@ export function Card({ goal, connections }: CardProps) {
           <EditGoal goalBeingEdited={goal} connections={connections} />
 
           {!goal.isSharedWithMe && (
-            <Button.IconButtonPreset
+            <Button.Preset
               icon={{ name: "FaTrash" }}
               root={{
                 tone: "danger",
@@ -133,7 +133,7 @@ export function Card({ goal, connections }: CardProps) {
               <span className={`${styles.stepTitle} ${step.completed ? styles.stepTitleDone : ""}`}>
                 {step.title}
               </span>
-              <Button.IconButtonPreset
+              <Button.Preset
                 icon={{ name: "FaTrash" }}
                 root={{
                   tone: "danger",

@@ -78,7 +78,7 @@ export function EditHabit({ habitBeingEdited, connections, goalOptions }: IEditH
 
   return (
     <>
-      <Button.IconButtonPreset
+      <Button.Preset
         icon={{ name: "FaEdit" }}
         root={{
           tone: "highlight",

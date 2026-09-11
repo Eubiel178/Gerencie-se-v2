@@ -89,7 +89,7 @@ export function List({ checkups }: { checkups: IHealthCheckup[] }) {
               <Icon name="FaCheck" />
             </Button.Root>
 
-            <Button.IconButtonPreset
+            <Button.Preset
               icon={{ name: "FaTrash" }}
               root={{
                 tone: "danger",

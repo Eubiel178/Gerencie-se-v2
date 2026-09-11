@@ -41,7 +41,7 @@ export function Card(event: IEvent) {
           <h4>{event.title}</h4>
 
           <div className={styles.eventCardActions}>
-            <Button.IconButtonPreset
+            <Button.Preset
               icon={{ name: "FaTrash" }}
               root={{
                 tone: "danger",

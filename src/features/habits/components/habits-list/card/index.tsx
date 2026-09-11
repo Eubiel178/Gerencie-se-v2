@@ -81,7 +81,7 @@ export function Card({
           />
 
           {!habit.isSharedWithMe && (
-            <Button.IconButtonPreset
+            <Button.Preset
               icon={{ name: "FaTrash" }}
               root={{
                 tone: "danger",

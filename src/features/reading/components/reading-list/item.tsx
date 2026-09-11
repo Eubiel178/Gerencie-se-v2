@@ -71,7 +71,7 @@ export function Item({ item }: { item: IReadingItem }) {
           {item.author && <p className={styles.itemAuthor}>{item.author}</p>}
         </div>
 
-        <Button.IconButtonPreset
+        <Button.Preset
           icon={{ name: "FaTrash" }}
           root={{
             tone: "danger",

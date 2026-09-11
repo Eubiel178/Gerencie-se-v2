@@ -167,7 +167,7 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
                   log.loggedAt
                 )}
               </span>
-              <Button.IconButtonPreset
+              <Button.Preset
                 icon={{ name: "FaTrash" }}
                 root={{
                   tone: "danger",

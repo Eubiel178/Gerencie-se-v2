@@ -14,7 +14,7 @@ export function ModalHeader({ title, onClose }: ModalHeaderProps) {
     <div className={styles.header}>
       <h3>{title}</h3>
 
-      <Button.IconButtonPreset
+      <Button.Preset
         icon={{ name: "MdClose" }}
         root={{ tone: "muted", "aria-label": "Fechar", onClick: onClose }}
       />

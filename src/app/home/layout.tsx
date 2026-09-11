@@ -1,3 +1,5 @@
+import { auth } from "@/lib/auth";
+
 import { Header } from "@/components";
 import { Assistant } from "@/features/assistant";
 import { TaskReminders } from "@/features/tasks/components/reminder-scheduler";
@@ -10,10 +12,17 @@ import styles from "./home-layout.module.css";
 // requisição real, e aí o `error.tsx` entra em ação).
 export const dynamic = "force-dynamic";
 
-const HomeLayout = ({ children }: { children: React.ReactNode }) => {
+const HomeLayout = async ({ children }: { children: React.ReactNode }) => {
+  const session = await auth();
+
   return (
     <div className={styles.shell}>
-      <Header />
+      <Header
+        user={{
+          name: session?.user?.name ?? null,
+          image: session?.user?.image ?? null,
+        }}
+      />
 
       <main className={styles.main}>{children}</main>
 

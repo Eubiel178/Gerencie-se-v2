@@ -42,7 +42,7 @@ export function History({ entries }: { entries: ICycleEntry[] }) {
             </span>
           </div>
 
-          <Button.IconButtonPreset
+          <Button.Preset
             icon={{ name: "FaTrash" }}
             root={{
               tone: "danger",

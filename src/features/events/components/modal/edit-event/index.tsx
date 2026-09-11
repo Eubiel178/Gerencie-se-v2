@@ -65,7 +65,7 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
 
   return (
     <>
-      <Button.IconButtonPreset
+      <Button.Preset
         icon={{ name: "FaEdit" }}
         root={{
           tone: "muted",

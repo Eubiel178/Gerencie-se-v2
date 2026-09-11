@@ -70,7 +70,7 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
 
   return (
     <>
-      <Button.IconButtonPreset
+      <Button.Preset
         icon={{ name: "FaEdit" }}
         root={{
           tone: "highlight",

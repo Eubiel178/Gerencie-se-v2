@@ -59,7 +59,7 @@ export function RoutineListItem({ item, taskOptions, connections, linkedTaskTitl
         <EditRoutineItem itemBeingEdited={item} taskOptions={taskOptions} connections={connections} />
 
         {!item.isSharedWithMe && (
-          <Button.IconButtonPreset
+          <Button.Preset
             icon={{ name: "FaTrash" }}
             root={{
               tone: "danger",

@@ -107,7 +107,7 @@ export function Card({
 
           <div className={styles.headerActions}>
             {!task.isSharedWithMe && (
-              <Button.IconButtonPreset
+              <Button.Preset
                 icon={{ name: "FaTrash" }}
                 root={{
                   tone: "danger",

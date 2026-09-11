@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
@@ -24,7 +25,24 @@ const links = [
   { href: "/home/settings", label: "Configurações", icon: "MdSettings" },
 ] as const;
 
-export const Header = () => {
+interface HeaderProps {
+  user: {
+    name: string | null;
+    image: string | null;
+  };
+}
+
+function initials(name: string | null): string {
+  if (!name) return "?";
+
+  const parts = name.trim().split(/\s+/);
+  const first = parts[0]?.[0] ?? "";
+  const last = parts.length > 1 ? parts[parts.length - 1][0] : "";
+
+  return (first + last).toUpperCase();
+}
+
+export const Header = ({ user }: HeaderProps) => {
   const pathname = usePathname();
 
   return (
@@ -74,6 +92,24 @@ export const Header = () => {
           ))}
         </ul>
       </nav>
+
+      <Link href="/home/settings" className={styles.profile}>
+        {user.image ? (
+          <Image
+            src={user.image}
+            alt=""
+            width={32}
+            height={32}
+            className={styles.profileAvatar}
+          />
+        ) : (
+          <span className={styles.profileAvatarFallback} aria-hidden="true">
+            {initials(user.name)}
+          </span>
+        )}
+        <span className={styles.profileName}>{user.name ?? "Minha conta"}</span>
+      </Link>
+
       <button
         className={styles.signOut}
         type="button"

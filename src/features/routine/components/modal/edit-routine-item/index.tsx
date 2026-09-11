@@ -68,7 +68,7 @@ export function EditRoutineItem({ itemBeingEdited, taskOptions, connections }: I
 
   return (
     <>
-      <Button.IconButtonPreset
+      <Button.Preset
         icon={{ name: "FaEdit" }}
         root={{
           tone: "highlight",
