@@ -475,12 +475,60 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   }),
 }));
 
-export const goalsRelations = relations(goals, ({ many }) => ({
+export const goalsRelations = relations(goals, ({ one, many }) => ({
+  user: one(users, {
+    fields: [goals.userId],
+    references: [users.id],
+  }),
   steps: many(goalSteps),
   tasks: many(tasks),
   habits: many(habits),
 }));
 
-export const habitsRelations = relations(habits, ({ many }) => ({
+export const goalStepsRelations = relations(goalSteps, ({ one }) => ({
+  goal: one(goals, {
+    fields: [goalSteps.goalId],
+    references: [goals.id],
+  }),
+  user: one(users, {
+    fields: [goalSteps.userId],
+    references: [users.id],
+  }),
+}));
+
+export const tasksRelations = relations(tasks, ({ one }) => ({
+  user: one(users, {
+    fields: [tasks.userId],
+    references: [users.id],
+  }),
+  goal: one(goals, {
+    fields: [tasks.goalId],
+    references: [goals.id],
+  }),
+}));
+
+export const eventsRelations = relations(events, ({ one }) => ({
+  user: one(users, {
+    fields: [events.userId],
+    references: [users.id],
+  }),
+}));
+
+export const habitsRelations = relations(habits, ({ one, many }) => ({
+  user: one(users, {
+    fields: [habits.userId],
+    references: [users.id],
+  }),
+  goal: one(goals, {
+    fields: [habits.goalId],
+    references: [goals.id],
+  }),
   logs: many(habitLogs),
+}));
+
+export const habitLogsRelations = relations(habitLogs, ({ one }) => ({
+  habit: one(habits, {
+    fields: [habitLogs.habitId],
+    references: [habits.id],
+  }),
 }));
