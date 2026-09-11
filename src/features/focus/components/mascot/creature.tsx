@@ -9,18 +9,22 @@ interface MascotCreatureProps {
    * pré-visualização de Configurações, onde um bicho se mexendo sozinho
    * dentro de um formulário só distrai. */
   roaming?: boolean;
+  /** "sm" encolhe o mesmo corpo (via transform, mesmo desenho) pro avatar
+   * do widget do assistente — é o mesmo mascote, só menor. */
+  size?: "sm" | "lg";
 }
 
 /**
  * Corpo do mascote, sem o balão de fala nem o nome/XP em volta — só a
- * parte visual, pra poder ser reaproveitada tanto no Focus (`Mascot`)
- * quanto na pré-visualização ao vivo de Configurações (`MascotSettings`).
- * Espécie muda só enfeites (orelhas/rabo/focinho) por cima do mesmo blob
- * base — nenhum asset novo, tudo CSS.
+ * parte visual, pra poder ser reaproveitada no Focus (`Mascot`), na
+ * pré-visualização ao vivo de Configurações (`MascotSettings`) e no
+ * avatar do widget do assistente (`Widget`) — os três mostram o MESMO
+ * personagem. Espécie muda só enfeites (orelhas/rabo/focinho) por cima
+ * do mesmo blob base — nenhum asset novo, tudo CSS.
  */
-export function MascotCreature({ species, mood, roaming = false }: MascotCreatureProps) {
+export function MascotCreature({ species, mood, roaming = false, size = "lg" }: MascotCreatureProps) {
   return (
-    <div className={styles.stage} data-roaming={roaming}>
+    <div className={styles.stage} data-roaming={roaming} data-size={size}>
       <div className={styles.roamer}>
         <div className={styles.creature} data-mood={mood} data-species={species} aria-hidden="true">
           {species === "gato" && (

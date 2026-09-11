@@ -8,14 +8,24 @@ import { getHabitFetcher } from "@/features/habits/data/get-habit-fetcher";
 import { getGoalFetcher } from "@/features/goals/data/get-goal-fetcher";
 import { getRoutineFetcher } from "@/features/routine/data/get-routine-fetcher";
 import { getMascotFetcher } from "@/features/focus/data/get-focus-fetcher";
+import { IMascotState } from "@/features/focus/domain";
 
 import { pickTopMessage, RuleBasedAssistantProvider } from "./insight-provider";
 
-export interface IAssistantSnapshot {
-  enabled: boolean;
-  reducedPresence: boolean;
-  message: IAssistantMessage | null;
-}
+// União discriminada por `enabled`: quando `false`, `Assistant` nem chega
+// a montar o widget, então não faz sentido nenhum outro campo além de
+// `reducedPresence` (mantido pra Configurações continuar refletindo o
+// estado do toggle mesmo desabilitado). Quando `true`, `mascot` é
+// obrigatório — o widget do assistente É o mascote (mesmo nome/espécie/
+// personalidade/voz), não um segundo personagem à parte.
+export type IAssistantSnapshot =
+  | { enabled: false; reducedPresence: boolean }
+  | {
+      enabled: true;
+      reducedPresence: boolean;
+      message: IAssistantMessage | null;
+      mascot: IMascotState;
+    };
 
 /**
  * Único ponto de entrada do JARVIS para o resto da aplicação. Nunca acessa
@@ -34,7 +44,7 @@ export class AssistantService {
     const preferences = await getAssistantPreferencesFetcher().getPreferences();
 
     if (!preferences.enabled) {
-      return { enabled: false, reducedPresence: preferences.reducedPresence, message: null };
+      return { enabled: false, reducedPresence: preferences.reducedPresence };
     }
 
     const [tasks, habits, goals, routine, mascot] = await Promise.all([
@@ -57,6 +67,7 @@ export class AssistantService {
       enabled: true,
       reducedPresence: preferences.reducedPresence,
       message: pickTopMessage(messages),
+      mascot,
     };
   }
 }

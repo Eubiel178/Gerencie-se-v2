@@ -17,6 +17,15 @@
 .stage{position:relative;width:12rem;height:8rem}
 .roamer{position:absolute;top:0;left:0;width:8rem;height:8rem}
 .stage[data-roaming="true"] .roamer{animation:roam 9s ease-in-out infinite}
+/* Sem roaming não precisa da pista larga (só existe pra dar espaço pro
+   vai-e-vem) — encolhe pro tamanho exato da criatura, senão ela fica
+   descentralizada (encostada na esquerda) dentro de quem a centraliza. */
+.stage[data-roaming="false"]{width:8rem}
+
+/* Avatar pequeno do widget do assistente: mesmo desenho, só encolhido
+   via transform (nunca duplicar o CSS da criatura). */
+.stage[data-size="sm"]{width:2.75rem;height:2.75rem;overflow:hidden}
+.stage[data-size="sm"] .roamer{transform:scale(0.34);transform-origin:top left}
 
 /* Forma simétrica e arredondada de propósito — a versão anterior (bordas
    bem irregulares/assimétricas + olhos numa cor quase preta) lia como

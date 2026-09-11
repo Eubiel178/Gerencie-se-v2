@@ -20,11 +20,41 @@
   animation: pop var(--duration-base) var(--easing-standard);
 }
 
+.bubbleName {
+  margin: 0 0 var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
 .bubbleText {
   margin: 0;
   color: var(--color-text);
   font-size: var(--font-size-sm);
   line-height: var(--line-height-base);
+}
+
+.bubbleActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--space-2);
+}
+
+/* Enquanto a fala está tocando, o ícone pulsa em vez de virar um spinner
+   de carregamento — a fala pode durar vários segundos, e um anel girando
+   por tanto tempo passa a impressão de estar travado/quebrado, não de
+   "falando agora" (mesmo tratamento do botão de ouvir no Focus). */
+.speakingIcon {
+  animation: speakingPulse 1s ease-in-out infinite;
+}
+@keyframes speakingPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .speakingIcon { animation: none; }
 }
 
 .dismiss {
@@ -62,7 +92,6 @@
   background: var(--color-surface-elevated);
   border: 1px solid var(--color-border);
   box-shadow: 0 0.25rem 0.75rem var(--color-shadow);
-  font-size: 1.4rem;
   cursor: pointer;
   transition: transform var(--duration-fast) var(--easing-standard);
 }

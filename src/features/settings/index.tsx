@@ -66,12 +66,14 @@ export async function Settings({ searchParams }: SettingsProps) {
         <div className={styles.panelHeader}>
           <h2>Assistente</h2>
           <p className={styles.panelText}>
-            O JARVIS aparece discretamente na tela com sugestões baseadas
-            no que você tem pendente.
+            {mascot.name} aparece discretamente na tela com sugestões
+            baseadas no que você tem pendente — é o mesmo mascote de
+            Foco, com o nome, a espécie e a personalidade escolhidos
+            abaixo.
           </p>
         </div>
 
-        <PreferencesPanel preferences={assistantPreferences} />
+        <PreferencesPanel preferences={assistantPreferences} mascotName={mascot.name} />
       </section>
 
       <section className={styles.settingPanel}>
@@ -100,8 +102,8 @@ export async function Settings({ searchParams }: SettingsProps) {
         <div className={styles.panelHeader}>
           <h2>Mascote</h2>
           <p className={styles.panelText}>
-            Escolha o nome e a personalidade do mascote que te acompanha
-            no Foco.
+            Escolha o nome, a espécie e a personalidade do mascote que te
+            acompanha no Foco e também como assistente pelo resto do app.
           </p>
         </div>
 

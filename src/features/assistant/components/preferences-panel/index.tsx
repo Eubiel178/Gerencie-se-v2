@@ -8,7 +8,14 @@ import { IAssistantPreferences } from "@/features/assistant/domain";
 
 import styles from "./preferences-panel.module.css";
 
-export function PreferencesPanel({ preferences }: { preferences: IAssistantPreferences }) {
+interface PreferencesPanelProps {
+  preferences: IAssistantPreferences;
+  // Nome que o usuário deu ao mascote — o assistente É o mascote, então
+  // o toggle fala por esse nome em vez do genérico "JARVIS".
+  mascotName: string;
+}
+
+export function PreferencesPanel({ preferences, mascotName }: PreferencesPanelProps) {
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +44,7 @@ export function PreferencesPanel({ preferences }: { preferences: IAssistantPrefe
           disabled={isSaving}
           onChange={(event) => handleToggle({ enabled: event.target.checked })}
         />
-        <span>Mostrar o assistente (JARVIS)</span>
+        <span>Mostrar o assistente ({mascotName})</span>
       </label>
 
       <label className={styles.row} data-disabled={!preferences.enabled}>

@@ -13,6 +13,10 @@ export async function Assistant() {
   if (!snapshot.enabled) return null;
 
   return (
-    <Widget initialMessage={snapshot.message} reducedPresence={snapshot.reducedPresence} />
+    <Widget
+      initialMessage={snapshot.message}
+      reducedPresence={snapshot.reducedPresence}
+      mascot={snapshot.mascot}
+    />
   );
 }

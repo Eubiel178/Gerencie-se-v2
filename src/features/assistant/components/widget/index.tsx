@@ -1,9 +1,14 @@
 "use client";
 
 import { useState, useSyncExternalStore } from "react";
+
+import { Button } from "@/components";
 import { Icon } from "@/components/icon";
 
 import { IAssistantMessage } from "@/features/assistant/domain";
+import { IMascotState, MascotEvent } from "@/features/focus/domain";
+import { MascotCreature } from "@/features/focus/components/mascot/creature";
+import { useSpeak } from "@/lib/speak-text";
 
 import styles from "./widget.module.css";
 
@@ -16,16 +21,18 @@ function moodFor(message: IAssistantMessage | null): Mood {
   return "speaking";
 }
 
-const MOOD_EMOJI: Record<Mood, string> = {
-  idle: "🙂",
-  speaking: "💡",
-  warning: "⚠️",
-  celebrating: "🎉",
-};
+// A criatura só tem 3 poses (não 4 como o widget) — "celebrating" usa a
+// pose feliz (ganha os brilhos), o resto fica na pose parada.
+function creatureMoodFor(mood: Mood): MascotEvent {
+  return mood === "celebrating" ? "happy" : "idle";
+}
 
 interface WidgetProps {
   initialMessage: IAssistantMessage | null;
   reducedPresence: boolean;
+  // Mesmo personagem do Focus (nome/espécie/voz) — o widget do
+  // assistente É o mascote, não um segundo bichinho à parte.
+  mascot: IMascotState;
 }
 
 const DISMISSED_KEY = "assistant-dismissed-message";
@@ -64,9 +71,10 @@ function getDismissedServerSnapshot(): string | null {
  * abertura/fechamento manual pelo avatar, que sempre pode sobrepor essa
  * regra (mesmo com presença reduzida ou mensagem já dispensada).
  */
-export function Widget({ initialMessage, reducedPresence }: WidgetProps) {
+export function Widget({ initialMessage, reducedPresence, mascot }: WidgetProps) {
   const [message, setMessage] = useState(initialMessage);
   const [manuallyToggled, setManuallyToggled] = useState<boolean | null>(null);
+  const { isSpeaking, speak: handleSpeak } = useSpeak();
 
   const dismissedText = useSyncExternalStore(
     subscribeNoop,
@@ -103,7 +111,21 @@ export function Widget({ initialMessage, reducedPresence }: WidgetProps) {
     <div className={styles.wrapper}>
       {isOpen && message && (
         <div className={styles.bubble} role="status">
+          <p className={styles.bubbleName}>{mascot.name}</p>
           <p className={styles.bubbleText}>{message.text}</p>
+
+          <div className={styles.bubbleActions}>
+            <Button.Preset
+              icon={{ name: "FaVolumeUp", className: isSpeaking ? styles.speakingIcon : undefined }}
+              root={{
+                tone: "muted",
+                "aria-label": isSpeaking ? "Falando" : `Ouvir ${mascot.name}`,
+                disabled: isSpeaking,
+                onClick: () => handleSpeak(message.text),
+              }}
+            />
+          </div>
+
           <button
             type="button"
             className={styles.dismiss}
@@ -120,12 +142,12 @@ export function Widget({ initialMessage, reducedPresence }: WidgetProps) {
         className={styles.avatar}
         data-mood={mood}
         aria-label={
-          isOpen ? "Fechar mensagem do JARVIS" : "Abrir mensagem do JARVIS"
+          isOpen ? `Fechar mensagem de ${mascot.name}` : `Abrir mensagem de ${mascot.name}`
         }
         aria-expanded={isOpen}
         onClick={handleAvatarClick}
       >
-        <span aria-hidden="true">{MOOD_EMOJI[mood]}</span>
+        <MascotCreature species={mascot.species} mood={creatureMoodFor(mood)} size="sm" />
         {!isOpen && message && (
           <span className={styles.pingDot} aria-hidden="true" />
         )}
