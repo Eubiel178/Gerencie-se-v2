@@ -1,10 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { Icon } from "@/components/icon";
+
+import { Modal, ModalHeader, Button } from "@/components";
+import { ProfileModal } from "./profile-modal";
 
 import styles from "@/app/home/home-layout.module.css";
 
@@ -28,6 +32,7 @@ const links = [
 interface HeaderProps {
   user: {
     name: string | null;
+    email: string | null;
     image: string | null;
   };
 }
@@ -47,6 +52,8 @@ function initials(name: string | null): string {
 
 export const Header = ({ user }: HeaderProps) => {
   const pathname = usePathname();
+  const [isConfirmingSignOut, setIsConfirmingSignOut] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   return (
     <aside className={styles.sidebar}>
@@ -96,7 +103,7 @@ export const Header = ({ user }: HeaderProps) => {
         </ul>
       </nav>
 
-      <Link href="/home/settings#conta" className={styles.profile}>
+      <button type="button" className={styles.profile} onClick={() => setIsProfileOpen(true)}>
         {user.image ? (
           <Image
             src={user.image}
@@ -111,16 +118,38 @@ export const Header = ({ user }: HeaderProps) => {
           </span>
         )}
         <span className={styles.profileName}>{user.name ?? "Minha conta"}</span>
-      </Link>
+      </button>
+
+      {isProfileOpen && (
+        <ProfileModal user={user} onClose={() => setIsProfileOpen(false)} />
+      )}
 
       <button
         className={styles.signOut}
         type="button"
-        onClick={() => signOut({ callbackUrl: "/login" })}
+        onClick={() => setIsConfirmingSignOut(true)}
       >
         <Icon name="FaSignOutAlt" aria-hidden="true" />
         Sair
       </button>
+
+      {isConfirmingSignOut && (
+        <Modal>
+          <ModalHeader title="Sair da conta" onClose={() => setIsConfirmingSignOut(false)} />
+
+          <p>Deseja realmente sair?</p>
+
+          <div className={styles.signOutConfirmActions}>
+            <Button.Root variant="secondary" onClick={() => setIsConfirmingSignOut(false)}>
+              Cancelar
+            </Button.Root>
+
+            <Button.Root tone="danger" onClick={() => signOut({ callbackUrl: "/login" })}>
+              Sair
+            </Button.Root>
+          </div>
+        </Modal>
+      )}
     </aside>
   );
 };

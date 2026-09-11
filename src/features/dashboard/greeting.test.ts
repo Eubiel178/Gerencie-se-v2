@@ -18,3 +18,12 @@ test("noite (18-23h): Boa noite", () => {
   assert.equal(greetingForHour(18), "Boa noite.");
   assert.equal(greetingForHour(23), "Boa noite.");
 });
+
+test("com nome: cumprimento seguido de vírgula e nome", () => {
+  assert.equal(greetingForHour(8, "Gabriel"), "Bom dia, Gabriel.");
+});
+
+test("sem nome (null/undefined): mantém só o cumprimento", () => {
+  assert.equal(greetingForHour(8, null), "Bom dia.");
+  assert.equal(greetingForHour(8, undefined), "Bom dia.");
+});

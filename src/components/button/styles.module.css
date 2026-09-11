@@ -36,7 +36,7 @@
 }
 :where(.primary):hover:not(:disabled) {
   filter: brightness(1.08);
-  box-shadow: 0 0.35rem 0.85rem var(--color-shadow);
+  box-shadow: 0 0.2rem 0.5rem var(--color-shadow);
   transform: translateY(-1px);
 }
 :where(.primary):active:not(:disabled) {
@@ -54,7 +54,7 @@
 }
 :where(.secondary):hover:not(:disabled) {
   filter: brightness(1.05);
-  box-shadow: 0 0.35rem 0.85rem var(--color-shadow);
+  box-shadow: 0 0.2rem 0.5rem var(--color-shadow);
   transform: translateY(-1px);
 }
 :where(.secondary):active:not(:disabled) {

@@ -1,0 +1,31 @@
+.avatarRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.avatar {
+  border-radius: var(--radius-full);
+  object-fit: cover;
+}
+
+.avatarFallback {
+  display: block;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-full);
+  background: var(--color-highlight);
+}
+
+.email {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.formError {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  color: var(--color-danger);
+}

@@ -7,6 +7,7 @@ import "@/styles/global-style.css";
 
 import { ThemeInit } from "@/design-system/theme/theme-init";
 import { ServiceWorkerRegistration } from "@/features/pwa/service-worker-registration";
+import { ToastProvider } from "@/providers/toast-context";
 
 export const metadata: Metadata = {
   title: "Gerencie-se",
@@ -46,7 +47,9 @@ export default function RootLayout({
             design-system/theme/theme-init.tsx pra entender por que isso
             não usa mais next/script com beforeInteractive. */}
         <ThemeInit />
-        <SessionProvider>{children}</SessionProvider>
+        <SessionProvider>
+          <ToastProvider>{children}</ToastProvider>
+        </SessionProvider>
         <ServiceWorkerRegistration />
       </body>
     </html>

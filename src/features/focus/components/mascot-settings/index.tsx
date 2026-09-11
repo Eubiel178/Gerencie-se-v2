@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { validationSchema } from "@/validation/mascot-schema";
 
 import { Form, Input, Button } from "@/components";
+import { useToast } from "@/providers/toast-context";
 
 import { updateMascotAction } from "@/features/focus/actions";
 import { IMascotState, MascotPersonality } from "@/features/focus/domain";
@@ -26,6 +27,7 @@ const PERSONALITY_OPTIONS = [
 
 export function MascotSettings({ mascot }: { mascot: IMascotState }) {
   const router = useRouter();
+  const { showToast } = useToast();
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
@@ -51,6 +53,7 @@ export function MascotSettings({ mascot }: { mascot: IMascotState }) {
       return;
     }
 
+    showToast("Mascote atualizado!");
     router.refresh();
   }
 

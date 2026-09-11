@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { Icon } from "@/components/icon";
 
 import { IAssistantMessage } from "@/features/assistant/domain";
@@ -28,30 +28,75 @@ interface WidgetProps {
   reducedPresence: boolean;
 }
 
+const DISMISSED_KEY = "assistant-dismissed-message";
+
+// `sessionStorage` não existe durante o render no servidor —
+// `useSyncExternalStore` (não `useEffect` + `setState`) é o jeito de ler
+// isso sem arriscar mismatch de hidratação, mesmo padrão de
+// `design-system/theme/use-theme.ts`.
+function subscribeNoop() {
+  return () => {};
+}
+
+function getDismissedSnapshot(): string | null {
+  try {
+    return sessionStorage.getItem(DISMISSED_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function getDismissedServerSnapshot(): string | null {
+  return null;
+}
+
 /**
  * Presença discreta do JARVIS: um avatar fixo no canto, que abre um balão
  * de fala quando há uma mensagem contextual. Nunca interrompe sozinho -
  * o balão só some quando o usuário clica em fechar, e com presença
  * reduzida o balão nem abre automaticamente (fica só o avatar).
+ *
+ * `initialMessage` vem de nova busca no servidor a cada
+ * `router.refresh()` (chamado por praticamente toda ação do app) —
+ * `dismissedText` (via `sessionStorage`) garante que a MESMA mensagem já
+ * dispensada não reapareça sozinha se o componente remontar antes do
+ * servidor gerar uma mensagem realmente nova. `manuallyToggled` é a
+ * abertura/fechamento manual pelo avatar, que sempre pode sobrepor essa
+ * regra (mesmo com presença reduzida ou mensagem já dispensada).
  */
 export function Widget({ initialMessage, reducedPresence }: WidgetProps) {
   const [message, setMessage] = useState(initialMessage);
-  const [isOpen, setIsOpen] = useState(!reducedPresence && !!initialMessage);
+  const [manuallyToggled, setManuallyToggled] = useState<boolean | null>(null);
 
+  const dismissedText = useSyncExternalStore(
+    subscribeNoop,
+    getDismissedSnapshot,
+    getDismissedServerSnapshot
+  );
+
+  const autoOpen = !!message && message.text !== dismissedText && !reducedPresence;
+  const isOpen = manuallyToggled ?? autoOpen;
   const mood = moodFor(message);
 
   function handleAvatarClick() {
-    if (isOpen) {
-      setIsOpen(false);
-      return;
-    }
+    if (!message) return;
 
-    if (message) setIsOpen(true);
+    setManuallyToggled(!isOpen);
   }
 
   function handleDismiss() {
-    setIsOpen(false);
+    if (message) {
+      try {
+        sessionStorage.setItem(DISMISSED_KEY, message.text);
+      } catch {
+        // sessionStorage indisponível (modo privado etc.) — o dismiss desta
+        // sessão de render continua funcionando, só não sobrevive a um
+        // remount do componente.
+      }
+    }
+
     setMessage(null);
+    setManuallyToggled(null);
   }
 
   return (

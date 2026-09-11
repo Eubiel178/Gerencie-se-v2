@@ -20,6 +20,7 @@ const HomeLayout = async ({ children }: { children: React.ReactNode }) => {
       <Header
         user={{
           name: session?.user?.name ?? null,
+          email: session?.user?.email ?? null,
           image: session?.user?.image ?? null,
         }}
       />

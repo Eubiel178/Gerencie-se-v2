@@ -27,21 +27,17 @@ export async function loginAction(
   }
 
   try {
+    // `redirect: false` faz o `signIn` nunca redirecionar sozinho — nem em
+    // caso de sucesso, nem de falha. Assim o catch abaixo só recebe erro de
+    // credencial de verdade (nunca o redirect interno de sucesso disfarçado
+    // de erro), e o redirect pro /home é sempre o nosso, explícito, depois
+    // do try/catch.
     await signIn("credentials", {
       email: parsed.data.email,
       password: parsed.data.password,
-      redirectTo: "/home",
+      redirect: false,
     });
-
-    return { error: null };
   } catch (error) {
-    // `signIn` usa um redirect interno do Next.js para navegar em caso de
-    // sucesso — isso chega aqui como um erro especial que precisa
-    // continuar subindo, nunca ser tratado como falha de login.
-    if (error && typeof error === "object" && "digest" in error) {
-      throw error;
-    }
-
     if (error instanceof AuthError) {
       return { error: GENERIC_LOGIN_ERROR };
     }
@@ -50,6 +46,8 @@ export async function loginAction(
       error: "Não foi possível entrar agora. Tente novamente.",
     };
   }
+
+  redirect("/home");
 }
 
 export async function registerAction(
@@ -81,20 +79,12 @@ export async function registerAction(
   await db.insert(users).values({ name, email, passwordHash });
 
   try {
-    await signIn("credentials", {
-      email,
-      password,
-      redirectTo: "/home",
-    });
-
-    return { error: null };
-  } catch (error) {
-    if (error && typeof error === "object" && "digest" in error) {
-      throw error;
-    }
-
+    await signIn("credentials", { email, password, redirect: false });
+  } catch {
     // A conta já foi criada; se o login automático falhar por algum motivo
     // inesperado, mandamos para o login manual em vez de perder o cadastro.
     redirect("/login");
   }
+
+  redirect("/home");
 }

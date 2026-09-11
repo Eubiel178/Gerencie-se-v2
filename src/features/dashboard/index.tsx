@@ -1,5 +1,7 @@
 import dayjs from "dayjs";
 
+import { auth } from "@/lib/auth";
+
 import { getTaskFetcher } from "@/features/tasks/data/get-task-fetcher";
 import { getRoutineFetcher } from "@/features/routine/data/get-routine-fetcher";
 import { getHabitFetcher } from "@/features/habits/data/get-habit-fetcher";
@@ -24,7 +26,8 @@ import styles from "./dashboard.module.css";
 const PRIORITY_RANK = { critica: 3, alta: 2, media: 1, baixa: 0 } as const;
 
 export async function Dashboard() {
-  const [tasks, routine, habits, goals, mascot, hydrationToday] = await Promise.all([
+  const [session, tasks, routine, habits, goals, mascot, hydrationToday] = await Promise.all([
+    auth(),
     getTaskFetcher().loadAll(),
     getRoutineFetcher().loadAll(),
     getHabitFetcher().loadAll(),
@@ -32,6 +35,8 @@ export async function Dashboard() {
     getMascotFetcher().getMascot(),
     getHydrationFetcher().getToday(),
   ]);
+
+  const firstName = session?.user?.name?.split(" ")[0] ?? null;
 
   const nextAction = buildNextAction({ tasks, routine, habits });
 
@@ -59,7 +64,7 @@ export async function Dashboard() {
     <div className={styles.grid}>
       <div className={styles.hero}>
         <Greeting
-          text={greetingForHour(now.hour())}
+          text={greetingForHour(now.hour(), firstName)}
           priorityTaskCount={priorityTaskCount}
           pendingHabitCount={pendingHabitCount}
           mainGoal={activeGoals[0] ?? null}
