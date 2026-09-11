@@ -11,6 +11,7 @@ import { Button } from "@/components";
 import { ProfileModal } from "./profile-modal";
 import { ProfileOverview } from "@/features/profile/get-profile-overview";
 import { Gender } from "@/features/profile/get-gender";
+import { usePaletteStore } from "@/features/search/palette-store";
 
 import styles from "@/app/home/home-layout.module.css";
 
@@ -96,6 +97,7 @@ function initials(name: string | null): string {
 
 export const Header = ({ user, overview }: HeaderProps) => {
   const pathname = usePathname();
+  const openPalette = usePaletteStore((state) => state.open);
   const [isConfirmingSignOut, setIsConfirmingSignOut] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -170,6 +172,13 @@ export const Header = ({ user, overview }: HeaderProps) => {
         </span>
         Gerencie-se
       </p>
+
+      <button type="button" className={styles.searchTrigger} onClick={openPalette}>
+        <Icon name="FaSearch" aria-hidden="true" />
+        Buscar
+        <span className={styles.searchShortcut}>Ctrl+K</span>
+      </button>
+
       <nav aria-label="Navegação principal" className={styles.navGroups}>
         {navGroups.map((group, index) => {
           const isOpen = !group.label || openGroups.has(index);
