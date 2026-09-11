@@ -14,6 +14,7 @@ import { MascotSettings } from "@/features/focus/components/mascot-settings";
 import { getMascotFetcher } from "@/features/focus/data/get-focus-fetcher";
 import { WeeklySummaryPanel } from "@/features/weekly-summary/components/weekly-summary-panel";
 import { getWeeklySummaryEnabled } from "@/features/weekly-summary/get-preference";
+import { ExportDataPanel } from "@/features/export/components/export-data-panel";
 
 import { CalendarStatusBanner } from "./components/calendar-status-banner";
 import { ConnectionCard } from "./components/connection-card";
@@ -132,6 +133,14 @@ export async function Settings({ searchParams }: SettingsProps) {
             ? "Você está conectado com Google"
             : "Você acessa com e-mail e senha."}
         </p>
+      </section>
+
+      <section className={styles.settingPanel}>
+        <div className={styles.panelHeader}>
+          <h2>Exportar dados</h2>
+        </div>
+
+        <ExportDataPanel />
       </section>
 
       <section className={styles.settingPanel}>
