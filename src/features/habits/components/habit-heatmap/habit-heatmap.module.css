@@ -1,0 +1,94 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.rangeLabel {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+.navButtons {
+  display: flex;
+  gap: var(--space-1);
+}
+
+/* A grade pode ficar mais larga que a tela (26 semanas) — rola só ela,
+   nunca a página inteira. */
+.scrollArea {
+  overflow-x: auto;
+  padding-bottom: var(--space-1);
+}
+
+.chart {
+  display: flex;
+  gap: var(--space-2);
+  width: max-content;
+}
+
+.weekdayColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex-shrink: 0;
+}
+.monthLabelSpacer {
+  height: 1rem;
+}
+.weekdayLabel {
+  height: 0.75rem;
+  line-height: 0.75rem;
+  font-size: 0.6rem;
+  color: var(--color-text-muted);
+}
+
+.weeksRow {
+  display: flex;
+  gap: 3px;
+}
+.weekColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.monthLabel {
+  height: 1rem;
+  line-height: 1rem;
+  font-size: 0.65rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.cell {
+  display: block;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 2px;
+  background: var(--color-border);
+}
+.cell[data-level="future"] {
+  background: transparent;
+}
+.cell[data-level="1"] {
+  background: color-mix(in srgb, var(--color-highlight) 35%, var(--color-border));
+}
+.cell[data-level="2"] {
+  background: color-mix(in srgb, var(--color-highlight) 65%, var(--color-border));
+}
+.cell[data-level="3"] {
+  background: var(--color-highlight);
+}
+
+.legend {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
