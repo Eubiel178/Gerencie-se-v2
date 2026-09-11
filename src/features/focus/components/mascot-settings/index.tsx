@@ -25,6 +25,9 @@ interface FormData {
 const PERSONALITY_OPTIONS = [
   { label: "Afetuoso", value: "afetuoso" },
   { label: "Sarcástico", value: "sarcastico" },
+  { label: "Engraçado", value: "engracado" },
+  { label: "Motivador", value: "motivador" },
+  { label: "Zen", value: "zen" },
 ];
 
 const SPECIES_OPTIONS = [

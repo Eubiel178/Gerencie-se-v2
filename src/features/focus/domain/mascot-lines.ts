@@ -57,9 +57,66 @@ const SARCASTICO: Record<MascotEvent, Line[]> = {
   ],
 };
 
+const ENGRACADO: Record<MascotEvent, Line[]> = {
+  idle: [
+    (p) => `Boa ${periodOfDay(p.hour)}! Bora fazer alguma coisa antes que eu comece a contar piada ruim.`,
+    (p) => `${p.xpToNextLevel} XP pro nível ${p.level + 1}... quase tão longe quanto minha vontade de trabalhar.`,
+    () => "Tic-tac, tic-tac... ok, eu não sei fazer relógio, mas o tempo tá passando.",
+  ],
+  working: [
+    () => "Modo foco ativado! *sons de robô muito convincentes*",
+    (p) => `Faltam ${p.xpToNextLevel} XP — mais rápido que eu contando até três.`,
+    () => "Shhh, não me distrai, eu tô fingindo que também tô trabalhando.",
+  ],
+  happy: [
+    (p) => `Nível ${p.level}! Chama a imprensa (ou pelo menos sua mãe).`,
+    () => "Confete imaginário voando por todo lado. 🎊 (imagina aí)",
+    (p) => `Boa ${periodOfDay(p.hour)} de campeão(ã)! Ou de sortudo(a). Dá no mesmo hoje.`,
+  ],
+};
+
+const MOTIVADOR: Record<MascotEvent, Line[]> = {
+  idle: [
+    (p) => `Boa ${periodOfDay(p.hour)}! Hoje é um ótimo dia pra começar de novo.`,
+    (p) => `Só ${p.xpToNextLevel} XP separam você do próximo nível. Vamos lá!`,
+    () => "O primeiro passo é sempre o mais difícil — e você já tá aqui, então já começou.",
+  ],
+  working: [
+    () => "Isso! Cada minuto de foco é uma vitória.",
+    (p) => `Faltam ${p.xpToNextLevel} XP — você tá mais perto do que imagina.`,
+    () => "Não pare agora, o resultado já tá vindo.",
+  ],
+  happy: [
+    (p) => `Nível ${p.level} conquistado! Isso é disciplina de verdade.`,
+    () => "Você provou pra si mesmo(a) que é capaz. De novo.",
+    (p) => `Essa ${periodOfDay(p.hour)} valeu a pena, e amanhã vale ainda mais.`,
+  ],
+};
+
+const ZEN: Record<MascotEvent, Line[]> = {
+  idle: [
+    (p) => `Boa ${periodOfDay(p.hour)}. Respire fundo — quando estiver pronto(a), eu estarei aqui.`,
+    (p) => `Faltam ${p.xpToNextLevel} XP pro nível ${p.level + 1}. Sem pressa, um passo de cada vez.`,
+    () => "Nem todo momento precisa de produtividade. Este pode ser só de pausa.",
+  ],
+  working: [
+    () => "Presente, aqui, agora. Só isso já é o suficiente.",
+    (p) => `Faltam ${p.xpToNextLevel} XP — o caminho importa tanto quanto o fim dele.`,
+    () => "Um foco de cada vez. O resto pode esperar.",
+  ],
+  happy: [
+    (p) => `Nível ${p.level}. Reconheça esse momento, com calma.`,
+    () => "Uma conquista tranquila também é uma conquista.",
+    (p) => `Uma ${periodOfDay(p.hour)} bem vivida, sem pressa nenhuma.`,
+  ],
+};
+
 const LINES: Record<MascotPersonality, Record<MascotEvent, Line[]>> = {
   afetuoso: AFETUOSO,
   sarcastico: SARCASTICO,
+  engracado: ENGRACADO,
+  motivador: MOTIVADOR,
+  zen: ZEN,
 };
 
 /** Escolha determinística (nunca `Math.random()` — não pode mudar sozinha

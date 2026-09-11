@@ -29,6 +29,13 @@
       "when": 1789153587469,
       "tag": "0003_magenta_praxagora",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1789154359977,
+      "tag": "0004_parallel_chronomancer",
+      "breakpoints": true
     }
   ]
 }

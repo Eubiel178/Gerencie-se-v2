@@ -1,0 +1,1 @@
+ALTER TABLE "user_preference" ADD COLUMN "gender" text DEFAULT 'nao_informado' NOT NULL;

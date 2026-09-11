@@ -5,4 +5,5 @@ export const validationSchema = z.object({
     .string()
     .min(1, "Campo obrigatório")
     .max(60, "O nome deve ter no máximo 60 caracteres"),
+  gender: z.enum(["feminino", "masculino", "nao_informado"]),
 });

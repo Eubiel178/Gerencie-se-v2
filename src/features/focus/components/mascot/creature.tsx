@@ -47,6 +47,7 @@ export function MascotCreature({ species, mood, roaming = false }: MascotCreatur
             <span className={styles.cheek} />
             <span className={styles.cheek} />
           </div>
+          <span className={styles.mouth} />
           {mood === "happy" && (
             <>
               <span className={`${styles.sparkle} ${styles.sparkleOne}`}>✦</span>

@@ -349,7 +349,9 @@ export const mascotStates = pgTable("mascot_state", {
     .primaryKey()
     .references(() => users.id, { onDelete: "cascade" }),
   name: text("name").notNull().default("Chunchumaru"),
-  personality: text("personality", { enum: ["afetuoso", "sarcastico"] })
+  personality: text("personality", {
+    enum: ["afetuoso", "sarcastico", "engracado", "motivador", "zen"],
+  })
     .notNull()
     .default("afetuoso"),
   species: text("species", { enum: ["blob", "gato", "cachorro"] })
@@ -370,6 +372,11 @@ export const userPreferences = pgTable("user_preference", {
   hydrationDailyGoalMl: integer("hydration_daily_goal_ml").notNull().default(2000),
   assistantEnabled: boolean("assistant_enabled").notNull().default(true),
   assistantReducedPresence: boolean("assistant_reduced_presence").notNull().default(false),
+  // Só usado pra decidir quais links da navegação fazem sentido mostrar
+  // (ex.: Ciclo Menstrual) — nunca exposto/usado fora disso.
+  gender: text("gender", { enum: ["feminino", "masculino", "nao_informado"] })
+    .notNull()
+    .default("nao_informado"),
 });
 
 export const hydrationLogs = pgTable("hydration_log", {

@@ -3,7 +3,7 @@
 // uma progressão simples que dá sensação de avanço a cada sessão de foco.
 export const XP_PER_LEVEL = 100;
 
-export type MascotPersonality = "afetuoso" | "sarcastico";
+export type MascotPersonality = "afetuoso" | "sarcastico" | "engracado" | "motivador" | "zen";
 export type MascotSpecies = "blob" | "gato" | "cachorro";
 
 export interface IMascotState {

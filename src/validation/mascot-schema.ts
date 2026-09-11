@@ -5,6 +5,6 @@ export const validationSchema = z.object({
     .string()
     .min(1, "Campo obrigatório")
     .max(24, "O nome deve ter no máximo 24 caracteres"),
-  personality: z.enum(["afetuoso", "sarcastico"]),
+  personality: z.enum(["afetuoso", "sarcastico", "engracado", "motivador", "zen"]),
   species: z.enum(["blob", "gato", "cachorro"]),
 });

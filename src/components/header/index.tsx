@@ -5,36 +5,78 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { Icon } from "@/components/icon";
+import { Icon, IconName } from "@/components/icon";
 
 import { Button } from "@/components";
 import { ProfileModal } from "./profile-modal";
 import { ProfileOverview } from "@/features/profile/get-profile-overview";
+import { Gender } from "@/features/profile/get-gender";
 
 import styles from "@/app/home/home-layout.module.css";
 
-const links = [
-  { href: "/home", label: "Visão geral", icon: "FaHome" },
-  { href: "/home/tasks", label: "Tarefas", icon: "FaListUl" },
-  { href: "/home/routine", label: "Rotina", icon: "MdOutlineSchedule" },
-  { href: "/home/habits", label: "Hábitos", icon: "FaFire" },
-  { href: "/home/goals", label: "Objetivos", icon: "FaBullseye" },
-  { href: "/home/focus", label: "Foco", icon: "MdTimer" },
-  { href: "/home/hydration", label: "Hidratação", icon: "FaTint" },
-  { href: "/home/running", label: "Corrida", icon: "FaRunning" },
-  { href: "/home/reading", label: "Leitura", icon: "FaBook" },
-  { href: "/home/health", label: "Saúde", icon: "FaHeartbeat" },
-  { href: "/home/menstrual-cycle", label: "Ciclo", icon: "FaCalendarCheck" },
-  { href: "/home/event", label: "Calendário", icon: "MdEvent" },
-  { href: "/home/stats", label: "Estatísticas", icon: "FaChartBar" },
-  { href: "/home/settings", label: "Configurações", icon: "MdSettings" },
-] as const;
+interface NavLink {
+  href: string;
+  label: string;
+  icon: IconName;
+  /** Só aparece pra quem marcou o gênero "feminino" em Configurações. */
+  femaleOnly?: true;
+}
+
+interface NavGroup {
+  label: string | null;
+  links: NavLink[];
+}
+
+// Navegação em grupos (sub-listas com um rótulo pequeno acima), em vez de
+// uma lista única de 14 links — mais fácil de escanear. "Visão geral" e
+// "Configurações" ficam soltos, de propósito, fora de qualquer grupo (são
+// os dois pontos de entrada/saída da navegação, não pertencem a uma
+// categoria).
+const NAV_GROUPS: NavGroup[] = [
+  { label: null, links: [{ href: "/home", label: "Visão geral", icon: "FaHome" }] },
+  {
+    label: "Produtividade",
+    links: [
+      { href: "/home/tasks", label: "Tarefas", icon: "FaListUl" },
+      { href: "/home/routine", label: "Rotina", icon: "MdOutlineSchedule" },
+      { href: "/home/habits", label: "Hábitos", icon: "FaFire" },
+      { href: "/home/goals", label: "Objetivos", icon: "FaBullseye" },
+      { href: "/home/focus", label: "Foco", icon: "MdTimer" },
+    ],
+  },
+  {
+    label: "Saúde & bem-estar",
+    links: [
+      { href: "/home/hydration", label: "Hidratação", icon: "FaTint" },
+      { href: "/home/running", label: "Corrida", icon: "FaRunning" },
+      { href: "/home/reading", label: "Leitura", icon: "FaBook" },
+      { href: "/home/health", label: "Saúde", icon: "FaHeartbeat" },
+      { href: "/home/menstrual-cycle", label: "Ciclo", icon: "FaCalendarCheck", femaleOnly: true },
+    ],
+  },
+  {
+    label: "Organização",
+    links: [
+      { href: "/home/event", label: "Calendário", icon: "MdEvent" },
+      { href: "/home/stats", label: "Estatísticas", icon: "FaChartBar" },
+    ],
+  },
+  { label: null, links: [{ href: "/home/settings", label: "Configurações", icon: "MdSettings" }] },
+];
+
+function visibleNavGroups(gender: Gender): NavGroup[] {
+  return NAV_GROUPS.map((group) => ({
+    ...group,
+    links: group.links.filter((link) => !link.femaleOnly || gender === "feminino"),
+  })).filter((group) => group.links.length > 0);
+}
 
 interface HeaderProps {
   user: {
     name: string | null;
     email: string | null;
     image: string | null;
+    gender: Gender;
   };
   overview: ProfileOverview;
 }
@@ -56,6 +98,34 @@ export const Header = ({ user, overview }: HeaderProps) => {
   const pathname = usePathname();
   const [isConfirmingSignOut, setIsConfirmingSignOut] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const navGroups = visibleNavGroups(user.gender);
+
+  // Começa aberto só o grupo (se houver) que contém a página atual — o
+  // resto some por trás de um clique, em vez de mostrar os 14 links soltos
+  // o tempo todo.
+  const [openGroups, setOpenGroups] = useState<Set<number>>(() => {
+    const initial = new Set<number>();
+
+    navGroups.forEach((group, index) => {
+      if (group.label && group.links.some((link) => link.href === pathname)) {
+        initial.add(index);
+      }
+    });
+
+    return initial;
+  });
+
+  function toggleGroup(index: number) {
+    setOpenGroups((current) => {
+      const next = new Set(current);
+      if (next.has(index)) {
+        next.delete(index);
+      } else {
+        next.add(index);
+      }
+      return next;
+    });
+  }
 
   return (
     <aside className={styles.sidebar}>
@@ -92,17 +162,39 @@ export const Header = ({ user, overview }: HeaderProps) => {
         </span>
         Gerencie-se
       </p>
-      <nav aria-label="Navegação principal">
-        <ul className={styles.navigation}>
-          {links.map(({ href, label, icon }) => (
-            <li key={href}>
-              <Link href={href} data-active={pathname === href}>
-                <Icon name={icon} aria-hidden="true" />
-                {label}
-              </Link>
-            </li>
-          ))}
-        </ul>
+      <nav aria-label="Navegação principal" className={styles.navGroups}>
+        {navGroups.map((group, index) => {
+          const isOpen = !group.label || openGroups.has(index);
+
+          return (
+            <div key={index} className={styles.navGroup}>
+              {group.label && (
+                <button
+                  type="button"
+                  className={styles.navGroupToggle}
+                  aria-expanded={isOpen}
+                  onClick={() => toggleGroup(index)}
+                >
+                  {group.label}
+                  <Icon name={isOpen ? "MdExpandLess" : "MdExpandMore"} aria-hidden="true" />
+                </button>
+              )}
+
+              {isOpen && (
+                <ul className={styles.navigation}>
+                  {group.links.map(({ href, label, icon }) => (
+                    <li key={href}>
+                      <Link href={href} data-active={pathname === href}>
+                        <Icon name={icon} aria-hidden="true" />
+                        {label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          );
+        })}
       </nav>
 
       <button type="button" className={styles.profile} onClick={() => setIsProfileOpen(true)}>
@@ -123,7 +215,7 @@ export const Header = ({ user, overview }: HeaderProps) => {
       </button>
 
       {isProfileOpen && (
-        <ProfileModal user={user} overview={overview} onClose={() => setIsProfileOpen(false)} />
+        <ProfileModal user={user} gender={user.gender} overview={overview} onClose={() => setIsProfileOpen(false)} />
       )}
 
       {isConfirmingSignOut ? (

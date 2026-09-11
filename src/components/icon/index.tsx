@@ -12,7 +12,7 @@ const icons = {
   ...FiIcons,
 } satisfies Record<string, IconType>;
 
-type IconName = keyof typeof icons;
+export type IconName = keyof typeof icons;
 
 export interface IconProps extends IconBaseProps {
   name?: IconName;

@@ -9,6 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { validationSchema } from "@/validation/profile-schema";
 import { updateProfileAction } from "@/features/profile/actions";
 import { ProfileOverview } from "@/features/profile/get-profile-overview";
+import { Gender } from "@/features/profile/get-gender";
 import { useToast } from "@/providers/toast-context";
 
 import { Modal, ModalHeader, Form, Input, Button } from "..";
@@ -17,10 +18,18 @@ import styles from "./profile-modal.module.css";
 
 interface FormData {
   name: string;
+  gender: Gender;
 }
+
+const GENDER_OPTIONS = [
+  { label: "Prefiro não dizer", value: "nao_informado" },
+  { label: "Feminino", value: "feminino" },
+  { label: "Masculino", value: "masculino" },
+];
 
 interface ProfileModalProps {
   user: { name: string | null; email: string | null; image: string | null };
+  gender: Gender;
   overview: ProfileOverview;
   onClose: () => void;
 }
@@ -38,7 +47,7 @@ function initials(name: string | null): string {
   return result.toUpperCase();
 }
 
-export function ProfileModal({ user, overview, onClose }: ProfileModalProps) {
+export function ProfileModal({ user, gender, overview, onClose }: ProfileModalProps) {
   const router = useRouter();
   const { showToast } = useToast();
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -51,7 +60,7 @@ export function ProfileModal({ user, overview, onClose }: ProfileModalProps) {
   } = useForm<FormData>({
     mode: "onChange",
     resolver: zodResolver(validationSchema),
-    defaultValues: { name: user.name ?? "" },
+    defaultValues: { name: user.name ?? "", gender },
   });
 
   async function handleFormSubmit(data: FormData) {
@@ -121,6 +130,14 @@ export function ProfileModal({ user, overview, onClose }: ProfileModalProps) {
               <Input.Label>Nome</Input.Label>
               <Input.Wrapper>
                 <Input.Field {...register("name")} placeholder="Seu nome" />
+              </Input.Wrapper>
+              <Input.HelperText />
+            </Input.Root>
+
+            <Input.Root sharedProps={{ error: errors.gender?.message }}>
+              <Input.Label>Gênero</Input.Label>
+              <Input.Wrapper>
+                <Input.FieldSelect {...register("gender")} optionsArray={GENDER_OPTIONS} />
               </Input.Wrapper>
               <Input.HelperText />
             </Input.Root>

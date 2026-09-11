@@ -13,6 +13,7 @@ import { Form, Input, Modal, ModalHeader, Button } from "@/components";
 
 import { createRoutineItemAction } from "@/features/routine/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
+import { nowForTimeInput } from "@/utils";
 
 import { FormData, IAddRoutineItemProps, NO_TASK_VALUE } from "../interfaces";
 
@@ -32,7 +33,7 @@ export function AddRoutineItem({ buttonText, taskOptions, connections }: IAddRou
     mode: "onChange",
     resolver: zodResolver(validationSchema),
     defaultValues: {
-      time: "",
+      time: nowForTimeInput(),
       title: "",
       taskId: NO_TASK_VALUE,
       sharedWithUserId: "",
@@ -42,6 +43,16 @@ export function AddRoutineItem({ buttonText, taskOptions, connections }: IAddRou
   function closeModal() {
     setIsOpen(false);
     reset();
+  }
+
+  function openModal() {
+    reset({
+      time: nowForTimeInput(),
+      title: "",
+      taskId: NO_TASK_VALUE,
+      sharedWithUserId: "",
+    });
+    setIsOpen(true);
   }
 
   async function handleOnSubmit(data: FormData) {
@@ -65,12 +76,7 @@ export function AddRoutineItem({ buttonText, taskOptions, connections }: IAddRou
 
   return (
     <>
-      <Button.Root
-        type="button"
-        onClick={function () {
-          setIsOpen(true);
-        }}
-      >
+      <Button.Root type="button" onClick={openModal}>
         {buttonText}
       </Button.Root>
 

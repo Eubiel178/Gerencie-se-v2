@@ -14,18 +14,11 @@ import { Form, Input, Modal, ModalHeader, Button } from "@/components";
 import inputStyles from "@/components/form/input/styles.module.css";
 
 import { createEventAction } from "@/features/events/actions";
+import { nowForDatetimeLocal } from "@/utils";
 
 import { FormData, IModalProps } from "./interfaces";
 
 import styles from "./add-event.module.css";
-
-// Formato exigido por <input type="datetime-local">: "AAAA-MM-DDTHH:mm".
-function nowForDatetimeLocal(): string {
-  const now = new Date();
-  const pad = (value: number) => String(value).padStart(2, "0");
-
-  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
-}
 
 export const AddEvent = ({ buttonText }: IModalProps) => {
   const router = useRouter();

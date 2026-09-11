@@ -39,6 +39,37 @@
   background: var(--color-highlight);
   color: var(--color-on-info);
 }
+.navGroups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.navGroupToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin: 0 0 var(--space-1);
+  padding: 0.3rem 0.8rem;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font: inherit;
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+.navGroupToggle:hover {
+  color: var(--color-text);
+  background: var(--color-surface-elevated);
+}
+.navGroupToggle svg {
+  width: 1rem;
+  height: 1rem;
+}
 .navigation {
   display: grid;
   gap: var(--space-2);

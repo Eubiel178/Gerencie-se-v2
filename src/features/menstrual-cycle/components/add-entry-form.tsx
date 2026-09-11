@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { Button, Input } from "@/components";
 
 import { createCycleEntryAction } from "@/features/menstrual-cycle/actions";
+import { todayForDateInput } from "@/utils";
 
 import styles from "../cycle.module.css";
 
@@ -14,7 +15,7 @@ const COMMON_SYMPTOMS = ["Cólica", "Dor de cabeça", "Inchaço", "Fadiga", "Mud
 
 export function AddEntryForm() {
   const router = useRouter();
-  const [startDate, setStartDate] = useState("");
+  const [startDate, setStartDate] = useState(todayForDateInput);
   const [periodLengthDays, setPeriodLengthDays] = useState("");
   const [symptoms, setSymptoms] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -39,7 +40,7 @@ export function AddEntryForm() {
         notes: null,
       });
 
-      setStartDate("");
+      setStartDate(todayForDateInput());
       setPeriodLengthDays("");
       setSymptoms([]);
       router.refresh();

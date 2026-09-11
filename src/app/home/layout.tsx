@@ -4,6 +4,7 @@ import { Header } from "@/components";
 import { Assistant } from "@/features/assistant";
 import { TaskReminders } from "@/features/tasks/components/reminder-scheduler";
 import { getProfileOverview } from "@/features/profile/get-profile-overview";
+import { getGender } from "@/features/profile/get-gender";
 import styles from "./home-layout.module.css";
 
 // As tarefas e eventos são dados dinâmicos e específicos de cada usuário —
@@ -14,7 +15,7 @@ import styles from "./home-layout.module.css";
 export const dynamic = "force-dynamic";
 
 const HomeLayout = async ({ children }: { children: React.ReactNode }) => {
-  const [session, overview] = await Promise.all([auth(), getProfileOverview()]);
+  const [session, overview, gender] = await Promise.all([auth(), getProfileOverview(), getGender()]);
 
   return (
     <div className={styles.shell}>
@@ -23,6 +24,7 @@ const HomeLayout = async ({ children }: { children: React.ReactNode }) => {
           name: session?.user?.name ?? null,
           email: session?.user?.email ?? null,
           image: session?.user?.image ?? null,
+          gender,
         }}
         overview={overview}
       />

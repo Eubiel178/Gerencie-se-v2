@@ -11,7 +11,11 @@
 .roamer{position:absolute;top:0;left:0;width:8rem;height:8rem}
 .stage[data-roaming="true"] .roamer{animation:roam 9s ease-in-out infinite}
 
-.creature{position:relative;width:8rem;height:8rem;border-radius:58% 42% 55% 45%/55% 45% 60% 40%;background:linear-gradient(155deg,var(--color-highlight),var(--color-highlight-soft));box-shadow:0 .75rem 1.5rem var(--color-shadow);animation:breathe 3.2s ease-in-out infinite}
+/* Forma simétrica e arredondada de propósito — a versão anterior (bordas
+   bem irregulares/assimétricas + olhos numa cor quase preta) lia como
+   "estranho/tenebroso" em vez de fofo. Um oval bem redondo + rosto claro
+   é o que faz ler como kawaii. */
+.creature{position:relative;width:8rem;height:8rem;border-radius:50% 50% 46% 46%/56% 56% 44% 44%;background:linear-gradient(160deg,var(--color-highlight-soft),var(--color-highlight));box-shadow:0 .75rem 1.5rem var(--color-shadow);animation:breathe 3.2s ease-in-out infinite}
 .creature[data-mood="working"]{animation:breathe 1.6s ease-in-out infinite}
 
 /* Espécie: só enfeites em cima do mesmo blob base — sem asset novo. */
@@ -26,11 +30,17 @@
 .snout{position:absolute;bottom:1.5rem;left:50%;transform:translateX(-50%);width:2.1rem;height:1.3rem;border-radius:50%;background:var(--color-highlight-soft)}
 
 .eyes{position:absolute;top:42%;left:50%;transform:translate(-50%,-50%);display:flex;gap:1.4rem}
-.eye{width:.85rem;height:.85rem;border-radius:50%;background:var(--color-on-highlight)}
-.creature[data-mood="working"] .eye{width:.85rem;height:.2rem;border-radius:var(--radius-full)}
-.creature[data-mood="happy"] .eye{width:.85rem;height:.55rem;border-radius:0 0 999px 999px/0 0 999px 999px;background:transparent;border-bottom:.2rem solid var(--color-on-highlight)}
-.cheeks{position:absolute;top:58%;left:50%;transform:translateX(-50%);display:flex;gap:2.6rem;opacity:.55}
-.cheek{width:.6rem;height:.35rem;border-radius:50%;background:var(--color-on-highlight)}
+.eye{position:relative;width:.85rem;height:.85rem;border-radius:50%;background:#2b2b33}
+/* Brilho no canto do olho — é o que mais faz um rosto simples ler como
+   "fofo" em vez de um círculo sólido encarando de volta. Só no estado
+   parado (nos outros dois o olho vira um traço/arco, sem espaço pro
+   brilho). */
+.creature[data-mood="idle"] .eye::after{content:"";position:absolute;top:.1rem;left:.1rem;width:.25rem;height:.25rem;border-radius:50%;background:#fff;opacity:.9}
+.creature[data-mood="working"] .eye{width:.85rem;height:.5rem;background:transparent;border-top:.16rem solid #2b2b33;border-radius:999px 999px 0 0/999px 999px 0 0}
+.creature[data-mood="happy"] .eye{width:.85rem;height:.55rem;border-radius:0 0 999px 999px/0 0 999px 999px;background:transparent;border-bottom:.2rem solid #2b2b33}
+.mouth{position:absolute;top:56%;left:50%;transform:translateX(-50%);width:.65rem;height:.4rem;border-bottom:.16rem solid #2b2b33;border-radius:0 0 999px 999px;opacity:.75}
+.cheeks{position:absolute;top:56%;left:50%;transform:translateX(-50%);display:flex;gap:3rem}
+.cheek{width:.7rem;height:.45rem;border-radius:50%;background:#ff9db8;opacity:.7}
 .sparkle{position:absolute;font-size:1.1rem;animation:pop .6s ease-out}
 .sparkleOne{top:-.5rem;right:.5rem}
 .sparkleTwo{bottom:-.25rem;left:-.5rem;animation-delay:.15s}
