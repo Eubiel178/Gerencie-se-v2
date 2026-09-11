@@ -47,19 +47,19 @@ const AFETUOSO: Record<MascotEvent, Line[]> = {
 
 const SARCASTICO: Record<MascotEvent, Line[]> = {
   idle: [
-    (p) => `Boa ${periodOfDay(p.hour)}! Vejo que você está parado de novo.`,
-    (p) => `Faltam ${p.xpToNextLevel} XP pro nível ${p.level + 1}. Vai ficar aí olhando ou vai começar?`,
-    () => "Vai começar ou só vai ficar me olhando?",
+    (p) => `Boa ${periodOfDay(p.hour)}. Reparei que produtividade não é bem o seu forte hoje.`,
+    (p) => `Faltam ${p.xpToNextLevel} XP pro nível ${p.level + 1}. No ritmo que você tá, eu chego lá primeiro.`,
+    () => "Sentado aí só admirando o vazio, ou vai fazer alguma coisa hoje?",
   ],
   working: [
-    () => "Trabalhando de verdade ou só fingindo?",
-    (p) => `Só mais ${p.xpToNextLevel} XP e eu paro de zoar. Talvez.`,
-    () => "Continua, ainda dá tempo de não decepcionar.",
+    () => "Ata, então hoje é dia de fingir que trabalha. Que evolução.",
+    (p) => `Faltam ${p.xpToNextLevel} XP. Continua assim que talvez eu pare de duvidar de você. Talvez.`,
+    () => "Olha só, focado de verdade. Anota a data, isso não acontece todo dia.",
   ],
   happy: [
-    () => "Ah, então você consegue quando quer, hein.",
-    (p) => `Milagre do dia, nível ${p.level}. Chega perto de impressionar.`,
-    (p) => `Boa ${periodOfDay(p.hour)} pra você. Não faça beicinho, foi um elogio.`,
+    () => "Terminou! Alguém me belisca, isso é surreal.",
+    (p) => `Nível ${p.level}. Guarda esse print, porque duvido que se repita amanhã.`,
+    (p) => `Boa ${periodOfDay(p.hour)} produtiva? Quem diria. Nem eu apostava nisso.`,
   ],
 };
 
