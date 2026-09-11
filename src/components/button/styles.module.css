@@ -1,9 +1,9 @@
-/* Três variantes (aparência) e três tamanhos, os únicos que se repetiam
-   de verdade em várias telas (ver Button.Root). Tudo dentro de
-   `:where(...)` — especificidade zerada — pra uma classe local passada
-   via `className` SEMPRE vencer, não importa a ordem de carregamento do
-   CSS no bundle final. `tone` (cor) fica fora do `:where`, de propósito:
-   precisa vencer a cor da variante mesmo sem `className`. */
+/* Três variantes (aparência), as únicas que se repetiam de verdade em
+   várias telas (ver Button.Root). Tudo dentro de `:where(...)` —
+   especificidade zerada — pra uma classe local passada via `className`
+   SEMPRE vencer, não importa a ordem de carregamento do CSS no bundle
+   final. `tone` (cor) fica fora do `:where`, de propósito: precisa
+   vencer a cor da variante mesmo sem `className`. */
 .button {
   display: inline-flex;
   align-items: center;
@@ -26,9 +26,11 @@
 }
 
 :where(.primary) {
+  padding: 0.7rem var(--space-5);
   border: 1px solid transparent;
   background: var(--color-highlight);
   color: var(--color-on-highlight);
+  font-size: var(--font-size-md);
   box-shadow: 0 1px 2px var(--color-shadow);
 }
 :where(.primary):hover:not(:disabled) {
@@ -42,9 +44,11 @@
 }
 
 :where(.secondary) {
+  padding: 0.7rem var(--space-5);
   border: 1px solid var(--color-border);
   background: var(--color-surface-elevated);
   color: var(--color-text);
+  font-size: var(--font-size-md);
   box-shadow: 0 1px 2px var(--color-shadow);
 }
 :where(.secondary):hover:not(:disabled) {
@@ -58,9 +62,11 @@
 }
 
 :where(.ghost) {
+  padding: 0.7rem var(--space-5);
   border: 1px solid transparent;
   background: transparent;
   color: var(--color-text);
+  font-size: var(--font-size-md);
   box-shadow: none;
 }
 :where(.ghost):hover:not(:disabled) {
@@ -68,19 +74,6 @@
   filter: none;
   box-shadow: none;
   transform: none;
-}
-
-:where(.md) {
-  padding: 0.7rem var(--space-5);
-  font-size: var(--font-size-md);
-}
-:where(.sm) {
-  padding: 0.45rem var(--space-3);
-  font-size: var(--font-size-sm);
-}
-:where(.sizeIcon) {
-  padding: var(--space-2);
-  font-size: var(--font-size-xl);
 }
 
 .toneDanger {

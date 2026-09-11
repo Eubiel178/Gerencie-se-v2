@@ -67,7 +67,7 @@ export function NotificationsToggle() {
       </p>
 
       <div className={styles.buttonRow}>
-        <Button.Root type="button" size="sm" onClick={handleEnable}>
+        <Button.Root type="button" className={styles.smallButton} onClick={handleEnable}>
           Ativar notificações de lembrete
         </Button.Root>
       </div>

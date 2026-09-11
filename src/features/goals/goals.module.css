@@ -28,5 +28,6 @@
 .addStepForm{display:flex;gap:var(--space-2)}
 .addStepForm input{flex:1}
 .sharedBadge{margin:0;font-family:var(--font-sans);color:var(--color-info);font-size:var(--font-size-xs)}
+.smallButton{padding:.45rem var(--space-3);font-size:var(--font-size-sm)}
 .emptyState{margin:0;font-family:var(--font-sans);color:var(--color-info);font-size:var(--font-size-md)}
 @media(max-width:640px){.toolbar{align-items:stretch;flex-direction:column}.grid{grid-template-columns:1fr}}

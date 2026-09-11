@@ -21,3 +21,4 @@
 .weekSection{width:100%}
 .actionError{margin:0;font-family:var(--font-sans);color:var(--color-danger);font-size:var(--font-size-md)}
 .weekEmptyMessage{margin:0;font-family:var(--font-sans);color:var(--color-info);font-size:var(--font-size-md)}
+.smallButton{padding:.45rem var(--space-3);font-size:var(--font-size-sm)}

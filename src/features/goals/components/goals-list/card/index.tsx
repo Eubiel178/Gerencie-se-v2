@@ -136,7 +136,7 @@ export function Card({ goal, connections }: CardProps) {
               </span>
               <IconButton
                 tone="danger"
-                size="sm"
+                className={styles.smallButton}
                 aria-label={`Remover etapa ${step.title}`}
                 onClick={() => handleRemoveStep(step.id)}
               >
@@ -157,7 +157,7 @@ export function Card({ goal, connections }: CardProps) {
         <Button.Root
           type="submit"
           variant="secondary"
-          size="sm"
+          className={styles.smallButton}
           aria-label="Adicionar etapa"
           loading={isAddingStep}
         >

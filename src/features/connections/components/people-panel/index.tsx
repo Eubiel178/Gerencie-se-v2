@@ -95,7 +95,7 @@ export function PeoplePanel({ connections }: { connections: IConnection[] }) {
           />
         </Input.Wrapper>
 
-        <Button.Root type="submit" size="sm" loading={isSubmitting}>
+        <Button.Root type="submit" className={styles.smallButton} loading={isSubmitting}>
           Convidar
         </Button.Root>
       </form>
@@ -127,7 +127,7 @@ export function PeoplePanel({ connections }: { connections: IConnection[] }) {
                   <>
                     <Button.Root
                       type="button"
-                      size="sm"
+                      className={styles.smallButton}
                       loading={pendingId === connection.id}
                       onClick={() => handleRespond(connection.id, true)}
                     >
@@ -135,8 +135,8 @@ export function PeoplePanel({ connections }: { connections: IConnection[] }) {
                     </Button.Root>
                     <Button.Root
                       type="button"
-                      size="sm"
                       variant="secondary"
+                      className={styles.smallButton}
                       loading={pendingId === connection.id}
                       onClick={() => handleRespond(connection.id, false)}
                     >
@@ -146,9 +146,9 @@ export function PeoplePanel({ connections }: { connections: IConnection[] }) {
                 ) : (
                   <Button.Root
                     type="button"
-                    size="sm"
                     variant="ghost"
                     tone="danger"
+                    className={styles.smallButton}
                     aria-label={`Remover conexão com ${connection.otherPersonEmail}`}
                     loading={pendingId === connection.id}
                     onClick={() => handleRemove(connection.id)}

@@ -104,11 +104,11 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
             value={goalInput}
             onChange={(event) => setGoalInput(event.target.value)}
           />
-          <Button.Root type="submit" size="sm">Salvar</Button.Root>
+          <Button.Root type="submit" className={styles.smallButton}>Salvar</Button.Root>
           <Button.Root
             type="button"
-            size="sm"
             variant="secondary"
+            className={styles.smallButton}
             onClick={() => setIsEditingGoal(false)}
           >
             Cancelar
@@ -170,7 +170,7 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
               </span>
               <IconButton
                 tone="danger"
-                size="sm"
+                className={styles.smallButton}
                 aria-label="Remover registro"
                 onClick={() => handleDelete(log.id)}
               >

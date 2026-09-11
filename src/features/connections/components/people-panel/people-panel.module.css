@@ -69,3 +69,8 @@
   flex-shrink: 0;
 }
 
+.smallButton {
+  padding: 0.45rem var(--space-3);
+  font-size: var(--font-size-sm);
+}
+
