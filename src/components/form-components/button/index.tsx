@@ -1,18 +1,19 @@
 import styles from "./styles.module.css";
 
-type ButtonColor = "primary" | "secondary" | "danger";
-type ButtonBackground = "transparent" | "primary" | "secondary";
-type ButtonRadius = "square" | "rounded" | "lg" | "md" | "sm";
+type ButtonVariant = "primary" | "secondary" | "ghost";
+type ButtonTone = "muted" | "highlight" | "danger";
 type ButtonSize = "xsmall" | "small" | "medium" | "large" | "xlarge";
 
 type ButtonProps = React.ComponentProps<"button"> & {
-  // Sem valor: a cor do texto/ícone vem do `background` escolhido (ver
-  // `.background*` no CSS) — cada fundo já define uma cor legível própria.
-  // Só passe `color` para forçar uma cor específica (ex.: um ícone
-  // "danger" dentro de um botão transparente).
-  color?: ButtonColor;
-  background?: ButtonBackground;
-  radius?: ButtonRadius;
+  // Fundo do botão — cada um já define sua própria cor de texto/ícone
+  // legível (ver CSS). Default "primary" cobre a maioria dos botões
+  // (CTA principal de formulário); "ghost" é pra ícone-só sem fundo
+  // (editar/excluir/fechar em cards e modais).
+  variant?: ButtonVariant;
+  // Tinge o texto/ícone sem trocar o fundo — só passe quando o padrão
+  // do `variant` não for o que você quer (ex.: um ícone de excluir
+  // vermelho dentro de um botão "ghost").
+  tone?: ButtonTone;
   size?: ButtonSize;
   loading?: boolean;
 };
@@ -20,24 +21,16 @@ type ButtonProps = React.ComponentProps<"button"> & {
 // Mapas explícitos prop → classe (em vez de montar o nome da classe com
 // string dinâmica): TypeScript aponta na hora se faltar um caso, e
 // nenhum valor pode "escorregar" pra uma classe inexistente em silêncio.
-const COLOR_CLASSES: Record<ButtonColor, string> = {
-  primary: styles.colorPrimary,
-  secondary: styles.colorSecondary,
-  danger: styles.colorDanger,
+const VARIANT_CLASSES: Record<ButtonVariant, string> = {
+  primary: styles.variantPrimary,
+  secondary: styles.variantSecondary,
+  ghost: styles.variantGhost,
 };
 
-const BACKGROUND_CLASSES: Record<ButtonBackground, string> = {
-  transparent: styles.backgroundTransparent,
-  primary: styles.backgroundPrimary,
-  secondary: styles.backgroundSecondary,
-};
-
-const RADIUS_CLASSES: Record<ButtonRadius, string> = {
-  square: styles.radiusSquare,
-  rounded: styles.radiusRounded,
-  lg: styles.radiusLg,
-  md: styles.radiusMd,
-  sm: styles.radiusSm,
+const TONE_CLASSES: Record<ButtonTone, string> = {
+  muted: styles.toneMuted,
+  highlight: styles.toneHighlight,
+  danger: styles.toneDanger,
 };
 
 const SIZE_CLASSES: Record<ButtonSize, string> = {
@@ -51,9 +44,8 @@ const SIZE_CLASSES: Record<ButtonSize, string> = {
 export const Button = ({
   loading = false,
   children,
-  color,
-  background = "primary",
-  radius = "md",
+  variant = "primary",
+  tone,
   disabled,
   size = "medium",
   className,
@@ -63,12 +55,11 @@ export const Button = ({
 
   const classNames = [
     styles.button,
-    BACKGROUND_CLASSES[background],
-    // A cor padrão de cada fundo vive numa regra `:where(...)` no CSS
-    // (especificidade zerada) — por isso esta classe, quando passada,
-    // sempre vence, não importa a ordem no arquivo ou no array abaixo.
-    color && COLOR_CLASSES[color],
-    RADIUS_CLASSES[radius],
+    VARIANT_CLASSES[variant],
+    // A cor padrão de cada variante vive numa regra `:where(...)` no
+    // CSS (especificidade zerada) — por isso esta classe, quando
+    // passada, sempre vence, não importa a ordem no arquivo.
+    tone && TONE_CLASSES[tone],
     SIZE_CLASSES[size],
     className,
   ]

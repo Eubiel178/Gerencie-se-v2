@@ -69,7 +69,7 @@ export function SyncWithGoogle({
             <Button
               type="button"
               size="small"
-              background="transparent"
+              variant="ghost"
               onClick={() => setValue("syncEnabled", false)}
             >
               Continuar sem sincronizar

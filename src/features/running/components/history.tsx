@@ -53,8 +53,8 @@ export function History({ sessions }: HistoryProps) {
           </div>
 
           <Button
-            color="danger"
-            background="transparent"
+            variant="ghost"
+            tone="danger"
             size="xlarge"
             aria-label="Excluir corrida"
             loading={removingId === session.id}

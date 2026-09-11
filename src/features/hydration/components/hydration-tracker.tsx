@@ -106,7 +106,7 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
             onChange={(event) => setGoalInput(event.target.value)}
           />
           <Button type="submit" size="small">Salvar</Button>
-          <Button type="button" background="secondary" size="small" onClick={() => setIsEditingGoal(false)}>
+          <Button type="button" variant="secondary" size="small" onClick={() => setIsEditingGoal(false)}>
             Cancelar
           </Button>
         </form>
@@ -129,7 +129,7 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
 
       <div className={styles.quickAdd}>
         {QUICK_AMOUNTS.map((amount) => (
-          <Button key={amount} background="secondary" loading={isBusy} onClick={() => handleLog(amount)}>
+          <Button key={amount} variant="secondary" loading={isBusy} onClick={() => handleLog(amount)}>
             +{amount} ml
           </Button>
         ))}
@@ -144,7 +144,7 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
           value={customAmount}
           onChange={(event) => setCustomAmount(event.target.value)}
         />
-        <Button type="submit" background="secondary" loading={isBusy}>
+        <Button type="submit" variant="secondary" loading={isBusy}>
           Adicionar
         </Button>
       </form>
@@ -160,8 +160,8 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
                 )}
               </span>
               <Button
-                color="danger"
-                background="transparent"
+                variant="ghost"
+                tone="danger"
                 size="small"
                 aria-label="Remover registro"
                 onClick={() => handleDelete(log.id)}

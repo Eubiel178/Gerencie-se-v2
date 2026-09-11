@@ -91,11 +91,11 @@ export function AddHabit({ buttonText, connections, goalOptions }: IAddHabitProp
             <h3>Novo Hábito</h3>
 
             <Button
-              color="secondary"
+              variant="ghost"
+              tone="muted"
               size="xlarge"
               aria-label="Fechar"
               onClick={closeModal}
-              background="transparent"
             >
               <MdClose />
             </Button>

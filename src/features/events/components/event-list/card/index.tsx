@@ -45,8 +45,8 @@ export function Card(event: IEvent) {
 
           <div className={styles.eventCardActions}>
             <Button
-              color="danger"
-              background="transparent"
+              variant="ghost"
+              tone="danger"
               size="xlarge"
               aria-label={`Excluir evento ${event.title}`}
               loading={isRemoving}

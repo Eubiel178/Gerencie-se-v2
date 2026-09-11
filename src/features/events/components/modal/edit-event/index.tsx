@@ -68,8 +68,8 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
   return (
     <>
       <Button
-        color="secondary"
-        background="transparent"
+        variant="ghost"
+        tone="muted"
         size="xlarge"
         aria-label={`Editar evento ${eventBeingEdited.title}`}
         onClick={function () {
@@ -85,8 +85,8 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
             <h3>Editando Evento</h3>
 
             <Button
-              background="transparent"
-              color="secondary"
+              variant="ghost"
+              tone="muted"
               size="xlarge"
               aria-label="Fechar"
               onClick={closeModal}

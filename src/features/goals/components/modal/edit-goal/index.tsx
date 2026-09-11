@@ -72,8 +72,8 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
   return (
     <>
       <Button
-        color="primary"
-        background="transparent"
+        variant="ghost"
+        tone="highlight"
         size="xlarge"
         aria-label={`Editar objetivo ${goalBeingEdited.title}`}
         onClick={function () {
@@ -89,8 +89,8 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
             <h3>Editar Objetivo</h3>
 
             <Button
-              background="transparent"
-              color="secondary"
+              variant="ghost"
+              tone="muted"
               size="xlarge"
               aria-label="Fechar"
               onClick={closeModal}

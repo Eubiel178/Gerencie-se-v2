@@ -82,8 +82,8 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
   return (
     <>
       <Button
-        color="primary"
-        background="transparent"
+        variant="ghost"
+        tone="highlight"
         size="xlarge"
         aria-label={`Editar tarefa ${taskBeingEdited.title}`}
         onClick={function () {
@@ -99,8 +99,8 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
             <h3>Editar Tarefa</h3>
 
             <Button
-              background="transparent"
-              color="secondary"
+              variant="ghost"
+              tone="muted"
               size="xlarge"
               aria-label="Fechar"
               onClick={closeModal}

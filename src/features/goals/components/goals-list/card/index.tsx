@@ -93,8 +93,8 @@ export function Card({ goal, connections }: CardProps) {
 
           {!goal.isSharedWithMe && (
             <Button
-              color="danger"
-              background="transparent"
+              variant="ghost"
+              tone="danger"
               size="xlarge"
               aria-label={`Excluir objetivo ${goal.title}`}
               loading={isRemoving}
@@ -135,8 +135,8 @@ export function Card({ goal, connections }: CardProps) {
                 {step.title}
               </span>
               <Button
-                color="danger"
-                background="transparent"
+                variant="ghost"
+                tone="danger"
                 size="small"
                 aria-label={`Remover etapa ${step.title}`}
                 onClick={() => handleRemoveStep(step.id)}
@@ -157,7 +157,7 @@ export function Card({ goal, connections }: CardProps) {
         />
         <Button
           type="submit"
-          background="secondary"
+          variant="secondary"
           size="small"
           aria-label="Adicionar etapa"
           loading={isAddingStep}

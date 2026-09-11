@@ -81,11 +81,11 @@ export function AddRoutineItem({ buttonText, taskOptions, connections }: IAddRou
             <h3>Novo Item de Rotina</h3>
 
             <Button
-              color="secondary"
+              variant="ghost"
+              tone="muted"
               size="xlarge"
               aria-label="Fechar"
               onClick={closeModal}
-              background="transparent"
             >
               <MdClose />
             </Button>

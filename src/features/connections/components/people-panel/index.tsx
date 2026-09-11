@@ -136,7 +136,7 @@ export function PeoplePanel({ connections }: { connections: IConnection[] }) {
                     <Button
                       type="button"
                       size="small"
-                      background="secondary"
+                      variant="secondary"
                       loading={pendingId === connection.id}
                       onClick={() => handleRespond(connection.id, false)}
                     >
@@ -147,8 +147,8 @@ export function PeoplePanel({ connections }: { connections: IConnection[] }) {
                   <Button
                     type="button"
                     size="small"
-                    background="transparent"
-                    color="danger"
+                    variant="ghost"
+                    tone="danger"
                     aria-label={`Remover conexão com ${connection.otherPersonEmail}`}
                     loading={pendingId === connection.id}
                     onClick={() => handleRemove(connection.id)}

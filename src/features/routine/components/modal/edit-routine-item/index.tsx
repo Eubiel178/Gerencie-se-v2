@@ -70,8 +70,8 @@ export function EditRoutineItem({ itemBeingEdited, taskOptions, connections }: I
   return (
     <>
       <Button
-        color="primary"
-        background="transparent"
+        variant="ghost"
+        tone="highlight"
         size="xlarge"
         aria-label={`Editar item de rotina ${itemBeingEdited.title}`}
         onClick={function () {
@@ -87,8 +87,8 @@ export function EditRoutineItem({ itemBeingEdited, taskOptions, connections }: I
             <h3>Editar Item de Rotina</h3>
 
             <Button
-              background="transparent"
-              color="secondary"
+              variant="ghost"
+              tone="muted"
               size="xlarge"
               aria-label="Fechar"
               onClick={closeModal}

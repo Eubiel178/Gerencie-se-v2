@@ -83,11 +83,11 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
             <h3>Novo Objetivo</h3>
 
             <Button
-              color="secondary"
+              variant="ghost"
+              tone="muted"
               size="xlarge"
               aria-label="Fechar"
               onClick={closeModal}
-              background="transparent"
             >
               <MdClose />
             </Button>

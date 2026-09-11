@@ -60,8 +60,8 @@ export function RoutineListItem({ item, taskOptions, connections, linkedTaskTitl
 
         {!item.isSharedWithMe && (
           <Button
-            color="danger"
-            background="transparent"
+            variant="ghost"
+            tone="danger"
             size="xlarge"
             aria-label={`Remover ${item.title} da rotina`}
             loading={isRemoving}

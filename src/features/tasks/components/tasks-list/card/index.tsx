@@ -102,8 +102,8 @@ export function Card({ task, tagLabel, isGoogleConnected, connections }: CardPro
           <div className={styles.headerActions}>
             {!task.isSharedWithMe && (
               <Button
-                color="danger"
-                background="transparent"
+                variant="ghost"
+                tone="danger"
                 size="xlarge"
                 aria-label={`Excluir tarefa ${task.title}`}
                 loading={isRemoving}
@@ -179,7 +179,7 @@ export function Card({ task, tagLabel, isGoogleConnected, connections }: CardPro
                 <Button
                   type="button"
                   size="xsmall"
-                  background="secondary"
+                  variant="secondary"
                   loading={isRetrying}
                   onClick={handleRetrySync}
                 >

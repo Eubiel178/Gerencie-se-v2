@@ -79,8 +79,8 @@ export const AddEvent = ({ buttonText }: IModalProps) => {
             <h3>Novo Evento</h3>
 
             <Button
-              background="transparent"
-              color="secondary"
+              variant="ghost"
+              tone="muted"
               size="xlarge"
               aria-label="Fechar"
               onClick={closeModal}

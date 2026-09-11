@@ -65,8 +65,8 @@ export function Card({ habit, today, connections, goalOptions, linkedGoalTitle }
 
           {!habit.isSharedWithMe && (
             <Button
-              color="danger"
-              background="transparent"
+              variant="ghost"
+              tone="danger"
               size="xlarge"
               aria-label={`Excluir hábito ${habit.title}`}
               loading={isRemoving}
@@ -108,7 +108,7 @@ export function Card({ habit, today, connections, goalOptions, linkedGoalTitle }
 
       <Button
         className={styles.toggleButton}
-        background={habit.completedToday ? "secondary" : "primary"}
+        variant={habit.completedToday ? "secondary" : "primary"}
         loading={isToggling}
         onClick={handleToggleToday}
       >

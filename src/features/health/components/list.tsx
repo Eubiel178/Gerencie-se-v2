@@ -72,7 +72,7 @@ export function List({ checkups }: { checkups: IHealthCheckup[] }) {
 
           <div className={styles.actions}>
             <Button
-              background="secondary"
+              variant="secondary"
               size="small"
               loading={busyId === checkup.id}
               aria-label={`Marcar ${checkup.title} como feito hoje`}
@@ -82,8 +82,8 @@ export function List({ checkups }: { checkups: IHealthCheckup[] }) {
             </Button>
 
             <Button
-              color="danger"
-              background="transparent"
+              variant="ghost"
+              tone="danger"
               size="xlarge"
               aria-label={`Excluir ${checkup.title}`}
               loading={busyId === checkup.id}

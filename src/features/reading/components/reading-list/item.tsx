@@ -74,8 +74,8 @@ export function Item({ item }: { item: IReadingItem }) {
         </div>
 
         <Button
-          color="danger"
-          background="transparent"
+          variant="ghost"
+          tone="danger"
           size="xlarge"
           aria-label={`Remover ${item.title}`}
           loading={isRemoving}

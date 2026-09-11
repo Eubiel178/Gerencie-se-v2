@@ -117,7 +117,7 @@ export function Auth() {
 
       <Button
         type="button"
-        background="secondary"
+        variant="secondary"
         loading={isGoogleLoading}
         onClick={handleGoogleSignIn}
       >

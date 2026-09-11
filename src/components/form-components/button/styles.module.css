@@ -4,6 +4,7 @@
   justify-content: center;
   gap: var(--space-2);
   border: 1px solid transparent;
+  border-radius: var(--radius-md);
   font-family: var(--font-sans);
   font-weight: 600;
   letter-spacing: -0.01em;
@@ -34,80 +35,56 @@
   pointer-events: none;
 }
 
-/* Fundo. */
-.backgroundTransparent {
+/* Variante (substitui o antigo par background+color): cada uma já
+   define seu próprio fundo e a cor de texto/ícone mais usada nesse
+   fundo, dentro de `:where(...)` (especificidade zerada) — um `tone`
+   explícito sempre vence esse padrão, não importa a ordem no arquivo. */
+.variantGhost {
   background: transparent;
 }
-.backgroundTransparent:hover:not(:disabled) {
+.variantGhost:hover:not(:disabled) {
   background: var(--color-surface-elevated);
 }
-.backgroundPrimary {
+.variantPrimary {
   background: var(--color-highlight);
   box-shadow: 0 1px 2px var(--color-shadow);
 }
-.backgroundSecondary {
+.variantSecondary {
   background: var(--color-surface-elevated);
   border-color: var(--color-border);
   box-shadow: 0 1px 2px var(--color-shadow);
 }
-.backgroundPrimary:hover:not(:disabled),
-.backgroundSecondary:hover:not(:disabled) {
+.variantPrimary:hover:not(:disabled),
+.variantSecondary:hover:not(:disabled) {
   filter: brightness(1.08);
   box-shadow: 0 0.35rem 0.85rem var(--color-shadow);
   transform: translateY(-1px);
 }
-.backgroundPrimary:active:not(:disabled),
-.backgroundSecondary:active:not(:disabled) {
+.variantPrimary:active:not(:disabled),
+.variantSecondary:active:not(:disabled) {
   box-shadow: none;
 }
 
-/*
- * Cor do texto/ícone.
- *
- * Cada fundo tem uma cor padrão "mais usada" (dentro de `:where(...)`,
- * que zera a especificidade dessas regras pra 0). Quando o componente
- * passa um `color` explícito, a classe `.color*` correspondente tem
- * especificidade normal e por isso SEMPRE vence o padrão — não importa
- * a ordem das regras no arquivo, nem a ordem das classes no elemento.
- * Isso evita depender de "quem vem por último no CSS ganha".
- */
-:where(.backgroundPrimary) {
+:where(.variantPrimary) {
   color: var(--color-on-highlight);
 }
-:where(.backgroundSecondary),
-:where(.backgroundTransparent) {
+:where(.variantSecondary),
+:where(.variantGhost) {
   color: var(--color-text);
 }
 
-.colorPrimary {
-  color: var(--color-on-highlight);
-}
-/* Não é "cor de sucesso" — é a cor de texto/ícone discreta, usada pelo
-   botão "Fechar" (X) de todos os modais. Antes usava
-   --color-on-success (pensado pra texto sobre fundo verde, que este
-   botão nunca tem) e ficava quase invisível nos dois temas. */
-.colorSecondary {
+/* Tom — só aplicado quando passado explicitamente (ver componente),
+   pra tingir o texto/ícone sem trocar o fundo (ex.: um "Cancelar" em
+   fundo secundário, ou um ícone de excluir/editar/fechar num botão
+   ghost). */
+.toneMuted {
   color: var(--color-text-muted);
 }
-.colorDanger {
+.toneHighlight {
+  color: var(--color-highlight);
+}
+.toneDanger {
   color: var(--color-danger);
-}
-
-/* Raio */
-.radiusSquare {
-  border-radius: 0;
-}
-.radiusRounded {
-  border-radius: var(--radius-full);
-}
-.radiusLg {
-  border-radius: var(--radius-lg);
-}
-.radiusMd {
-  border-radius: var(--radius-md);
-}
-.radiusSm {
-  border-radius: var(--radius-sm);
 }
 
 /* Tamanho (afeta o texto/ícone, o padding acompanha proporcionalmente).

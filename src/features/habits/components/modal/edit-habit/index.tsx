@@ -80,8 +80,8 @@ export function EditHabit({ habitBeingEdited, connections, goalOptions }: IEditH
   return (
     <>
       <Button
-        color="primary"
-        background="transparent"
+        variant="ghost"
+        tone="highlight"
         size="xlarge"
         aria-label={`Editar hábito ${habitBeingEdited.title}`}
         onClick={function () {
@@ -97,8 +97,8 @@ export function EditHabit({ habitBeingEdited, connections, goalOptions }: IEditH
             <h3>Editar Hábito</h3>
 
             <Button
-              background="transparent"
-              color="secondary"
+              variant="ghost"
+              tone="muted"
               size="xlarge"
               aria-label="Fechar"
               onClick={closeModal}
