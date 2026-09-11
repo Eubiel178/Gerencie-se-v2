@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useSyncExternalStore } from "react";
-import { useRouter } from "next/navigation";
 import { Icon } from "@/components/icon";
 
 import { IAssistantMessage } from "@/features/assistant/domain";
@@ -66,7 +65,6 @@ function getDismissedServerSnapshot(): string | null {
  * regra (mesmo com presença reduzida ou mensagem já dispensada).
  */
 export function Widget({ initialMessage, reducedPresence }: WidgetProps) {
-  const router = useRouter();
   const [message, setMessage] = useState(initialMessage);
   const [manuallyToggled, setManuallyToggled] = useState<boolean | null>(null);
 
@@ -80,16 +78,10 @@ export function Widget({ initialMessage, reducedPresence }: WidgetProps) {
   const isOpen = manuallyToggled ?? autoOpen;
   const mood = moodFor(message);
 
-  // O avatar nunca pode virar um botão morto: sem mensagem no momento, o
-  // clique leva pra seção do assistente em Configurações (onde ficam as
-  // preferências de verdade) em vez de não fazer nada.
   function handleAvatarClick() {
-    if (message) {
-      setManuallyToggled(!isOpen);
-      return;
-    }
+    if (!message) return;
 
-    router.push("/home/settings#assistente");
+    setManuallyToggled(!isOpen);
   }
 
   function handleDismiss() {
@@ -128,13 +120,9 @@ export function Widget({ initialMessage, reducedPresence }: WidgetProps) {
         className={styles.avatar}
         data-mood={mood}
         aria-label={
-          message
-            ? isOpen
-              ? "Fechar mensagem do JARVIS"
-              : "Abrir mensagem do JARVIS"
-            : "Ir para as preferências do assistente"
+          isOpen ? "Fechar mensagem do JARVIS" : "Abrir mensagem do JARVIS"
         }
-        aria-expanded={message ? isOpen : undefined}
+        aria-expanded={isOpen}
         onClick={handleAvatarClick}
       >
         <span aria-hidden="true">{MOOD_EMOJI[mood]}</span>
