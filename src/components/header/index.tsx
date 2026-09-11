@@ -19,7 +19,7 @@ import {
   MdSettings,
   MdTimer,
   MdOutlineSchedule,
-} from "@/components/icons";
+} from "@/components/icon";
 
 import styles from "@/app/home/home-layout.module.css";
 
@@ -43,34 +43,61 @@ const links = [
 export const Header = () => {
   const pathname = usePathname();
 
-  return <aside className={styles.sidebar}>
-    <p className={styles.brand}>
-      <span className={styles.brandMark} aria-hidden="true">
-        <svg viewBox="0 0 64 64" width="20" height="20" fill="none">
-          <circle cx="32" cy="32" r="22" stroke="currentColor" strokeOpacity="0.35" strokeWidth="6" />
-          <circle
-            cx="32"
-            cy="32"
-            r="22"
-            stroke="currentColor"
-            strokeWidth="6"
-            strokeLinecap="round"
-            strokeDasharray="138.2"
-            strokeDashoffset="34.5"
-            transform="rotate(-90 32 32)"
-          />
-          <path
-            d="M22 33 L29 40 L43 24"
-            stroke="currentColor"
-            strokeWidth="6"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </span>
-      Gerencie-se
-    </p>
-    <nav aria-label="Navegação principal"><ul className={styles.navigation}>{links.map(({ href, label, icon: Icon }) => <li key={href}><Link href={href} data-active={pathname === href}><Icon aria-hidden="true" />{label}</Link></li>)}</ul></nav>
-    <button className={styles.signOut} type="button" onClick={() => signOut({ callbackUrl: "/login" })}><FaSignOutAlt aria-hidden="true" />Sair</button>
-  </aside>;
+  return (
+    <aside className={styles.sidebar}>
+      <p className={styles.brand}>
+        <span className={styles.brandMark} aria-hidden="true">
+          <svg viewBox="0 0 64 64" width="20" height="20" fill="none">
+            <circle
+              cx="32"
+              cy="32"
+              r="22"
+              stroke="currentColor"
+              strokeOpacity="0.35"
+              strokeWidth="6"
+            />
+            <circle
+              cx="32"
+              cy="32"
+              r="22"
+              stroke="currentColor"
+              strokeWidth="6"
+              strokeLinecap="round"
+              strokeDasharray="138.2"
+              strokeDashoffset="34.5"
+              transform="rotate(-90 32 32)"
+            />
+            <path
+              d="M22 33 L29 40 L43 24"
+              stroke="currentColor"
+              strokeWidth="6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </span>
+        Gerencie-se
+      </p>
+      <nav aria-label="Navegação principal">
+        <ul className={styles.navigation}>
+          {links.map(({ href, label, icon: Icon }) => (
+            <li key={href}>
+              <Link href={href} data-active={pathname === href}>
+                <Icon aria-hidden="true" />
+                {label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
+      <button
+        className={styles.signOut}
+        type="button"
+        onClick={() => signOut({ callbackUrl: "/login" })}
+      >
+        <FaSignOutAlt aria-hidden="true" />
+        Sair
+      </button>
+    </aside>
+  );
 };

@@ -7,7 +7,7 @@ import {
   FiHeart,
   FiTarget,
   FiZap,
-} from "@/components/icons";
+} from "@/components/icon";
 import { ThemeToggle } from "@/design-system/theme/theme-toggle";
 import styles from "./landing-page.module.css";
 

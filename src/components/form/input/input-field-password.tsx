@@ -1,7 +1,7 @@
 "use client";
 
 import { forwardRef, useState } from "react";
-import { FaEye, FaEyeSlash } from "@/components/icons";
+import { FaEye, FaEyeSlash } from "@/components/icon";
 
 import { useInputRootContext } from "@/providers/input-root-context";
 
@@ -20,7 +20,11 @@ export const InputFieldPassword = forwardRef<
 
   const [isVisible, setVisible] = useState(false);
 
-  const classNames = [styles.field, styles.passwordField, incorrect && styles.incorrect]
+  const classNames = [
+    styles.field,
+    styles.passwordField,
+    incorrect && styles.incorrect,
+  ]
     .filter(Boolean)
     .join(" ");
 

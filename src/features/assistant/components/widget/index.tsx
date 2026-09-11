@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MdClose } from "@/components/icons";
+import { MdClose } from "@/components/icon";
 
 import { IAssistantMessage } from "@/features/assistant/domain";
 
@@ -74,12 +74,16 @@ export function Widget({ initialMessage, reducedPresence }: WidgetProps) {
         type="button"
         className={styles.avatar}
         data-mood={mood}
-        aria-label={isOpen ? "Fechar mensagem do JARVIS" : "Abrir mensagem do JARVIS"}
+        aria-label={
+          isOpen ? "Fechar mensagem do JARVIS" : "Abrir mensagem do JARVIS"
+        }
         aria-expanded={isOpen}
         onClick={handleAvatarClick}
       >
         <span aria-hidden="true">{MOOD_EMOJI[mood]}</span>
-        {!isOpen && message && <span className={styles.pingDot} aria-hidden="true" />}
+        {!isOpen && message && (
+          <span className={styles.pingDot} aria-hidden="true" />
+        )}
       </button>
     </div>
   );

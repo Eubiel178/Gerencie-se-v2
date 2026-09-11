@@ -4,11 +4,14 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { FaCheck } from "@/components/icons";
+import { FaCheck, FaTrash } from "@/components/icon";
 
 import { Button } from "@/components";
 
-import { deleteHealthCheckupAction, markHealthCheckupDoneAction } from "@/features/health/actions";
+import {
+  deleteHealthCheckupAction,
+  markHealthCheckupDoneAction,
+} from "@/features/health/actions";
 import { IHealthCheckup } from "@/features/health/domain";
 
 import styles from "../health.module.css";
@@ -40,7 +43,11 @@ export function List({ checkups }: { checkups: IHealthCheckup[] }) {
   }
 
   if (checkups.length === 0) {
-    return <p className={styles.emptyMessage}>Nenhum cuidado preventivo cadastrado ainda.</p>;
+    return (
+      <p className={styles.emptyMessage}>
+        Nenhum cuidado preventivo cadastrado ainda.
+      </p>
+    );
   }
 
   return (
@@ -54,13 +61,15 @@ export function List({ checkups }: { checkups: IHealthCheckup[] }) {
             <p className={styles.itemTitle}>{checkup.title}</p>
             <span className={styles.itemMeta}>
               {checkup.category}
-              {checkup.lastDoneAt && ` · Última vez: ${formatDate(checkup.lastDoneAt)}`}
+              {checkup.lastDoneAt &&
+                ` · Última vez: ${formatDate(checkup.lastDoneAt)}`}
               {checkup.nextDueDate && (
                 <>
                   {" · "}
                   {checkup.isOverdue ? (
                     <span className={styles.overdueLabel}>
-                      Estimativa: atrasado desde {formatDate(checkup.nextDueDate)}
+                      Estimativa: atrasado desde{" "}
+                      {formatDate(checkup.nextDueDate)}
                     </span>
                   ) : (
                     `Estimativa: próximo em ${formatDate(checkup.nextDueDate)}`
@@ -81,7 +90,7 @@ export function List({ checkups }: { checkups: IHealthCheckup[] }) {
             </Button.Root>
 
             <Button.IconButtonPreset
-              icon="FaTrash"
+              icon={FaTrash}
               tone="danger"
               aria-label={`Excluir ${checkup.title}`}
               loading={busyId === checkup.id}

@@ -12,7 +12,7 @@ import { validationSchema } from "@/validation/login-schema";
 
 import styles from "../../../auth-page.module.css";
 
-import { FaGoogle } from "@/components/icons";
+import { FaGoogle } from "@/components/icon";
 
 import { Form, Input, Button } from "@/components";
 
@@ -32,7 +32,7 @@ export function Auth() {
   // de página novo, então o valor de `searchParams` no primeiro render já é
   // o definitivo — não há necessidade de sincronizar depois.
   const [formError, setFormError] = useState<string | null>(() =>
-    authErrorMessage(searchParams.get("error"))
+    authErrorMessage(searchParams.get("error")),
   );
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
@@ -95,7 +95,9 @@ export function Auth() {
           </Input.Root>
 
           <Input.Root className={styles.rememberRow}>
-            <Link className={styles.link} href="#">Esqueceu sua senha?</Link>
+            <Link className={styles.link} href="#">
+              Esqueceu sua senha?
+            </Link>
 
             <Input.Wrapper>
               <Input.Wrapper>
@@ -133,7 +135,9 @@ export function Auth() {
       <div className={styles.authSwitch}>
         <p className={styles.authSwitchText}>Ainda não tem conta?</p>
 
-        <Link className={styles.link} href="/register">Cadastre-se</Link>
+        <Link className={styles.link} href="/register">
+          Cadastre-se
+        </Link>
       </div>
     </section>
   );

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { useForm } from "react-hook-form";
+import { FaEdit } from "@/components/icon";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/goal-schema";
@@ -71,7 +72,7 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
   return (
     <>
       <Button.IconButtonPreset
-        icon="FaEdit"
+        icon={FaEdit}
         tone="highlight"
         aria-label={`Editar objetivo ${goalBeingEdited.title}`}
         onClick={function () {

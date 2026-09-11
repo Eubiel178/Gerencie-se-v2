@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { FaSyncAlt, FaCheck, FaRedo } from "@/components/icons";
+import { FaSyncAlt, FaCheck, FaRedo, FaTrash } from "@/components/icon";
 
 import {
   deleteTaskAction,
@@ -39,7 +39,12 @@ interface CardProps {
   connections: LoadAcceptedConnections.Model;
 }
 
-export function Card({ task, tagLabel, isGoogleConnected, connections }: CardProps) {
+export function Card({
+  task,
+  tagLabel,
+  isGoogleConnected,
+  connections,
+}: CardProps) {
   const router = useRouter();
   const [isRemoving, setIsRemoving] = useState(false);
   const [isRetrying, setIsRetrying] = useState(false);
@@ -103,7 +108,7 @@ export function Card({ task, tagLabel, isGoogleConnected, connections }: CardPro
           <div className={styles.headerActions}>
             {!task.isSharedWithMe && (
               <Button.IconButtonPreset
-                icon="FaTrash"
+                icon={FaTrash}
                 tone="danger"
                 aria-label={`Excluir tarefa ${task.title}`}
                 loading={isRemoving}
@@ -111,7 +116,11 @@ export function Card({ task, tagLabel, isGoogleConnected, connections }: CardPro
               />
             )}
 
-            <EditTask taskBeingEdited={task} isGoogleConnected={isGoogleConnected} connections={connections} />
+            <EditTask
+              taskBeingEdited={task}
+              isGoogleConnected={isGoogleConnected}
+              connections={connections}
+            />
           </div>
         </div>
       </div>
@@ -120,10 +129,7 @@ export function Card({ task, tagLabel, isGoogleConnected, connections }: CardPro
         <div className={styles.cardTop}>
           <div className={styles.titleRow}>
             <div className={styles.titleGroup}>
-              <h3
-                className={styles.taskTitle}
-                data-completed={task.completed}
-              >
+              <h3 className={styles.taskTitle} data-completed={task.completed}>
                 {task.title}
               </h3>
 
@@ -131,9 +137,15 @@ export function Card({ task, tagLabel, isGoogleConnected, connections }: CardPro
                 <FaRedo
                   role="img"
                   aria-label={
-                    task.recurrence === "daily" ? "Repete diariamente" : "Repete semanalmente"
+                    task.recurrence === "daily"
+                      ? "Repete diariamente"
+                      : "Repete semanalmente"
                   }
-                  title={task.recurrence === "daily" ? "Repete diariamente" : "Repete semanalmente"}
+                  title={
+                    task.recurrence === "daily"
+                      ? "Repete diariamente"
+                      : "Repete semanalmente"
+                  }
                   size={12}
                   color="var(--color-text-muted)"
                 />
@@ -169,7 +181,8 @@ export function Card({ task, tagLabel, isGoogleConnected, connections }: CardPro
             {task.syncStatus === "ERROR" && (
               <>
                 <p className={styles.syncError}>
-                  {task.syncError || "Falha ao sincronizar com o Google Agenda."}
+                  {task.syncError ||
+                    "Falha ao sincronizar com o Google Agenda."}
                 </p>
 
                 <Button.Root

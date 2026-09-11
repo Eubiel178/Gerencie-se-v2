@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { useForm, useWatch } from "react-hook-form";
 import { useFormTags } from "@/features/tasks/hooks/use-form-tags";
+import { FaEdit } from "@/components/icon";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/task-schema";
@@ -81,7 +82,7 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
   return (
     <>
       <Button.IconButtonPreset
-        icon="FaEdit"
+        icon={FaEdit}
         tone="highlight"
         aria-label={`Editar tarefa ${taskBeingEdited.title}`}
         onClick={function () {

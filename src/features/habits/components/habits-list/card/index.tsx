@@ -4,12 +4,15 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { FaFire, FaCheck } from "@/components/icons";
+import { FaFire, FaCheck, FaTrash } from "@/components/icon";
 
 import { Button } from "@/components";
 import { SharedBadge } from "@/features/connections/components/shared-badge";
 
-import { deleteHabitAction, toggleHabitLogAction } from "@/features/habits/actions";
+import {
+  deleteHabitAction,
+  toggleHabitLogAction,
+} from "@/features/habits/actions";
 import { EditHabit } from "../../modal";
 
 import { IHabit } from "@/features/habits/domain";
@@ -26,7 +29,13 @@ interface CardProps {
   linkedGoalTitle?: string;
 }
 
-export function Card({ habit, today, connections, goalOptions, linkedGoalTitle }: CardProps) {
+export function Card({
+  habit,
+  today,
+  connections,
+  goalOptions,
+  linkedGoalTitle,
+}: CardProps) {
   const router = useRouter();
   const [isRemoving, setIsRemoving] = useState(false);
   const [isToggling, setIsToggling] = useState(false);
@@ -54,7 +63,10 @@ export function Card({ habit, today, connections, goalOptions, linkedGoalTitle }
   }
 
   const target = habit.targetPerWeek ?? 7;
-  const progressPercent = Math.min(100, Math.round((habit.completionsThisWeek / target) * 100));
+  const progressPercent = Math.min(
+    100,
+    Math.round((habit.completionsThisWeek / target) * 100),
+  );
 
   return (
     <li className={styles.card}>
@@ -62,11 +74,15 @@ export function Card({ habit, today, connections, goalOptions, linkedGoalTitle }
         <h3 className={styles.cardTitle}>{habit.title}</h3>
 
         <div className={styles.actions}>
-          <EditHabit habitBeingEdited={habit} connections={connections} goalOptions={goalOptions} />
+          <EditHabit
+            habitBeingEdited={habit}
+            connections={connections}
+            goalOptions={goalOptions}
+          />
 
           {!habit.isSharedWithMe && (
             <Button.IconButtonPreset
-              icon="FaTrash"
+              icon={FaTrash}
               tone="danger"
               aria-label={`Excluir hábito ${habit.title}`}
               loading={isRemoving}
@@ -83,7 +99,9 @@ export function Card({ habit, today, connections, goalOptions, linkedGoalTitle }
         className={styles.sharedBadge}
       />
 
-      {linkedGoalTitle && <p className={styles.linkedGoal}>Vinculado a: {linkedGoalTitle}</p>}
+      {linkedGoalTitle && (
+        <p className={styles.linkedGoal}>Vinculado a: {linkedGoalTitle}</p>
+      )}
 
       <div className={styles.stats}>
         <span className={styles.streak}>
@@ -99,7 +117,10 @@ export function Card({ habit, today, connections, goalOptions, linkedGoalTitle }
               {habit.completionsThisWeek}/{target} esta semana
             </span>
             <div className={styles.progressTrack}>
-              <div className={styles.progressFill} style={{ width: `${progressPercent}%` }} />
+              <div
+                className={styles.progressFill}
+                style={{ width: `${progressPercent}%` }}
+              />
             </div>
           </>
         )}

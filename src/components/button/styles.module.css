@@ -97,11 +97,6 @@
   pointer-events: none;
 }
 
-.icon {
-  display: inline-flex;
-  font-size: 1.1em;
-}
-
 :where(.iconButton) {
   padding: var(--space-2);
   font-size: var(--font-size-xl);

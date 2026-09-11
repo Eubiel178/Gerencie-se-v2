@@ -11,7 +11,7 @@ import { validationSchema } from "@/validation/register-schema";
 
 import styles from "../../../auth-page.module.css";
 
-import { FaGoogle } from "@/components/icons";
+import { FaGoogle } from "@/components/icon";
 
 import { Form, Input, Button } from "@/components";
 
@@ -130,7 +130,9 @@ export function Auth() {
       <div className={styles.authSwitch}>
         <p className={styles.authSwitchText}>Já tem uma conta?</p>
 
-        <Link className={styles.link} href="/login">Logar</Link>
+        <Link className={styles.link} href="/login">
+          Logar
+        </Link>
       </div>
     </section>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { MdFullscreen, MdFullscreenExit } from "@/components/icon";
 
 import { useRouter } from "next/navigation";
 
@@ -216,7 +217,7 @@ export function Timer({ initialSession, mascot }: TimerProps) {
     <div ref={panelRef} className={styles.panel} data-fullscreen={isFullscreen}>
       {session && (
         <Button.IconButtonPreset
-          icon={isFullscreen ? "MdFullscreenExit" : "MdFullscreen"}
+          icon={isFullscreen ? MdFullscreenExit : MdFullscreen}
           className={styles.fullscreenToggle}
           aria-label={isFullscreen ? "Sair da tela cheia" : "Modo foco em tela cheia"}
           onClick={handleToggleFullscreen}
