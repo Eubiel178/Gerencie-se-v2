@@ -7,9 +7,5 @@ type ButtonIconProps = {
 };
 
 export function ButtonIcon({ icon }: ButtonIconProps) {
-  return (
-    <span className={styles.icon}>
-      <Icon name={icon} />
-    </span>
-  );
+  return <Icon name={icon} className={styles.icon} />;
 }
