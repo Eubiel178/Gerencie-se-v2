@@ -1,5 +1,6 @@
 .formError{margin:0;font-family:var(--font-sans);font-size:var(--font-size-md);color:var(--color-info)}
 .formWrapper{gap:var(--space-5)}
+.colorSwatchesLabel{margin-top:calc(var(--space-1) * -1);font-family:var(--font-sans);font-size:var(--font-size-xs);color:var(--color-text-muted)}
 .colorSwatches{display:flex;flex-wrap:wrap;gap:var(--space-2)}
 .colorSwatch{width:1.6rem;height:1.6rem;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0;transition:transform var(--duration-fast) var(--easing-standard),border-color var(--duration-fast) var(--easing-standard)}
 .colorSwatch:hover{transform:scale(1.1)}

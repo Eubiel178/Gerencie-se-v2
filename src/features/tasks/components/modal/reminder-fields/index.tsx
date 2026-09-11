@@ -46,6 +46,10 @@ export function ReminderFields({ register, scheduledAtError, hasScheduledAt }: R
           <Input.Field {...register("scheduledAt")} type="datetime-local" id="scheduledAt" />
         </Input.Wrapper>
 
+        <p className={styles.hint}>
+          Preencha pra poder agendar lembrete e repetição pra esta tarefa.
+        </p>
+
         <Input.HelperText />
       </Input.Root>
 

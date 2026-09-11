@@ -152,7 +152,7 @@ export const AddEvent = ({ buttonText }: IModalProps) => {
                 </Input.Wrapper>
 
                 <SuggestionChips
-                  label="Duração"
+                  label="Duração até o fim"
                   suggestions={DURATION_SHORTCUTS.map((shortcut) => shortcut.label)}
                   onSelect={(label) => {
                     const shortcut = DURATION_SHORTCUTS.find((option) => option.label === label);
@@ -195,7 +195,9 @@ export const AddEvent = ({ buttonText }: IModalProps) => {
                   />
                 </Input.Wrapper>
 
-                <div className={styles.colorSwatches}>
+                <span className={styles.colorSwatchesLabel}>Cores prontas — clique para preencher</span>
+
+                <div className={styles.colorSwatches} role="group" aria-label="Cores prontas">
                   {EVENT_COLORS.map((color) => (
                     <button
                       key={color}

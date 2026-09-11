@@ -17,7 +17,7 @@ export function SuggestionChips({ label, suggestions, onSelect }: SuggestionChip
 
   return (
     <div className={styles.wrapper}>
-      <span className={styles.label}>{label}</span>
+      <span className={styles.label}>{label} — clique para preencher</span>
 
       <div className={styles.row}>
         {suggestions.map((suggestion) => (

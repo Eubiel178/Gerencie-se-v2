@@ -1,3 +1,10 @@
+.hint {
+  margin: calc(var(--space-1) * -1) 0 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
 .option {
   display: flex;
   align-items: center;

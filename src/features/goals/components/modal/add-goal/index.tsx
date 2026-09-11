@@ -126,7 +126,7 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
                 </Input.Wrapper>
 
                 <SuggestionChips
-                  label="Atalhos"
+                  label="Atalhos de prazo"
                   suggestions={DEADLINE_SHORTCUTS.map((shortcut) => shortcut.label)}
                   onSelect={(label) => {
                     const shortcut = DEADLINE_SHORTCUTS.find((option) => option.label === label);
