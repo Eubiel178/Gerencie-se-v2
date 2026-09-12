@@ -1,4 +1,8 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
+import { Lottie } from "lottie-react";
 
 import { MascotBreed, MascotEvent, MascotSpecies } from "@/features/focus/domain";
 
@@ -17,9 +21,18 @@ const SPECIES_LABEL: Record<MascotSpecies, string> = {
 // em alta resolução, escalam bem com suavização normal.
 const PIXELATED_SPECIES = new Set<MascotSpecies>(["coelho", "galinha"]);
 
-function spriteSrc(species: MascotSpecies, breed: MascotBreed): string {
+function pngSrc(species: MascotSpecies, breed: MascotBreed): string {
   const extension = species === "galinha" ? "gif" : "png";
   return `/mascot/${species}-${breed}.${extension}`;
+}
+
+// Uma animação Lottie por espécie (não por raça — a raça continua
+// distinguindo só o sprite estático usado como fallback). Nem toda
+// espécie precisa ter uma ainda: se o arquivo não existir, o `error` do
+// player cai pro sprite estático abaixo, sem precisar de uma lista
+// travada aqui do que já foi adicionado.
+function lottieSrc(species: MascotSpecies): string {
+  return `/mascot/lottie/${species}.json`;
 }
 
 interface MascotSpriteProps {
@@ -35,11 +48,54 @@ interface MascotSpriteProps {
   size?: "sm" | "lg";
 }
 
+interface MascotBodyContentProps {
+  species: MascotSpecies;
+  breed: MascotBreed;
+  size: "sm" | "lg";
+}
+
+/** Só a decisão Lottie-ou-fallback, isolada num componente próprio pra
+ * poder ser remontada (via `key={species}` em quem a usa) sempre que a
+ * espécie muda — assim `lottieFailed` sempre nasce `false` de novo pra
+ * cada espécie nova, sem precisar de um `useEffect` só pra resetar
+ * estado (o que o React Compiler já rejeita como anti-padrão). */
+function MascotBodyContent({ species, breed, size }: MascotBodyContentProps) {
+  const [lottieFailed, setLottieFailed] = useState(false);
+
+  if (lottieFailed) {
+    return (
+      <Image
+        src={pngSrc(species, breed)}
+        alt={SPECIES_LABEL[species]}
+        width={128}
+        height={128}
+        unoptimized={species === "galinha"}
+        className={`${styles.image} ${PIXELATED_SPECIES.has(species) ? styles.pixelated : ""}`}
+        priority={size === "lg"}
+      />
+    );
+  }
+
+  return (
+    <Lottie
+      src={lottieSrc(species)}
+      loop
+      autoplay
+      className={styles.image}
+      subscriptions={{ error: () => setLottieFailed(true) }}
+    />
+  );
+}
+
 /**
- * Corpo do mascote: um sprite estático (PNG/GIF) por espécie+raça,
- * animado via CSS de acordo com o `mood` — idle (respirando devagar),
- * working (respirando mais rápido, sem vaivém) e happy (pulinho +
- * brilhos). Reaproveitado no Focus (`Mascot`), na pré-visualização de
+ * Corpo do mascote. Tenta uma animação Lottie da espécie primeiro (mais
+ * viva — tem movimento de verdade, não só CSS fingindo); se não existir
+ * `public/mascot/lottie/<especie>.json` ainda, cai pro sprite estático
+ * (PNG/GIF por espécie+raça) animado só via CSS — o mesmo mecanismo de
+ * sempre, preservado como fallback enquanto as animações Lottie vão
+ * sendo adicionadas aos poucos.
+ *
+ * Reaproveitado no Focus (`Mascot`), na pré-visualização de
  * Configurações (`MascotSettings`) e no avatar do widget do assistente
  * (`Widget`) — os três mostram o MESMO personagem.
  */
@@ -48,15 +104,7 @@ export function MascotSprite({ species, breed, mood, roaming = false, size = "lg
     <div className={styles.stage} data-roaming={roaming} data-size={size}>
       <div className={styles.roamer}>
         <div className={styles.body} data-mood={mood}>
-          <Image
-            src={spriteSrc(species, breed)}
-            alt={SPECIES_LABEL[species]}
-            width={128}
-            height={128}
-            unoptimized={species === "galinha"}
-            className={`${styles.image} ${PIXELATED_SPECIES.has(species) ? styles.pixelated : ""}`}
-            priority={size === "lg"}
-          />
+          <MascotBodyContent key={species} species={species} breed={breed} size={size} />
 
           {mood === "happy" && (
             <>
