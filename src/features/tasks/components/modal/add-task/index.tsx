@@ -10,7 +10,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/task-schema";
 
-import { Form, Input, Modal, ModalHeader, Button, ChipGroup } from "@/components";
+import { Form, Input, Modal, ModalHeader, Button, ChipGroup, CollapsibleSection } from "@/components";
+import { Icon } from "@/components/icon";
 
 import { createTaskAction } from "@/features/tasks/actions";
 
@@ -92,36 +93,13 @@ export function AddTask({ buttonText, isGoogleConnected, connections }: IAddTask
 
           <Form.Root onSubmit={handleSubmit(handleOnSubmit)}>
             <Form.Wrapper>
-              <Input.Root sharedProps={{ error: errors.tag?.message }}>
-                <Input.Label>Tipo de Tarefa</Input.Label>
-
-                <Input.Wrapper>
-                  <Input.FieldSelect
-                    {...register("tag")}
-                    optionsArray={formTags.options}
-                  />
-                </Input.Wrapper>
-
-                <Input.HelperText />
-              </Input.Root>
-
               <Input.Root sharedProps={{ error: errors.title?.message }}>
                 <Input.Wrapper>
                   <Input.Field
+                    autoFocus
+                    className={styles.titleField}
                     {...register("title")}
-                    placeholder="Título da Tarefa"
-                  />
-                </Input.Wrapper>
-
-                <Input.HelperText />
-              </Input.Root>
-
-              <Input.Root sharedProps={{ error: errors.description?.message }}>
-                <Input.Wrapper>
-                  <Input.FieldTextarea
-                    {...register("description")}
-                    rows={5}
-                    placeholder="Descrição da Tarefa"
+                    placeholder="O que você precisa fazer?"
                   />
                 </Input.Wrapper>
 
@@ -129,7 +107,9 @@ export function AddTask({ buttonText, isGoogleConnected, connections }: IAddTask
               </Input.Root>
 
               <Input.Root sharedProps={{ error: errors.priority?.message }}>
-                <Input.Label>Prioridade</Input.Label>
+                <Input.Label>
+                  <Icon name="FaFlag" size={12} /> Prioridade
+                </Input.Label>
 
                 <ChipGroup
                   aria-label="Prioridade"
@@ -141,28 +121,61 @@ export function AddTask({ buttonText, isGoogleConnected, connections }: IAddTask
                 <Input.HelperText />
               </Input.Root>
 
-              <ReminderFields
-                register={register}
-                scheduledAtError={errors.scheduledAt?.message}
-                hasScheduledAt={!!scheduledAt}
-              />
-
-              <Input.Root sharedProps={{ error: errors.sharedWithUserId?.message }}>
-                <Input.Label>Compartilhar com</Input.Label>
+              <Input.Root sharedProps={{ error: errors.tag?.message }}>
+                <Input.Label>
+                  <Icon name="FaTag" size={12} /> Tipo de Tarefa
+                </Input.Label>
 
                 <Input.Wrapper>
-                  <ShareSelect connections={connections} {...register("sharedWithUserId")} />
+                  <Input.FieldSelect
+                    {...register("tag")}
+                    optionsArray={formTags.options}
+                  />
                 </Input.Wrapper>
 
                 <Input.HelperText />
               </Input.Root>
 
-              <SyncWithGoogle
-                register={register}
-                setValue={setValue}
-                isChecked={!!syncEnabled}
-                isGoogleConnected={isGoogleConnected}
-              />
+              <Input.Root sharedProps={{ error: errors.description?.message }}>
+                <Input.Label>
+                  <Icon name="FaAlignLeft" size={12} /> Descrição
+                </Input.Label>
+
+                <Input.Wrapper>
+                  <Input.FieldTextarea
+                    {...register("description")}
+                    rows={3}
+                    placeholder="Detalhes (opcional)"
+                  />
+                </Input.Wrapper>
+
+                <Input.HelperText />
+              </Input.Root>
+
+              <CollapsibleSection label="Mais opções">
+                <ReminderFields
+                  register={register}
+                  scheduledAtError={errors.scheduledAt?.message}
+                  hasScheduledAt={!!scheduledAt}
+                />
+
+                <Input.Root sharedProps={{ error: errors.sharedWithUserId?.message }}>
+                  <Input.Label>Compartilhar com</Input.Label>
+
+                  <Input.Wrapper>
+                    <ShareSelect connections={connections} {...register("sharedWithUserId")} />
+                  </Input.Wrapper>
+
+                  <Input.HelperText />
+                </Input.Root>
+
+                <SyncWithGoogle
+                  register={register}
+                  setValue={setValue}
+                  isChecked={!!syncEnabled}
+                  isGoogleConnected={isGoogleConnected}
+                />
+              </CollapsibleSection>
             </Form.Wrapper>
 
             {submitError && <p className={styles.formError}>{submitError}</p>}

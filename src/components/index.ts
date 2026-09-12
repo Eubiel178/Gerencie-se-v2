@@ -20,3 +20,4 @@ export { Input } from "./form/input";
 export { ChipGroup } from "./chip-group";
 export type { ChipOption } from "./chip-group";
 export { SuggestionChips } from "./suggestion-chips";
+export { CollapsibleSection } from "./collapsible-section";

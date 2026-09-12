@@ -17,15 +17,40 @@
   transition:
     background var(--duration-fast) var(--easing-standard),
     border-color var(--duration-fast) var(--easing-standard),
-    color var(--duration-fast) var(--easing-standard);
+    color var(--duration-fast) var(--easing-standard),
+    transform var(--duration-fast) var(--easing-standard),
+    box-shadow var(--duration-fast) var(--easing-standard);
 }
 .chip:hover {
   border-color: var(--color-highlight);
+  transform: translateY(-1px);
+}
+.chip:active {
+  transform: scale(0.94);
 }
 .chip[data-selected="true"] {
   background: var(--color-highlight);
   border-color: var(--color-highlight);
   color: var(--color-on-highlight);
+  transform: scale(1.06);
+  box-shadow: 0 0.3rem 0.6rem var(--color-shadow);
+}
+.chip[data-selected="true"]:hover {
+  transform: scale(1.06) translateY(-1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(.chip) {
+    transition: background var(--duration-fast) var(--easing-standard),
+      border-color var(--duration-fast) var(--easing-standard),
+      color var(--duration-fast) var(--easing-standard);
+  }
+  .chip:hover,
+  .chip:active,
+  .chip[data-selected="true"],
+  .chip[data-selected="true"]:hover {
+    transform: none;
+  }
 }
 
 .chip[data-tone="low"][data-selected="true"] {

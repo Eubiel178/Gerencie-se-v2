@@ -7,6 +7,7 @@
   justify-content: center;
   background: var(--color-overlay);
   padding: var(--space-4);
+  animation: overlayIn var(--duration-fast) var(--easing-standard);
 }
 
 :where(.modal) {
@@ -21,4 +22,29 @@
   color: var(--color-text);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
+  box-shadow: 0 1.5rem 3rem var(--color-shadow);
+  animation: modalIn var(--duration-base) var(--easing-standard);
+}
+
+@keyframes overlayIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay,
+  :where(.modal) {
+    animation: none;
+  }
 }

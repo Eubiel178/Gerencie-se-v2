@@ -107,6 +107,9 @@
 }
 
 .label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   color: var(--color-text);
   font-family: var(--font-sans);
 }

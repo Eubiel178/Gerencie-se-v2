@@ -11,7 +11,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/goal-schema";
 
-import { Form, Input, Modal, ModalHeader, Button, ChipGroup, SuggestionChips } from "@/components";
+import { Form, Input, Modal, ModalHeader, Button, ChipGroup, SuggestionChips, CollapsibleSection } from "@/components";
+import { Icon } from "@/components/icon";
 
 import { createGoalAction } from "@/features/goals/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
@@ -97,8 +98,9 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
               <Input.Root sharedProps={{ error: errors.title?.message }}>
                 <Input.Wrapper>
                   <Input.Field
+                    className={styles.titleField}
                     {...register("title")}
-                    placeholder="Ex.: Estudar inglês"
+                    placeholder="Qual objetivo você quer alcançar?"
                     autoFocus
                   />
                 </Input.Wrapper>
@@ -107,11 +109,14 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
               </Input.Root>
 
               <Input.Root sharedProps={{ error: errors.description?.message }}>
+                <Input.Label>
+                  <Icon name="FaAlignLeft" size={12} /> Descrição
+                </Input.Label>
                 <Input.Wrapper>
                   <Input.FieldTextarea
                     {...register("description")}
                     rows={3}
-                    placeholder="Descrição (opcional)"
+                    placeholder="Detalhes (opcional)"
                   />
                 </Input.Wrapper>
 
@@ -119,7 +124,9 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
               </Input.Root>
 
               <Input.Root sharedProps={{ error: errors.deadline?.message }}>
-                <Input.Label>Prazo (opcional)</Input.Label>
+                <Input.Label>
+                  <Icon name="FaCalendarAlt" size={12} /> Prazo (opcional)
+                </Input.Label>
 
                 <Input.Wrapper>
                   <Input.Field {...register("deadline")} type="date" />
@@ -138,7 +145,9 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
               </Input.Root>
 
               <Input.Root sharedProps={{ error: errors.priority?.message }}>
-                <Input.Label>Prioridade</Input.Label>
+                <Input.Label>
+                  <Icon name="FaFlag" size={12} /> Prioridade
+                </Input.Label>
 
                 <ChipGroup
                   aria-label="Prioridade"
@@ -150,15 +159,17 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
                 <Input.HelperText />
               </Input.Root>
 
-              <Input.Root sharedProps={{ error: errors.sharedWithUserId?.message }}>
-                <Input.Label>Compartilhar com</Input.Label>
+              <CollapsibleSection label="Mais opções">
+                <Input.Root sharedProps={{ error: errors.sharedWithUserId?.message }}>
+                  <Input.Label>Compartilhar com</Input.Label>
 
-                <Input.Wrapper>
-                  <ShareSelect connections={connections} {...register("sharedWithUserId")} />
-                </Input.Wrapper>
+                  <Input.Wrapper>
+                    <ShareSelect connections={connections} {...register("sharedWithUserId")} />
+                  </Input.Wrapper>
 
-                <Input.HelperText />
-              </Input.Root>
+                  <Input.HelperText />
+                </Input.Root>
+              </CollapsibleSection>
             </Form.Wrapper>
 
             {submitError && <p className={styles.formError}>{submitError}</p>}
