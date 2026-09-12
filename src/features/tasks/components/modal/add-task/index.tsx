@@ -14,6 +14,7 @@ import { Form, Input, Modal, ModalHeader, Button, ChipGroup, CollapsibleSection 
 import { Icon } from "@/components/icon";
 
 import { createTaskAction } from "@/features/tasks/actions";
+import { isVagueTaskTitle } from "@/features/tasks/is-vague-title";
 
 import { ShareSelect } from "@/features/connections/components/share-select";
 
@@ -56,6 +57,7 @@ export function AddTask({ buttonText, isGoogleConnected, connections }: IAddTask
   const syncEnabled = useWatch({ control, name: "syncEnabled" });
   const scheduledAt = useWatch({ control, name: "scheduledAt" });
   const priority = useWatch({ control, name: "priority" });
+  const title = useWatch({ control, name: "title" });
 
   function closeModal() {
     setIsOpen(false);
@@ -102,6 +104,13 @@ export function AddTask({ buttonText, isGoogleConnected, connections }: IAddTask
                     placeholder="O que você precisa fazer?"
                   />
                 </Input.Wrapper>
+
+                {isVagueTaskTitle(title) && (
+                  <p className={styles.vagueHint}>
+                    Que tal detalhar um pouco mais? Você também pode quebrar em passos menores
+                    depois de criar.
+                  </p>
+                )}
 
                 <Input.HelperText />
               </Input.Root>

@@ -13,6 +13,7 @@ export * from "./domain";
 export * from "./actions";
 export * from "./filter-tasks";
 export * from "./sort-tasks";
+export * from "./is-vague-title";
 export * from "./task-store";
 export * from "./sync";
 export { getTaskFetcher } from "./data/get-task-fetcher";

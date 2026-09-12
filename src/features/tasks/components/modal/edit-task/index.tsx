@@ -14,6 +14,7 @@ import { Form, Modal, ModalHeader, Input, Button, ChipGroup, CollapsibleSection 
 import { Icon } from "@/components/icon";
 
 import { updateTaskAction } from "@/features/tasks/actions";
+import { isVagueTaskTitle } from "@/features/tasks/is-vague-title";
 
 import { ShareSelect } from "@/features/connections/components/share-select";
 import { ShareReadOnlyNote } from "@/features/connections/components/share-readonly-note";
@@ -59,6 +60,7 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
   const syncEnabled = useWatch({ control, name: "syncEnabled" });
   const scheduledAt = useWatch({ control, name: "scheduledAt" });
   const priority = useWatch({ control, name: "priority" });
+  const title = useWatch({ control, name: "title" });
 
   const closeModal = () => {
     setIsOpen(false);
@@ -110,6 +112,13 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
                     autoFocus
                   />
                 </Input.Wrapper>
+
+                {isVagueTaskTitle(title) && (
+                  <p className={styles.vagueHint}>
+                    Que tal detalhar um pouco mais? Você também pode quebrar em passos menores
+                    depois de criar.
+                  </p>
+                )}
 
                 <Input.HelperText />
               </Input.Root>

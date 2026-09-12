@@ -29,3 +29,9 @@
   outline: none;
   box-shadow: none;
 }
+
+.vagueHint {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
