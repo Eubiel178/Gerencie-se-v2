@@ -12,6 +12,7 @@ import { LoadAcceptedConnections } from "@/features/connections/domain";
 import styles from "../../home-dashboard.module.css";
 import { useTaskStore } from "@/features/tasks/task-store";
 import { filterTasks } from "@/features/tasks/filter-tasks";
+import { sortTasksByPriority } from "@/features/tasks/sort-tasks";
 
 interface TasksListProps {
   tasksList: ITask[];
@@ -35,13 +36,20 @@ export function TasksList({ tasksList, isGoogleConnected, connections }: TasksLi
   const tag = formTags.tagExists(paramsUrl.get("tag") || "");
   const tasksByTag = tag !== "all" ? tasks.filter((task) => task.tag === tag) : tasks;
   const tasksFiltred = filterTasks(tasksByTag, { searchQuery, statusFilter, priorityFilter });
-  const thereAreTasks = tasksFiltred.length > 0;
+  // Prioridade primeiro, e dentro de cada prioridade quem ainda não
+  // concluiu vem antes de quem já concluiu — dois `.sort()` estáveis
+  // encadeados (o segundo preserva a ordem de prioridade já aplicada
+  // dentro de cada grupo concluída/pendente).
+  const tasksSorted = sortTasksByPriority(tasksFiltred).sort(
+    (a, b) => Number(a.completed) - Number(b.completed)
+  );
+  const thereAreTasks = tasksSorted.length > 0;
 
   return (
     <>
       {thereAreTasks ? (
         <ul className={styles.taskGrid}>
-          {tasksFiltred.map((task) => (
+          {tasksSorted.map((task) => (
             <Card
               key={task.id}
               task={task}

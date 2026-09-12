@@ -18,6 +18,10 @@ export interface ITask {
   // gerido por uma ação dedicada, não por um campo de formulário comum).
   completed: boolean;
   completedAt?: Date | null;
+  // "Começar também conta": marcado uma vez (nunca desfeito) na primeira
+  // vez que a tarefa é explicitamente iniciada — ver `MarkTaskStarted`.
+  // Nulo = ainda não iniciada.
+  startedAt?: Date | null;
 
   // Data/hora agendada (formato de `<input type="datetime-local">`, ex.
   // "2026-10-01T14:30"). Opcional para uma tarefa comum; obrigatória no

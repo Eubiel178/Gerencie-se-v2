@@ -12,6 +12,7 @@ import { Section, TasksList, TasksListHeader } from "./components";
 export * from "./domain";
 export * from "./actions";
 export * from "./filter-tasks";
+export * from "./sort-tasks";
 export * from "./task-store";
 export * from "./sync";
 export { getTaskFetcher } from "./data/get-task-fetcher";

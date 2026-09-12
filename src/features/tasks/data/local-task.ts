@@ -31,13 +31,18 @@ export type UpdateTaskSyncStateParams = {
  * compartilhada pode ver/editar/concluir, mas só o DONO pode mudar com
  * quem ela está compartilhada ou excluí-la — ver cada método abaixo.
  */
+// XP simbólico por só começar uma tarefa — bem menor que o de concluir,
+// pra não competir com a recompensa "de verdade" de terminar algo.
+const TASK_START_XP = 5;
+
 export class LocalTask
   implements
     domain.CreateTask,
     domain.LoadAllTasks,
     domain.UpdateTask,
     domain.DeleteTask,
-    domain.ToggleTaskComplete
+    domain.ToggleTaskComplete,
+    domain.MarkTaskStarted
 {
   async create(params: domain.CreateTask.Params) {
     const userId = await requireUserId();
@@ -195,6 +200,32 @@ export class LocalTask
     return { completed };
   }
 
+  /** Marca a tarefa como iniciada — dono ou colaborador (mesmo acesso de
+   * `toggleComplete`). Idempotente: uma segunda chamada não reconta XP
+   * nem sobrescreve o horário do primeiro início. */
+  async markStarted(params: domain.MarkTaskStarted.Params): Promise<domain.MarkTaskStarted.Result> {
+    const userId = await requireUserId();
+
+    const [row] = await db
+      .select({ startedAt: tasks.startedAt })
+      .from(tasks)
+      .where(
+        and(eq(tasks.id, params.id), or(eq(tasks.userId, userId), eq(tasks.sharedWithUserId, userId)))
+      )
+      .limit(1);
+
+    if (!row || row.startedAt) {
+      return { xpEarned: 0 };
+    }
+
+    await db
+      .update(tasks)
+      .set({ startedAt: new Date() })
+      .where(eq(tasks.id, params.id));
+
+    return { xpEarned: TASK_START_XP };
+  }
+
   /** Só o DONO pode excluir — compartilhamento dá acesso de ajudar, nunca
    * de apagar o que é do outro. */
   async delete(params: domain.DeleteTask.Params) {
@@ -302,6 +333,7 @@ function mapRowToTask(
     priority: row.priority as domain.TaskPriority,
     completed: row.completed,
     completedAt: row.completedAt,
+    startedAt: row.startedAt,
     scheduledAt: row.scheduledAt ?? undefined,
     syncEnabled: row.syncEnabled,
     syncStatus: row.syncStatus as TaskSyncStatus,

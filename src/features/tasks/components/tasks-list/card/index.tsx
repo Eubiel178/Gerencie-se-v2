@@ -8,6 +8,7 @@ import { Icon } from "@/components/icon";
 
 import {
   deleteTaskAction,
+  markTaskStartedAction,
   retryTaskSyncAction,
   toggleTaskCompleteAction,
 } from "@/features/tasks/actions";
@@ -49,6 +50,7 @@ export function Card({
   const [isRemoving, setIsRemoving] = useState(false);
   const [isRetrying, setIsRetrying] = useState(false);
   const [isToggling, setIsToggling] = useState(false);
+  const [isStarting, setIsStarting] = useState(false);
   const removeTask = useTaskStore((state) => state.removeTask);
 
   async function handleTaskRemove() {
@@ -71,6 +73,18 @@ export function Card({
       router.refresh();
     } finally {
       setIsToggling(false);
+    }
+  }
+
+  async function handleMarkStarted() {
+    if (isStarting) return;
+    setIsStarting(true);
+
+    try {
+      await markTaskStartedAction({ id: task.id });
+      router.refresh();
+    } finally {
+      setIsStarting(false);
     }
   }
 
@@ -106,6 +120,18 @@ export function Card({
           </div>
 
           <div className={styles.headerActions}>
+            {!task.completed && !task.startedAt && (
+              <Button.Preset
+                icon={{ name: "FaPlay" }}
+                root={{
+                  tone: "highlight",
+                  "aria-label": `Começar tarefa ${task.title}`,
+                  loading: isStarting,
+                  onClick: handleMarkStarted,
+                }}
+              />
+            )}
+
             {!task.isSharedWithMe && (
               <Button.Preset
                 icon={{ name: "FaTrash" }}
@@ -152,6 +178,13 @@ export function Card({
                   size={12}
                   color="var(--color-text-muted)"
                 />
+              )}
+
+              {task.startedAt && !task.completed && (
+                <span className={styles.startedBadge}>
+                  <Icon name="FaPlay" aria-hidden="true" size={10} />
+                  Em andamento
+                </span>
               )}
             </div>
 

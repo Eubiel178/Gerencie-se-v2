@@ -20,6 +20,7 @@ export namespace UpdateTask {
     | "googleEventUpdatedAt"
     | "completed"
     | "completedAt"
+    | "startedAt"
     | "isSharedWithMe"
     | "ownerLabel"
   >;

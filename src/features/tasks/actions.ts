@@ -7,6 +7,7 @@ import { getTaskFetcher } from "@/features/tasks/data/get-task-fetcher";
 
 import { requireUserId } from "@/lib/require-user-id";
 import { deleteCalendarEventForTask } from "@/lib/google-calendar";
+import { getMascotFetcher } from "@/features/focus/data/get-focus-fetcher";
 
 import { syncTaskToGoogle } from "./sync";
 
@@ -174,6 +175,32 @@ export async function toggleTaskCompleteAction(
     return { error: null, completed: result.completed };
   } catch {
     return { error: "Não foi possível atualizar a tarefa. Tente novamente." };
+  }
+}
+
+/**
+ * "Começar também conta": marca a tarefa como iniciada e, se essa foi a
+ * primeira vez (`xpEarned > 0`), soma o XP ao mascote — mesma
+ * orquestração de `completeFocusSessionAction` em `features/focus`
+ * (repositório só mexe na própria entidade, a soma de XP acontece aqui).
+ */
+export async function markTaskStartedAction(
+  params: domain.MarkTaskStarted.Params
+): Promise<ActionResult> {
+  try {
+    const repo = getTaskFetcher();
+    const result = await repo.markStarted(params);
+
+    if (result.xpEarned > 0) {
+      await getMascotFetcher().addXp(result.xpEarned);
+    }
+
+    revalidatePath("/home");
+    revalidatePath("/home/tasks");
+
+    return { error: null };
+  } catch {
+    return { error: "Não foi possível marcar a tarefa como iniciada. Tente novamente." };
   }
 }
 
