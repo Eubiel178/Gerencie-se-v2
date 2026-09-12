@@ -4,7 +4,8 @@ import { Header } from "@/components";
 import { Assistant } from "@/features/assistant";
 import { TaskReminders } from "@/features/tasks/components/reminder-scheduler";
 import { CommandPalette } from "@/features/search/components/command-palette";
-import { MascotPet } from "@/features/mascot-pet";
+import { MascotPet, characterIdForSpecies } from "@/features/mascot-pet";
+import { getMascotFetcher } from "@/features/focus/data/get-focus-fetcher";
 import { getProfileOverview } from "@/features/profile/get-profile-overview";
 import { getGender } from "@/features/profile/get-gender";
 import styles from "./home-layout.module.css";
@@ -17,7 +18,13 @@ import styles from "./home-layout.module.css";
 export const dynamic = "force-dynamic";
 
 const HomeLayout = async ({ children }: { children: React.ReactNode }) => {
-  const [session, overview, gender] = await Promise.all([auth(), getProfileOverview(), getGender()]);
+  const [session, overview, gender, mascot] = await Promise.all([
+    auth(),
+    getProfileOverview(),
+    getGender(),
+    getMascotFetcher().getMascot(),
+  ]);
+  const mascotCharacterId = characterIdForSpecies(mascot.species);
 
   return (
     <div className={styles.shell}>
@@ -36,7 +43,7 @@ const HomeLayout = async ({ children }: { children: React.ReactNode }) => {
       <Assistant />
       <TaskReminders />
       <CommandPalette />
-      <MascotPet />
+      <MascotPet characterId={mascotCharacterId} />
     </div>
   );
 };

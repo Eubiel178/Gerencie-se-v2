@@ -7,6 +7,15 @@ import { MascotRuntime } from "@/features/mascot-pet/engine/runtime";
 
 import styles from "./mascot-pet.module.css";
 
+interface MascotPetProps {
+  /** Id de personagem (ver `MASCOT_CHARACTERS`) - normalmente calculado a
+   * partir da espécie escolhida em Configurações via
+   * `characterIdForSpecies`. `undefined`/id desconhecido cai no padrão;
+   * `null` explícito não renderiza nada (espécie escolhida ainda sem
+   * atlas próprio). */
+  characterId?: string | null;
+}
+
 /**
  * Bichinho de estimação 2D (PixiJS) que anda livremente pela tela,
  * sobreposto à interface - ver `engine/runtime.ts` pro motor real
@@ -15,15 +24,15 @@ import styles from "./mascot-pet.module.css";
  * runtime e nunca deve aparecer mais de uma vez na árvore (garantido
  * hoje por ser renderizado uma única vez em `src/app/home/layout.tsx`).
  */
-export function MascotPet() {
-  const containerRef = useRef<HTMLDivElement>(null);
+export function MascotPet({ characterId }: MascotPetProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const resolvedId = characterId === null ? null : (characterId ?? DEFAULT_MASCOT_CHARACTER_ID);
+  const character = resolvedId ? MASCOT_CHARACTERS[resolvedId] : undefined;
 
   useEffect(() => {
     const wrapper = wrapperRef.current;
-    if (!wrapper) return;
+    if (!wrapper || !character) return;
 
-    const character = MASCOT_CHARACTERS[DEFAULT_MASCOT_CHARACTER_ID];
     const runtime = new MascotRuntime({ wrapper }, character);
     let cancelled = false;
 
@@ -35,10 +44,15 @@ export function MascotPet() {
       cancelled = true;
       runtime.destroy();
     };
-  }, []);
+    // Reexecuta (destrói e remonta com o novo bicho) quando a espécie
+    // escolhida em Configurações muda - `character` já é a referência
+    // certa pro id atual.
+  }, [character]);
+
+  if (!character) return null;
 
   return (
-    <div ref={containerRef} className={styles.stage} aria-hidden="true">
+    <div className={styles.stage} aria-hidden="true">
       <div ref={wrapperRef} className={styles.wrapper} />
     </div>
   );

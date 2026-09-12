@@ -1,8 +1,9 @@
 Mascote flutuante (PixiJS) - créditos de asset
 
-Personagem: gato ("cat.png", atlas gerado localmente a partir do pack
-abaixo - ver src/features/mascot-pet/domain/cat-frames.json pros
-retângulos de recorte de cada frame).
+Personagens: gato ("cat.png") e cachorro ("dog.png") - atlas de cada um
+gerado localmente a partir do pack abaixo (pasta "cat" e pasta "dog" do
+mesmo CatnDog.zip) - ver src/features/mascot-pet/domain/cat-frames.json
+e dog-frames.json pros retângulos de recorte de cada frame.
 
 Fonte: "Cat & Dog - Free Sprites" (arquivo CatnDog.zip)
 Autor: pzUH
@@ -12,7 +13,8 @@ por transparência/rastreabilidade do asset original).
 
 Nenhum dos 8 estados do pack original (Idle, Walk, Run, Jump, Hurt,
 Slide, Fall, Dead) chama-se "sleep", "happy" ou "celebrate" - o mapeamento
-usado (ver MASCOT_CHARACTERS em domain/characters.ts) é:
+usado (ver MASCOT_CHARACTERS em domain/characters.ts, mesmo mapeamento
+pros dois personagens) é:
 
   idle        -> Idle
   walk        -> Walk
@@ -25,7 +27,7 @@ usado (ver MASCOT_CHARACTERS em domain/characters.ts) é:
                           evitado de propósito)
   interaction -> Slide  (pose de "escorregada" alegre, usada na reação ao clique)
 
-Pra trocar de personagem (dog/giraffe/rabbit) no futuro: gerar um atlas
-equivalente (mesmo esquema de nomes "<Estado>_<índice>") e adicionar uma
-entrada nova em MASCOT_CHARACTERS - o motor de movimento/comportamento
-não depende do gato especificamente.
+Pra adicionar mais personagens (ex.: coelho/galinha) no futuro: gerar um
+atlas equivalente (mesmo esquema de nomes "<Estado>_<índice>") e
+adicionar uma entrada nova em MASCOT_CHARACTERS - o motor de
+movimento/comportamento não depende de nenhum bicho específico.

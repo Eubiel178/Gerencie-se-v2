@@ -4,6 +4,14 @@
   padding: var(--space-3) 0;
 }
 
+.roamHint {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
 .formError {
   margin: 0;
   font-family: var(--font-sans);

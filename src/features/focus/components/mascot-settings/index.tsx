@@ -19,6 +19,7 @@ import {
   breedsForSpecies,
 } from "@/features/focus/domain";
 import { MascotSprite } from "@/features/focus/components/mascot-sprite";
+import { characterIdForSpecies } from "@/features/mascot-pet";
 
 import styles from "./mascot-settings.module.css";
 
@@ -76,6 +77,7 @@ export function MascotSettings({ mascot }: { mascot: IMascotState }) {
 
   const previewSpecies = watch("species");
   const previewBreed = watch("breed");
+  const roamsFreely = characterIdForSpecies(previewSpecies) !== null;
   const breedOptions = breedsForSpecies(previewSpecies).map((breed) => ({
     label: BREED_LABEL[breed as MascotBreed] ?? breed,
     value: breed,
@@ -111,6 +113,12 @@ export function MascotSettings({ mascot }: { mascot: IMascotState }) {
       <div className={styles.preview}>
         <MascotSprite species={previewSpecies} breed={previewBreed} mood="idle" />
       </div>
+
+      <p className={styles.roamHint}>
+        {roamsFreely
+          ? "Esse bicho também anda solto pela tela, fora do assistente."
+          : "Por enquanto esse bicho só aparece aqui e no assistente — ainda não anda solto pela tela."}
+      </p>
 
       <Form.Wrapper>
         <Input.Root sharedProps={{ error: errors.name?.message }}>
