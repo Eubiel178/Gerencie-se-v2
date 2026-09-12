@@ -40,6 +40,7 @@ function buildStats(tasks: ITask[], habits: IHabit[], goals: IGoal[]): Achieveme
 
   return {
     tasksCompletedTotal: completedTasks.length,
+    tasksStartedTotal: tasks.filter((task) => task.startedAt).length,
     habitsCreatedTotal: habits.length,
     bestHabitStreak: calculateBestHabitStreak(habits),
     goalsCompletedTotal: goals.filter((goal) => goal.progressPercent >= 100).length,

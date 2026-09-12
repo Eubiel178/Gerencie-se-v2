@@ -4,6 +4,10 @@ import { IconName } from "@/components/icon";
 
 export interface AchievementStats {
   tasksCompletedTotal: number;
+  // "Começar também conta" (Modo Assistido): total histórico de tarefas
+  // que já foram iniciadas ao menos uma vez, concluídas ou não — ver
+  // `ITask.startedAt`.
+  tasksStartedTotal: number;
   habitsCreatedTotal: number;
   bestHabitStreak: number;
   goalsCompletedTotal: number;
@@ -42,6 +46,20 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
     description: "Concluiu 100 tarefas.",
     icon: "FaTrophy",
     isUnlocked: (stats) => stats.tasksCompletedTotal >= 100,
+  },
+  {
+    id: "first-start",
+    name: "Deu o start",
+    description: "Começou uma tarefa (terminar depois é só bônus).",
+    icon: "FaPlay",
+    isUnlocked: (stats) => stats.tasksStartedTotal >= 1,
+  },
+  {
+    id: "five-starts",
+    name: "No embalo",
+    description: "Começou 5 tarefas.",
+    icon: "FaPlay",
+    isUnlocked: (stats) => stats.tasksStartedTotal >= 5,
   },
   {
     id: "first-habit",
