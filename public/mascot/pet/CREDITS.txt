@@ -1,0 +1,31 @@
+Mascote flutuante (PixiJS) - créditos de asset
+
+Personagem: gato ("cat.png", atlas gerado localmente a partir do pack
+abaixo - ver src/features/mascot-pet/domain/cat-frames.json pros
+retângulos de recorte de cada frame).
+
+Fonte: "Cat & Dog - Free Sprites" (arquivo CatnDog.zip)
+Autor: pzUH
+Licença: CC0 (Domínio Público) - https://opengameart.org/content/cat-dog-free-sprites
+Uso comercial permitido, sem exigência de atribuição (creditado aqui só
+por transparência/rastreabilidade do asset original).
+
+Nenhum dos 8 estados do pack original (Idle, Walk, Run, Jump, Hurt,
+Slide, Fall, Dead) chama-se "sleep", "happy" ou "celebrate" - o mapeamento
+usado (ver MASCOT_CHARACTERS em domain/characters.ts) é:
+
+  idle        -> Idle
+  walk        -> Walk
+  run         -> Run
+  happy       -> Jump   (pose alegre, olhos fechados, língua de fora)
+  celebrate   -> Jump   (mesma pose de "happy", reaproveitada)
+  sad         -> Hurt   (olhos em X, lágrimas)
+  sleep       -> Idle   (reaproveitado; "Dead" também existe no pack mas
+                          fica com cara de desmaiado, não de dormindo -
+                          evitado de propósito)
+  interaction -> Slide  (pose de "escorregada" alegre, usada na reação ao clique)
+
+Pra trocar de personagem (dog/giraffe/rabbit) no futuro: gerar um atlas
+equivalente (mesmo esquema de nomes "<Estado>_<índice>") e adicionar uma
+entrada nova em MASCOT_CHARACTERS - o motor de movimento/comportamento
+não depende do gato especificamente.

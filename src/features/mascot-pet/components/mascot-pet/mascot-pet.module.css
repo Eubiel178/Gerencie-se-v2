@@ -1,0 +1,18 @@
+/* Cobre a área visível pra servir de referência de posicionamento fixo,
+   mas nunca captura clique - só o `.wrapper` (do tamanho do bichinho)
+   pode (regra 10: não bloquear cliques no resto da aplicação). */
+.stage {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: auto;
+  will-change: transform;
+}

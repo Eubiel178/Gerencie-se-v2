@@ -4,6 +4,7 @@ import { Header } from "@/components";
 import { Assistant } from "@/features/assistant";
 import { TaskReminders } from "@/features/tasks/components/reminder-scheduler";
 import { CommandPalette } from "@/features/search/components/command-palette";
+import { MascotPet } from "@/features/mascot-pet";
 import { getProfileOverview } from "@/features/profile/get-profile-overview";
 import { getGender } from "@/features/profile/get-gender";
 import styles from "./home-layout.module.css";
@@ -35,6 +36,7 @@ const HomeLayout = async ({ children }: { children: React.ReactNode }) => {
       <Assistant />
       <TaskReminders />
       <CommandPalette />
+      <MascotPet />
     </div>
   );
 };
