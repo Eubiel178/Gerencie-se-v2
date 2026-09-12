@@ -21,6 +21,10 @@
   background: var(--color-danger);
   color: var(--color-on-danger);
 }
+.card[data-kind="resumed"] {
+  background: var(--color-success);
+  color: var(--color-on-success);
+}
 .card[data-kind="none"] {
   background: var(--color-surface-elevated);
   color: var(--color-text);

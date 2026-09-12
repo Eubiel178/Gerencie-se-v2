@@ -5,6 +5,7 @@ import { INextAction } from "@/features/dashboard/next-action";
 import styles from "./next-action.module.css";
 
 const KIND_LABEL: Record<INextAction["kind"], string> = {
+  resumed: "Continuar de onde parou",
   overdue: "Atrasada",
   scheduled: "Próxima tarefa",
   routine: "Próximo da rotina",

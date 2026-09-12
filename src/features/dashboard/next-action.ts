@@ -4,7 +4,7 @@ import { ITask } from "@/features/tasks/domain";
 import { IRoutineItem } from "@/features/routine/domain";
 import { IHabit } from "@/features/habits/domain";
 
-export type NextActionKind = "overdue" | "scheduled" | "routine" | "priority" | "habit" | "none";
+export type NextActionKind = "resumed" | "overdue" | "scheduled" | "routine" | "priority" | "habit" | "none";
 
 export interface INextAction {
   kind: NextActionKind;
@@ -35,6 +35,23 @@ export function buildNextAction(params: {
 }): INextAction {
   const now = dayjs(params.now ?? new Date());
   const pendingTasks = params.tasks.filter((task) => !task.completed);
+
+  // Retomar uma tarefa já começada vem antes de tudo: voltar de uma
+  // interrupção custa caro (reengajar contexto), então evitamos mandar a
+  // pessoa pra outra coisa antes de oferecer continuar o que já estava
+  // em andamento.
+  const resumedTask = pendingTasks
+    .filter((task) => task.startedAt)
+    .sort((a, b) => dayjs(b.startedAt).valueOf() - dayjs(a.startedAt).valueOf())[0];
+
+  if (resumedTask) {
+    return {
+      kind: "resumed",
+      label: "Continuar de onde parou",
+      title: resumedTask.title,
+      href: "/home/tasks",
+    };
+  }
 
   const overdue = pendingTasks
     .filter((task) => task.scheduledAt && dayjs(task.scheduledAt).isBefore(now))
