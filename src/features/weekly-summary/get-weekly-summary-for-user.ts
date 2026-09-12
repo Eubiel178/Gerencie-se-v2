@@ -54,7 +54,12 @@ export async function getWeeklySummaryForUser(userId: string): Promise<WeeklySum
 
   const [taskRows, focusRows, habitRows, goalRows, runningRows, mascotRows] = await Promise.all([
     db
-      .select({ completed: tasks.completed, completedAt: tasks.completedAt, scheduledAt: tasks.scheduledAt })
+      .select({
+        completed: tasks.completed,
+        completedAt: tasks.completedAt,
+        scheduledAt: tasks.scheduledAt,
+        startedAt: tasks.startedAt,
+      })
       .from(tasks)
       .where(eq(tasks.userId, userId)),
     db

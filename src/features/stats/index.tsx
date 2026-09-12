@@ -95,6 +95,11 @@ export async function Stats() {
           <p className={styles.bigNumber}>{taskStats.completionRate}%</p>
         </Card>
 
+        <Card title="Taxa de início">
+          <p className={styles.bigNumber}>{taskStats.startRate}%</p>
+          <p className={styles.hint}>% de tarefas ao menos começadas — começar já conta.</p>
+        </Card>
+
         <Card title="Horas de foco (7 dias)">
           <p className={styles.bigNumber}>{focusHours}h</p>
           <FocusWeeksChart sessions={focusHistoryForChart} fetchedWeeksBack={WEEKS_BACK} />

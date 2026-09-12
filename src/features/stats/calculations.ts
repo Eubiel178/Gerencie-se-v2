@@ -11,6 +11,11 @@ export interface TaskStats {
   completedThisWeek: number;
   overdueCount: number;
   completionRate: number;
+  // "Começar também conta" (Modo Assistido): % de tarefas que ao menos
+  // foram iniciadas (marcadas com `startedAt`) ou concluídas direto —
+  // concluir sem ter clicado em "Começar" antes também conta como tendo
+  // começado. Métrica pensada pra valorizar iniciativa, não só término.
+  startRate: number;
 }
 
 /** Cada número aqui responde uma pergunta específica (nunca decorativo,
@@ -19,7 +24,7 @@ export interface TaskStats {
  * mínimo (não `ITask[]` inteiro) pra também funcionar com a consulta
  * direta do resumo semanal por e-mail, que só busca essas 3 colunas. */
 export function calculateTaskStats(
-  tasks: Pick<ITask, "completed" | "completedAt" | "scheduledAt">[],
+  tasks: Pick<ITask, "completed" | "completedAt" | "scheduledAt" | "startedAt">[],
   now: Dayjs = dayjs()
 ): TaskStats {
   const weekStart = now.subtract(STATS_WINDOW_DAYS, "day");
@@ -35,7 +40,10 @@ export function calculateTaskStats(
   const completedTotal = tasks.filter((task) => task.completed).length;
   const completionRate = tasks.length === 0 ? 0 : Math.round((completedTotal / tasks.length) * 100);
 
-  return { completedThisWeek, overdueCount, completionRate };
+  const startedTotal = tasks.filter((task) => task.startedAt || task.completed).length;
+  const startRate = tasks.length === 0 ? 0 : Math.round((startedTotal / tasks.length) * 100);
+
+  return { completedThisWeek, overdueCount, completionRate, startRate };
 }
 
 /** Soma só sessões CONCLUÍDAS (nunca canceladas) dos últimos 7 dias,

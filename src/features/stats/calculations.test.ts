@@ -50,11 +50,24 @@ test("calculateTaskStats: conta concluídas na semana, atrasadas e taxa geral", 
   assert.equal(stats.completionRate, 50); // 2 de 4 concluídas (todas, não só a semana)
 });
 
+test("calculateTaskStats: taxa de inicio conta iniciada OU concluida", () => {
+  const tasks = [
+    task({ completed: true }), // concluida sem ter marcado "comecar" -- conta como iniciada
+    task({ completed: false, startedAt: NOW.toDate() }), // marcada como iniciada
+    task({ completed: false }), // nem iniciada nem concluida
+    task({ completed: false }), // nem iniciada nem concluida
+  ];
+
+  const stats = calculateTaskStats(tasks, NOW);
+  assert.equal(stats.startRate, 50); // 2 de 4
+});
+
 test("calculateTaskStats: sem tarefas, tudo zerado (sem divisão por zero)", () => {
   assert.deepEqual(calculateTaskStats([], NOW), {
     completedThisWeek: 0,
     overdueCount: 0,
     completionRate: 0,
+    startRate: 0,
   });
 });
 
