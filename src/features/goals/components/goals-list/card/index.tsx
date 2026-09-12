@@ -16,8 +16,10 @@ import {
 import { EditGoal } from "../../modal";
 import { PRIORITY_LABELS } from "../../modal/interfaces";
 
-import { IGoal } from "@/features/goals/domain";
+import { IGoal, calculateGoalProgress } from "@/features/goals/domain";
 import { LoadAcceptedConnections } from "@/features/connections/domain";
+
+import { emitMascotEvent } from "@/features/mascot-pet";
 
 import styles from "../../../goals.module.css";
 
@@ -51,7 +53,23 @@ export function Card({ goal, connections }: CardProps) {
 
     setBusyStepId(stepId);
     try {
-      await updateGoalStepAction({ id: stepId, completed });
+      const result = await updateGoalStepAction({ id: stepId, completed });
+
+      if (result.error) {
+        emitMascotEvent("action-error");
+      } else {
+        // Progresso é sempre calculado (nunca guardado - ver progress.ts),
+        // então prevemos aqui o valor pós-toggle com os mesmos dados já
+        // carregados, sem esperar o `router.refresh()` pra saber se
+        // acabou de bater 100%.
+        const stepsAfterToggle = goal.steps.map((step) =>
+          step.id === stepId ? { ...step, completed } : step
+        );
+        const wasComplete = goal.progressPercent >= 100;
+        const isNowComplete = calculateGoalProgress(stepsAfterToggle) >= 100;
+        if (isNowComplete && !wasComplete) emitMascotEvent("goal-completed");
+      }
+
       router.refresh();
     } finally {
       setBusyStepId(null);

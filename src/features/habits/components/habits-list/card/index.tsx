@@ -19,6 +19,8 @@ import { IHabit } from "@/features/habits/domain";
 import { LoadAcceptedConnections } from "@/features/connections/domain";
 import { GoalOption } from "../../modal/interfaces";
 
+import { emitMascotEvent } from "@/features/mascot-pet";
+
 import styles from "../../../habits.module.css";
 
 interface CardProps {
@@ -55,7 +57,12 @@ export function Card({
     setIsToggling(true);
 
     try {
-      await toggleHabitLogAction({ habitId: habit.id, date: today });
+      const result = await toggleHabitLogAction({ habitId: habit.id, date: today });
+      if (result.error) {
+        emitMascotEvent("action-error");
+      } else if (result.completed) {
+        emitMascotEvent("habit-completed");
+      }
       router.refresh();
     } finally {
       setIsToggling(false);

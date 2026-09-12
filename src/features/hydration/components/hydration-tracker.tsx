@@ -13,6 +13,8 @@ import {
 } from "@/features/hydration/actions";
 import { IHydrationDay, IHydrationSummary } from "@/features/hydration/domain";
 
+import { emitMascotEvent } from "@/features/mascot-pet";
+
 import styles from "../hydration.module.css";
 
 const QUICK_AMOUNTS = [200, 300, 500];
@@ -40,9 +42,11 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
       const result = await logWaterAction({ amountMl });
       if (result.error) {
         setActionError(result.error);
+        emitMascotEvent("action-error");
         return;
       }
 
+      emitMascotEvent("hydration-logged");
       router.refresh();
     } finally {
       setIsBusy(false);

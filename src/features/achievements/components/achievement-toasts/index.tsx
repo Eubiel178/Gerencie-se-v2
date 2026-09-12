@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 
 import { useToast } from "@/providers/toast-context";
 import { AchievementView } from "@/features/achievements/get-achievements-status";
+import { emitMascotEvent } from "@/features/mascot-pet";
 
 /** Dispara um toast pra cada conquista que acabou de ser desbloqueada
  * nesta carga do Dashboard. `hasFiredRef` evita disparar de novo num
@@ -19,6 +20,7 @@ export function AchievementToasts({ items }: { items: AchievementView[] }) {
     for (const achievement of items) {
       showToast(`🏆 Conquista desbloqueada: ${achievement.name}`);
     }
+    emitMascotEvent("achievement-unlocked");
   }, [items, showToast]);
 
   return null;

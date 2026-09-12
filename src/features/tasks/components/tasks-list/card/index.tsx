@@ -23,6 +23,7 @@ import { LoadAcceptedConnections } from "@/features/connections/domain";
 
 import styles from "../../../home-dashboard.module.css";
 import { useTaskStore } from "@/features/tasks/task-store";
+import { emitMascotEvent } from "@/features/mascot-pet";
 
 const HIGH_PRIORITY_BADGE_CLASS = {
   critica: "priorityBadgeError",
@@ -69,7 +70,12 @@ export function Card({
     setIsToggling(true);
 
     try {
-      await toggleTaskCompleteAction({ id: task.id });
+      const result = await toggleTaskCompleteAction({ id: task.id });
+      if (result.error) {
+        emitMascotEvent("action-error");
+      } else if (result.completed) {
+        emitMascotEvent("task-completed");
+      }
       router.refresh();
     } finally {
       setIsToggling(false);
