@@ -14,5 +14,8 @@
   top: 0;
   left: 0;
   pointer-events: auto;
+  /* Sem isso, iniciar o arraste num touchscreen também rolaria a página
+     por baixo do dedo. */
+  touch-action: none;
   will-change: transform;
 }

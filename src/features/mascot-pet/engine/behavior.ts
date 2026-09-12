@@ -21,7 +21,7 @@ const RUN_CHANCE = 0.3;
 // do usuário (essa não foi pedida - ver domain/events.ts).
 const SLEEP_CHANCE = 0.12;
 
-const IDLE_DURATION_RANGE_MS: [number, number] = [2500, 5000];
+const IDLE_DURATION_RANGE_MS: [number, number] = [1500, 3500];
 const SLEEP_DURATION_RANGE_MS: [number, number] = [3000, 5500];
 
 const REACTIVE_DURATION_MS: Record<Exclude<ReactiveState, "sleep">, number> = {
@@ -34,6 +34,7 @@ const REACTIVE_DURATION_MS: Record<Exclude<ReactiveState, "sleep">, number> = {
 const EVENT_REACTION: Record<MascotEventType, ReactiveState> = {
   "task-completed": "celebrate",
   "goal-completed": "celebrate",
+  "habit-completed": "happy",
   "achievement-unlocked": "celebrate",
   "hydration-logged": "happy",
   "action-error": "sad",
@@ -64,6 +65,7 @@ export class MascotBehavior {
   private facingLeft = false;
   private stateTimerMs = randomBetween(IDLE_DURATION_RANGE_MS);
   private reducedMotion = false;
+  private dragging = false;
 
   constructor(initialPosition: MascotVector2) {
     this.position = initialPosition;
@@ -91,7 +93,30 @@ export class MascotBehavior {
     this.enterReactive(EVENT_REACTION[type]);
   }
 
+  /** Pega o bichinho pra arrastar - suspende o passeio autônomo até soltar. */
+  startDrag(): void {
+    this.dragging = true;
+    this.state = "interaction";
+  }
+
+  /** Chamado a cada movimento do ponteiro enquanto arrasta - `position`
+   * já vem em coordenadas de tela (mesmo espaço usado pelo resto do
+   * motor), só precisa ficar dentro dos limites atuais. */
+  updateDragPosition(position: MascotVector2, bounds: MascotBounds): void {
+    this.position = clampToBounds(position, bounds);
+  }
+
+  /** Solta o bichinho - o passeio autônomo recomeça a partir de onde foi
+   * largado (nunca "salta" de volta pra um alvo antigo). */
+  endDrag(): void {
+    this.dragging = false;
+    this.target = this.position;
+    this.goIdle();
+  }
+
   tick(deltaMs: number, bounds: MascotBounds): void {
+    if (this.dragging) return;
+
     switch (this.state) {
       case "idle": {
         this.stateTimerMs -= deltaMs;

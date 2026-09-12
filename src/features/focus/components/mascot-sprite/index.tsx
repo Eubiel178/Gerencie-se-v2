@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { Lottie } from "lottie-react";
 
+import { Icon, IconName } from "@/components/icon";
 import { MascotBreed, MascotEvent, MascotSpecies } from "@/features/focus/domain";
 
 import styles from "./mascot-sprite.module.css";
@@ -13,6 +14,16 @@ const SPECIES_LABEL: Record<MascotSpecies, string> = {
   cachorro: "Cachorro",
   coelho: "Coelho",
   galinha: "Galinha",
+};
+
+// Ícone de emergência: se nem o Lottie nem o sprite estático (PNG/GIF em
+// public/mascot/) existirem - ex.: alguém apagou os arquivos - mostra
+// isso em vez de deixar o navegador exibir um ícone de imagem quebrada.
+const SPECIES_FALLBACK_ICON: Record<MascotSpecies, IconName> = {
+  gato: "FaCat",
+  cachorro: "FaDog",
+  coelho: "MdCrueltyFree",
+  galinha: "FaKiwiBird",
 };
 
 // Sprites pequenos/em pixel art (ver public/mascot/CREDITS.txt) —
@@ -61,6 +72,15 @@ interface MascotBodyContentProps {
  * estado (o que o React Compiler já rejeita como anti-padrão). */
 function MascotBodyContent({ species, breed, size }: MascotBodyContentProps) {
   const [lottieFailed, setLottieFailed] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
+
+  if (lottieFailed && imageFailed) {
+    return (
+      <div className={styles.fallbackIcon} data-size={size}>
+        <Icon name={SPECIES_FALLBACK_ICON[species]} aria-label={SPECIES_LABEL[species]} />
+      </div>
+    );
+  }
 
   if (lottieFailed) {
     return (
@@ -72,6 +92,7 @@ function MascotBodyContent({ species, breed, size }: MascotBodyContentProps) {
         unoptimized={species === "galinha"}
         className={`${styles.image} ${PIXELATED_SPECIES.has(species) ? styles.pixelated : ""}`}
         priority={size === "lg"}
+        onError={() => setImageFailed(true)}
       />
     );
   }

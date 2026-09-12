@@ -46,8 +46,53 @@ test("MascotBehavior: evento externo mapeia pro estado reativo certo", () => {
   behavior.handleEvent("task-completed");
   assert.equal(behavior.snapshot().state, "celebrate");
 
+  behavior.handleEvent("goal-completed");
+  assert.equal(behavior.snapshot().state, "celebrate");
+
+  behavior.handleEvent("habit-completed");
+  assert.equal(behavior.snapshot().state, "happy");
+
+  behavior.handleEvent("achievement-unlocked");
+  assert.equal(behavior.snapshot().state, "celebrate");
+
+  behavior.handleEvent("hydration-logged");
+  assert.equal(behavior.snapshot().state, "happy");
+
   behavior.handleEvent("action-error");
   assert.equal(behavior.snapshot().state, "sad");
+
+  behavior.handleEvent("user-idle");
+  assert.equal(behavior.snapshot().state, "sleep");
+});
+
+test("MascotBehavior: arrastar suspende o passeio autônomo e move só via updateDragPosition", () => {
+  const behavior = new MascotBehavior({ x: 100, y: 100 });
+
+  behavior.startDrag();
+  assert.equal(behavior.snapshot().state, "interaction");
+
+  // Mesmo com um deltaMs enorme, nada muda sozinho enquanto arrasta.
+  behavior.tick(10_000, BOUNDS);
+  assert.deepEqual(behavior.snapshot().position, { x: 100, y: 100 });
+  assert.equal(behavior.snapshot().state, "interaction");
+
+  behavior.updateDragPosition({ x: 150, y: 120 }, BOUNDS);
+  assert.deepEqual(behavior.snapshot().position, { x: 150, y: 120 });
+
+  behavior.endDrag();
+  assert.equal(behavior.snapshot().state, "idle");
+  assert.deepEqual(behavior.snapshot().position, { x: 150, y: 120 });
+});
+
+test("MascotBehavior: updateDragPosition nunca solta o bichinho fora dos limites", () => {
+  const behavior = new MascotBehavior({ x: 100, y: 100 });
+
+  behavior.startDrag();
+  behavior.updateDragPosition({ x: 9999, y: -500 }, BOUNDS);
+
+  const snapshot = behavior.snapshot();
+  assert.ok(snapshot.position.x <= BOUNDS.maxX);
+  assert.ok(snapshot.position.y >= BOUNDS.minY);
 });
 
 test("MascotBehavior: com reduced motion, nunca sai do idle sozinho (só reage a clique/evento)", () => {

@@ -1,9 +1,10 @@
 import { AnimatedSprite, Application, Assets, Rectangle, Texture, Ticker } from "pixi.js";
 
 import { MascotCharacter, MascotStateName, MascotVector2 } from "../domain/types";
-import { subscribeMascotEvent } from "../domain/events";
+import { emitMascotEvent, subscribeMascotEvent } from "../domain/events";
 
 import { MascotBehavior } from "./behavior";
+import { watchUserIdle } from "./idle-watcher";
 import { MascotBounds } from "./movement";
 import { computeViewportBounds, isMobileViewport } from "./viewport-bounds";
 
@@ -37,6 +38,14 @@ export class MascotRuntime {
   private currentRenderedState: MascotStateName | null = null;
   private destroyed = false;
   private unsubscribeEvent: (() => void) | null = null;
+  private unsubscribeIdleWatch: (() => void) | null = null;
+
+  // Arraste: guarda onde o ponteiro começou e onde o bichinho estava
+  // naquele instante, pra sempre calcular a nova posição por delta (nunca
+  // "teleporta" pro ponto exato do cursor).
+  private dragPointerId: number | null = null;
+  private dragStartClient: MascotVector2 = { x: 0, y: 0 };
+  private dragStartPosition: MascotVector2 = { x: 0, y: 0 };
 
   constructor(handles: MascotRuntimeHandles, character: MascotCharacter) {
     this.character = character;
@@ -103,17 +112,25 @@ export class MascotRuntime {
     sprite.anchor.set(0.5, 0.5);
     sprite.x = this.character.frameWidth / 2;
     sprite.y = this.character.frameHeight / 2;
-    sprite.eventMode = "static";
-    sprite.cursor = "pointer";
-    sprite.on("pointertap", () => this.behavior.handleClick());
 
     this.sprite = sprite;
     this.currentRenderedState = "idle";
     app.stage.addChild(sprite);
 
+    // Arraste/clique tratados via ponteiro nativo do DOM no `wrapper`
+    // (não pelos eventos federados do Pixi) - as coordenadas já nascem no
+    // mesmo espaço (tela) que o resto do motor usa, sem conversão.
+    this.wrapper.style.cursor = "grab";
+    this.wrapper.style.touchAction = "none";
+    this.wrapper.addEventListener("pointerdown", this.handlePointerDown);
+    this.wrapper.addEventListener("pointermove", this.handlePointerMove);
+    this.wrapper.addEventListener("pointerup", this.handlePointerUp);
+    this.wrapper.addEventListener("pointercancel", this.handlePointerUp);
+
     window.addEventListener("resize", this.handleResize);
     this.reducedMotionQuery.addEventListener("change", this.handleReducedMotionChange);
     this.unsubscribeEvent = subscribeMascotEvent((type) => this.behavior.handleEvent(type));
+    this.unsubscribeIdleWatch = watchUserIdle(() => emitMascotEvent("user-idle"));
 
     app.ticker.add(this.handleTick);
     this.positionWrapper(this.behavior.snapshot().position);
@@ -127,6 +144,13 @@ export class MascotRuntime {
     this.reducedMotionQuery.removeEventListener("change", this.handleReducedMotionChange);
     this.unsubscribeEvent?.();
     this.unsubscribeEvent = null;
+    this.unsubscribeIdleWatch?.();
+    this.unsubscribeIdleWatch = null;
+
+    this.wrapper.removeEventListener("pointerdown", this.handlePointerDown);
+    this.wrapper.removeEventListener("pointermove", this.handlePointerMove);
+    this.wrapper.removeEventListener("pointerup", this.handlePointerUp);
+    this.wrapper.removeEventListener("pointercancel", this.handlePointerUp);
 
     if (this.app) {
       this.app.ticker.remove(this.handleTick);
@@ -219,4 +243,36 @@ export class MascotRuntime {
   private positionWrapper(position: MascotVector2): void {
     this.wrapper.style.transform = `translate(${Math.round(position.x)}px, ${Math.round(position.y)}px)`;
   }
+
+  private handlePointerDown = (event: PointerEvent): void => {
+    if (this.dragPointerId !== null) return;
+
+    this.dragPointerId = event.pointerId;
+    this.dragStartClient = { x: event.clientX, y: event.clientY };
+    this.dragStartPosition = this.behavior.snapshot().position;
+    this.wrapper.setPointerCapture(event.pointerId);
+    this.wrapper.style.cursor = "grabbing";
+    this.behavior.startDrag();
+  };
+
+  private handlePointerMove = (event: PointerEvent): void => {
+    if (this.dragPointerId !== event.pointerId) return;
+
+    const nextPosition: MascotVector2 = {
+      x: this.dragStartPosition.x + (event.clientX - this.dragStartClient.x),
+      y: this.dragStartPosition.y + (event.clientY - this.dragStartClient.y),
+    };
+    this.behavior.updateDragPosition(nextPosition, this.bounds);
+  };
+
+  private handlePointerUp = (event: PointerEvent): void => {
+    if (this.dragPointerId !== event.pointerId) return;
+
+    this.dragPointerId = null;
+    if (this.wrapper.hasPointerCapture(event.pointerId)) {
+      this.wrapper.releasePointerCapture(event.pointerId);
+    }
+    this.wrapper.style.cursor = "grab";
+    this.behavior.endDrag();
+  };
 }
