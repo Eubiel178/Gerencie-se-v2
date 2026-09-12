@@ -64,6 +64,31 @@ export async function createTaskAction(
   }
 }
 
+/**
+ * "Despejo mental": captura rápida sem nenhuma decisão prévia (tag,
+ * prioridade, data) — só o texto. Nasce como uma tarefa comum com
+ * valores padrão neutros; refinar (categorizar, agendar, etc.) é uma
+ * ação separada e opcional depois, editando normalmente. A ideia é
+ * nunca deixar a fricção de "preencher o formulário inteiro" competir
+ * com o impulso de anotar algo antes que se perca.
+ */
+export async function quickCaptureTaskAction(rawTitle: string): Promise<ActionResult> {
+  const title = rawTitle.trim();
+
+  if (!title) {
+    return { error: "Digite alguma coisa antes de capturar." };
+  }
+
+  return createTaskAction({
+    tag: "other",
+    title,
+    description: "",
+    priority: "media",
+    recurrence: "none",
+    syncEnabled: false,
+  });
+}
+
 export async function updateTaskAction(
   data: domain.UpdateTask.Params
 ): Promise<ActionResult> {

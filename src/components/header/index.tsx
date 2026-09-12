@@ -12,6 +12,7 @@ import { ProfileModal } from "./profile-modal";
 import { ProfileOverview } from "@/features/profile/get-profile-overview";
 import { Gender } from "@/features/profile/get-gender";
 import { usePaletteStore } from "@/features/search/palette-store";
+import { QuickCapture } from "@/features/tasks/components/quick-capture";
 
 import styles from "@/app/home/home-layout.module.css";
 
@@ -178,6 +179,8 @@ export const Header = ({ user, overview }: HeaderProps) => {
         Buscar
         <span className={styles.searchShortcut}>Ctrl+K</span>
       </button>
+
+      <QuickCapture triggerClassName={styles.searchTrigger} />
 
       <nav aria-label="Navegação principal" className={styles.navGroups}>
         {navGroups.map((group, index) => {
