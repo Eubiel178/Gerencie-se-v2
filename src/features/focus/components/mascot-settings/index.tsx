@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,15 +11,8 @@ import { Form, Input, Button } from "@/components";
 import { useToast } from "@/providers/toast-context";
 
 import { updateMascotAction } from "@/features/focus/actions";
-import {
-  IMascotState,
-  MascotBreed,
-  MascotPersonality,
-  MascotSpecies,
-  breedsForSpecies,
-} from "@/features/focus/domain";
-import { MascotSprite } from "@/features/focus/components/mascot-sprite";
-import { characterIdForSpecies } from "@/features/mascot-pet";
+import { IMascotState, MascotPersonality, MascotSpecies } from "@/features/focus/domain";
+import { MascotPreview, characterIdForSpecies } from "@/features/mascot-pet";
 
 import styles from "./mascot-settings.module.css";
 
@@ -27,7 +20,6 @@ interface FormData {
   name: string;
   personality: MascotPersonality;
   species: MascotSpecies;
-  breed: MascotBreed;
 }
 
 const PERSONALITY_OPTIONS = [
@@ -41,17 +33,7 @@ const PERSONALITY_OPTIONS = [
 const SPECIES_OPTIONS = [
   { label: "Gato", value: "gato" },
   { label: "Cachorro", value: "cachorro" },
-  { label: "Coelho", value: "coelho" },
-  { label: "Galinha", value: "galinha" },
 ];
-
-const BREED_LABEL: Record<MascotBreed, string> = {
-  cinza: "Cinza",
-  laranja: "Laranja",
-  "vira-lata": "Vira-lata",
-  comum: "Comum",
-  preta: "Preta",
-};
 
 export function MascotSettings({ mascot }: { mascot: IMascotState }) {
   const router = useRouter();
@@ -62,7 +44,6 @@ export function MascotSettings({ mascot }: { mascot: IMascotState }) {
     handleSubmit,
     register,
     watch,
-    setValue,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     mode: "onChange",
@@ -71,28 +52,10 @@ export function MascotSettings({ mascot }: { mascot: IMascotState }) {
       name: mascot.name,
       personality: mascot.personality,
       species: mascot.species,
-      breed: mascot.breed,
     },
   });
 
   const previewSpecies = watch("species");
-  const previewBreed = watch("breed");
-  const roamsFreely = characterIdForSpecies(previewSpecies) !== null;
-  const breedOptions = breedsForSpecies(previewSpecies).map((breed) => ({
-    label: BREED_LABEL[breed as MascotBreed] ?? breed,
-    value: breed,
-  }));
-
-  // Troca de espécie pode deixar a raça atual inválida (ex.: "laranja"
-  // não existe pra coelho) — sempre que isso acontece, cai pra primeira
-  // raça válida da nova espécie em vez de deixar o formulário num estado
-  // inconsistente.
-  useEffect(() => {
-    const validBreeds = breedsForSpecies(previewSpecies);
-    if (!(validBreeds as readonly string[]).includes(previewBreed)) {
-      setValue("breed", validBreeds[0] as MascotBreed, { shouldValidate: true });
-    }
-  }, [previewSpecies, previewBreed, setValue]);
 
   async function handleFormSubmit(data: FormData) {
     setSubmitError(null);
@@ -111,14 +74,8 @@ export function MascotSettings({ mascot }: { mascot: IMascotState }) {
   return (
     <Form.Root onSubmit={handleSubmit(handleFormSubmit)} className={styles.form}>
       <div className={styles.preview}>
-        <MascotSprite species={previewSpecies} breed={previewBreed} mood="idle" />
+        <MascotPreview characterId={characterIdForSpecies(previewSpecies)} scale={1.3} />
       </div>
-
-      <p className={styles.roamHint}>
-        {roamsFreely
-          ? "Esse bicho também anda solto pela tela, fora do assistente."
-          : "Por enquanto esse bicho só aparece aqui e no assistente — ainda não anda solto pela tela."}
-      </p>
 
       <Form.Wrapper>
         <Input.Root sharedProps={{ error: errors.name?.message }}>
@@ -141,14 +98,6 @@ export function MascotSettings({ mascot }: { mascot: IMascotState }) {
           <Input.Label>Espécie</Input.Label>
           <Input.Wrapper>
             <Input.FieldSelect {...register("species")} optionsArray={SPECIES_OPTIONS} />
-          </Input.Wrapper>
-          <Input.HelperText />
-        </Input.Root>
-
-        <Input.Root sharedProps={{ error: errors.breed?.message }}>
-          <Input.Label>Raça</Input.Label>
-          <Input.Wrapper>
-            <Input.FieldSelect {...register("breed")} optionsArray={breedOptions} />
           </Input.Wrapper>
           <Input.HelperText />
         </Input.Root>

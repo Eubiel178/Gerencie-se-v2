@@ -9,7 +9,6 @@ import styles from "./focus.module.css";
 export * from "./domain";
 export * from "./actions";
 export { getFocusFetcher, getMascotFetcher } from "./data/get-focus-fetcher";
-export { MascotSprite } from "./components/mascot-sprite";
 export { MascotSettings } from "./components/mascot-settings";
 
 export async function Focus() {

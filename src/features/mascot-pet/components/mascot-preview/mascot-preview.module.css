@@ -1,0 +1,17 @@
+.stage {
+  position: relative;
+  overflow: hidden;
+}
+
+.crop {
+  position: relative;
+  overflow: hidden;
+  transform-origin: top left;
+}
+
+.atlas {
+  position: absolute;
+  max-width: none;
+  width: auto;
+  height: auto;
+}

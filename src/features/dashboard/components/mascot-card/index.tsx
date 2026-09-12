@@ -7,8 +7,6 @@ import styles from "./mascot-card.module.css";
 const SPECIES_EMOJI: Record<MascotSpecies, string> = {
   gato: "🐱",
   cachorro: "🐶",
-  coelho: "🐰",
-  galinha: "🐔",
 };
 
 export function MascotCard({ mascot }: { mascot: IMascotState }) {

@@ -6,8 +6,9 @@ import { Button } from "@/components";
 import { Icon } from "@/components/icon";
 
 import { IAssistantMessage } from "@/features/assistant/domain";
-import { IMascotState, MascotEvent } from "@/features/focus/domain";
-import { MascotSprite } from "@/features/focus/components/mascot-sprite";
+import { IMascotState } from "@/features/focus/domain";
+import { MascotPreview, characterIdForSpecies } from "@/features/mascot-pet";
+import { MascotStateName } from "@/features/mascot-pet/domain/types";
 import { useSpeak } from "@/lib/speak-text";
 
 import styles from "./widget.module.css";
@@ -21,9 +22,9 @@ function moodFor(message: IAssistantMessage | null): Mood {
   return "speaking";
 }
 
-// A criatura só tem 3 poses (não 4 como o widget) — "celebrating" usa a
-// pose feliz (ganha os brilhos), o resto fica na pose parada.
-function creatureMoodFor(mood: Mood): MascotEvent {
+// O avatar só tem 2 poses (não 4 como o widget) — "celebrating" usa a
+// pose feliz, o resto fica na pose parada.
+function creatureStateFor(mood: Mood): MascotStateName {
   return mood === "celebrating" ? "happy" : "idle";
 }
 
@@ -147,7 +148,11 @@ export function Widget({ initialMessage, reducedPresence, mascot }: WidgetProps)
         aria-expanded={isOpen}
         onClick={handleAvatarClick}
       >
-        <MascotSprite species={mascot.species} breed={mascot.breed} mood={creatureMoodFor(mood)} size="sm" />
+        <MascotPreview
+          characterId={characterIdForSpecies(mascot.species)}
+          state={creatureStateFor(mood)}
+          scale={0.3}
+        />
         {!isOpen && message && (
           <span className={styles.pingDot} aria-hidden="true" />
         )}

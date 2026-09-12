@@ -1,22 +1,7 @@
-// Catálogo de espécie + raça do mascote. Cada raça precisa ter um sprite
-// correspondente em public/mascot/<especie>-<raca>.(png|gif) — ver
-// public/mascot/CREDITS.txt pra origem/licença de cada imagem.
-export const MASCOT_BREEDS = {
-  gato: ["cinza", "laranja"],
-  cachorro: ["vira-lata"],
-  coelho: ["comum"],
-  galinha: ["preta"],
-} as const;
+// Espécies do mascote — cada uma precisa ter um personagem correspondente
+// no mascote que anda pela tela (ver src/features/mascot-pet/domain/
+// characters.ts e characterIdForSpecies). Não existe mais conceito de
+// "raça": o visual é só o personagem PixiJS, um por espécie.
+export const MASCOT_SPECIES_LIST = ["gato", "cachorro"] as const;
 
-export type MascotSpecies = keyof typeof MASCOT_BREEDS;
-export type MascotBreed = (typeof MASCOT_BREEDS)[MascotSpecies][number];
-
-export const MASCOT_SPECIES_LIST = Object.keys(MASCOT_BREEDS) as MascotSpecies[];
-
-export function breedsForSpecies(species: MascotSpecies): readonly string[] {
-  return MASCOT_BREEDS[species];
-}
-
-export function isValidBreedForSpecies(species: MascotSpecies, breed: string): boolean {
-  return (MASCOT_BREEDS[species] as readonly string[]).includes(breed);
-}
+export type MascotSpecies = (typeof MASCOT_SPECIES_LIST)[number];
