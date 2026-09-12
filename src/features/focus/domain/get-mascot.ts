@@ -1,4 +1,4 @@
-import { IMascotState, MascotPersonality, MascotSpecies } from "./mascot";
+import { IMascotState, MascotBreed, MascotPersonality, MascotSpecies } from "./mascot";
 
 // Cria o estado do mascote na primeira chamada (linha ainda não existe
 // pra usuários que nunca focaram) — sempre devolve um estado válido,
@@ -15,6 +15,7 @@ export interface IMascotPatch {
   name?: string;
   personality?: MascotPersonality;
   species?: MascotSpecies;
+  breed?: MascotBreed;
 }
 
 export type UpdateMascot = {

@@ -1,5 +1,19 @@
-Sprites do mascote (galinha.png, vaca.png, porco.png, cabra.png)
+Sprites do mascote
 
-Fonte: "Animal Pack Remastered" by Kenney (kenney.nl)
-Licença: CC0 1.0 (domínio público) — https://creativecommons.org/publicdomain/zero/1.0/
-Atribuição não é obrigatória, mas é dada aqui por boa prática.
+gato-cinza.png, gato-laranja.png (recolorido a partir do gato-cinza.png),
+cachorro-viralata.png
+  Fonte: "CatnDog" (OpenGameArt.org)
+  Licença: CC0 1.0 (domínio público)
+  https://opengameart.org/content/cat-dog-free-sprites
+
+galinha-preta.gif
+  Fonte: "Chicken Sprites" por Shepardskin (OpenGameArt.org)
+  Licença: CC0 1.0 (domínio público) — crédito opcional, dado por boa
+  prática
+  https://opengameart.org/content/chicken-sprites
+
+coelho-comum.png (recortado de uma folha de sprites maior)
+  Fonte: "Bunny Rabbit LPC style for PixelFarm"
+  Autor: Stephen Challener (Redshrike), encomendado por Tebruno99,
+  hospedado em OpenGameArt.org
+  Licença: CC-BY 3.0 — https://creativecommons.org/licenses/by/3.0/

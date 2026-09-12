@@ -1,18 +1,19 @@
+import { MascotBreed, MascotSpecies } from "./mascot-species";
+
 // 100 XP por nível — número redondo, fácil de comunicar na interface
 // ("faltam 35 XP pro próximo nível"). Não precisa ser sofisticado: é só
 // uma progressão simples que dá sensação de avanço a cada sessão de foco.
 export const XP_PER_LEVEL = 100;
 
 export type MascotPersonality = "afetuoso" | "sarcastico" | "engracado" | "motivador" | "zen";
-// Sprites de animal de fazenda (CC0, ver public/mascot/CREDITS.txt) —
-// cada valor aqui precisa ter um PNG correspondente em public/mascot/.
-export type MascotSpecies = "galinha" | "vaca" | "porco" | "cabra";
+export type { MascotSpecies, MascotBreed } from "./mascot-species";
 
 export interface IMascotState {
   userId: string;
   name: string;
   personality: MascotPersonality;
   species: MascotSpecies;
+  breed: MascotBreed;
   totalXp: number;
   // Calculado a partir de `totalXp` (nunca guardado — mesma lógica de
   // "progresso calculado, nunca persistido" usada em Goals/Habits).

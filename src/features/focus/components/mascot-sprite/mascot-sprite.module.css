@@ -59,6 +59,12 @@
   filter: drop-shadow(0 0.5rem 0.75rem var(--color-shadow));
 }
 
+/* Sprites pequenos em pixel art (coelho/galinha) — sem isso o navegador
+   suaviza a ampliação e os pixels ficam borrados em vez de nítidos. */
+.pixelated {
+  image-rendering: pixelated;
+}
+
 .sparkle {
   position: absolute;
   font-size: 1.1rem;

@@ -6,5 +6,6 @@ export * from "./get-active";
 export * from "./load-history";
 export * from "./load-history-range";
 export * from "./mascot";
+export * from "./mascot-species";
 export * from "./mascot-lines";
 export * from "./get-mascot";

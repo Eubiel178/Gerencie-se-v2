@@ -147,7 +147,7 @@ export function Widget({ initialMessage, reducedPresence, mascot }: WidgetProps)
         aria-expanded={isOpen}
         onClick={handleAvatarClick}
       >
-        <MascotSprite species={mascot.species} mood={creatureMoodFor(mood)} size="sm" />
+        <MascotSprite species={mascot.species} breed={mascot.breed} mood={creatureMoodFor(mood)} size="sm" />
         {!isOpen && message && (
           <span className={styles.pingDot} aria-hidden="true" />
         )}

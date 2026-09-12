@@ -392,11 +392,16 @@ export const mascotStates = pgTable("mascot_state", {
   })
     .notNull()
     .default("afetuoso"),
-  // Sprite estático (PNG, CC0 — ver public/mascot/CREDITS.txt) animado
-  // via CSS, não um desenho em código nem um modelo 3D.
-  species: text("species", { enum: ["galinha", "vaca", "porco", "cabra"] })
+  // Sprite estático (PNG/GIF) animado via CSS — não um desenho em código
+  // nem um modelo 3D. `species` + `breed` juntos escolhem o arquivo em
+  // public/mascot/<especie>-<raca>.(png|gif); o catálogo de combinações
+  // válidas vive em `MASCOT_BREEDS` (src/features/focus/domain), não
+  // aqui — ver public/mascot/CREDITS.txt pra origem/licença de cada
+  // imagem.
+  species: text("species", { enum: ["gato", "cachorro", "coelho", "galinha"] })
     .notNull()
     .default("galinha"),
+  breed: text("breed").notNull().default("preta"),
   totalXp: integer("total_xp").notNull().default(0),
   updatedAt: timestamp("updated_at", { mode: "date" })
     .notNull()

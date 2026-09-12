@@ -66,8 +66,22 @@ export async function updateMascotAction(patch: domain.IMascotPatch): Promise<Ac
     return { error: parsed.error.issues[0]?.message ?? "Dados inválidos." };
   }
 
+  // Checado à parte do zod (ver comentário no schema): garante que a
+  // raça enviada realmente existe pra espécie enviada — nunca confia
+  // que quem chamou (ex.: uma requisição manual) respeitou as opções que
+  // o formulário mostra.
+  if (
+    parsed.data.species &&
+    parsed.data.breed &&
+    !domain.isValidBreedForSpecies(parsed.data.species, parsed.data.breed)
+  ) {
+    return { error: "Raça inválida para a espécie escolhida." };
+  }
+
   try {
-    await getMascotFetcher().updateMascot(parsed.data);
+    // `breed` é validado acima contra a espécie (não pelo zod, que só
+    // checa formato) — seguro estreitar pro union aqui.
+    await getMascotFetcher().updateMascot(parsed.data as domain.IMascotPatch);
     revalidatePath("/home/focus");
     revalidatePath("/home");
     revalidatePath("/home/settings");

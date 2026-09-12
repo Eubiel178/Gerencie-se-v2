@@ -39,7 +39,7 @@ export function Mascot({ mascot, mood }: MascotProps) {
         />
       </div>
 
-      <MascotSprite species={mascot.species} mood={mood} roaming />
+      <MascotSprite species={mascot.species} breed={mascot.breed} mood={mood} roaming />
 
       <p className={styles.name}>{mascot.name}</p>
       <p className={styles.level}>Nível {mascot.level}</p>

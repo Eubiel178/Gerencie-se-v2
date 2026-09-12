@@ -10,6 +10,7 @@ function buildMascot(overrides: Partial<IMascotState> = {}): IMascotState {
     name: "Chunchumaru",
     personality: "afetuoso",
     species: "galinha",
+    breed: "preta",
     totalXp: 0,
     level: 1,
     xpIntoCurrentLevel: 0,
