@@ -28,6 +28,7 @@ export function TasksList({ tasksList, isGoogleConnected, connections }: TasksLi
   const searchQuery = useTaskStore((state) => state.searchQuery);
   const statusFilter = useTaskStore((state) => state.statusFilter);
   const priorityFilter = useTaskStore((state) => state.priorityFilter);
+  const lowEnergyMode = useTaskStore((state) => state.lowEnergyMode);
 
   useEffect(() => {
     setTasks(tasksList);
@@ -35,7 +36,7 @@ export function TasksList({ tasksList, isGoogleConnected, connections }: TasksLi
 
   const tag = formTags.tagExists(paramsUrl.get("tag") || "");
   const tasksByTag = tag !== "all" ? tasks.filter((task) => task.tag === tag) : tasks;
-  const tasksFiltred = filterTasks(tasksByTag, { searchQuery, statusFilter, priorityFilter });
+  const tasksFiltred = filterTasks(tasksByTag, { searchQuery, statusFilter, priorityFilter, lowEnergyMode });
   // Prioridade primeiro, e dentro de cada prioridade quem ainda não
   // concluiu vem antes de quem já concluiu — dois `.sort()` estáveis
   // encadeados (o segundo preserva a ordem de prioridade já aplicada

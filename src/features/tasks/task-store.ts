@@ -22,6 +22,13 @@ interface TaskStore {
   setStatusFilter: (status: TaskStatusFilter) => void;
   priorityFilter: TaskPriority | "all";
   setPriorityFilter: (priority: TaskPriority | "all") => void;
+
+  // Modo de baixa energia (Modo Assistido): esconde tarefas de
+  // prioridade alta/crítica — pra dias de pouca energia, mostra só o
+  // que é mais leve de encarar. Nunca marca/edita nada sozinho, só
+  // filtra a exibição.
+  lowEnergyMode: boolean;
+  setLowEnergyMode: (value: boolean) => void;
 }
 
 /** Estado de interface para tarefas. A fonte persistente continua sendo o
@@ -43,4 +50,7 @@ export const useTaskStore = create<TaskStore>((set) => ({
   setStatusFilter: (statusFilter) => set({ statusFilter }),
   priorityFilter: "all",
   setPriorityFilter: (priorityFilter) => set({ priorityFilter }),
+
+  lowEnergyMode: false,
+  setLowEnergyMode: (lowEnergyMode) => set({ lowEnergyMode }),
 }));

@@ -52,6 +52,30 @@ test("filterTasks: status atrasada exige nao concluida e data no passado", () =>
   assert.equal(result.length, 1);
 });
 
+test("filterTasks: modo de baixa energia esconde alta e critica", () => {
+  const tasks = [
+    task({ priority: "critica" }),
+    task({ priority: "alta" }),
+    task({ priority: "media" }),
+    task({ priority: "baixa" }),
+  ];
+
+  const result = filterTasks(
+    tasks,
+    { searchQuery: "", statusFilter: "all", priorityFilter: "all", lowEnergyMode: true },
+    NOW
+  );
+
+  assert.deepEqual(result.map((t) => t.priority), ["media", "baixa"]);
+});
+
+test("filterTasks: sem modo de baixa energia mostra todas as prioridades", () => {
+  const tasks = [task({ priority: "critica" }), task({ priority: "baixa" })];
+  const result = filterTasks(tasks, { searchQuery: "", statusFilter: "all", priorityFilter: "all" }, NOW);
+
+  assert.equal(result.length, 2);
+});
+
 test("filterTasks: combina busca, status e prioridade ao mesmo tempo", () => {
   const tasks = [
     task({ title: "Estudar React", priority: "alta", completed: false }),

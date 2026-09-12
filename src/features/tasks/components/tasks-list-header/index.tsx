@@ -4,6 +4,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useParamsUrl } from "@/hooks/use-params-url";
 
 import { Input, ChipGroup } from "@/components";
+import { Icon } from "@/components/icon";
 import { AddTask } from "../modal";
 import { PRIORITY_OPTIONS } from "../modal/interfaces";
 import { LoadAcceptedConnections } from "@/features/connections/domain";
@@ -36,6 +37,8 @@ export function TasksListHeader({
   const setStatusFilter = useTaskStore((state) => state.setStatusFilter);
   const priorityFilter = useTaskStore((state) => state.priorityFilter);
   const setPriorityFilter = useTaskStore((state) => state.setPriorityFilter);
+  const lowEnergyMode = useTaskStore((state) => state.lowEnergyMode);
+  const setLowEnergyMode = useTaskStore((state) => state.setLowEnergyMode);
 
   function handleTag(event: React.ChangeEvent<HTMLSelectElement>) {
     return router.push(
@@ -98,6 +101,18 @@ export function TasksListHeader({
           value={priorityFilter}
           onChange={(value) => setPriorityFilter(value as typeof priorityFilter)}
         />
+
+        <button
+          type="button"
+          className={styles.lowEnergyToggle}
+          data-active={lowEnergyMode}
+          aria-pressed={lowEnergyMode}
+          title="Modo de baixa energia: esconde tarefas de prioridade alta/crítica"
+          onClick={() => setLowEnergyMode(!lowEnergyMode)}
+        >
+          <Icon name="FaBatteryQuarter" aria-hidden="true" />
+          Baixa energia
+        </button>
       </div>
     </>
   );

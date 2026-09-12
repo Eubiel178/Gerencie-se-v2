@@ -434,6 +434,16 @@ export const userPreferences = pgTable("user_preference", {
   // (ver `features/onboarding`) — nunca reaparece depois disso, mesmo que
   // algum item continue incompleto.
   onboardingDismissed: boolean("onboarding_dismissed").notNull().default(false),
+  // Limite de interrupções (Modo Assistido): quantas mensagens contextuais
+  // já foram auto-abertas HOJE (ver MAX_DAILY_INSIGHTS em
+  // `local-assistant-preferences.ts`) — zera sozinho quando a data muda,
+  // sem precisar de um job/cron pra resetar.
+  assistantDailyInsightCount: integer("assistant_daily_insight_count").notNull().default(0),
+  assistantDailyInsightDate: text("assistant_daily_insight_date"),
+  // Repetir a MESMA mensagem de novo (ex.: em cada `router.refresh()`
+  // enquanto a mesma condição persiste) nunca consome cota — só uma
+  // mensagem com texto diferente da última conta como nova interrupção.
+  assistantLastInsightText: text("assistant_last_insight_text"),
 });
 
 export const hydrationLogs = pgTable("hydration_log", {

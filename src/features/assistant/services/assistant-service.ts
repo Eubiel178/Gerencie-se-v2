@@ -63,10 +63,21 @@ export class AssistantService {
       mascot,
     });
 
+    const candidate = pickTopMessage(messages);
+
+    // Limite de interrupções: só "gasta" cota quando existe mesmo uma
+    // mensagem candidata pra mostrar — nunca por uma navegação qualquer
+    // sem nada a dizer.
+    const message = candidate
+      ? (await getAssistantPreferencesFetcher().registerInsightShown(candidate.text)).allowed
+        ? candidate
+        : null
+      : null;
+
     return {
       enabled: true,
       reducedPresence: preferences.reducedPresence,
-      message: pickTopMessage(messages),
+      message,
       mascot,
     };
   }
