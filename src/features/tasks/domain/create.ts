@@ -23,6 +23,7 @@ export namespace CreateTask {
     | "completed"
     | "completedAt"
     | "startedAt"
+    | "steps"
     | "isSharedWithMe"
     | "ownerLabel"
   >;

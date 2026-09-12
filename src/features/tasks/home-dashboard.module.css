@@ -21,6 +21,7 @@
 .description{margin:0;font-family:var(--font-sans);color:var(--color-text-muted);font-size:var(--font-size-sm)}
 .sharedBadge{margin:0;font-family:var(--font-sans);color:var(--color-info);font-size:var(--font-size-xs)}
 .startedBadge{display:inline-flex;align-items:center;gap:.25rem;margin:0;font-family:var(--font-sans);color:var(--color-highlight);font-size:var(--font-size-xs)}
+.stepsProgress{display:inline-flex;align-items:center;gap:.3rem;margin:0;width:fit-content;font-family:var(--font-sans);color:var(--color-text-muted);font-size:var(--font-size-xs)}
 .syncSection{display:flex;flex-direction:column;gap:var(--space-2);color:var(--color-text)}
 .syncSuccess{margin:0;font-family:var(--font-sans);color:var(--color-success);font-size:var(--font-size-xs)}
 .syncError{margin:0;font-family:var(--font-sans);color:var(--color-danger);font-size:var(--font-size-xs)}

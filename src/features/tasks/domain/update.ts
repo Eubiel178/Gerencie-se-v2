@@ -21,6 +21,7 @@ export namespace UpdateTask {
     | "completed"
     | "completedAt"
     | "startedAt"
+    | "steps"
     | "isSharedWithMe"
     | "ownerLabel"
   >;

@@ -6,4 +6,6 @@ export * from "./delete";
 export * from "./load-all";
 export * from "./toggle-complete";
 export * from "./mark-started";
+export * from "./task-step";
+export * from "./manage-steps";
 export * from "./recurrence";

@@ -20,6 +20,7 @@ function task(overrides: Partial<Parameters<typeof filterTasks>[0][number]>) {
     syncStatus: "NONE" as const,
     recurrence: "none" as const,
     isSharedWithMe: false,
+    steps: [],
     ...overrides,
   };
 }

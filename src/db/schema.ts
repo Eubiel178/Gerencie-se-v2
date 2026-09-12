@@ -208,6 +208,27 @@ export const tasks = pgTable("task", {
 });
 
 /**
+ * "Quebrar tarefa em passos menores" (Modo Assistido) — mesmo desenho
+ * de `goalSteps`: sem dono próprio, acesso sempre decidido pela tarefa
+ * (dono OU colaborador). Nunca gerado automaticamente (nunca inventa
+ * passos sozinho); só o que o usuário mesmo adicionar.
+ */
+export const taskSteps = pgTable("task_step", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  taskId: text("task_id")
+    .notNull()
+    .references(() => tasks.id, { onDelete: "cascade" }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  completed: boolean("completed").notNull().default(false),
+  order: integer("order").notNull().default(0),
+});
+
+/**
  * Anexos de tarefa. Conteúdo guardado como `bytea` direto no Postgres —
  * sem storage externo (S3, blob, etc.), mesma base de dados que já
  * guarda todo o resto do app. É exatamente por essa escolha que existe
@@ -595,7 +616,7 @@ export const goalStepsRelations = relations(goalSteps, ({ one }) => ({
   }),
 }));
 
-export const tasksRelations = relations(tasks, ({ one }) => ({
+export const tasksRelations = relations(tasks, ({ one, many }) => ({
   user: one(users, {
     fields: [tasks.userId],
     references: [users.id],
@@ -603,6 +624,18 @@ export const tasksRelations = relations(tasks, ({ one }) => ({
   goal: one(goals, {
     fields: [tasks.goalId],
     references: [goals.id],
+  }),
+  steps: many(taskSteps),
+}));
+
+export const taskStepsRelations = relations(taskSteps, ({ one }) => ({
+  task: one(tasks, {
+    fields: [taskSteps.taskId],
+    references: [tasks.id],
+  }),
+  user: one(users, {
+    fields: [taskSteps.userId],
+    references: [users.id],
   }),
 }));
 

@@ -45,6 +45,8 @@ export async function createTaskAction(
         priority: data.priority,
         completed: false,
         completedAt: null,
+        startedAt: null,
+        steps: [],
         scheduledAt: data.scheduledAt,
         syncEnabled: data.syncEnabled,
         recurrence: data.recurrence,
@@ -110,6 +112,8 @@ export async function updateTaskAction(
         priority: data.priority,
         completed: previousTask?.completed ?? false,
         completedAt: previousTask?.completedAt ?? null,
+        startedAt: previousTask?.startedAt ?? null,
+        steps: previousTask?.steps ?? [],
         scheduledAt: data.scheduledAt,
         syncEnabled: data.syncEnabled,
         recurrence: data.recurrence,
@@ -201,6 +205,51 @@ export async function markTaskStartedAction(
     return { error: null };
   } catch {
     return { error: "Não foi possível marcar a tarefa como iniciada. Tente novamente." };
+  }
+}
+
+/** "Quebrar tarefa em passos menores" (Modo Assistido) — mesma
+ * orquestração simples usada em Goals: repositório cuida só da entidade,
+ * a action só chama e revalida. */
+export async function createTaskStepAction(
+  params: domain.CreateTaskStep.Params
+): Promise<ActionResult> {
+  try {
+    await getTaskFetcher().createStep(params);
+    revalidatePath("/home/tasks");
+    revalidatePath("/home");
+
+    return { error: null };
+  } catch {
+    return { error: "Não foi possível adicionar o passo. Tente novamente." };
+  }
+}
+
+export async function updateTaskStepAction(
+  params: domain.UpdateTaskStep.Params
+): Promise<ActionResult> {
+  try {
+    await getTaskFetcher().updateStep(params);
+    revalidatePath("/home/tasks");
+    revalidatePath("/home");
+
+    return { error: null };
+  } catch {
+    return { error: "Não foi possível atualizar o passo. Tente novamente." };
+  }
+}
+
+export async function deleteTaskStepAction(
+  params: domain.DeleteTaskStep.Params
+): Promise<ActionResult> {
+  try {
+    await getTaskFetcher().deleteStep(params);
+    revalidatePath("/home/tasks");
+    revalidatePath("/home");
+
+    return { error: null };
+  } catch {
+    return { error: "Não foi possível remover o passo. Tente novamente." };
   }
 }
 

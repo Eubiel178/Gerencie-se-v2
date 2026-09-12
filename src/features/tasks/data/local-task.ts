@@ -1,12 +1,12 @@
 import "server-only";
 
-import { and, eq, inArray, or } from "drizzle-orm";
+import { and, eq, inArray, max, or } from "drizzle-orm";
 
 import * as domain from "@/features/tasks/domain";
 import type { TaskSyncStatus } from "@/features/tasks/domain";
 
 import { db } from "@/db/client";
-import { tasks, users } from "@/db/schema";
+import { taskSteps, tasks, users } from "@/db/schema";
 import { requireUserId } from "@/lib/require-user-id";
 import { assertAcceptedConnection } from "@/lib/assert-accepted-connection";
 
@@ -42,7 +42,10 @@ export class LocalTask
     domain.UpdateTask,
     domain.DeleteTask,
     domain.ToggleTaskComplete,
-    domain.MarkTaskStarted
+    domain.MarkTaskStarted,
+    domain.CreateTaskStep,
+    domain.UpdateTaskStep,
+    domain.DeleteTaskStep
 {
   async create(params: domain.CreateTask.Params) {
     const userId = await requireUserId();
@@ -86,7 +89,26 @@ export class LocalTask
 
     const ownerById = new Map(owners.map((owner) => [owner.id, owner]));
 
-    return rows.map((row) => mapRowToTask(row, userId, ownerById.get(row.userId)));
+    const taskIds = rows.map((row) => row.id);
+    const stepRows =
+      taskIds.length === 0
+        ? []
+        : await db
+            .select()
+            .from(taskSteps)
+            .where(inArray(taskSteps.taskId, taskIds))
+            .orderBy(taskSteps.order);
+
+    const stepsByTaskId = new Map<string, domain.ITaskStep[]>();
+    for (const step of stepRows) {
+      const list = stepsByTaskId.get(step.taskId) ?? [];
+      list.push(step);
+      stepsByTaskId.set(step.taskId, list);
+    }
+
+    return rows.map((row) =>
+      mapRowToTask(row, userId, ownerById.get(row.userId), stepsByTaskId.get(row.id) ?? [])
+    );
   }
 
   async update(params: domain.UpdateTask.Params) {
@@ -226,6 +248,78 @@ export class LocalTask
     return { xpEarned: TASK_START_XP };
   }
 
+  async createStep(params: domain.CreateTaskStep.Params) {
+    const userId = await requireUserId();
+
+    // `taskId` vem do cliente — sem essa checagem, qualquer usuário
+    // autenticado que soubesse/adivinhasse o UUID de uma tarefa alheia
+    // conseguiria injetar um passo nela. Dono OU colaborador (tarefa
+    // compartilhada) podem adicionar passos — mesmo espírito de ajudar.
+    const [accessibleTask] = await db
+      .select({ id: tasks.id })
+      .from(tasks)
+      .where(
+        and(eq(tasks.id, params.taskId), or(eq(tasks.userId, userId), eq(tasks.sharedWithUserId, userId)))
+      )
+      .limit(1);
+
+    if (!accessibleTask) {
+      throw new Error("Tarefa não encontrada.");
+    }
+
+    const id = crypto.randomUUID();
+
+    const [{ maxOrder }] = await db
+      .select({ maxOrder: max(taskSteps.order) })
+      .from(taskSteps)
+      .where(eq(taskSteps.taskId, params.taskId));
+
+    await db.insert(taskSteps).values({
+      id,
+      taskId: params.taskId,
+      userId,
+      title: params.title,
+      order: (maxOrder ?? -1) + 1,
+    });
+
+    return { id };
+  }
+
+  async updateStep(params: domain.UpdateTaskStep.Params) {
+    const userId = await requireUserId();
+
+    await this.assertStepAccess(params.id, userId);
+
+    await db
+      .update(taskSteps)
+      .set({ completed: params.completed })
+      .where(eq(taskSteps.id, params.id));
+  }
+
+  async deleteStep(params: domain.DeleteTaskStep.Params) {
+    const userId = await requireUserId();
+
+    await this.assertStepAccess(params.id, userId);
+
+    await db.delete(taskSteps).where(eq(taskSteps.id, params.id));
+  }
+
+  /** Passo não tem dono próprio — o acesso é sempre decidido pela tarefa
+   * (dono OU colaborador), nunca por `task_step.userId` (que só registra
+   * quem criou o passo). */
+  private async assertStepAccess(stepId: string, userId: string): Promise<void> {
+    const [row] = await db
+      .select({ taskUserId: tasks.userId, taskSharedWithUserId: tasks.sharedWithUserId })
+      .from(taskSteps)
+      .innerJoin(tasks, eq(taskSteps.taskId, tasks.id))
+      .where(eq(taskSteps.id, stepId))
+      .limit(1);
+
+    if (!row || (row.taskUserId !== userId && row.taskSharedWithUserId !== userId)) {
+      throw new Error("Passo não encontrado.");
+    }
+  }
+
   /** Só o DONO pode excluir — compartilhamento dá acesso de ajudar, nunca
    * de apagar o que é do outro. */
   async delete(params: domain.DeleteTask.Params) {
@@ -322,7 +416,8 @@ export class LocalTask
 function mapRowToTask(
   row: typeof tasks.$inferSelect,
   viewerId: string,
-  owner?: { name: string | null; email: string | null }
+  owner?: { name: string | null; email: string | null },
+  steps: domain.ITaskStep[] = []
 ): domain.ITask {
   return {
     id: row.id,
@@ -334,6 +429,7 @@ function mapRowToTask(
     completed: row.completed,
     completedAt: row.completedAt,
     startedAt: row.startedAt,
+    steps,
     scheduledAt: row.scheduledAt ?? undefined,
     syncEnabled: row.syncEnabled,
     syncStatus: row.syncStatus as TaskSyncStatus,

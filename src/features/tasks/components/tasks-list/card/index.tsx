@@ -197,6 +197,13 @@ export function Card({
 
           <p className={styles.description}>{task.description}</p>
 
+          {task.steps.length > 0 && (
+            <p className={styles.stepsProgress}>
+              <Icon name="FaListUl" aria-hidden="true" size={11} />
+              {task.steps.filter((step) => step.completed).length}/{task.steps.length} passos
+            </p>
+          )}
+
           <SharedBadge
             isSharedWithMe={task.isSharedWithMe}
             ownerLabel={task.ownerLabel}

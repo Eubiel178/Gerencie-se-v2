@@ -21,6 +21,7 @@ import { ShareReadOnlyNote } from "@/features/connections/components/share-reado
 import { SyncWithGoogle } from "../sync-with-google";
 import { ReminderFields } from "../reminder-fields";
 import { AttachmentsField } from "../../attachments-field";
+import { TaskSteps } from "../../task-steps";
 import { FormData, IEditTaskProps, PRIORITY_OPTIONS } from "../interfaces";
 
 import styles from "./edit-task.module.css";
@@ -157,6 +158,13 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
                 </Input.Wrapper>
 
                 <Input.HelperText />
+              </Input.Root>
+
+              <Input.Root>
+                <Input.Label>
+                  <Icon name="FaListUl" size={12} /> Passos
+                </Input.Label>
+                <TaskSteps taskId={taskBeingEdited.id} steps={taskBeingEdited.steps} />
               </Input.Root>
 
               <Input.Root>
