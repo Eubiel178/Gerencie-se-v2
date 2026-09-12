@@ -9,7 +9,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/routine-schema";
 
-import { Form, Modal, ModalHeader, Input, Button, SuggestionChips } from "@/components";
+import { Form, Modal, ModalHeader, Input, Button, SuggestionChips, CollapsibleSection } from "@/components";
+import { Icon } from "@/components/icon";
 
 import { updateRoutineItemAction } from "@/features/routine/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
@@ -89,8 +90,29 @@ export function EditRoutineItem({ itemBeingEdited, taskOptions, connections }: I
 
           <Form.Root onSubmit={handleSubmit(handleFormSubmit)}>
             <Form.Wrapper>
+              <Input.Root sharedProps={{ error: errors.title?.message }}>
+                <Input.Wrapper>
+                  <Input.Field
+                    className={styles.titleField}
+                    {...register("title")}
+                    placeholder="O que faz parte da sua rotina?"
+                    autoFocus
+                  />
+                </Input.Wrapper>
+
+                <SuggestionChips
+                  label="Sugestões"
+                  suggestions={TITLE_SUGGESTIONS}
+                  onSelect={(value) => setValue("title", value, { shouldValidate: true })}
+                />
+
+                <Input.HelperText />
+              </Input.Root>
+
               <Input.Root sharedProps={{ error: errors.time?.message }}>
-                <Input.Label>Horário</Input.Label>
+                <Input.Label>
+                  <Icon name="MdTimer" size={13} /> Horário
+                </Input.Label>
 
                 <Input.Wrapper>
                   <Input.Field {...register("time")} type="time" />
@@ -105,59 +127,44 @@ export function EditRoutineItem({ itemBeingEdited, taskOptions, connections }: I
                 <Input.HelperText />
               </Input.Root>
 
-              <Input.Root sharedProps={{ error: errors.title?.message }}>
-                <Input.Wrapper>
-                  <Input.Field
-                    {...register("title")}
-                    placeholder="Ex.: Acordar, Estudar, Exercício..."
-                  />
-                </Input.Wrapper>
+              <CollapsibleSection label="Mais opções">
+                {taskOptions.length > 0 && (
+                  <Input.Root>
+                    <Input.Label>Vincular a uma tarefa (opcional)</Input.Label>
 
-                <SuggestionChips
-                  label="Sugestões"
-                  suggestions={TITLE_SUGGESTIONS}
-                  onSelect={(value) => setValue("title", value, { shouldValidate: true })}
-                />
+                    <Input.Wrapper>
+                      <Input.FieldSelect
+                        {...register("taskId")}
+                        optionsArray={[
+                          { label: "Nenhuma", value: NO_TASK_VALUE },
+                          ...taskOptions.map((task) => ({
+                            label: task.title,
+                            value: task.id,
+                          })),
+                        ]}
+                      />
+                    </Input.Wrapper>
+                  </Input.Root>
+                )}
 
-                <Input.HelperText />
-              </Input.Root>
-
-              {taskOptions.length > 0 && (
-                <Input.Root>
-                  <Input.Label>Vincular a uma tarefa (opcional)</Input.Label>
+                <Input.Root sharedProps={{ error: errors.sharedWithUserId?.message }}>
+                  <Input.Label>Compartilhar com</Input.Label>
 
                   <Input.Wrapper>
-                    <Input.FieldSelect
-                      {...register("taskId")}
-                      optionsArray={[
-                        { label: "Nenhuma", value: NO_TASK_VALUE },
-                        ...taskOptions.map((task) => ({
-                          label: task.title,
-                          value: task.id,
-                        })),
-                      ]}
+                    <ShareSelect
+                      connections={connections}
+                      disabled={itemBeingEdited.isSharedWithMe}
+                      {...register("sharedWithUserId")}
                     />
                   </Input.Wrapper>
+
+                  <Input.HelperText />
                 </Input.Root>
-              )}
 
-              <Input.Root sharedProps={{ error: errors.sharedWithUserId?.message }}>
-                <Input.Label>Compartilhar com</Input.Label>
-
-                <Input.Wrapper>
-                  <ShareSelect
-                    connections={connections}
-                    disabled={itemBeingEdited.isSharedWithMe}
-                    {...register("sharedWithUserId")}
-                  />
-                </Input.Wrapper>
-
-                <Input.HelperText />
-              </Input.Root>
-
-              {itemBeingEdited.isSharedWithMe && (
-                <ShareReadOnlyNote noun="este item" className={styles.mutedNote} />
-              )}
+                {itemBeingEdited.isSharedWithMe && (
+                  <ShareReadOnlyNote noun="este item" className={styles.mutedNote} />
+                )}
+              </CollapsibleSection>
             </Form.Wrapper>
 
             {submitError && <p className={styles.formError}>{submitError}</p>}

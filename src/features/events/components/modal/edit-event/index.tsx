@@ -11,7 +11,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/event-schema";
 
-import { Form, Modal, ModalHeader, Input, Button, SuggestionChips } from "@/components";
+import { Form, Modal, ModalHeader, Input, Button, SuggestionChips, CollapsibleSection } from "@/components";
+import { Icon } from "@/components/icon";
 import inputStyles from "@/components/form/input/styles.module.css";
 
 import { updateEventAction } from "@/features/events/actions";
@@ -108,19 +109,10 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
               <Input.Root sharedProps={{ error: errors.title?.message }}>
                 <Input.Wrapper>
                   <Input.Field
+                    className={styles.titleField}
                     {...register("title")}
-                    placeholder="Nome do Evento"
-                  />
-                </Input.Wrapper>
-
-                <Input.HelperText />
-              </Input.Root>
-
-              <Input.Root sharedProps={{ error: errors.description?.message }}>
-                <Input.Wrapper>
-                  <Input.Field
-                    {...register("description")}
-                    placeholder="Descrição do Evento"
+                    placeholder="Nome do evento"
+                    autoFocus
                   />
                 </Input.Wrapper>
 
@@ -128,11 +120,13 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
               </Input.Root>
 
               <Input.Root sharedProps={{ error: errors.start?.message }}>
+                <Input.Label>
+                  <Icon name="FaCalendarAlt" size={12} /> Início
+                </Input.Label>
                 <Input.Wrapper>
                   <Input.Field
                     {...register("start")}
                     type="datetime-local"
-                    placeholder="Data e Hora inicial do evento"
                   />
                 </Input.Wrapper>
 
@@ -140,11 +134,11 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
               </Input.Root>
 
               <Input.Root sharedProps={{ error: errors.end?.message }}>
+                <Input.Label>Fim (opcional)</Input.Label>
                 <Input.Wrapper>
                   <Input.Field
                     {...register("end")}
                     type="datetime-local"
-                    placeholder="Data e Hora final do evento(opcional)"
                   />
                 </Input.Wrapper>
 
@@ -165,34 +159,12 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
                 <Input.HelperText />
               </Input.Root>
 
-              <Input.Root sharedProps={{ error: errors.url?.message }}>
-                <Input.Wrapper>
-                  <Input.Field
-                    {...register("url")}
-                    type="url"
-                    placeholder="Link do evento(opcional)"
-                  />
-                </Input.Wrapper>
-
-                <Input.HelperText />
-              </Input.Root>
-
               <Input.Root
                 sharedProps={{ error: errors.backgroundColor?.message }}
               >
                 <Input.Label htmlFor="backgroundColor">
-                  Cor do marcador do evento
+                  Cor do marcador
                 </Input.Label>
-
-                <Input.Wrapper>
-                  <Input.Field
-                    {...register("backgroundColor")}
-                    className={inputStyles.colorField}
-                    type="color"
-                  />
-                </Input.Wrapper>
-
-                <span className={styles.colorSwatchesLabel}>Cores prontas — clique para preencher</span>
 
                 <div className={styles.colorSwatches} role="group" aria-label="Cores prontas">
                   {EVENT_COLORS.map((color) => (
@@ -206,10 +178,46 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
                       onClick={() => setValue("backgroundColor", color, { shouldValidate: true })}
                     />
                   ))}
+
+                  <Input.Field
+                    {...register("backgroundColor")}
+                    className={`${inputStyles.colorField} ${styles.customColorField}`}
+                    type="color"
+                    aria-label="Escolher outra cor"
+                  />
                 </div>
 
                 <Input.HelperText />
               </Input.Root>
+
+              <CollapsibleSection label="Mais opções">
+                <Input.Root sharedProps={{ error: errors.description?.message }}>
+                  <Input.Label>
+                    <Icon name="FaAlignLeft" size={12} /> Descrição
+                  </Input.Label>
+                  <Input.Wrapper>
+                    <Input.Field
+                      {...register("description")}
+                      placeholder="Detalhes (opcional)"
+                    />
+                  </Input.Wrapper>
+
+                  <Input.HelperText />
+                </Input.Root>
+
+                <Input.Root sharedProps={{ error: errors.url?.message }}>
+                  <Input.Label>Link (opcional)</Input.Label>
+                  <Input.Wrapper>
+                    <Input.Field
+                      {...register("url")}
+                      type="url"
+                      placeholder="https://..."
+                    />
+                  </Input.Wrapper>
+
+                  <Input.HelperText />
+                </Input.Root>
+              </CollapsibleSection>
             </Form.Wrapper>
 
             {submitError && <p className={styles.formError}>{submitError}</p>}

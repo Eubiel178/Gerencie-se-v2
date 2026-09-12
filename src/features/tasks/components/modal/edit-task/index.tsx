@@ -10,7 +10,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/task-schema";
 
-import { Form, Modal, ModalHeader, Input, Button, ChipGroup } from "@/components";
+import { Form, Modal, ModalHeader, Input, Button, ChipGroup, CollapsibleSection } from "@/components";
+import { Icon } from "@/components/icon";
 
 import { updateTaskAction } from "@/features/tasks/actions";
 
@@ -99,36 +100,13 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
 
           <Form.Root onSubmit={handleSubmit(handleFormSubmit)}>
             <Form.Wrapper>
-              <Input.Root sharedProps={{ error: errors.tag?.message }}>
-                <Input.Label>Tipo de Tarefa</Input.Label>
-
-                <Input.Wrapper>
-                  <Input.FieldSelect
-                    {...register("tag")}
-                    optionsArray={formTags.options}
-                  />
-                </Input.Wrapper>
-
-                <Input.HelperText />
-              </Input.Root>
-
               <Input.Root sharedProps={{ error: errors.title?.message }}>
                 <Input.Wrapper>
                   <Input.Field
+                    className={styles.titleField}
                     {...register("title")}
-                    placeholder="Título da Tarefa"
-                  />
-                </Input.Wrapper>
-
-                <Input.HelperText />
-              </Input.Root>
-
-              <Input.Root sharedProps={{ error: errors.description?.message }}>
-                <Input.Wrapper>
-                  <Input.FieldTextarea
-                    {...register("description")}
-                    rows={5}
-                    placeholder="Descrição da Tarefa"
+                    placeholder="O que você precisa fazer?"
+                    autoFocus
                   />
                 </Input.Wrapper>
 
@@ -136,7 +114,9 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
               </Input.Root>
 
               <Input.Root sharedProps={{ error: errors.priority?.message }}>
-                <Input.Label>Prioridade</Input.Label>
+                <Input.Label>
+                  <Icon name="FaFlag" size={12} /> Prioridade
+                </Input.Label>
 
                 <ChipGroup
                   aria-label="Prioridade"
@@ -148,41 +128,74 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
                 <Input.HelperText />
               </Input.Root>
 
-              <ReminderFields
-                register={register}
-                scheduledAtError={errors.scheduledAt?.message}
-                hasScheduledAt={!!scheduledAt}
-              />
-
-              <Input.Root sharedProps={{ error: errors.sharedWithUserId?.message }}>
-                <Input.Label>Compartilhar com</Input.Label>
+              <Input.Root sharedProps={{ error: errors.tag?.message }}>
+                <Input.Label>
+                  <Icon name="FaTag" size={12} /> Tipo de Tarefa
+                </Input.Label>
 
                 <Input.Wrapper>
-                  <ShareSelect
-                    connections={connections}
-                    disabled={taskBeingEdited.isSharedWithMe}
-                    {...register("sharedWithUserId")}
+                  <Input.FieldSelect
+                    {...register("tag")}
+                    optionsArray={formTags.options}
                   />
                 </Input.Wrapper>
 
                 <Input.HelperText />
               </Input.Root>
 
-              {taskBeingEdited.isSharedWithMe && (
-                <ShareReadOnlyNote noun="esta tarefa" className={styles.mutedNote} />
-              )}
+              <Input.Root sharedProps={{ error: errors.description?.message }}>
+                <Input.Label>
+                  <Icon name="FaAlignLeft" size={12} /> Descrição
+                </Input.Label>
 
-              <SyncWithGoogle
-                register={register}
-                setValue={setValue}
-                isChecked={!!syncEnabled}
-                isGoogleConnected={isGoogleConnected}
-              />
+                <Input.Wrapper>
+                  <Input.FieldTextarea
+                    {...register("description")}
+                    rows={3}
+                    placeholder="Detalhes (opcional)"
+                  />
+                </Input.Wrapper>
+
+                <Input.HelperText />
+              </Input.Root>
 
               <Input.Root>
                 <Input.Label>Anexos</Input.Label>
                 <AttachmentsField taskId={taskBeingEdited.id} />
               </Input.Root>
+
+              <CollapsibleSection label="Mais opções">
+                <ReminderFields
+                  register={register}
+                  scheduledAtError={errors.scheduledAt?.message}
+                  hasScheduledAt={!!scheduledAt}
+                />
+
+                <Input.Root sharedProps={{ error: errors.sharedWithUserId?.message }}>
+                  <Input.Label>Compartilhar com</Input.Label>
+
+                  <Input.Wrapper>
+                    <ShareSelect
+                      connections={connections}
+                      disabled={taskBeingEdited.isSharedWithMe}
+                      {...register("sharedWithUserId")}
+                    />
+                  </Input.Wrapper>
+
+                  <Input.HelperText />
+                </Input.Root>
+
+                {taskBeingEdited.isSharedWithMe && (
+                  <ShareReadOnlyNote noun="esta tarefa" className={styles.mutedNote} />
+                )}
+
+                <SyncWithGoogle
+                  register={register}
+                  setValue={setValue}
+                  isChecked={!!syncEnabled}
+                  isGoogleConnected={isGoogleConnected}
+                />
+              </CollapsibleSection>
             </Form.Wrapper>
 
             {submitError && <p className={styles.formError}>{submitError}</p>}

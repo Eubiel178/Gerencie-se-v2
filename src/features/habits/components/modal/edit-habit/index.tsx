@@ -9,7 +9,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/habit-schema";
 
-import { Form, Modal, ModalHeader, Input, Button, ChipGroup, SuggestionChips } from "@/components";
+import { Form, Modal, ModalHeader, Input, Button, ChipGroup, SuggestionChips, CollapsibleSection } from "@/components";
+import { Icon } from "@/components/icon";
 
 import { updateHabitAction } from "@/features/habits/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
@@ -101,8 +102,10 @@ export function EditHabit({ habitBeingEdited, connections, goalOptions }: IEditH
               <Input.Root sharedProps={{ error: errors.title?.message }}>
                 <Input.Wrapper>
                   <Input.Field
+                    className={styles.titleField}
                     {...register("title")}
-                    placeholder="Ex.: Beber água, Ler, Meditar..."
+                    placeholder="Que hábito você quer criar?"
+                    autoFocus
                   />
                 </Input.Wrapper>
 
@@ -116,7 +119,9 @@ export function EditHabit({ habitBeingEdited, connections, goalOptions }: IEditH
               </Input.Root>
 
               <Input.Root sharedProps={{ error: errors.frequency?.message }}>
-                <Input.Label>Frequência</Input.Label>
+                <Input.Label>
+                  <Icon name="FaCalendarAlt" size={12} /> Frequência
+                </Input.Label>
 
                 <ChipGroup
                   aria-label="Frequência"
@@ -145,41 +150,43 @@ export function EditHabit({ habitBeingEdited, connections, goalOptions }: IEditH
                 </Input.Root>
               )}
 
-              {goalOptions.length > 0 && (
-                <Input.Root>
-                  <Input.Label>Vincular a um objetivo (opcional)</Input.Label>
+              <CollapsibleSection label="Mais opções">
+                {goalOptions.length > 0 && (
+                  <Input.Root>
+                    <Input.Label>Vincular a um objetivo (opcional)</Input.Label>
+
+                    <Input.Wrapper>
+                      <Input.FieldSelect
+                        {...register("goalId")}
+                        optionsArray={[
+                          { label: "Nenhum", value: NO_GOAL_VALUE },
+                          ...goalOptions.map((goal) => ({ label: goal.title, value: goal.id })),
+                        ]}
+                      />
+                    </Input.Wrapper>
+                  </Input.Root>
+                )}
+
+                <Input.Root sharedProps={{ error: errors.sharedWithUserId?.message }}>
+                  <Input.Label>Compartilhar com</Input.Label>
 
                   <Input.Wrapper>
-                    <Input.FieldSelect
-                      {...register("goalId")}
-                      optionsArray={[
-                        { label: "Nenhum", value: NO_GOAL_VALUE },
-                        ...goalOptions.map((goal) => ({ label: goal.title, value: goal.id })),
-                      ]}
+                    <ShareSelect
+                      connections={connections}
+                      disabled={habitBeingEdited.isSharedWithMe}
+                      {...register("sharedWithUserId")}
                     />
                   </Input.Wrapper>
+
+                  <Input.HelperText />
                 </Input.Root>
-              )}
 
-              <Input.Root sharedProps={{ error: errors.sharedWithUserId?.message }}>
-                <Input.Label>Compartilhar com</Input.Label>
-
-                <Input.Wrapper>
-                  <ShareSelect
-                    connections={connections}
-                    disabled={habitBeingEdited.isSharedWithMe}
-                    {...register("sharedWithUserId")}
-                  />
-                </Input.Wrapper>
-
-                <Input.HelperText />
-              </Input.Root>
-
-              {habitBeingEdited.isSharedWithMe && (
-                <p className={styles.readOnlyNote}>
-                  Só quem compartilhou este hábito pode mudar isso.
-                </p>
-              )}
+                {habitBeingEdited.isSharedWithMe && (
+                  <p className={styles.readOnlyNote}>
+                    Só quem compartilhou este hábito pode mudar isso.
+                  </p>
+                )}
+              </CollapsibleSection>
             </Form.Wrapper>
 
             {submitError && <p className={styles.formError}>{submitError}</p>}

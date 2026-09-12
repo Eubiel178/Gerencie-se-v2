@@ -11,3 +11,21 @@
   color: var(--color-text-muted);
   font-size: var(--font-size-xs);
 }
+
+.titleField {
+  border: none;
+  border-bottom: 2px solid var(--color-border);
+  border-radius: 0;
+  padding: var(--space-2) 0;
+  background: transparent;
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+}
+.titleField:hover:not(:disabled, :focus-visible) {
+  border-bottom-color: color-mix(in srgb, var(--color-highlight) 40%, var(--color-border));
+}
+.titleField:focus-visible {
+  border-bottom-color: var(--color-highlight);
+  outline: none;
+  box-shadow: none;
+}
