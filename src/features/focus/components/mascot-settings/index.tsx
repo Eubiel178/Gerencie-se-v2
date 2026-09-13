@@ -79,7 +79,7 @@ export function MascotSettings({ mascot }: { mascot: IMascotState }) {
 
       <Form.Wrapper>
         <Input.Root sharedProps={{ error: errors.name?.message }}>
-          <Input.Label>Nome do mascote</Input.Label>
+          <Input.Label htmlFor="name">Nome do mascote</Input.Label>
           <Input.Wrapper>
             <Input.Field {...register("name")} placeholder="Chunchumaru" />
           </Input.Wrapper>
@@ -87,7 +87,7 @@ export function MascotSettings({ mascot }: { mascot: IMascotState }) {
         </Input.Root>
 
         <Input.Root sharedProps={{ error: errors.personality?.message }}>
-          <Input.Label>Personalidade</Input.Label>
+          <Input.Label htmlFor="personality">Personalidade</Input.Label>
           <Input.Wrapper>
             <Input.FieldSelect {...register("personality")} optionsArray={PERSONALITY_OPTIONS} />
           </Input.Wrapper>
@@ -95,7 +95,7 @@ export function MascotSettings({ mascot }: { mascot: IMascotState }) {
         </Input.Root>
 
         <Input.Root sharedProps={{ error: errors.species?.message }}>
-          <Input.Label>Espécie</Input.Label>
+          <Input.Label htmlFor="species">Espécie</Input.Label>
           <Input.Wrapper>
             <Input.FieldSelect {...register("species")} optionsArray={SPECIES_OPTIONS} />
           </Input.Wrapper>

@@ -35,6 +35,7 @@ const EVENT_REACTION: Record<MascotEventType, ReactiveState> = {
   "task-completed": "celebrate",
   "goal-completed": "celebrate",
   "habit-completed": "happy",
+  "routine-completed": "happy",
   "achievement-unlocked": "celebrate",
   "hydration-logged": "happy",
   "action-error": "sad",

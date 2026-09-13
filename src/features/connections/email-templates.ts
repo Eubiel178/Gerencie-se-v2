@@ -1,3 +1,5 @@
+import { appUrl } from "@/lib/app-url";
+
 /** HTML simples e inline (sem CSS externo) — e-mail é lido em clientes que
  * ignoram <style> em muitos casos, então cores/espaçamento vão direto no
  * atributo `style` de cada tag, com a paleta do produto hardcoded aqui de
@@ -29,10 +31,6 @@ export function inviteEmailHtml(params: { inviterName: string; hasAccount: boole
       </p>
     </div>
   `.trim();
-}
-
-function appUrl(): string {
-  return process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 }
 
 function escapeHtml(value: string): string {

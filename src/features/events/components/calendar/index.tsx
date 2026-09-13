@@ -7,16 +7,16 @@ import interactionPlugin from "@fullcalendar/interaction";
 
 import { IEvent } from "@/features/events/domain";
 
+import styles from "./calendar.module.css";
+
 export function Calendar({ eventsList }: { eventsList: IEvent[] }) {
   return (
-    <div>
+    <div className={styles.wrapper}>
       <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
         locale="pt-br"
         height={500}
-        dayHeaderClassNames="bg-[var(--color-surface-elevated)] text-[var(--color-text)]"
-        dayCellClassNames="text-sm"
         headerToolbar={{
           left: "prev,next today",
           center: "title",

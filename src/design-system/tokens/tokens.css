@@ -39,6 +39,13 @@
   --color-on-danger: #ffffff;
   --color-on-info: #ffffff;
 
+  /* Quinto tom semântico, entre --color-warning e --color-danger — usado
+     hoje só pela prioridade "alta" de tarefa (baixa/média/alta/crítica:
+     4 níveis, mas success/warning/danger/info só cobrem 3 tons de
+     severidade "acionável"). Antes hardcoded em chip-group.module.css. */
+  --color-priority-high: #f97316;
+  --color-on-priority-high: #211002;
+
   --color-shadow: rgba(15, 23, 42, 0.12);
   --color-overlay: rgba(15, 18, 30, 0.45);
 
@@ -77,6 +84,28 @@
   --duration-base: 200ms;
   --duration-slow: 320ms;
   --easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /*
+   * Breakpoints — NÃO são custom properties utilizáveis em `@media`: a
+   * spec de CSS não permite `var()` dentro da condição de um `@media`
+   * (só dentro do bloco de declarações). Sem um pré-processador (Sass,
+   * postcss-custom-media), não há como ter um token de verdade aqui —
+   * isto é só documentação de quais valores já são usados no projeto,
+   * pra copiar em vez de inventar um novo:
+   *
+   *   640px — breakpoint mobile mais comum (workspace, tasks, goals,
+   *           habits, routine, assistant/widget)
+   *   720px — colapso da sidebar em `home-layout.module.css` (decisão
+   *           estrutural, não mexer sem testar visualmente em várias
+   *           larguras — não é só cosmético)
+   *   760px — landing page + tela de auth (login/registro)
+   *   768px — dashboard
+   *
+   * 720/760/768 são conceitualmente "o mesmo" corte mobile↔tablet mas
+   * divergiram com o tempo — unificar é uma melhoria real, mas exige
+   * validação visual em cada breakpoint antes de mudar (ver seção 84 do
+   * guia do projeto), não incluída nesta limpeza.
+   */
 }
 
 /* Tema escuro automático (segue o SO) — só quando o usuário não escolheu
@@ -104,6 +133,9 @@
     --color-on-warning: #451a03;
     --color-on-danger: #450a0a;
     --color-on-info: #051d2c;
+
+    --color-priority-high: #fb923c;
+    --color-on-priority-high: #431407;
 
     --color-shadow: rgba(0, 0, 0, 0.519);
     --color-overlay: rgba(0, 0, 0, 0.6);
@@ -133,6 +165,9 @@
   --color-on-warning: #451a03;
   --color-on-danger: #450a0a;
   --color-on-info: #051d2c;
+
+  --color-priority-high: #fb923c;
+  --color-on-priority-high: #431407;
 
   --color-shadow: rgba(0, 0, 0, 0.519);
   --color-overlay: rgba(0, 0, 0, 0.6);

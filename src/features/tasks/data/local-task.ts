@@ -8,7 +8,7 @@ import type { TaskSyncStatus } from "@/features/tasks/domain";
 import { db } from "@/db/client";
 import { taskSteps, tasks, users } from "@/db/schema";
 import { requireUserId } from "@/lib/require-user-id";
-import { assertAcceptedConnection } from "@/lib/assert-accepted-connection";
+import { assertAcceptedConnection, resolveSharedWithUserIdOnUpdate } from "@/lib/assert-accepted-connection";
 
 export type UpdateTaskSyncStateParams = {
   id: string;
@@ -129,15 +129,12 @@ export class LocalTask
     // colaborador editando a tarefa (título, prioridade, etc.) nunca
     // consegue alterar isso de tabela, seu valor de `sharedWithUserId` no
     // formulário é simplesmente ignorado.
-    const isOwner = existing.userId === userId;
-    let nextSharedWithUserId = existing.sharedWithUserId;
-
-    if (isOwner && params.sharedWithUserId !== existing.sharedWithUserId) {
-      if (params.sharedWithUserId) {
-        await assertAcceptedConnection(userId, params.sharedWithUserId);
-      }
-      nextSharedWithUserId = params.sharedWithUserId || null;
-    }
+    const nextSharedWithUserId = await resolveSharedWithUserIdOnUpdate({
+      userId,
+      isOwner: existing.userId === userId,
+      currentSharedWithUserId: existing.sharedWithUserId,
+      requestedSharedWithUserId: params.sharedWithUserId,
+    });
 
     await db
       .update(tasks)

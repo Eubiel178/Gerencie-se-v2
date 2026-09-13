@@ -10,7 +10,7 @@ import {
   updateHabitSchema,
 } from "@/validation/habit-schema";
 
-type ActionResult = { error: string | null };
+import type { ActionResult } from "@/types/action-result";
 
 export async function createHabitAction(
   data: domain.CreateHabit.Params

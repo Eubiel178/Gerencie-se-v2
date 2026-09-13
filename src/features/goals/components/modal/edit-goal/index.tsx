@@ -1,13 +1,6 @@
 "use client";
 
-import { useState } from "react";
-
-import { useRouter } from "next/navigation";
-
 import dayjs from "dayjs";
-
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/goal-schema";
 
@@ -17,6 +10,7 @@ import { Icon } from "@/components/icon";
 import { updateGoalAction } from "@/features/goals/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
 import { ShareReadOnlyNote } from "@/features/connections/components/share-readonly-note";
+import { useFormModal } from "@/hooks/use-form-modal";
 
 import { FormData, IEditGoalProps, PRIORITY_OPTIONS } from "../interfaces";
 
@@ -29,21 +23,18 @@ const DEADLINE_SHORTCUTS = [
 ];
 
 export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
-  const router = useRouter();
-
-  const [isOpen, setIsOpen] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-
   const {
-    reset,
     register,
     setValue,
     watch,
     formState: { errors, isSubmitting },
-    handleSubmit,
-  } = useForm<FormData>({
-    mode: "onChange",
-    resolver: zodResolver(validationSchema),
+    isOpen,
+    openModal,
+    closeModal,
+    submitError,
+    handleFormSubmit,
+  } = useFormModal<FormData>({
+    schema: validationSchema,
     defaultValues: {
       title: goalBeingEdited.title,
       description: goalBeingEdited.description,
@@ -51,35 +42,18 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
       priority: goalBeingEdited.priority,
       sharedWithUserId: goalBeingEdited.sharedWithUserId ?? "",
     },
+    onSubmit: (data) =>
+      updateGoalAction({
+        id: goalBeingEdited.id,
+        title: data.title,
+        description: data.description,
+        deadline: data.deadline || null,
+        priority: data.priority,
+        sharedWithUserId: data.sharedWithUserId,
+      }),
   });
 
   const priority = watch("priority");
-
-  const closeModal = () => {
-    setIsOpen(false);
-    reset();
-  };
-
-  const handleFormSubmit = async (data: FormData) => {
-    setSubmitError(null);
-
-    const result = await updateGoalAction({
-      id: goalBeingEdited.id,
-      title: data.title,
-      description: data.description,
-      deadline: data.deadline || null,
-      priority: data.priority,
-      sharedWithUserId: data.sharedWithUserId,
-    });
-
-    if (result.error) {
-      setSubmitError(result.error);
-      return;
-    }
-
-    closeModal();
-    router.refresh();
-  };
 
   return (
     <>
@@ -88,9 +62,7 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
         root={{
           tone: "highlight",
           "aria-label": `Editar objetivo ${goalBeingEdited.title}`,
-          onClick: function () {
-            setIsOpen(true);
-          },
+          onClick: openModal,
         }}
       />
 
@@ -98,7 +70,7 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
         <Modal onClose={closeModal}>
           <ModalHeader title="Editar Objetivo" onClose={closeModal} />
 
-          <Form.Root onSubmit={handleSubmit(handleFormSubmit)}>
+          <Form.Root onSubmit={handleFormSubmit}>
             <Form.Wrapper>
               <Input.Root sharedProps={{ error: errors.title?.message }}>
                 <Input.Wrapper>
@@ -114,7 +86,7 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
               </Input.Root>
 
               <Input.Root sharedProps={{ error: errors.description?.message }}>
-                <Input.Label>
+                <Input.Label htmlFor="description">
                   <Icon name="FaAlignLeft" size={12} /> Descrição
                 </Input.Label>
                 <Input.Wrapper>
@@ -129,7 +101,7 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
               </Input.Root>
 
               <Input.Root sharedProps={{ error: errors.deadline?.message }}>
-                <Input.Label>
+                <Input.Label htmlFor="deadline">
                   <Icon name="FaCalendarAlt" size={12} /> Prazo (opcional)
                 </Input.Label>
 
@@ -166,7 +138,7 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
 
               <CollapsibleSection label="Mais opções">
                 <Input.Root sharedProps={{ error: errors.sharedWithUserId?.message }}>
-                  <Input.Label>Compartilhar com</Input.Label>
+                  <Input.Label htmlFor="sharedWithUserId">Compartilhar com</Input.Label>
 
                   <Input.Wrapper>
                     <ShareSelect

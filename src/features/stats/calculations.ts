@@ -216,30 +216,3 @@ export function calculateAverageGoalProgress(
   return Math.round(active.reduce((sum, goal) => sum + goal.progressPercent, 0) / active.length);
 }
 
-/** Quantas metas (ativas — arquivadas já nem chegam de `loadAll`) foram
- * criadas em cada uma das `weeksBack` semanas. Diferente das outras
- * métricas de "por semana": metas não têm um valor histórico acumulável
- * (progresso é sempre o valor ATUAL, não guardado por data — ver
- * `calculateGoalProgress`), então "quantas foram criadas" é a única
- * dimensão de verdade temporal e real que o dado permite. */
-export function calculateGoalsCreatedByWeek(
-  goals: { createdAt: Date }[],
-  weeksBack: number = 4,
-  now: Dayjs = dayjs()
-): number[] {
-  const weeks: number[] = [];
-
-  for (let i = weeksBack - 1; i >= 0; i--) {
-    const weekEnd = now.subtract(i * STATS_WINDOW_DAYS, "day");
-    const weekStart = weekEnd.subtract(STATS_WINDOW_DAYS, "day");
-
-    const count = goals.filter((goal) => {
-      const date = dayjs(goal.createdAt);
-      return date.isAfter(weekStart) && !date.isAfter(weekEnd);
-    }).length;
-
-    weeks.push(count);
-  }
-
-  return weeks;
-}

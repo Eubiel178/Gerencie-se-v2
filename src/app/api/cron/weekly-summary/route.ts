@@ -1,3 +1,5 @@
+import { timingSafeEqual } from "node:crypto";
+
 import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 
@@ -25,8 +27,8 @@ export async function POST(request: Request) {
     );
   }
 
-  const authHeader = request.headers.get("authorization");
-  if (authHeader !== `Bearer ${secret}`) {
+  const authHeader = request.headers.get("authorization") ?? "";
+  if (!isValidCronSecret(authHeader, secret)) {
     return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
   }
 
@@ -50,4 +52,20 @@ export async function POST(request: Request) {
     sent: results.filter((result) => result.sent).length,
     failed: results.filter((result) => !result.sent),
   });
+}
+
+/**
+ * Compara em tempo constante para não vazar o `CRON_SECRET` por
+ * temporização (cada byte igual antecipadamente sairia mais rápido numa
+ * comparação `!==` comum). Chamada externa (cron-job.org, GitHub Actions
+ * etc.) manda o segredo pela internet — vale a proteção mesmo sendo um
+ * endpoint de baixo valor de ataque.
+ */
+function isValidCronSecret(authHeader: string, secret: string): boolean {
+  const expected = Buffer.from(`Bearer ${secret}`);
+  const received = Buffer.from(authHeader);
+
+  if (received.length !== expected.length) return false;
+
+  return timingSafeEqual(received, expected);
 }

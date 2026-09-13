@@ -64,9 +64,9 @@
   color: var(--color-on-warning);
 }
 .chip[data-tone="high"][data-selected="true"] {
-  background: #f97316;
-  border-color: #f97316;
-  color: #211002;
+  background: var(--color-priority-high);
+  border-color: var(--color-priority-high);
+  color: var(--color-on-priority-high);
 }
 .chip[data-tone="critical"][data-selected="true"] {
   background: var(--color-danger);

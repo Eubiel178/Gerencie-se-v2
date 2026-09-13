@@ -1,14 +1,6 @@
 "use client";
 
-import { useState } from "react";
-
-import { useRouter } from "next/navigation";
-
 import dayjs from "dayjs";
-
-import { useForm } from "react-hook-form";
-
-import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/event-schema";
 
@@ -18,6 +10,7 @@ import inputStyles from "@/components/form/input/styles.module.css";
 
 import { createEventAction } from "@/features/events/actions";
 import { nowForDatetimeLocal } from "@/utils";
+import { useFormModal } from "@/hooks/use-form-modal";
 
 import { FormData, IModalProps } from "./interfaces";
 
@@ -39,64 +32,43 @@ const DURATION_SHORTCUTS = [
   { label: "+2h", minutes: 120 },
 ];
 
-export const AddEvent = ({ buttonText }: IModalProps) => {
-  const router = useRouter();
-  const [isOpen, setIsOpen] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
+function emptyFormValues(): FormData {
+  return {
+    title: "",
+    description: "",
+    start: nowForDatetimeLocal(),
+    end: "",
+    url: "",
+    backgroundColor: "#3788d8",
+  };
+}
 
+export const AddEvent = ({ buttonText }: IModalProps) => {
   const {
-    handleSubmit,
     formState: { errors, isSubmitting },
     register,
     reset,
     setValue,
     watch,
-  } = useForm<FormData>({
-    mode: "onChange",
-    resolver: zodResolver(validationSchema),
-    defaultValues: {
-      title: "",
-      description: "",
-      start: nowForDatetimeLocal(),
-      end: "",
-      url: "",
-      backgroundColor: "#3788d8",
-    },
+    isOpen,
+    openModal: openModalBase,
+    closeModal,
+    submitError,
+    handleFormSubmit,
+  } = useFormModal<FormData>({
+    schema: validationSchema,
+    defaultValues: emptyFormValues(),
+    onSubmit: (data) => createEventAction(data),
   });
 
   const start = watch("start");
   const backgroundColor = watch("backgroundColor");
 
-  const handleFormSubmit = async (data: FormData) => {
-    setSubmitError(null);
-
-    const result = await createEventAction(data);
-
-    if (result.error) {
-      setSubmitError(result.error);
-      return;
-    }
-
-    reset();
-    closeModal();
-    router.refresh();
-  };
-
-  const closeModal = () => {
-    setIsOpen(false);
-    reset();
-  };
-
+  // `start` precisa ser reiniciado pro horário ATUAL a cada abertura (não
+  // só no mount) — diferente dos outros campos, "agora" muda a cada vez.
   function openModal() {
-    reset({
-      title: "",
-      description: "",
-      start: nowForDatetimeLocal(),
-      end: "",
-      url: "",
-      backgroundColor: "#3788d8",
-    });
-    setIsOpen(true);
+    reset(emptyFormValues());
+    openModalBase();
   }
 
   return (
@@ -107,7 +79,7 @@ export const AddEvent = ({ buttonText }: IModalProps) => {
         <Modal onClose={closeModal}>
           <ModalHeader title="Novo Evento" onClose={closeModal} />
 
-          <Form.Root onSubmit={handleSubmit(handleFormSubmit)}>
+          <Form.Root onSubmit={handleFormSubmit}>
             <Form.Wrapper className={styles.formWrapper}>
               <Input.Root sharedProps={{ error: errors.title?.message }}>
                 <Input.Wrapper>
@@ -123,7 +95,7 @@ export const AddEvent = ({ buttonText }: IModalProps) => {
               </Input.Root>
 
               <Input.Root sharedProps={{ error: errors.start?.message }}>
-                <Input.Label>
+                <Input.Label htmlFor="start">
                   <Icon name="FaCalendarAlt" size={12} /> Início
                 </Input.Label>
                 <Input.Wrapper>
@@ -137,7 +109,7 @@ export const AddEvent = ({ buttonText }: IModalProps) => {
               </Input.Root>
 
               <Input.Root sharedProps={{ error: errors.end?.message }}>
-                <Input.Label>Fim (opcional)</Input.Label>
+                <Input.Label htmlFor="end">Fim (opcional)</Input.Label>
                 <Input.Wrapper>
                   <Input.Field
                     {...register("end")}
@@ -195,7 +167,7 @@ export const AddEvent = ({ buttonText }: IModalProps) => {
 
               <CollapsibleSection label="Mais opções">
                 <Input.Root sharedProps={{ error: errors.description?.message }}>
-                  <Input.Label>
+                  <Input.Label htmlFor="description">
                     <Icon name="FaAlignLeft" size={12} /> Descrição
                   </Input.Label>
                   <Input.Wrapper>
@@ -209,7 +181,7 @@ export const AddEvent = ({ buttonText }: IModalProps) => {
                 </Input.Root>
 
                 <Input.Root sharedProps={{ error: errors.url?.message }}>
-                  <Input.Label>Link (opcional)</Input.Label>
+                  <Input.Label htmlFor="url">Link (opcional)</Input.Label>
                   <Input.Wrapper>
                     <Input.Field
                       {...register("url")}

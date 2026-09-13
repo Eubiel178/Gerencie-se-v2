@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { getTaskAttachmentFetcher } from "@/features/tasks/data/get-task-attachment-fetcher";
-import { MAX_ATTACHMENT_SIZE_BYTES, formatFileSize } from "@/lib/upload-limits";
+import { MAX_ATTACHMENT_SIZE_BYTES, formatFileSize, isAttachmentTypeAllowed } from "@/lib/upload-limits";
 
 const TOO_LARGE_MESSAGE = `Arquivo muito grande. O tamanho máximo permitido é ${formatFileSize(MAX_ATTACHMENT_SIZE_BYTES)} por arquivo.`;
+const TYPE_NOT_ALLOWED_MESSAGE = "Tipo de arquivo não permitido. Envie imagens, PDF ou documentos de texto/planilha/apresentação.";
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ taskId: string }> }) {
   const { taskId } = await params;
@@ -18,9 +19,10 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
 
 /**
  * Upload de anexo. De propósito um Route Handler, não uma Server Action:
- * Server Actions têm um limite de corpo de 1MB por padrão no Next.js, e
- * aqui o teto real é `MAX_ATTACHMENT_SIZE_BYTES` (10MB) — um Route
- * Handler lendo `request.formData()` não tem esse teto embutido.
+ * Server Actions têm um limite de corpo de 1MB por padrão no Next.js. O
+ * teto real aplicado aqui é `MAX_ATTACHMENT_SIZE_BYTES`, escolhido para
+ * ficar dentro do limite de 4,5MB que a própria Vercel impõe a toda
+ * Serverless Function (ver comentário em `upload-limits.ts`).
  */
 export async function POST(request: NextRequest, { params }: { params: Promise<{ taskId: string }> }) {
   const { taskId } = await params;
@@ -39,6 +41,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
   if (!(file instanceof File)) {
     return NextResponse.json({ error: "Nenhum arquivo enviado." }, { status: 400 });
+  }
+
+  if (!isAttachmentTypeAllowed(file.type)) {
+    return NextResponse.json({ error: TYPE_NOT_ALLOWED_MESSAGE }, { status: 415 });
   }
 
   // `file.size` vem do que o Next efetivamente leu do corpo da

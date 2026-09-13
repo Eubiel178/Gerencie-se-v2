@@ -6,7 +6,7 @@ import * as domain from "@/features/hydration/domain";
 import { getHydrationFetcher } from "@/features/hydration/data/get-hydration-fetcher";
 import { logWaterSchema, updateGoalSchema } from "@/validation/hydration-schema";
 
-type ActionResult = { error: string | null };
+import type { ActionResult } from "@/types/action-result";
 
 export async function logWaterAction(data: domain.LogWater.Params): Promise<ActionResult> {
   const parsed = logWaterSchema.safeParse(data);

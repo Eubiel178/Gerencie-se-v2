@@ -129,6 +129,7 @@ export class MascotRuntime {
 
     window.addEventListener("resize", this.handleResize);
     this.reducedMotionQuery.addEventListener("change", this.handleReducedMotionChange);
+    document.addEventListener("visibilitychange", this.handleVisibilityChange);
     this.unsubscribeEvent = subscribeMascotEvent((type) => this.behavior.handleEvent(type));
     this.unsubscribeIdleWatch = watchUserIdle(() => emitMascotEvent("user-idle"));
 
@@ -142,6 +143,7 @@ export class MascotRuntime {
 
     window.removeEventListener("resize", this.handleResize);
     this.reducedMotionQuery.removeEventListener("change", this.handleReducedMotionChange);
+    document.removeEventListener("visibilitychange", this.handleVisibilityChange);
     this.unsubscribeEvent?.();
     this.unsubscribeEvent = null;
     this.unsubscribeIdleWatch?.();
@@ -220,6 +222,20 @@ export class MascotRuntime {
     this.mobile = isMobileViewport();
     this.bounds = computeViewportBounds(this.character.frameWidth, this.character.frameHeight);
     this.behavior.clampToBounds(this.bounds);
+  };
+
+  // Aba em segundo plano por muito tempo não deveria continuar gastando
+  // CPU/bateria animando um bichinho que ninguém está vendo. `ticker.stop`
+  // pausa o loop de frame inteiro (não só a animação do sprite); volta a
+  // rodar sozinho quando a aba fica visível de novo.
+  private handleVisibilityChange = (): void => {
+    if (!this.app) return;
+
+    if (document.hidden) {
+      this.app.ticker.stop();
+    } else {
+      this.app.ticker.start();
+    }
   };
 
   private handleReducedMotionChange = (event: MediaQueryListEvent): void => {

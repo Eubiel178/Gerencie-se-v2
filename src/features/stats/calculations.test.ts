@@ -6,7 +6,6 @@ import dayjs from "dayjs";
 import {
   calculateAverageGoalProgress,
   calculateBestHabitStreak,
-  calculateGoalsCreatedByWeek,
   calculateHabitCompletionsByWeek,
   calculateHydrationAdherence,
   calculateHydrationAdherenceByWeek,
@@ -221,12 +220,3 @@ test("calculateHabitCompletionsByWeek: conta conclusões por semana", () => {
   assert.deepEqual(calculateHabitCompletionsByWeek(dates, 4, NOW), [0, 1, 0, 2]);
 });
 
-test("calculateGoalsCreatedByWeek: conta metas criadas por semana", () => {
-  const goals = [
-    { createdAt: NOW.subtract(1, "day").toDate() },
-    { createdAt: NOW.subtract(15, "day").toDate() },
-    { createdAt: NOW.subtract(15, "day").toDate() },
-  ];
-
-  assert.deepEqual(calculateGoalsCreatedByWeek(goals, 4, NOW), [0, 2, 0, 1]);
-});

@@ -1,4 +1,5 @@
-import { Auth, Figure, Main } from "./components";
+import { Auth } from "./components";
+import { Figure, Main } from "../components";
 import styles from "../auth-page.module.css";
 
 export function Register() {

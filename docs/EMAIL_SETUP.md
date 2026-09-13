@@ -1,14 +1,22 @@
-# Configuração de e-mail (Resend) — convites de compartilhamento
+# Configuração de e-mail (Resend)
 
 Este guia cobre a configuração necessária no [Resend](https://resend.com)
-para o app conseguir enviar o e-mail de convite quando você compartilha
-uma tarefa, item de rotina, hábito ou objetivo com outra pessoa (ver
-`src/lib/email.ts` e `src/features/connections`).
+para o app conseguir enviar os e-mails transacionais que envia hoje, todos
+através do mesmo `sendEmail()` em `src/lib/email.ts`:
 
-Sem essa configuração, o app funciona normalmente — só não envia o
-e-mail. O vínculo (convite) ainda é criado no banco e aparece pra pessoa
-convidada assim que ela entrar ou criar conta usando o mesmo e-mail que
-você convidou.
+- **Convite de compartilhamento** — ao compartilhar uma tarefa, item de
+  rotina, hábito ou objetivo com outra pessoa (`src/features/connections`).
+- **Aviso de tentativas de login** — várias senhas erradas seguidas na
+  mesma conta (`src/lib/login-attempt-tracker.ts`).
+- **Redefinição de senha** — link enviado em "Esqueceu sua senha?" na
+  tela de login (`src/lib/password-reset.ts`).
+
+Sem essa configuração, o app funciona normalmente — só não envia esses
+e-mails. O convite ainda é criado no banco e aparece pra pessoa convidada
+assim que ela entrar ou criar conta usando o mesmo e-mail; o aviso de
+login some sem consequência (nunca bloqueia a conta); e a redefinição de
+senha simplesmente não chega — o usuário precisa pedir de novo depois que
+o Resend estiver configurado.
 
 ## 1. Criar a conta
 
@@ -29,20 +37,22 @@ você convidou.
 Por padrão, o app envia pelo domínio de teste do próprio Resend
 (`onboarding@resend.dev`, ver `FROM_ADDRESS` em `src/lib/email.ts`). Esse
 domínio **só entrega para o e-mail da conta que criou a chave de API** —
-suficiente para testar sozinho, mas não para convidar outra pessoa de
-verdade.
+suficiente para testar sozinho, mas não para qualquer um dos três
+e-mails acima chegar pra outra pessoa de verdade (convidado, ou você
+mesmo com outro endereço).
 
-Para enviar convites para qualquer e-mail (uso real):
+Para enviar para qualquer e-mail (uso real):
 
 1. Vá em **Domains → Add Domain** no painel do Resend e siga o passo a
    passo (adicionar alguns registros DNS no seu domínio).
 2. Depois de verificado, troque `FROM_ADDRESS` em `src/lib/email.ts` para
-   um endereço desse domínio (ex.: `"Gerencie-se <convites@seudominio.com>"`).
+   um endereço desse domínio (ex.: `"Gerencie-se <contato@seudominio.com>"`)
+   — vale para os três tipos de e-mail, que compartilham o mesmo remetente.
 
-Se você não tiver um domínio próprio, pode deixar como está: o convite
-ainda é criado normalmente, só o e-mail não chega — a pessoa convidada
-consegue aceitar o vínculo assim que criar conta com o e-mail convidado,
-mesmo sem ter recebido nada.
+Se você não tiver um domínio próprio, pode deixar como está: convite e
+aviso de login continuam funcionando normalmente por trás (só o e-mail
+não chega), mas a redefinição de senha para outra conta que não seja a
+sua própria fica inutilizável até verificar um domínio.
 
 ## 4. Variáveis de ambiente
 

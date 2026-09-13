@@ -84,6 +84,48 @@ export const verificationTokens = pgTable(
 );
 
 /**
+ * Token de recuperação de senha — dedicada, e não a `verification_token`
+ * acima (que é gerenciada pelo `DrizzleAdapter` do Auth.js para os
+ * próprios fluxos dele, ex. login por link mágico, que este app não usa
+ * hoje). Um nome próprio evita qualquer confusão futura se um provider
+ * baseado em e-mail for adicionado depois.
+ *
+ * O token em si já é a chave primária (256 bits de aleatoriedade — ver
+ * `src/lib/password-reset.ts` — imprevisível o bastante pra não precisar
+ * de um `id` separado). Uma linha é consumida (apagada) assim que usada
+ * com sucesso, então "existir" já significa "ainda válido, ainda não
+ * usado" — não precisa de uma coluna `used` à parte.
+ */
+export const passwordResetTokens = pgTable("password_reset_token", {
+  token: text("token").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  expiresAt: timestamp("expires_at", { mode: "date" }).notNull(),
+});
+
+/**
+ * Rastreia tentativas de login por senha malsucedidas, só para decidir
+ * quando avisar o dono da conta por e-mail — nunca para bloquear login
+ * (decisão consciente: um contador com bloqueio pode trancar o próprio
+ * usuário fora da conta por engano; ver `src/lib/login-attempt-guard.ts`
+ * para a lógica de janela/limiar/cooldown). Uma linha por usuário, só
+ * para quem tem senha (login local) — login via Google não passa por
+ * `authorize()`, não gera tentativa aqui.
+ */
+export const loginAttempts = pgTable("login_attempt", {
+  userId: text("user_id")
+    .primaryKey()
+    .references(() => users.id, { onDelete: "cascade" }),
+  failedCount: integer("failed_count").notNull().default(0),
+  // Início da janela atual de tentativas (reinicia quando passa muito
+  // tempo desde a última tentativa, ou logo após um alerta ser enviado —
+  // ver `recordFailedAttempt`). Nulo = nenhuma tentativa falha registrada.
+  windowStartedAt: timestamp("window_started_at", { mode: "date" }),
+  lastAlertSentAt: timestamp("last_alert_sent_at", { mode: "date" }),
+});
+
+/**
  * Conexão com o Google Agenda — completamente separada da tabela `account`
  * (que é só identidade de login). Uma linha por usuário: se ele desconectar
  * e conectar de novo, sobrescrevemos em vez de acumular lixo.
@@ -292,6 +334,37 @@ export const routineItems = pgTable("routine_item", {
     .$defaultFn(() => new Date()),
 });
 
+/** Um registro por item de rotina por dia concluído — mesmo padrão de
+ * `habit_log` (ver comentário lá): "feito hoje" é sempre calculado a
+ * partir daqui, nunca guardado como campo solto em `routine_item`. */
+export const routineItemLogs = pgTable(
+  "routine_item_log",
+  {
+    // Não é chave primária: a chave real é a composta abaixo
+    // (routineItemId, date) — só um identificador estável da linha.
+    id: text("id")
+      .notNull()
+      .$defaultFn(() => crypto.randomUUID()),
+    routineItemId: text("routine_item_id")
+      .notNull()
+      .references(() => routineItems.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    date: text("date").notNull(), // "YYYY-MM-DD"
+    completedAt: timestamp("completed_at", { mode: "date" })
+      .notNull()
+      .$defaultFn(() => new Date()),
+  },
+  (table) => [
+    // Nunca dois registros do mesmo item no mesmo dia (idempotente ao
+    // marcar/desmarcar duas vezes seguidas) — mesmo raciocínio de
+    // `habit_log`, inclusive o compartilhamento: dono e colaborador
+    // compartilham o MESMO registro do dia, quem marcar primeiro "trava".
+    primaryKey({ columns: [table.routineItemId, table.date] }),
+  ]
+);
+
 export const goals = pgTable("goal", {
   id: text("id")
     .primaryKey()
@@ -435,6 +508,21 @@ export const userPreferences = pgTable("user_preference", {
   userId: text("user_id")
     .primaryKey()
     .references(() => users.id, { onDelete: "cascade" }),
+  // Fuso IANA (ex. "America/Sao_Paulo") capturado do NAVEGADOR na primeira
+  // vez que o usuário abre o app depois desta feature existir (ver
+  // `src/features/profile/actions.ts` → `saveUserTimezoneAction` e o
+  // componente que a chama em `src/components/header`). Nulo até essa
+  // primeira captura acontecer.
+  //
+  // Por que existe: rodando localmente, o fuso do processo Node sempre
+  // batia com o do usuário (mesma máquina) — mas hospedado (Vercel), o
+  // servidor roda em UTC, então usar o fuso do processo pra montar/ler
+  // eventos do Google Agenda passaria a interpretar toda hora agendada
+  // como se fosse UTC, gerando um deslocamento de horas em todo evento
+  // sincronizado. Ver `src/lib/google-calendar.ts` (`getUserTimezone`,
+  // usado em vez de `Intl.DateTimeFormat().resolvedOptions().timeZone`
+  // do servidor).
+  timezone: text("timezone"),
   hydrationDailyGoalMl: integer("hydration_daily_goal_ml").notNull().default(2000),
   assistantEnabled: boolean("assistant_enabled").notNull().default(true),
   assistantReducedPresence: boolean("assistant_reduced_presence").notNull().default(false),

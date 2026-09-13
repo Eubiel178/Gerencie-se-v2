@@ -3,7 +3,7 @@
 import { useRouter, usePathname } from "next/navigation";
 import { useParamsUrl } from "@/hooks/use-params-url";
 
-import { Input, ChipGroup } from "@/components";
+import { Input } from "@/components";
 import { Icon } from "@/components/icon";
 import { AddTask } from "../modal";
 import { PRIORITY_OPTIONS } from "../modal/interfaces";
@@ -88,19 +88,27 @@ export function TasksListHeader({
           </Input.Wrapper>
         </Input.Root>
 
-        <ChipGroup
-          aria-label="Filtrar por status"
-          options={STATUS_OPTIONS}
-          value={statusFilter}
-          onChange={(value) => setStatusFilter(value as typeof statusFilter)}
-        />
+        <Input.Root>
+          <Input.Wrapper>
+            <Input.FieldSelect
+              aria-label="Filtrar por status"
+              optionsArray={STATUS_OPTIONS}
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value as typeof statusFilter)}
+            />
+          </Input.Wrapper>
+        </Input.Root>
 
-        <ChipGroup
-          aria-label="Filtrar por prioridade"
-          options={PRIORITY_FILTER_OPTIONS}
-          value={priorityFilter}
-          onChange={(value) => setPriorityFilter(value as typeof priorityFilter)}
-        />
+        <Input.Root>
+          <Input.Wrapper>
+            <Input.FieldSelect
+              aria-label="Filtrar por prioridade"
+              optionsArray={PRIORITY_FILTER_OPTIONS}
+              value={priorityFilter}
+              onChange={(event) => setPriorityFilter(event.target.value as typeof priorityFilter)}
+            />
+          </Input.Wrapper>
+        </Input.Root>
 
         <button
           type="button"

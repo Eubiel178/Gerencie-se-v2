@@ -206,16 +206,23 @@ Para rodar esses testes, depois de preencher as variáveis de ambiente:
   push do Google. A sincronização reversa acontece a cada carregamento da
   página inicial. Numa versão hospedada, isso pode evoluir para webhooks
   (`watch`) do Google Calendar.
-- **Fuso horário**: os horários de evento assumem que o fuso do
-  computador que roda o servidor é o fuso do usuário — válido para este
-  app local de um único usuário; numa versão hospedada/multiusuário, isso
-  precisaria vir do perfil de cada usuário.
-- **`trustHost: true` no Auth.js**: necessário para o app funcionar em
-  modo de produção (`next start`) sem um domínio público configurado.
-  Documentado no código (`src/lib/auth.config.ts`) como uma decisão válida
-  para uso local; numa hospedagem real atrás de proxy, o recomendado é
-  configurar `AUTH_URL`/`AUTH_TRUST_HOST` no ambiente em vez de fixar isso
-  no código.
+- **Fuso horário — corrigido.** Quando este relatório foi escrito, os
+  horários de evento assumiam que o fuso do processo Node (servidor) era
+  o fuso do usuário — válido só rodando localmente na própria máquina do
+  usuário, mas quebraria numa hospedagem real (servidor em UTC, por
+  exemplo) para qualquer usuário fora de UTC: todo evento sincronizado
+  sairia deslocado em algumas horas, nos dois sentidos (criar/atualizar
+  no Google E ler de volta via polling). Corrigido: o fuso IANA real do
+  navegador é capturado uma vez por sessão (`useCaptureTimezone`,
+  `src/hooks/`) e salvo em `user_preference.timezone`; `getUserTimezone`
+  (`src/features/profile/get-user-timezone.ts`) é a única fonte de fuso
+  usada por `src/lib/google-calendar.ts` agora — nunca mais o fuso do
+  processo do servidor.
+- **`trustHost` no Auth.js — corrigido.** Antes fixo em `true`
+  incondicionalmente; agora só confia no header Host em desenvolvimento
+  local ou rodando na Vercel (`process.env.VERCEL`), ou quando
+  `AUTH_TRUST_HOST=true` é definida explicitamente para outros hosts —
+  ver `src/lib/auth.config.ts`.
 - **Duração padrão do evento**: 30 minutos, já que as tarefas não têm
   campo de "hora de término" — só de início.
 

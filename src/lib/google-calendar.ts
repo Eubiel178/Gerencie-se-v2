@@ -1,10 +1,23 @@
 import "server-only";
 
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
 import { google, calendar_v3 } from "googleapis";
 import { eq } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import { googleConnections } from "@/db/schema";
+import { decryptToken, encryptToken } from "@/lib/token-encryption";
+import { getUserTimezone } from "@/features/profile/get-user-timezone";
+
+// Precisa dos plugins `utc`+`timezone` (não vem no dayjs "puro") pra
+// converter um instante absoluto (o que o Google devolve) pro fuso de um
+// usuário ESPECÍFICO — diferente de `new Date(x).getHours()`, que sempre
+// lê no fuso do processo rodando o código, nunca no de quem realmente
+// importa aqui.
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 /**
  * Integração com o Google Agenda — separada do login por completo (ver
@@ -28,13 +41,6 @@ export const CALENDAR_SCOPES = [
 // (GET, POST, ...) e alguns campos de config; qualquer outro export
 // quebra o build ("is not a valid Route export field").
 export const GOOGLE_CALENDAR_STATE_COOKIE = "google_calendar_oauth_state";
-
-// Este app roda localmente, na máquina do próprio usuário — por isso é
-// seguro assumir que o fuso horário do processo Node é o fuso horário
-// "certo" para interpretar os horários que o usuário digita. Numa versão
-// hospedada/multiusuário isso precisaria vir do perfil do usuário, não do
-// servidor — documentado como limitação conhecida no relatório final.
-const LOCAL_TIMEZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 const DEFAULT_EVENT_DURATION_MINUTES = 30;
 
@@ -120,8 +126,10 @@ export async function saveGoogleConnection(
   // O Google só devolve refresh_token na PRIMEIRA autorização (ou quando
   // forçamos com prompt=consent, que sempre usamos) — mas por segurança,
   // se por algum motivo vier vazio numa reconexão, preservamos o anterior
-  // em vez de apagar a capacidade de renovar o token.
-  const refreshToken = tokens.refresh_token ?? existing?.refreshToken;
+  // em vez de apagar a capacidade de renovar o token. `existing.refreshToken`
+  // já vem criptografado do banco — decifra antes de decidir o valor em
+  // texto puro que será (re)criptografado logo abaixo.
+  const refreshToken = tokens.refresh_token ?? (existing ? decryptToken(existing.refreshToken) : undefined);
 
   if (!refreshToken) {
     throw new Error(
@@ -133,13 +141,17 @@ export async function saveGoogleConnection(
     ? new Date(tokens.expiry_date)
     : new Date(Date.now() + 55 * 60 * 1000);
 
+  // Nunca gravar token em texto puro — ver `src/lib/token-encryption.ts`.
+  const encryptedAccessToken = encryptToken(tokens.access_token);
+  const encryptedRefreshToken = encryptToken(refreshToken);
+
   if (existing) {
     await db
       .update(googleConnections)
       .set({
         googleAccountEmail,
-        accessToken: tokens.access_token,
-        refreshToken,
+        accessToken: encryptedAccessToken,
+        refreshToken: encryptedRefreshToken,
         expiresAt,
       })
       .where(eq(googleConnections.userId, userId));
@@ -149,8 +161,8 @@ export async function saveGoogleConnection(
       userId,
       googleAccountEmail,
       calendarId: "primary",
-      accessToken: tokens.access_token,
-      refreshToken,
+      accessToken: encryptedAccessToken,
+      refreshToken: encryptedRefreshToken,
       expiresAt,
     });
   }
@@ -176,7 +188,7 @@ export async function disconnectGoogleCalendar(userId: string): Promise<void> {
   if (connection) {
     try {
       const client = getOAuth2Client();
-      await client.revokeToken(connection.accessToken);
+      await client.revokeToken(decryptToken(connection.accessToken));
     } catch {
       // Ignorado de propósito — ver comentário da função.
     }
@@ -193,20 +205,24 @@ async function getAuthorizedClient(userId: string) {
   const client = getOAuth2Client();
 
   client.setCredentials({
-    access_token: connection.accessToken,
-    refresh_token: connection.refreshToken,
+    access_token: decryptToken(connection.accessToken),
+    refresh_token: decryptToken(connection.refreshToken),
     expiry_date: connection.expiresAt.getTime(),
   });
 
   // googleapis renova o access token sozinho quando expira (usando o
   // refresh_token) e emite este evento com o novo token — persistimos na
-  // hora pra não perder a renovação quando o processo reiniciar.
+  // hora pra não perder a renovação quando o processo reiniciar. `tokens.*`
+  // chega em texto puro do googleapis; sempre criptografamos antes de
+  // gravar. `connection.accessToken`/`refreshToken` usados como fallback
+  // já estão criptografados (vieram direto do banco), então não precisam
+  // passar por `encryptToken` de novo.
   client.on("tokens", (tokens) => {
     void db
       .update(googleConnections)
       .set({
-        accessToken: tokens.access_token ?? connection.accessToken,
-        refreshToken: tokens.refresh_token ?? connection.refreshToken,
+        accessToken: tokens.access_token ? encryptToken(tokens.access_token) : connection.accessToken,
+        refreshToken: tokens.refresh_token ? encryptToken(tokens.refresh_token) : connection.refreshToken,
         expiresAt: tokens.expiry_date
           ? new Date(tokens.expiry_date)
           : connection.expiresAt,
@@ -260,13 +276,15 @@ function addMinutesLocal(dateTimeLocal: string, minutes: number): string {
   )}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
 }
 
-/** Formata um Date (instante absoluto) de volta pro formato de
- * `<input type="datetime-local">`, no fuso local do servidor — usado ao
- * ler de volta um evento que foi alterado no lado do Google. */
-function toDateTimeLocalInput(date: Date): string {
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
-    date.getDate()
-  )}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+/** Formata um instante absoluto de volta pro formato de
+ * `<input type="datetime-local">`, NO FUSO DE QUEM É DONO DO EVENTO —
+ * usado ao ler de volta um evento que foi alterado no lado do Google.
+ * Nunca usar `new Date(x).getHours()`/`formatDateForDatetimeLocalInput`
+ * aqui: aquilo lê no fuso do processo que está rodando o código (do
+ * servidor, não do usuário), que em produção não bate com o fuso de
+ * ninguém de verdade. */
+function toDateTimeLocalInput(instant: Date, timeZone: string): string {
+  return dayjs(instant).tz(timeZone).format("YYYY-MM-DDTHH:mm");
 }
 
 export type TaskForCalendar = {
@@ -285,6 +303,7 @@ export async function createCalendarEventForTask(
     throw new Error("Google Agenda não conectado.");
   }
 
+  const timeZone = await getUserTimezone(userId);
   const calendar = google.calendar({ version: "v3", auth: authorized.client });
   const start = toGoogleDateTime(task.scheduledAt);
   const end = toGoogleDateTime(addMinutesLocal(task.scheduledAt, DEFAULT_EVENT_DURATION_MINUTES));
@@ -294,8 +313,8 @@ export async function createCalendarEventForTask(
     requestBody: {
       summary: task.title,
       description: task.description,
-      start: { dateTime: start, timeZone: LOCAL_TIMEZONE },
-      end: { dateTime: end, timeZone: LOCAL_TIMEZONE },
+      start: { dateTime: start, timeZone },
+      end: { dateTime: end, timeZone },
       // Marca o evento como criado por este app — não é usado para achar o
       // evento de volta (isso é feito pelo `googleEventId` salvo na
       // tarefa), só ajuda a identificar a origem se o usuário olhar os
@@ -325,6 +344,7 @@ export async function updateCalendarEventForTask(
     throw new Error("Google Agenda não conectado.");
   }
 
+  const timeZone = await getUserTimezone(userId);
   const calendar = google.calendar({ version: "v3", auth: authorized.client });
   const start = toGoogleDateTime(task.scheduledAt);
   const end = toGoogleDateTime(addMinutesLocal(task.scheduledAt, DEFAULT_EVENT_DURATION_MINUTES));
@@ -335,8 +355,8 @@ export async function updateCalendarEventForTask(
     requestBody: {
       summary: task.title,
       description: task.description,
-      start: { dateTime: start, timeZone: LOCAL_TIMEZONE },
-      end: { dateTime: end, timeZone: LOCAL_TIMEZONE },
+      start: { dateTime: start, timeZone },
+      end: { dateTime: end, timeZone },
     },
   });
 
@@ -406,10 +426,12 @@ export async function getCalendarEventSnapshot(
       return null;
     }
 
+    const timeZone = await getUserTimezone(userId);
+
     return {
       title: data.summary ?? "",
       description: data.description ?? "",
-      scheduledAt: toDateTimeLocalInput(new Date(startDateTime)),
+      scheduledAt: toDateTimeLocalInput(new Date(startDateTime), timeZone),
       updatedAt: data.updated ? new Date(data.updated) : new Date(),
     };
   } catch (error) {

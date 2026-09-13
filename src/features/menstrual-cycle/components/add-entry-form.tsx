@@ -52,9 +52,10 @@ export function AddEntryForm() {
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
       <Input.Root>
-        <Input.Label>Início do ciclo</Input.Label>
+        <Input.Label htmlFor="startDate">Início do ciclo</Input.Label>
         <Input.Wrapper>
           <Input.Field
+            name="startDate"
             type="date"
             value={startDate}
             onChange={(event) => setStartDate(event.target.value)}
@@ -63,9 +64,10 @@ export function AddEntryForm() {
       </Input.Root>
 
       <Input.Root>
-        <Input.Label>Duração do período em dias (opcional)</Input.Label>
+        <Input.Label htmlFor="periodLengthDays">Duração do período em dias (opcional)</Input.Label>
         <Input.Wrapper>
           <Input.Field
+            name="periodLengthDays"
             type="number"
             min={1}
             value={periodLengthDays}

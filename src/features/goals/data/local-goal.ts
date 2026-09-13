@@ -7,7 +7,7 @@ import * as domain from "@/features/goals/domain";
 import { db } from "@/db/client";
 import { goalSteps, goals, users } from "@/db/schema";
 import { requireUserId } from "@/lib/require-user-id";
-import { assertAcceptedConnection } from "@/lib/assert-accepted-connection";
+import { assertAcceptedConnection, resolveSharedWithUserIdOnUpdate } from "@/lib/assert-accepted-connection";
 
 /**
  * Implementação local (Drizzle + Postgres) dos casos de uso de Goal e suas
@@ -96,15 +96,12 @@ export class LocalGoal
 
     // Só o dono pode mudar com quem o objetivo está compartilhado — mesmo
     // raciocínio de `LocalTask.update`.
-    const isOwner = existing.userId === userId;
-    let nextSharedWithUserId = existing.sharedWithUserId;
-
-    if (isOwner && params.sharedWithUserId !== existing.sharedWithUserId) {
-      if (params.sharedWithUserId) {
-        await assertAcceptedConnection(userId, params.sharedWithUserId);
-      }
-      nextSharedWithUserId = params.sharedWithUserId || null;
-    }
+    const nextSharedWithUserId = await resolveSharedWithUserIdOnUpdate({
+      userId,
+      isOwner: existing.userId === userId,
+      currentSharedWithUserId: existing.sharedWithUserId,
+      requestedSharedWithUserId: params.sharedWithUserId,
+    });
 
     await db
       .update(goals)

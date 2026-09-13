@@ -56,9 +56,12 @@ export function TaskSteps({ taskId, steps }: TaskStepsProps) {
     }
   }
 
-  async function handleAddStep(event: React.FormEvent) {
-    event.preventDefault();
-
+  // Não é um <form>: este componente é sempre renderizado dentro do
+  // form de edição da tarefa (`EditTask`) — HTML não permite <form>
+  // aninhado (o navegador simplesmente ignora o de dentro, e o React
+  // acusa erro de hidratação). Enter no campo e clique no botão levam
+  // ao mesmo lugar: adicionar o passo, sem submeter o form de fora.
+  async function handleAddStep() {
     const title = newStepTitle.trim();
     if (!title) return;
 
@@ -71,6 +74,15 @@ export function TaskSteps({ taskId, steps }: TaskStepsProps) {
     } finally {
       setIsAddingStep(false);
     }
+  }
+
+  function handleTitleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (event.key !== "Enter") return;
+
+    // Impede que o Enter borbulhe e submeta o form de fora (o de editar
+    // a tarefa) — aqui ele só deve adicionar o passo.
+    event.preventDefault();
+    handleAddStep();
   }
 
   return (
@@ -110,23 +122,25 @@ export function TaskSteps({ taskId, steps }: TaskStepsProps) {
         </ul>
       )}
 
-      <form className={styles.addStepForm} onSubmit={handleAddStep}>
+      <div className={styles.addStepForm}>
         <Input.Field
           aria-label="Título do novo passo"
           placeholder="Adicionar um passo..."
           value={newStepTitle}
           onChange={(event) => setNewStepTitle(event.target.value)}
+          onKeyDown={handleTitleKeyDown}
         />
         <Button.Root
-          type="submit"
+          type="button"
           variant="secondary"
           className={styles.smallButton}
           aria-label="Adicionar passo"
           loading={isAddingStep}
+          onClick={handleAddStep}
         >
           <Button.Icon name="FaPlus" />
         </Button.Root>
-      </form>
+      </div>
     </div>
   );
 }

@@ -95,7 +95,7 @@ export function Auth() {
           </Input.Root>
 
           <Input.Root className={styles.rememberRow}>
-            <Link className={styles.link} href="#">
+            <Link className={styles.link} href="/forgot-password">
               Esqueceu sua senha?
             </Link>
 

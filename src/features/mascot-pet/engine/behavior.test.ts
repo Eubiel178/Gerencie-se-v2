@@ -52,6 +52,9 @@ test("MascotBehavior: evento externo mapeia pro estado reativo certo", () => {
   behavior.handleEvent("habit-completed");
   assert.equal(behavior.snapshot().state, "happy");
 
+  behavior.handleEvent("routine-completed");
+  assert.equal(behavior.snapshot().state, "happy");
+
   behavior.handleEvent("achievement-unlocked");
   assert.equal(behavior.snapshot().state, "celebrate");
 

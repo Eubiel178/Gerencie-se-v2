@@ -13,6 +13,7 @@ import { ProfileOverview } from "@/features/profile/get-profile-overview";
 import { Gender } from "@/features/profile/get-gender";
 import { usePaletteStore } from "@/features/search/palette-store";
 import { QuickCapture } from "@/features/tasks/components/quick-capture";
+import { useCaptureTimezone } from "@/hooks/use-capture-timezone";
 
 import styles from "@/app/home/home-layout.module.css";
 
@@ -97,6 +98,8 @@ function initials(name: string | null): string {
 }
 
 export const Header = ({ user, overview }: HeaderProps) => {
+  useCaptureTimezone();
+
   const pathname = usePathname();
   const openPalette = usePaletteStore((state) => state.open);
   const [isConfirmingSignOut, setIsConfirmingSignOut] = useState(false);

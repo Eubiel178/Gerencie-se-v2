@@ -1,13 +1,6 @@
 "use client";
 
-import { useState } from "react";
-
-import { useRouter } from "next/navigation";
-
 import dayjs from "dayjs";
-
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/goal-schema";
 
@@ -16,6 +9,7 @@ import { Icon } from "@/components/icon";
 
 import { createGoalAction } from "@/features/goals/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
+import { useFormModal } from "@/hooks/use-form-modal";
 
 import { FormData, IAddGoalProps, PRIORITY_OPTIONS } from "../interfaces";
 
@@ -28,20 +22,18 @@ const DEADLINE_SHORTCUTS = [
 ];
 
 export function AddGoal({ buttonText, connections }: IAddGoalProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  const router = useRouter();
-
   const {
-    reset,
-    register,
     setValue,
     watch,
+    register,
     formState: { errors, isSubmitting },
-    handleSubmit,
-  } = useForm<FormData>({
-    mode: "onChange",
-    resolver: zodResolver(validationSchema),
+    isOpen,
+    openModal,
+    closeModal,
+    submitError,
+    handleFormSubmit,
+  } = useFormModal<FormData>({
+    schema: validationSchema,
     defaultValues: {
       title: "",
       description: "",
@@ -49,43 +41,21 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
       priority: "media",
       sharedWithUserId: "",
     },
+    onSubmit: (data) =>
+      createGoalAction({
+        title: data.title,
+        description: data.description,
+        deadline: data.deadline || null,
+        priority: data.priority,
+        sharedWithUserId: data.sharedWithUserId,
+      }),
   });
 
   const priority = watch("priority");
 
-  function closeModal() {
-    setIsOpen(false);
-    reset();
-  }
-
-  async function handleOnSubmit(data: FormData) {
-    setSubmitError(null);
-
-    const result = await createGoalAction({
-      title: data.title,
-      description: data.description,
-      deadline: data.deadline || null,
-      priority: data.priority,
-      sharedWithUserId: data.sharedWithUserId,
-    });
-
-    if (result.error) {
-      setSubmitError(result.error);
-      return;
-    }
-
-    closeModal();
-    router.refresh();
-  }
-
   return (
     <>
-      <Button.Root
-        type="button"
-        onClick={function () {
-          setIsOpen(true);
-        }}
-      >
+      <Button.Root type="button" onClick={openModal}>
         {buttonText}
       </Button.Root>
 
@@ -93,7 +63,7 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
         <Modal onClose={closeModal}>
           <ModalHeader title="Novo Objetivo" onClose={closeModal} />
 
-          <Form.Root onSubmit={handleSubmit(handleOnSubmit)}>
+          <Form.Root onSubmit={handleFormSubmit}>
             <Form.Wrapper>
               <Input.Root sharedProps={{ error: errors.title?.message }}>
                 <Input.Wrapper>
@@ -109,7 +79,7 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
               </Input.Root>
 
               <Input.Root sharedProps={{ error: errors.description?.message }}>
-                <Input.Label>
+                <Input.Label htmlFor="description">
                   <Icon name="FaAlignLeft" size={12} /> Descrição
                 </Input.Label>
                 <Input.Wrapper>
@@ -124,7 +94,7 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
               </Input.Root>
 
               <Input.Root sharedProps={{ error: errors.deadline?.message }}>
-                <Input.Label>
+                <Input.Label htmlFor="deadline">
                   <Icon name="FaCalendarAlt" size={12} /> Prazo (opcional)
                 </Input.Label>
 
@@ -161,7 +131,7 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
 
               <CollapsibleSection label="Mais opções">
                 <Input.Root sharedProps={{ error: errors.sharedWithUserId?.message }}>
-                  <Input.Label>Compartilhar com</Input.Label>
+                  <Input.Label htmlFor="sharedWithUserId">Compartilhar com</Input.Label>
 
                   <Input.Wrapper>
                     <ShareSelect connections={connections} {...register("sharedWithUserId")} />

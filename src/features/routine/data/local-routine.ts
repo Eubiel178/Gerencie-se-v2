@@ -1,13 +1,14 @@
 import "server-only";
 
+import dayjs from "dayjs";
 import { and, asc, eq, inArray, or } from "drizzle-orm";
 
 import * as domain from "@/features/routine/domain";
 
 import { db } from "@/db/client";
-import { routineItems, users } from "@/db/schema";
+import { routineItemLogs, routineItems, users } from "@/db/schema";
 import { requireUserId } from "@/lib/require-user-id";
-import { assertAcceptedConnection } from "@/lib/assert-accepted-connection";
+import { assertAcceptedConnection, resolveSharedWithUserIdOnUpdate } from "@/lib/assert-accepted-connection";
 
 /**
  * Implementação local (Drizzle + Postgres) dos casos de uso de RoutineItem.
@@ -26,7 +27,8 @@ export class LocalRoutineItem
     domain.CreateRoutineItem,
     domain.LoadAllRoutineItems,
     domain.UpdateRoutineItem,
-    domain.DeleteRoutineItem
+    domain.DeleteRoutineItem,
+    domain.ToggleRoutineItemLog
 {
   async create(params: domain.CreateRoutineItem.Params) {
     const userId = await requireUserId();
@@ -68,7 +70,24 @@ export class LocalRoutineItem
 
     const ownerById = new Map(owners.map((owner) => [owner.id, owner]));
 
-    return rows.map((row) => mapRowToRoutineItem(row, userId, ownerById.get(row.userId)));
+    const itemIds = rows.map((row) => row.id);
+    const today = dayjs().format("YYYY-MM-DD");
+
+    // Não filtra por `userId`: um item compartilhado tem UM registro de
+    // "feito hoje" só, igual `habit_log` — ver comentário da classe.
+    const todaysLogRows =
+      itemIds.length === 0
+        ? []
+        : await db
+            .select({ routineItemId: routineItemLogs.routineItemId })
+            .from(routineItemLogs)
+            .where(and(inArray(routineItemLogs.routineItemId, itemIds), eq(routineItemLogs.date, today)));
+
+    const completedTodayIds = new Set(todaysLogRows.map((log) => log.routineItemId));
+
+    return rows.map((row) =>
+      mapRowToRoutineItem(row, userId, completedTodayIds.has(row.id), ownerById.get(row.userId))
+    );
   }
 
   async update(params: domain.UpdateRoutineItem.Params) {
@@ -91,15 +110,12 @@ export class LocalRoutineItem
 
     // Só o dono pode mudar com quem o item está compartilhado — ver
     // mesmo raciocínio em `LocalTask.update`.
-    const isOwner = existing.userId === userId;
-    let nextSharedWithUserId = existing.sharedWithUserId;
-
-    if (isOwner && params.sharedWithUserId !== existing.sharedWithUserId) {
-      if (params.sharedWithUserId) {
-        await assertAcceptedConnection(userId, params.sharedWithUserId);
-      }
-      nextSharedWithUserId = params.sharedWithUserId || null;
-    }
+    const nextSharedWithUserId = await resolveSharedWithUserIdOnUpdate({
+      userId,
+      isOwner: existing.userId === userId,
+      currentSharedWithUserId: existing.sharedWithUserId,
+      requestedSharedWithUserId: params.sharedWithUserId,
+    });
 
     await db
       .update(routineItems)
@@ -126,11 +142,76 @@ export class LocalRoutineItem
       .delete(routineItems)
       .where(and(eq(routineItems.id, params.id), eq(routineItems.userId, userId)));
   }
+
+  async toggleLog(params: domain.ToggleRoutineItemLog.Params): Promise<domain.ToggleRoutineItemLog.Result> {
+    const userId = await requireUserId();
+
+    const [item] = await db
+      .select({ id: routineItems.id })
+      .from(routineItems)
+      .where(
+        and(
+          eq(routineItems.id, params.routineItemId),
+          or(eq(routineItems.userId, userId), eq(routineItems.sharedWithUserId, userId))
+        )
+      )
+      .limit(1);
+
+    if (!item) {
+      throw new Error("Item de rotina não encontrado.");
+    }
+
+    // Não filtra por `userId`: a chave primária de `routine_item_log` é
+    // (routineItemId, date), então só existe UM registro por dia — de
+    // quem quer que tenha marcado primeiro. Ver comentário da classe.
+    const [existing] = await db
+      .select({ id: routineItemLogs.id })
+      .from(routineItemLogs)
+      .where(
+        and(eq(routineItemLogs.routineItemId, params.routineItemId), eq(routineItemLogs.date, params.date))
+      )
+      .limit(1);
+
+    if (existing) {
+      await db.delete(routineItemLogs).where(eq(routineItemLogs.id, existing.id));
+      return { completed: false };
+    }
+
+    try {
+      await db.insert(routineItemLogs).values({
+        id: crypto.randomUUID(),
+        routineItemId: params.routineItemId,
+        userId,
+        date: params.date,
+      });
+
+      return { completed: true };
+    } catch (error) {
+      // Corrida rara (dois cliques quase simultâneos, inclusive entre
+      // dono e colaborador): outra requisição já inseriu o mesmo
+      // (routineItemId, date) entre o SELECT acima e este INSERT — a
+      // chave primária composta rejeita a duplicata. O item já está
+      // marcado, então tratamos como sucesso em vez de propagar um erro
+      // confuso.
+      const isUniqueViolation =
+        typeof error === "object" &&
+        error !== null &&
+        "code" in error &&
+        (error as { code?: string }).code === "23505";
+
+      if (isUniqueViolation) {
+        return { completed: true };
+      }
+
+      throw error;
+    }
+  }
 }
 
 function mapRowToRoutineItem(
   row: typeof routineItems.$inferSelect,
   viewerId: string,
+  completedToday: boolean,
   owner?: { name: string | null; email: string | null }
 ): domain.IRoutineItem {
   return {
@@ -143,5 +224,6 @@ function mapRowToRoutineItem(
     sharedWithUserId: row.sharedWithUserId,
     isSharedWithMe: row.userId !== viewerId,
     ownerLabel: row.userId !== viewerId ? owner?.name || owner?.email || null : null,
+    completedToday,
   };
 }

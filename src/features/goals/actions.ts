@@ -11,7 +11,7 @@ import {
   updateGoalStepSchema,
 } from "@/validation/goal-schema";
 
-type ActionResult = { error: string | null };
+import type { ActionResult } from "@/types/action-result";
 
 export async function createGoalAction(
   data: domain.CreateGoal.Params

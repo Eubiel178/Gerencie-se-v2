@@ -37,3 +37,32 @@ export async function assertAcceptedConnection(userId: string, targetUserId: str
     throw new Error("Você não tem um vínculo aceito com essa pessoa.");
   }
 }
+
+/**
+ * Decide o próximo `sharedWithUserId` de um recurso (tarefa/objetivo/
+ * hábito/item de rotina) durante uma edição. Regra repetida — antes
+ * copiada quase byte a byte — em `LocalTask`, `LocalGoal`, `LocalHabit` e
+ * `LocalRoutineItem`.`update()`: só o DONO pode mudar com quem o recurso
+ * está compartilhado; um colaborador editando o resto dos campos nunca
+ * consegue alterar isso, mesmo enviando um valor diferente no formulário.
+ * Centralizado para as quatro entidades não poderem divergir por acidente
+ * nessa regra de autorização.
+ */
+export async function resolveSharedWithUserIdOnUpdate(params: {
+  userId: string;
+  isOwner: boolean;
+  currentSharedWithUserId: string | null;
+  requestedSharedWithUserId: string | null | undefined;
+}): Promise<string | null> {
+  const { userId, isOwner, currentSharedWithUserId, requestedSharedWithUserId } = params;
+
+  if (!isOwner || requestedSharedWithUserId === currentSharedWithUserId) {
+    return currentSharedWithUserId;
+  }
+
+  if (requestedSharedWithUserId) {
+    await assertAcceptedConnection(userId, requestedSharedWithUserId);
+  }
+
+  return requestedSharedWithUserId || null;
+}

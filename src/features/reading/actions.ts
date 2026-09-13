@@ -6,7 +6,7 @@ import * as domain from "@/features/reading/domain";
 import { getReadingFetcher } from "@/features/reading/data/get-reading-fetcher";
 import { createReadingItemSchema, updateReadingItemSchema } from "@/validation/reading-schema";
 
-type ActionResult = { error: string | null };
+import type { ActionResult } from "@/types/action-result";
 
 export async function createReadingItemAction(
   data: domain.CreateReadingItem.Params

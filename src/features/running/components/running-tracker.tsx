@@ -110,9 +110,10 @@ function ManualEntry({ onSaved }: { onSaved: () => void }) {
     <form className={styles.panel} onSubmit={handleSubmit}>
       <div className={styles.fieldsRow}>
         <Input.Root>
-          <Input.Label>Distância (km)</Input.Label>
+          <Input.Label htmlFor="distanceKm">Distância (km)</Input.Label>
           <Input.Wrapper>
             <Input.Field
+              name="distanceKm"
               type="number"
               step="0.01"
               min={0}
@@ -123,9 +124,10 @@ function ManualEntry({ onSaved }: { onSaved: () => void }) {
         </Input.Root>
 
         <Input.Root>
-          <Input.Label>Tempo (minutos)</Input.Label>
+          <Input.Label htmlFor="minutes">Tempo (minutos)</Input.Label>
           <Input.Wrapper>
             <Input.Field
+              name="minutes"
               type="number"
               step="0.1"
               min={0}

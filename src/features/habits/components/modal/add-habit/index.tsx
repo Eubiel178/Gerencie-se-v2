@@ -1,11 +1,6 @@
 "use client";
 
-import { useState } from "react";
-
-import { useRouter } from "next/navigation";
-
-import { useForm, useWatch } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useWatch } from "react-hook-form";
 
 import { validationSchema } from "@/validation/habit-schema";
 
@@ -14,6 +9,7 @@ import { Icon } from "@/components/icon";
 
 import { createHabitAction } from "@/features/habits/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
+import { useFormModal } from "@/hooks/use-form-modal";
 
 import { FormData, IAddHabitProps, NO_GOAL_VALUE } from "../interfaces";
 
@@ -27,20 +23,18 @@ const FREQUENCY_OPTIONS = [
 const TITLE_SUGGESTIONS = ["Beber água", "Ler", "Meditar", "Exercício", "Dormir cedo"];
 
 export function AddHabit({ buttonText, connections, goalOptions }: IAddHabitProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  const router = useRouter();
-
   const {
-    reset,
     register,
     control,
     setValue,
     formState: { errors, isSubmitting },
-    handleSubmit,
-  } = useForm<FormData>({
-    mode: "onChange",
-    resolver: zodResolver(validationSchema),
+    isOpen,
+    openModal,
+    closeModal,
+    submitError,
+    handleFormSubmit,
+  } = useFormModal<FormData>({
+    schema: validationSchema,
     defaultValues: {
       title: "",
       frequency: "daily",
@@ -48,43 +42,21 @@ export function AddHabit({ buttonText, connections, goalOptions }: IAddHabitProp
       goalId: NO_GOAL_VALUE,
       sharedWithUserId: "",
     },
+    onSubmit: (data) =>
+      createHabitAction({
+        title: data.title,
+        frequency: data.frequency,
+        targetPerWeek: data.frequency === "weekly" ? Number(data.targetPerWeek) : null,
+        goalId: data.goalId === NO_GOAL_VALUE ? null : data.goalId,
+        sharedWithUserId: data.sharedWithUserId,
+      }),
   });
 
   const frequency = useWatch({ control, name: "frequency" });
 
-  function closeModal() {
-    setIsOpen(false);
-    reset();
-  }
-
-  async function handleOnSubmit(data: FormData) {
-    setSubmitError(null);
-
-    const result = await createHabitAction({
-      title: data.title,
-      frequency: data.frequency,
-      targetPerWeek: data.frequency === "weekly" ? Number(data.targetPerWeek) : null,
-      goalId: data.goalId === NO_GOAL_VALUE ? null : data.goalId,
-      sharedWithUserId: data.sharedWithUserId,
-    });
-
-    if (result.error) {
-      setSubmitError(result.error);
-      return;
-    }
-
-    closeModal();
-    router.refresh();
-  }
-
   return (
     <>
-      <Button.Root
-        type="button"
-        onClick={function () {
-          setIsOpen(true);
-        }}
-      >
+      <Button.Root type="button" onClick={openModal}>
         {buttonText}
       </Button.Root>
 
@@ -92,7 +64,7 @@ export function AddHabit({ buttonText, connections, goalOptions }: IAddHabitProp
         <Modal onClose={closeModal}>
           <ModalHeader title="Novo Hábito" onClose={closeModal} />
 
-          <Form.Root onSubmit={handleSubmit(handleOnSubmit)}>
+          <Form.Root onSubmit={handleFormSubmit}>
             <Form.Wrapper>
               <Input.Root sharedProps={{ error: errors.title?.message }}>
                 <Input.Wrapper>
@@ -130,7 +102,7 @@ export function AddHabit({ buttonText, connections, goalOptions }: IAddHabitProp
 
               {frequency === "weekly" && (
                 <Input.Root sharedProps={{ error: errors.targetPerWeek?.message }}>
-                  <Input.Label>Quantas vezes por semana</Input.Label>
+                  <Input.Label htmlFor="targetPerWeek">Quantas vezes por semana</Input.Label>
 
                   <Input.Wrapper>
                     <Input.Field
@@ -148,7 +120,7 @@ export function AddHabit({ buttonText, connections, goalOptions }: IAddHabitProp
               <CollapsibleSection label="Mais opções">
                 {goalOptions.length > 0 && (
                   <Input.Root>
-                    <Input.Label>Vincular a um objetivo (opcional)</Input.Label>
+                    <Input.Label htmlFor="goalId">Vincular a um objetivo (opcional)</Input.Label>
 
                     <Input.Wrapper>
                       <Input.FieldSelect
@@ -163,7 +135,7 @@ export function AddHabit({ buttonText, connections, goalOptions }: IAddHabitProp
                 )}
 
                 <Input.Root sharedProps={{ error: errors.sharedWithUserId?.message }}>
-                  <Input.Label>Compartilhar com</Input.Label>
+                  <Input.Label htmlFor="sharedWithUserId">Compartilhar com</Input.Label>
 
                   <Input.Wrapper>
                     <ShareSelect connections={connections} {...register("sharedWithUserId")} />

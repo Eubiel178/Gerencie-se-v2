@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { getConnectionFetcher } from "@/features/connections/data/get-connection-fetcher";
 import { inviteConnectionSchema } from "@/validation/connection-schema";
 
-type ActionResult = { error: string | null };
+import type { ActionResult } from "@/types/action-result";
 
 export async function inviteConnectionAction(data: { email: string }): Promise<ActionResult> {
   const parsed = inviteConnectionSchema.safeParse(data);

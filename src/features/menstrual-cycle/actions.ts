@@ -6,7 +6,7 @@ import * as domain from "@/features/menstrual-cycle/domain";
 import { getCycleFetcher } from "@/features/menstrual-cycle/data/get-cycle-fetcher";
 import { createCycleEntrySchema } from "@/validation/menstrual-cycle-schema";
 
-type ActionResult = { error: string | null };
+import type { ActionResult } from "@/types/action-result";
 
 export async function createCycleEntryAction(
   data: domain.CreateCycleEntry.Params

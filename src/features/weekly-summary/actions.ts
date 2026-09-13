@@ -10,7 +10,7 @@ import { requireUserId } from "@/lib/require-user-id";
 import { getWeeklySummaryForCurrentUser } from "./get-weekly-summary";
 import { sendWeeklySummaryEmail } from "./send-weekly-summary";
 
-type ActionResult = { error: string | null };
+import type { ActionResult } from "@/types/action-result";
 
 export async function updateWeeklySummaryPreferenceAction(enabled: boolean): Promise<ActionResult> {
   try {

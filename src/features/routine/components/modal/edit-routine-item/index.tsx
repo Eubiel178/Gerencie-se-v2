@@ -1,12 +1,5 @@
 "use client";
 
-import { useState } from "react";
-
-import { useRouter } from "next/navigation";
-
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-
 import { validationSchema } from "@/validation/routine-schema";
 
 import { Form, Modal, ModalHeader, Input, Button, SuggestionChips, CollapsibleSection } from "@/components";
@@ -15,6 +8,7 @@ import { Icon } from "@/components/icon";
 import { updateRoutineItemAction } from "@/features/routine/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
 import { ShareReadOnlyNote } from "@/features/connections/components/share-readonly-note";
+import { useFormModal } from "@/hooks/use-form-modal";
 
 import { FormData, IEditRoutineItemProps, NO_TASK_VALUE } from "../interfaces";
 
@@ -24,52 +18,32 @@ const TITLE_SUGGESTIONS = ["Acordar", "Café da manhã", "Estudar", "Exercício"
 const TIME_SUGGESTIONS = ["07:00", "12:00", "18:00", "22:00"];
 
 export function EditRoutineItem({ itemBeingEdited, taskOptions, connections }: IEditRoutineItemProps) {
-  const router = useRouter();
-
-  const [isOpen, setIsOpen] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-
   const {
-    reset,
     register,
     setValue,
     formState: { errors, isSubmitting },
-    handleSubmit,
-  } = useForm<FormData>({
-    mode: "onChange",
-    resolver: zodResolver(validationSchema),
+    isOpen,
+    openModal,
+    closeModal,
+    submitError,
+    handleFormSubmit,
+  } = useFormModal<FormData>({
+    schema: validationSchema,
     defaultValues: {
       time: itemBeingEdited.time,
       title: itemBeingEdited.title,
       taskId: itemBeingEdited.taskId || NO_TASK_VALUE,
       sharedWithUserId: itemBeingEdited.sharedWithUserId ?? "",
     },
+    onSubmit: (data) =>
+      updateRoutineItemAction({
+        id: itemBeingEdited.id,
+        time: data.time,
+        title: data.title,
+        taskId: data.taskId === NO_TASK_VALUE ? null : data.taskId,
+        sharedWithUserId: data.sharedWithUserId,
+      }),
   });
-
-  const closeModal = () => {
-    setIsOpen(false);
-    reset();
-  };
-
-  const handleFormSubmit = async (data: FormData) => {
-    setSubmitError(null);
-
-    const result = await updateRoutineItemAction({
-      id: itemBeingEdited.id,
-      time: data.time,
-      title: data.title,
-      taskId: data.taskId === NO_TASK_VALUE ? null : data.taskId,
-      sharedWithUserId: data.sharedWithUserId,
-    });
-
-    if (result.error) {
-      setSubmitError(result.error);
-      return;
-    }
-
-    closeModal();
-    router.refresh();
-  };
 
   return (
     <>
@@ -78,9 +52,7 @@ export function EditRoutineItem({ itemBeingEdited, taskOptions, connections }: I
         root={{
           tone: "highlight",
           "aria-label": `Editar item de rotina ${itemBeingEdited.title}`,
-          onClick: function () {
-            setIsOpen(true);
-          },
+          onClick: openModal,
         }}
       />
 
@@ -88,7 +60,7 @@ export function EditRoutineItem({ itemBeingEdited, taskOptions, connections }: I
         <Modal onClose={closeModal}>
           <ModalHeader title="Editar Item de Rotina" onClose={closeModal} />
 
-          <Form.Root onSubmit={handleSubmit(handleFormSubmit)}>
+          <Form.Root onSubmit={handleFormSubmit}>
             <Form.Wrapper>
               <Input.Root sharedProps={{ error: errors.title?.message }}>
                 <Input.Wrapper>
@@ -110,7 +82,7 @@ export function EditRoutineItem({ itemBeingEdited, taskOptions, connections }: I
               </Input.Root>
 
               <Input.Root sharedProps={{ error: errors.time?.message }}>
-                <Input.Label>
+                <Input.Label htmlFor="time">
                   <Icon name="MdTimer" size={13} /> Horário
                 </Input.Label>
 
@@ -130,7 +102,7 @@ export function EditRoutineItem({ itemBeingEdited, taskOptions, connections }: I
               <CollapsibleSection label="Mais opções">
                 {taskOptions.length > 0 && (
                   <Input.Root>
-                    <Input.Label>Vincular a uma tarefa (opcional)</Input.Label>
+                    <Input.Label htmlFor="taskId">Vincular a uma tarefa (opcional)</Input.Label>
 
                     <Input.Wrapper>
                       <Input.FieldSelect
@@ -148,7 +120,7 @@ export function EditRoutineItem({ itemBeingEdited, taskOptions, connections }: I
                 )}
 
                 <Input.Root sharedProps={{ error: errors.sharedWithUserId?.message }}>
-                  <Input.Label>Compartilhar com</Input.Label>
+                  <Input.Label htmlFor="sharedWithUserId">Compartilhar com</Input.Label>
 
                   <Input.Wrapper>
                     <ShareSelect

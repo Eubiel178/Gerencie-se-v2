@@ -15,6 +15,7 @@ import { getMascotFetcher } from "@/features/focus/data/get-focus-fetcher";
 import { WeeklySummaryPanel } from "@/features/weekly-summary/components/weekly-summary-panel";
 import { getWeeklySummaryEnabled } from "@/features/weekly-summary/get-preference";
 import { ExportDataPanel } from "@/features/export/components/export-data-panel";
+import { ChangePasswordForm } from "@/features/profile/components/change-password-form";
 
 import { CalendarStatusBanner } from "./components/calendar-status-banner";
 import { ConnectionCard } from "./components/connection-card";
@@ -70,6 +71,8 @@ export async function Settings({ searchParams }: SettingsProps) {
                   ? "Você está conectado com Google"
                   : "Você acessa com e-mail e senha."}
               </p>
+
+              {!isGoogleLogin && <ChangePasswordForm />}
             </section>
 
             <section className={styles.settingPanel}>

@@ -8,7 +8,7 @@ import {
   updateSelectedCalendar,
 } from "@/lib/google-calendar";
 
-type ActionResult = { error: string | null };
+import type { ActionResult } from "@/types/action-result";
 
 export async function disconnectGoogleCalendarAction(): Promise<ActionResult> {
   try {

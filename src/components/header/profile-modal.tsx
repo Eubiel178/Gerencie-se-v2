@@ -127,7 +127,7 @@ export function ProfileModal({ user, gender, overview, onClose }: ProfileModalPr
         <Form.Root onSubmit={handleSubmit(handleFormSubmit)}>
           <Form.Wrapper>
             <Input.Root sharedProps={{ error: errors.name?.message }}>
-              <Input.Label>Nome</Input.Label>
+              <Input.Label htmlFor="name">Nome</Input.Label>
               <Input.Wrapper>
                 <Input.Field {...register("name")} placeholder="Seu nome" />
               </Input.Wrapper>
@@ -135,7 +135,7 @@ export function ProfileModal({ user, gender, overview, onClose }: ProfileModalPr
             </Input.Root>
 
             <Input.Root sharedProps={{ error: errors.gender?.message }}>
-              <Input.Label>Gênero</Input.Label>
+              <Input.Label htmlFor="gender">Gênero</Input.Label>
               <Input.Wrapper>
                 <Input.FieldSelect {...register("gender")} optionsArray={GENDER_OPTIONS} />
               </Input.Wrapper>

@@ -8,7 +8,7 @@ import * as domain from "@/features/habits/domain";
 import { db } from "@/db/client";
 import { habitLogs, habits, users } from "@/db/schema";
 import { requireUserId } from "@/lib/require-user-id";
-import { assertAcceptedConnection } from "@/lib/assert-accepted-connection";
+import { assertAcceptedConnection, resolveSharedWithUserIdOnUpdate } from "@/lib/assert-accepted-connection";
 
 const STREAK_WINDOW_DAYS = 60;
 
@@ -132,15 +132,12 @@ export class LocalHabit
 
     // Só o dono pode mudar com quem o hábito está compartilhado — mesmo
     // raciocínio de `LocalTask.update`.
-    const isOwner = existing.userId === userId;
-    let nextSharedWithUserId = existing.sharedWithUserId;
-
-    if (isOwner && params.sharedWithUserId !== existing.sharedWithUserId) {
-      if (params.sharedWithUserId) {
-        await assertAcceptedConnection(userId, params.sharedWithUserId);
-      }
-      nextSharedWithUserId = params.sharedWithUserId || null;
-    }
+    const nextSharedWithUserId = await resolveSharedWithUserIdOnUpdate({
+      userId,
+      isOwner: existing.userId === userId,
+      currentSharedWithUserId: existing.sharedWithUserId,
+      requestedSharedWithUserId: params.sharedWithUserId,
+    });
 
     await db
       .update(habits)

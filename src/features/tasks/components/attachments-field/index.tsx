@@ -5,7 +5,12 @@ import { useEffect, useId, useState } from "react";
 import { Button } from "@/components";
 import { Icon } from "@/components/icon";
 import { ITaskAttachment } from "@/features/tasks/domain";
-import { MAX_ATTACHMENT_SIZE_BYTES, formatFileSize, isFileTooLarge } from "@/lib/upload-limits";
+import {
+  ALLOWED_ATTACHMENT_ACCEPT,
+  MAX_ATTACHMENT_SIZE_BYTES,
+  formatFileSize,
+  isFileTooLarge,
+} from "@/lib/upload-limits";
 
 import styles from "./attachments-field.module.css";
 
@@ -138,6 +143,7 @@ export function AttachmentsField({ taskId }: AttachmentsFieldProps) {
         id={inputId}
         type="file"
         multiple
+        accept={ALLOWED_ATTACHMENT_ACCEPT}
         className={styles.hiddenInput}
         onChange={(event) => {
           handleFilesSelected(event.target.files);

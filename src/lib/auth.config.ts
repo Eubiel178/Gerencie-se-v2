@@ -19,14 +19,18 @@ export default {
   pages: {
     signIn: "/login",
   },
-  // O app roda localmente, na máquina do próprio usuário, sem domínio
-  // público nem proxy reverso na frente — não há um "Host" de terceiros
-  // pra validar contra ataques de Host header injection, cenário que essa
-  // proteção do Auth.js existe para cobrir. Documentado como decisão
-  // consciente: numa eventual versão hospedada atrás de um proxy, isso
-  // deveria dar lugar a `AUTH_URL`/`AUTH_TRUST_HOST` configurados no
-  // ambiente de produção real, não a esta flag fixa no código.
-  trustHost: true,
+  // Confia no header Host só quando sabemos que é seguro: em
+  // desenvolvimento local não há proxy de terceiros na frente (é a sua
+  // própria máquina), e na Vercel (`VERCEL` é definida automaticamente em
+  // toda function rodando lá) o X-Forwarded-Host vem corretamente do
+  // proxy deles. Fora desses dois casos (self-host atrás de outro proxy),
+  // só confia se `AUTH_TRUST_HOST=true` for definida explicitamente —
+  // nunca por padrão, para não abrir brecha de Host header injection num
+  // ambiente que não controlamos.
+  trustHost:
+    process.env.NODE_ENV !== "production" ||
+    process.env.VERCEL === "1" ||
+    process.env.AUTH_TRUST_HOST === "true",
   providers: [
     Google({
       // Escopo mínimo para login — NÃO inclui Calendar. O acesso ao Google

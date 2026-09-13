@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Input, ChipGroup } from "@/components";
+import { Input } from "@/components";
 import { IReadingItem, ReadingStatus } from "@/features/reading/domain";
 import { filterReadingItems } from "@/features/reading/filter-reading-items";
 import { AddForm } from "./add-form";
@@ -48,12 +48,16 @@ export function ReadingList({ items }: ReadingListProps) {
               </Input.Wrapper>
             </Input.Root>
 
-            <ChipGroup
-              aria-label="Filtrar por status"
-              options={STATUS_OPTIONS}
-              value={statusFilter}
-              onChange={(value) => setStatusFilter(value as ReadingStatus | "all")}
-            />
+            <Input.Root>
+              <Input.Wrapper>
+                <Input.FieldSelect
+                  aria-label="Filtrar por status"
+                  optionsArray={STATUS_OPTIONS}
+                  value={statusFilter}
+                  onChange={(event) => setStatusFilter(event.target.value as ReadingStatus | "all")}
+                />
+              </Input.Wrapper>
+            </Input.Root>
           </div>
 
           {filteredItems.length === 0 ? (

@@ -9,6 +9,7 @@ export type MascotEventType =
   | "task-completed"
   | "goal-completed"
   | "habit-completed"
+  | "routine-completed"
   | "achievement-unlocked"
   | "hydration-logged"
   | "action-error"

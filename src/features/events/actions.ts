@@ -15,7 +15,7 @@ import { getEventFetcher } from "@/features/events/data/get-event-fetcher";
  * e resolvem o usuário dono dos dados a partir da sessão (nunca de um valor
  * vindo do formulário).
  */
-type ActionResult = { error: string | null };
+import type { ActionResult } from "@/types/action-result";
 
 export async function createEventAction(
   data: domain.CreateEvent.Params

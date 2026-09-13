@@ -15,7 +15,6 @@ import { FocusWeeksChart } from "./focus-weeks-chart";
 import { HydrationWeeksChart } from "./hydration-weeks-chart";
 import { RunningWeeksChart } from "./running-weeks-chart";
 import { HabitsWeeksChart } from "./habits-weeks-chart";
-import { GoalsWeeksChart } from "./goals-weeks-chart";
 
 import {
   calculateAverageGoalProgress,
@@ -121,7 +120,6 @@ export async function Stats() {
 
         <Card title="Progresso médio das metas ativas">
           <p className={styles.bigNumber}>{avgGoalProgress}%</p>
-          <GoalsWeeksChart goals={goals} />
         </Card>
 
         <Card title="Corrida (7 dias)">

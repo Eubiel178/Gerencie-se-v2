@@ -39,6 +39,9 @@ export async function Habits() {
       {habitsList.length > 0 && (
         <div className={styles.heatmapSection}>
           <h2 className={styles.heatmapTitle}>Consistência</h2>
+          <p className={styles.subheading}>
+            Cada quadrado é um dia. Quanto mais escuro, mais hábitos você concluiu naquele dia.
+          </p>
           <HabitHeatmap
             completionDates={completionDates}
             totalHabits={habitsList.length}

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import dayjs from "dayjs";
 
-import { Input, ChipGroup } from "@/components";
+import { Input } from "@/components";
 import { IHabit } from "@/features/habits/domain";
 import { LoadAcceptedConnections } from "@/features/connections/domain";
 import { GoalOption } from "../modal/interfaces";
@@ -62,19 +62,27 @@ export function HabitsList({ habitsList, connections, goalOptions }: HabitsListP
           </Input.Wrapper>
         </Input.Root>
 
-        <ChipGroup
-          aria-label="Filtrar por status"
-          options={STATUS_OPTIONS}
-          value={statusFilter}
-          onChange={(value) => setStatusFilter(value as HabitStatusFilter)}
-        />
+        <Input.Root>
+          <Input.Wrapper>
+            <Input.FieldSelect
+              aria-label="Filtrar por status"
+              optionsArray={STATUS_OPTIONS}
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value as HabitStatusFilter)}
+            />
+          </Input.Wrapper>
+        </Input.Root>
 
-        <ChipGroup
-          aria-label="Filtrar por frequência"
-          options={FREQUENCY_OPTIONS}
-          value={frequencyFilter}
-          onChange={(value) => setFrequencyFilter(value as HabitFrequencyFilter)}
-        />
+        <Input.Root>
+          <Input.Wrapper>
+            <Input.FieldSelect
+              aria-label="Filtrar por frequência"
+              optionsArray={FREQUENCY_OPTIONS}
+              value={frequencyFilter}
+              onChange={(event) => setFrequencyFilter(event.target.value as HabitFrequencyFilter)}
+            />
+          </Input.Wrapper>
+        </Input.Root>
       </div>
 
       {filteredHabits.length === 0 ? (

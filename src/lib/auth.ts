@@ -8,6 +8,7 @@ import { and, eq } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import { accounts, sessions, users, verificationTokens } from "@/db/schema";
+import { handleFailedLoginAttempt, handleSuccessfulLogin } from "@/lib/login-attempt-tracker";
 
 import authConfig from "./auth.config";
 
@@ -59,8 +60,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         );
 
         if (!passwordMatches) {
+          // Só rastreia pra quem EXISTE (ver `handleFailedLoginAttempt`) —
+          // nunca atrasa nem muda o retorno pro chamador; a mensagem de
+          // erro de login continua idêntica não importa o que acontecer
+          // aqui.
+          await handleFailedLoginAttempt(user.id);
           return null;
         }
+
+        await handleSuccessfulLogin(user.id);
 
         return { id: user.id, name: user.name, email: user.email };
       },

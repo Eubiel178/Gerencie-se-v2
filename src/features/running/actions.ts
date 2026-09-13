@@ -6,7 +6,7 @@ import * as domain from "@/features/running/domain";
 import { getRunningFetcher } from "@/features/running/data/get-running-fetcher";
 import { createRunningSessionSchema } from "@/validation/running-schema";
 
-type ActionResult = { error: string | null };
+import type { ActionResult } from "@/types/action-result";
 
 export async function createRunningSessionAction(
   data: domain.CreateRunningSession.Params

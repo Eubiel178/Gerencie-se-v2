@@ -10,9 +10,7 @@ Hoje, olhando novamente para ele, vejo que a componentização é um ponto forte
 
 Se eu fosse refatorar o projeto hoje, eu não começaria mudando toda a arquitetura. Primeiro, eu melhoraria os fluxos que já existem.
 
-Hoje a aplicação já possui botões para editar e excluir tarefas e eventos, mas essas ações ainda não estão completas na camada de dados. Eu implementaria essas operações de ponta a ponta antes de criar novas funcionalidades.
-
-Isso deixaria o projeto mais coerente: se o usuário vê uma ação na tela, ela realmente funciona e atualiza a lista depois da resposta da API.
+*Atualização: isso já foi feito.* Quando escrevi este texto, editar e excluir tarefas e eventos tinham botão na tela mas não estavam completos na camada de dados. Depois implementei essas operações de ponta a ponta (Server Actions com autorização por linha, cobrindo dono e compartilhamento) para tarefas, eventos, hábitos, metas, rotina e leitura — hoje, se o usuário vê uma ação na tela, ela realmente funciona e atualiza a lista depois da resposta da API.
 
 Eu também tiparia melhor as respostas da API e criaria testes para os fluxos principais: criar, editar e excluir. Isso evita que um erro de requisição seja tratado como se fosse um dado válido e dá mais segurança para refatorar depois.
 
@@ -28,9 +26,7 @@ Por fim, eu usaria o cache do Next.js de forma mais intencional. Dados que não 
 
 ### Estado de tarefas e eventos
 
-Hoje, o resultado das buscas da API é armazenado em constantes locais nas páginas de tarefas e eventos. Isso funciona para a primeira renderização, mas não cria um estado compartilhado: quando uma tarefa ou um evento é criado, editado ou excluído, as outras partes da interface não são atualizadas automaticamente.
-
-Em uma próxima versão, eu usaria Zustand para centralizar tarefas e eventos em uma store. Assim, todas as telas consumiriam a mesma fonte de dados e a interface poderia ser atualizada imediatamente após criar, editar ou excluir um item. A API continuaria responsável pela persistência; Zustand ficaria responsável pelo estado compartilhado, carregamento e erros no cliente.
+*Atualização: isso também já foi feito.* Quando escrevi este texto, o resultado das buscas da API ficava em constantes locais nas páginas de tarefas e eventos — funcionava na primeira renderização, mas não criava um estado compartilhado entre partes da interface. Depois criei uma store Zustand pra tarefas e outra pra eventos: a API continua responsável pela persistência, e a store fica responsável pelo estado compartilhado no cliente. Metas e hábitos ainda seguem o padrão antigo (dados vindos via props do Server Component, atualizados com `router.refresh()`) — é a próxima extensão natural desse mesmo padrão, não uma reescrita.
 
 ## Execução local
 

@@ -1,13 +1,6 @@
 "use client";
 
-import { useState } from "react";
-
-import { useRouter } from "next/navigation";
-
 import dayjs from "dayjs";
-
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/event-schema";
 
@@ -17,6 +10,7 @@ import inputStyles from "@/components/form/input/styles.module.css";
 
 import { updateEventAction } from "@/features/events/actions";
 import { useEventStore } from "@/features/events/event-store";
+import { useFormModal } from "@/hooks/use-form-modal";
 
 import { FormData, IModalProps } from "./interfaces";
 
@@ -39,21 +33,20 @@ const DURATION_SHORTCUTS = [
 ];
 
 export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  const router = useRouter();
   const replaceEvent = useEventStore((state) => state.replaceEvent);
 
   const {
-    handleSubmit,
     formState: { errors, isSubmitting },
     register,
-    reset,
     setValue,
     watch,
-  } = useForm<FormData>({
-    mode: "onChange",
-    resolver: zodResolver(validationSchema),
+    isOpen,
+    openModal,
+    closeModal,
+    submitError,
+    handleFormSubmit,
+  } = useFormModal<FormData>({
+    schema: validationSchema,
     defaultValues: {
       title: eventBeingEdited.title,
       description: eventBeingEdited.description,
@@ -62,30 +55,20 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
       url: eventBeingEdited.url,
       backgroundColor: eventBeingEdited.backgroundColor || "#3788d8",
     },
+    onSubmit: async (data) => {
+      const updatedEvent = { ...eventBeingEdited, ...data };
+      const result = await updateEventAction(updatedEvent);
+
+      if (!result.error) {
+        replaceEvent(updatedEvent);
+      }
+
+      return result;
+    },
   });
 
   const start = watch("start");
   const backgroundColor = watch("backgroundColor");
-
-  function closeModal() {
-    setIsOpen(false);
-  }
-
-  async function handleFormSubmit(data: FormData) {
-    setSubmitError(null);
-
-    const updatedEvent = { ...eventBeingEdited, ...data };
-    const result = await updateEventAction(updatedEvent);
-
-    if (result.error) {
-      setSubmitError(result.error);
-      return;
-    }
-
-    replaceEvent(updatedEvent);
-    closeModal();
-    router.refresh();
-  }
 
   return (
     <>
@@ -94,9 +77,7 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
         root={{
           tone: "muted",
           "aria-label": `Editar evento ${eventBeingEdited.title}`,
-          onClick: function () {
-            setIsOpen(true);
-          },
+          onClick: openModal,
         }}
       />
 
@@ -104,7 +85,7 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
         <Modal onClose={closeModal}>
           <ModalHeader title="Editando Evento" onClose={closeModal} />
 
-          <Form.Root onSubmit={handleSubmit(handleFormSubmit)}>
+          <Form.Root onSubmit={handleFormSubmit}>
             <Form.Wrapper>
               <Input.Root sharedProps={{ error: errors.title?.message }}>
                 <Input.Wrapper>
@@ -120,7 +101,7 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
               </Input.Root>
 
               <Input.Root sharedProps={{ error: errors.start?.message }}>
-                <Input.Label>
+                <Input.Label htmlFor="start">
                   <Icon name="FaCalendarAlt" size={12} /> Início
                 </Input.Label>
                 <Input.Wrapper>
@@ -134,7 +115,7 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
               </Input.Root>
 
               <Input.Root sharedProps={{ error: errors.end?.message }}>
-                <Input.Label>Fim (opcional)</Input.Label>
+                <Input.Label htmlFor="end">Fim (opcional)</Input.Label>
                 <Input.Wrapper>
                   <Input.Field
                     {...register("end")}
@@ -192,7 +173,7 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
 
               <CollapsibleSection label="Mais opções">
                 <Input.Root sharedProps={{ error: errors.description?.message }}>
-                  <Input.Label>
+                  <Input.Label htmlFor="description">
                     <Icon name="FaAlignLeft" size={12} /> Descrição
                   </Input.Label>
                   <Input.Wrapper>
@@ -206,7 +187,7 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
                 </Input.Root>
 
                 <Input.Root sharedProps={{ error: errors.url?.message }}>
-                  <Input.Label>Link (opcional)</Input.Label>
+                  <Input.Label htmlFor="url">Link (opcional)</Input.Label>
                   <Input.Wrapper>
                     <Input.Field
                       {...register("url")}

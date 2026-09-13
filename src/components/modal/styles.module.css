@@ -42,6 +42,42 @@
   }
 }
 
+/*
+ * Mobile: bottom sheet em vez de diálogo centralizado — ver seção 39 do
+ * guia do projeto. Um diálogo pequeno flutuando no meio da tela, com
+ * padding nos 4 lados, desperdiça espaço numa tela estreita e obriga
+ * scroll interno cedo em formulários maiores (ex. Nova Tarefa). Ancorado
+ * embaixo, sem padding lateral/inferior, cantos retos na base e usando
+ * quase a tela toda de altura resolve isso — e combina com o gesto de
+ * "puxar pra fechar" que usuários de celular já esperam desse padrão.
+ * 640px é o breakpoint mobile já documentado em `tokens.css`.
+ */
+@media (max-width: 640px) {
+  .overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  :where(.modal) {
+    width: 100%;
+    max-height: 92vh;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    border-bottom: none;
+    animation-name: modalInMobile;
+  }
+}
+
+@keyframes modalInMobile {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .overlay,
   :where(.modal) {

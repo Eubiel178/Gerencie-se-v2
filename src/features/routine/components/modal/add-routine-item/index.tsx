@@ -1,12 +1,5 @@
 "use client";
 
-import { useState } from "react";
-
-import { useRouter } from "next/navigation";
-
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-
 import { validationSchema } from "@/validation/routine-schema";
 
 import { Form, Input, Modal, ModalHeader, Button, SuggestionChips, CollapsibleSection } from "@/components";
@@ -15,6 +8,7 @@ import { Icon } from "@/components/icon";
 import { createRoutineItemAction } from "@/features/routine/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
 import { nowForTimeInput } from "@/utils";
+import { useFormModal } from "@/hooks/use-form-modal";
 
 import { FormData, IAddRoutineItemProps, NO_TASK_VALUE } from "../interfaces";
 
@@ -23,60 +17,38 @@ import styles from "./add-routine-item.module.css";
 const TITLE_SUGGESTIONS = ["Acordar", "Café da manhã", "Estudar", "Exercício", "Dormir"];
 const TIME_SUGGESTIONS = ["07:00", "12:00", "18:00", "22:00"];
 
-export function AddRoutineItem({ buttonText, taskOptions, connections }: IAddRoutineItemProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  const router = useRouter();
+function emptyFormValues(): FormData {
+  return { time: nowForTimeInput(), title: "", taskId: NO_TASK_VALUE, sharedWithUserId: "" };
+}
 
+export function AddRoutineItem({ buttonText, taskOptions, connections }: IAddRoutineItemProps) {
   const {
     reset,
     register,
     setValue,
     formState: { errors, isSubmitting },
-    handleSubmit,
-  } = useForm<FormData>({
-    mode: "onChange",
-    resolver: zodResolver(validationSchema),
-    defaultValues: {
-      time: nowForTimeInput(),
-      title: "",
-      taskId: NO_TASK_VALUE,
-      sharedWithUserId: "",
-    },
+    isOpen,
+    openModal: openModalBase,
+    closeModal,
+    submitError,
+    handleFormSubmit,
+  } = useFormModal<FormData>({
+    schema: validationSchema,
+    defaultValues: emptyFormValues(),
+    onSubmit: (data) =>
+      createRoutineItemAction({
+        time: data.time,
+        title: data.title,
+        taskId: data.taskId === NO_TASK_VALUE ? null : data.taskId,
+        sharedWithUserId: data.sharedWithUserId,
+      }),
   });
 
-  function closeModal() {
-    setIsOpen(false);
-    reset();
-  }
-
+  // `time` precisa ser reiniciado pro horário ATUAL a cada abertura (não
+  // só no mount) — diferente dos outros campos, "agora" muda a cada vez.
   function openModal() {
-    reset({
-      time: nowForTimeInput(),
-      title: "",
-      taskId: NO_TASK_VALUE,
-      sharedWithUserId: "",
-    });
-    setIsOpen(true);
-  }
-
-  async function handleOnSubmit(data: FormData) {
-    setSubmitError(null);
-
-    const result = await createRoutineItemAction({
-      time: data.time,
-      title: data.title,
-      taskId: data.taskId === NO_TASK_VALUE ? null : data.taskId,
-      sharedWithUserId: data.sharedWithUserId,
-    });
-
-    if (result.error) {
-      setSubmitError(result.error);
-      return;
-    }
-
-    closeModal();
-    router.refresh();
+    reset(emptyFormValues());
+    openModalBase();
   }
 
   return (
@@ -89,7 +61,7 @@ export function AddRoutineItem({ buttonText, taskOptions, connections }: IAddRou
         <Modal onClose={closeModal}>
           <ModalHeader title="Novo Item de Rotina" onClose={closeModal} />
 
-          <Form.Root onSubmit={handleSubmit(handleOnSubmit)}>
+          <Form.Root onSubmit={handleFormSubmit}>
             <Form.Wrapper>
               <Input.Root sharedProps={{ error: errors.title?.message }}>
                 <Input.Wrapper>
@@ -111,7 +83,7 @@ export function AddRoutineItem({ buttonText, taskOptions, connections }: IAddRou
               </Input.Root>
 
               <Input.Root sharedProps={{ error: errors.time?.message }}>
-                <Input.Label>
+                <Input.Label htmlFor="time">
                   <Icon name="MdTimer" size={13} /> Horário
                 </Input.Label>
 
@@ -131,7 +103,7 @@ export function AddRoutineItem({ buttonText, taskOptions, connections }: IAddRou
               <CollapsibleSection label="Mais opções">
                 {taskOptions.length > 0 && (
                   <Input.Root>
-                    <Input.Label>Vincular a uma tarefa (opcional)</Input.Label>
+                    <Input.Label htmlFor="taskId">Vincular a uma tarefa (opcional)</Input.Label>
 
                     <Input.Wrapper>
                       <Input.FieldSelect
@@ -149,7 +121,7 @@ export function AddRoutineItem({ buttonText, taskOptions, connections }: IAddRou
                 )}
 
                 <Input.Root sharedProps={{ error: errors.sharedWithUserId?.message }}>
-                  <Input.Label>Compartilhar com</Input.Label>
+                  <Input.Label htmlFor="sharedWithUserId">Compartilhar com</Input.Label>
 
                   <Input.Wrapper>
                     <ShareSelect connections={connections} {...register("sharedWithUserId")} />

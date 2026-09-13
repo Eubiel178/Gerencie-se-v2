@@ -16,4 +16,9 @@ export interface IRoutineItem {
   sharedWithUserId?: string | null;
   isSharedWithMe: boolean;
   ownerLabel?: string | null;
+
+  // Calculado a partir de `routine_item_log` (nunca guardado — mesmo
+  // raciocínio de `IHabit.completedToday`). Preenchido só por
+  // `LoadAllRoutineItems`, nunca por `create`/`update`.
+  completedToday: boolean;
 }

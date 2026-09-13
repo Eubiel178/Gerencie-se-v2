@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { MAX_ATTACHMENT_SIZE_BYTES, formatFileSize, isFileTooLarge } from "./upload-limits";
+import { MAX_ATTACHMENT_SIZE_BYTES, formatFileSize, isAttachmentTypeAllowed, isFileTooLarge } from "./upload-limits";
 
 test("isFileTooLarge: arquivo abaixo do limite passa", () => {
-  assert.equal(isFileTooLarge(8 * 1024 * 1024), false);
+  assert.equal(isFileTooLarge(MAX_ATTACHMENT_SIZE_BYTES - 1), false);
 });
 
 test("isFileTooLarge: arquivo exatamente no limite passa", () => {
@@ -33,4 +33,19 @@ test("formatFileSize: megabytes redondo sem casa decimal", () => {
 
 test("formatFileSize: acima do limite tambem formata (usado na mensagem de erro)", () => {
   assert.equal(formatFileSize(14.7 * 1024 * 1024), "14,7 MB");
+});
+
+test("isAttachmentTypeAllowed: aceita imagem, pdf e documento comuns", () => {
+  assert.equal(isAttachmentTypeAllowed("image/jpeg"), true);
+  assert.equal(isAttachmentTypeAllowed("application/pdf"), true);
+  assert.equal(
+    isAttachmentTypeAllowed("application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
+    true
+  );
+});
+
+test("isAttachmentTypeAllowed: rejeita executavel, script e tipo vazio", () => {
+  assert.equal(isAttachmentTypeAllowed("application/x-msdownload"), false);
+  assert.equal(isAttachmentTypeAllowed("application/x-sh"), false);
+  assert.equal(isAttachmentTypeAllowed(""), false);
 });

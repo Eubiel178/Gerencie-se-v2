@@ -6,7 +6,7 @@ import * as domain from "@/features/health/domain";
 import { getHealthFetcher } from "@/features/health/data/get-health-fetcher";
 import { createHealthCheckupSchema } from "@/validation/health-schema";
 
-type ActionResult = { error: string | null };
+import type { ActionResult } from "@/types/action-result";
 
 export async function createHealthCheckupAction(
   data: domain.CreateHealthCheckup.Params

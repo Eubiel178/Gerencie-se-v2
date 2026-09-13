@@ -1,12 +1,7 @@
 "use client";
 
-import { useState } from "react";
-
-import { useRouter } from "next/navigation";
-
-import { useForm, useWatch } from "react-hook-form";
+import { useWatch } from "react-hook-form";
 import { useFormTags } from "@/features/tasks/hooks/use-form-tags";
-import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/task-schema";
 
@@ -18,6 +13,7 @@ import { isVagueTaskTitle } from "@/features/tasks/is-vague-title";
 
 import { ShareSelect } from "@/features/connections/components/share-select";
 import { ShareReadOnlyNote } from "@/features/connections/components/share-readonly-note";
+import { useFormModal } from "@/hooks/use-form-modal";
 
 import { SyncWithGoogle } from "../sync-with-google";
 import { ReminderFields } from "../reminder-fields";
@@ -28,22 +24,20 @@ import { FormData, IEditTaskProps, PRIORITY_OPTIONS } from "../interfaces";
 import styles from "./edit-task.module.css";
 
 export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IEditTaskProps) {
-  const router = useRouter();
-
-  const [isOpen, setIsOpen] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
   const formTags = useFormTags();
 
   const {
-    reset,
     register,
     setValue,
     control,
     formState: { errors, isSubmitting },
-    handleSubmit,
-  } = useForm<FormData>({
-    mode: "onChange",
-    resolver: zodResolver(validationSchema),
+    isOpen,
+    openModal,
+    closeModal,
+    submitError,
+    handleFormSubmit,
+  } = useFormModal<FormData>({
+    schema: validationSchema,
     defaultValues: {
       tag: taskBeingEdited.tag,
       title: taskBeingEdited.title,
@@ -55,34 +49,13 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
       sharedWithUserId: taskBeingEdited.sharedWithUserId ?? "",
       syncEnabled: taskBeingEdited.syncEnabled,
     },
+    onSubmit: (data) => updateTaskAction({ ...data, id: taskBeingEdited.id }),
   });
 
   const syncEnabled = useWatch({ control, name: "syncEnabled" });
   const scheduledAt = useWatch({ control, name: "scheduledAt" });
   const priority = useWatch({ control, name: "priority" });
   const title = useWatch({ control, name: "title" });
-
-  const closeModal = () => {
-    setIsOpen(false);
-    reset();
-  };
-
-  const handleFormSubmit = async (data: FormData) => {
-    setSubmitError(null);
-
-    const result = await updateTaskAction({
-      ...data,
-      id: taskBeingEdited.id,
-    });
-
-    if (result.error) {
-      setSubmitError(result.error);
-      return;
-    }
-
-    closeModal();
-    router.refresh();
-  };
 
   return (
     <>
@@ -91,9 +64,7 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
         root={{
           tone: "highlight",
           "aria-label": `Editar tarefa ${taskBeingEdited.title}`,
-          onClick: function () {
-            setIsOpen(true);
-          },
+          onClick: openModal,
         }}
       />
 
@@ -101,7 +72,7 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
         <Modal onClose={closeModal}>
           <ModalHeader title="Editar Tarefa" onClose={closeModal} />
 
-          <Form.Root onSubmit={handleSubmit(handleFormSubmit)}>
+          <Form.Root onSubmit={handleFormSubmit}>
             <Form.Wrapper>
               <Input.Root sharedProps={{ error: errors.title?.message }}>
                 <Input.Wrapper>
@@ -139,7 +110,7 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
               </Input.Root>
 
               <Input.Root sharedProps={{ error: errors.tag?.message }}>
-                <Input.Label>
+                <Input.Label htmlFor="tag">
                   <Icon name="FaTag" size={12} /> Tipo de Tarefa
                 </Input.Label>
 
@@ -154,7 +125,7 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
               </Input.Root>
 
               <Input.Root sharedProps={{ error: errors.description?.message }}>
-                <Input.Label>
+                <Input.Label htmlFor="description">
                   <Icon name="FaAlignLeft" size={12} /> Descrição
                 </Input.Label>
 
@@ -189,7 +160,7 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
                 />
 
                 <Input.Root sharedProps={{ error: errors.sharedWithUserId?.message }}>
-                  <Input.Label>Compartilhar com</Input.Label>
+                  <Input.Label htmlFor="sharedWithUserId">Compartilhar com</Input.Label>
 
                   <Input.Wrapper>
                     <ShareSelect

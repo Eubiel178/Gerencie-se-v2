@@ -113,6 +113,34 @@
       "when": 1789187308605,
       "tag": "0015_round_iron_man",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1789214688672,
+      "tag": "0016_flashy_gamma_corps",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1789263232154,
+      "tag": "0017_unique_doctor_doom",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1789265116241,
+      "tag": "0018_cynical_guardian",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1789265929500,
+      "tag": "0019_glossy_winter_soldier",
+      "breakpoints": true
     }
   ]
 }

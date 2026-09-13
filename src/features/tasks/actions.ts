@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import * as domain from "@/features/tasks/domain";
 import { getTaskFetcher } from "@/features/tasks/data/get-task-fetcher";
+import { createTaskSchema, updateTaskSchema } from "@/validation/task-schema";
 
 import { requireUserId } from "@/lib/require-user-id";
 import { deleteCalendarEventForTask } from "@/lib/google-calendar";
@@ -25,11 +26,16 @@ import { syncTaskToGoogle } from "./sync";
  * tarefa já estar salva localmente — uma falha ali nunca desfaz nem
  * impede a operação local, só fica registrada em `syncStatus`/`syncError`.
  */
-type ActionResult = { error: string | null };
+import type { ActionResult } from "@/types/action-result";
 
 export async function createTaskAction(
   data: domain.CreateTask.Params
 ): Promise<ActionResult> {
+  const parsed = createTaskSchema.safeParse(data);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Dados inválidos." };
+  }
+
   try {
     const repo = getTaskFetcher();
     const userId = await requireUserId();
@@ -95,6 +101,11 @@ export async function quickCaptureTaskAction(rawTitle: string): Promise<ActionRe
 export async function updateTaskAction(
   data: domain.UpdateTask.Params
 ): Promise<ActionResult> {
+  const parsed = updateTaskSchema.safeParse(data);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Dados inválidos." };
+  }
+
   try {
     const repo = getTaskFetcher();
     const userId = await requireUserId();

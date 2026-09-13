@@ -27,7 +27,16 @@ declare global {
 // do próprio driver.
 const databaseUrl = process.env.DATABASE_URL ?? "";
 
-const client = globalThis.__postgres__ ?? postgres(databaseUrl);
+// Na Vercel cada invocação pode rodar numa instância de function isolada;
+// sob carga, a plataforma escala para várias instâncias concorrentes, cada
+// uma com o seu próprio pool. Com o `max` padrão do driver (10), muitas
+// instâncias concorrentes somadas podem estourar o limite de conexões do
+// Postgres hospedado (planos gratuitos costumam permitir bem menos que
+// isso). `max: 1` mantém cada instância enxuta; combine com uma connection
+// string com pooler (ex. Neon/Supabase em modo "pooled") para produção —
+// ver `docs/DEPLOY.md`. Fora da Vercel (dev local), mantém o padrão do
+// driver, que já é adequado para um único processo de longa duração.
+const client = globalThis.__postgres__ ?? postgres(databaseUrl, process.env.VERCEL ? { max: 1 } : undefined);
 
 if (process.env.NODE_ENV !== "production") {
   globalThis.__postgres__ = client;

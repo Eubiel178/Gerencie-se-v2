@@ -6,7 +6,7 @@ import * as domain from "@/features/focus/domain";
 import { getFocusFetcher, getMascotFetcher } from "@/features/focus/data/get-focus-fetcher";
 import { validationSchema as mascotSchema } from "@/validation/mascot-schema";
 
-type ActionResult = { error: string | null };
+import type { ActionResult } from "@/types/action-result";
 
 export async function startFocusSessionAction(
   data: domain.StartFocusSession.Params

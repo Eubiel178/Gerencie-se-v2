@@ -4,9 +4,13 @@ import { revalidatePath } from "next/cache";
 
 import * as domain from "@/features/routine/domain";
 import { getRoutineFetcher } from "@/features/routine/data/get-routine-fetcher";
-import { createRoutineItemSchema, updateRoutineItemSchema } from "@/validation/routine-schema";
+import {
+  createRoutineItemSchema,
+  toggleRoutineItemLogSchema,
+  updateRoutineItemSchema,
+} from "@/validation/routine-schema";
 
-type ActionResult = { error: string | null };
+import type { ActionResult } from "@/types/action-result";
 
 export async function createRoutineItemAction(
   data: domain.CreateRoutineItem.Params
@@ -54,5 +58,23 @@ export async function deleteRoutineItemAction(
     return { error: null };
   } catch {
     return { error: "Não foi possível excluir o item de rotina. Tente novamente." };
+  }
+}
+
+export async function toggleRoutineItemLogAction(
+  params: domain.ToggleRoutineItemLog.Params
+): Promise<ActionResult & { completed?: boolean }> {
+  const parsed = toggleRoutineItemLogSchema.safeParse(params);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Dados inválidos." };
+  }
+
+  try {
+    const result = await getRoutineFetcher().toggleLog(parsed.data);
+    revalidatePath("/home/routine");
+
+    return { error: null, completed: result.completed };
+  } catch {
+    return { error: "Não foi possível registrar agora. Tente novamente." };
   }
 }
