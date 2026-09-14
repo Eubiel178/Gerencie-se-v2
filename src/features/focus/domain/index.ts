@@ -8,5 +8,6 @@ export * from "./load-history";
 export * from "./load-history-range";
 export * from "./mascot";
 export * from "./mascot-species";
+export * from "./species-emoji";
 export * from "./mascot-lines";
 export * from "./get-mascot";

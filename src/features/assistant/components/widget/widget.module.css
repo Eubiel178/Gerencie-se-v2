@@ -87,10 +87,6 @@
   justify-content: center;
   width: 3.5rem;
   height: 3.5rem;
-  /* Contenção garantida - independente de qualquer ajuste futuro de
-     escala por personagem (`scaleForAvatar`), o bichinho nunca mais
-     transborda pra fora do círculo (causa real da bolha "feia": um
-     personagem maior que os outros vazando pros lados). */
   overflow: hidden;
   border: none;
   border-radius: var(--radius-full);
@@ -149,6 +145,11 @@
   .avatar {
     animation: none;
   }
+}
+
+.avatarEmoji {
+  font-size: 1.75rem;
+  line-height: 1;
 }
 
 .pingDot {

@@ -6,37 +6,10 @@ import { Button } from "@/components";
 import { Icon } from "@/components/icon";
 
 import { IAssistantMessage } from "@/features/assistant/domain";
-import { IMascotState } from "@/features/focus/domain";
-import { MascotPreview, characterIdForSpecies, MASCOT_CHARACTERS } from "@/features/mascot-pet";
-import { MascotStateName } from "@/features/mascot-pet/domain/types";
+import { IMascotState, SPECIES_EMOJI } from "@/features/focus/domain";
 import { useSpeak } from "@/lib/speak-text";
 
 import styles from "./widget.module.css";
-
-// Tamanho que o bichinho deve OCUPAR dentro do avatar circular (px, no
-// espaço do próprio atlas) - calculado por personagem a partir do
-// próprio tamanho de exibição dele (`displayWidth`/`frameWidth`), em vez
-// de um `scale` fixo pra todos. Um `scale` único quebrava (acabou de
-// acontecer, achado relatado: "a bolinha tá feia") assim que qualquer
-// personagem mudasse de tamanho de exibição - os 6 mascotes novos, bem
-// maiores que os originais, transbordavam pra fora do círculo pequeno.
-const AVATAR_CREATURE_TARGET_PX = 34;
-
-// Mira no tamanho aparente do BICHO DE VERDADE, não do frame inteiro -
-// sem dividir por `contentFillRatio`, o cálculo mirava certo no frame
-// (que já inclui a folga transparente ao redor, ver `displayWidth` em
-// characters.ts), mas isso deixava o bicho em si minúsculo demais pra
-// enxergar nas raças de cão/gato novas (só ~33-38% de conteúdo real
-// dentro do próprio frame) - achado relatado: "o icone do bicho fica
-// tao pequeno que mal da pra ver".
-function scaleForAvatar(characterId: string | null): number {
-  const character = characterId ? MASCOT_CHARACTERS[characterId] : undefined;
-  if (!character) return 0.3;
-
-  const nativeSize = character.displayWidth ?? character.frameWidth;
-  const fillRatio = character.contentFillRatio ?? 1;
-  return AVATAR_CREATURE_TARGET_PX / (nativeSize * fillRatio);
-}
 
 type Mood = "idle" | "speaking" | "warning" | "celebrating";
 
@@ -50,12 +23,6 @@ function moodFor(message: IAssistantMessage | null): Mood {
   };
 
   return messages[message.tone];
-}
-
-// O avatar só tem 2 poses (não 4 como o widget) — "celebrating" usa a
-// pose feliz, o resto fica na pose parada.
-function creatureStateFor(mood: Mood): MascotStateName {
-  return mood === "celebrating" ? "happy" : "idle";
 }
 
 interface WidgetProps {
@@ -197,11 +164,15 @@ export function Widget({
         aria-expanded={isOpen}
         onClick={handleAvatarClick}
       >
-        <MascotPreview
-          characterId={characterIdForSpecies(mascot.species)}
-          state={creatureStateFor(mood)}
-          scale={scaleForAvatar(characterIdForSpecies(mascot.species))}
-        />
+        {/* Emoji, não o sprite pixel art real (`MascotPreview`) - dentro
+            de um círculo pequeno o sprite nunca ficava bom (minúsculo
+            demais ou cortado, dependendo do personagem - achado
+            relatado várias vezes: "a foto do pet fica bugado"). Um
+            emoji sempre renderiza nítido em qualquer tamanho, sem
+            depender de atlas/frame/escala nenhum. */}
+        <span className={styles.avatarEmoji} aria-hidden="true">
+          {SPECIES_EMOJI[mascot.species]}
+        </span>
         {!isOpen && message && (
           <span className={styles.pingDot} aria-hidden="true" />
         )}
