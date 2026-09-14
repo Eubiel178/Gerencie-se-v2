@@ -7,11 +7,28 @@ import { Icon } from "@/components/icon";
 
 import { IAssistantMessage } from "@/features/assistant/domain";
 import { IMascotState } from "@/features/focus/domain";
-import { MascotPreview, characterIdForSpecies } from "@/features/mascot-pet";
+import { MascotPreview, characterIdForSpecies, MASCOT_CHARACTERS } from "@/features/mascot-pet";
 import { MascotStateName } from "@/features/mascot-pet/domain/types";
 import { useSpeak } from "@/lib/speak-text";
 
 import styles from "./widget.module.css";
+
+// Tamanho que o bichinho deve OCUPAR dentro do avatar circular (px, no
+// espaço do próprio atlas) - calculado por personagem a partir do
+// próprio tamanho de exibição dele (`displayWidth`/`frameWidth`), em vez
+// de um `scale` fixo pra todos. Um `scale` único quebrava (acabou de
+// acontecer, achado relatado: "a bolinha tá feia") assim que qualquer
+// personagem mudasse de tamanho de exibição - os 6 mascotes novos, bem
+// maiores que os originais, transbordavam pra fora do círculo pequeno.
+const AVATAR_CREATURE_TARGET_PX = 34;
+
+function scaleForAvatar(characterId: string | null): number {
+  const character = characterId ? MASCOT_CHARACTERS[characterId] : undefined;
+  if (!character) return 0.3;
+
+  const nativeSize = character.displayWidth ?? character.frameWidth;
+  return AVATAR_CREATURE_TARGET_PX / nativeSize;
+}
 
 type Mood = "idle" | "speaking" | "warning" | "celebrating";
 
@@ -166,7 +183,7 @@ export function Widget({
         <MascotPreview
           characterId={characterIdForSpecies(mascot.species)}
           state={creatureStateFor(mood)}
-          scale={0.3}
+          scale={scaleForAvatar(characterIdForSpecies(mascot.species))}
         />
         {!isOpen && message && (
           <span className={styles.pingDot} aria-hidden="true" />

@@ -1,7 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
-import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -55,6 +54,37 @@ export function AccountPanel({ user, gender, overview }: AccountPanelProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [avatarError, setAvatarError] = useState<string | null>(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  // Preview LOCAL (via `URL.createObjectURL`, mostrado na hora, antes de
+  // qualquer resposta do servidor) - sem isso, escolher um arquivo não
+  // dava feedback visual nenhum até o upload+`router.refresh()`
+  // terminarem (achado relatado: "não consigo ver o preview quando
+  // troco"). Só é limpo quando `user.image` (vindo do servidor) muda de
+  // verdade pra outra coisa - nunca antes disso, pra não "piscar" de
+  // volta pra foto antiga no meio do caminho.
+  const [localPreview, setLocalPreview] = useState<string | null>(null);
+  // Ajuste de estado durante a renderização (não em `useEffect`), padrão
+  // recomendado pra "resetar estado quando uma prop muda" - evita o
+  // re-render em cascata que um `useEffect` chamando `setState` causaria.
+  const [previousUserImage, setPreviousUserImage] = useState(user.image);
+  if (user.image !== previousUserImage) {
+    setPreviousUserImage(user.image);
+    setLocalPreview((current) => {
+      if (current) URL.revokeObjectURL(current);
+      return null;
+    });
+  }
+
+  // Revoga o blob pendente se o componente desmontar no meio do upload
+  // (ex.: navegou pra outra categoria de Configurações) - sem isso, a
+  // URL fica presa em memória até a aba fechar.
+  useEffect(() => {
+    return () => {
+      setLocalPreview((current) => {
+        if (current) URL.revokeObjectURL(current);
+        return current;
+      });
+    };
+  }, []);
 
   const {
     handleSubmit,
@@ -89,6 +119,15 @@ export function AccountPanel({ user, gender, overview }: AccountPanelProps) {
     setAvatarError(null);
     setIsUploadingAvatar(true);
 
+    // Mostra o arquivo escolhido IMEDIATAMENTE (antes do upload em si
+    // terminar) - `URL.createObjectURL` lê o arquivo direto do disco,
+    // sem precisar de rede. Revoga o blob anterior (se houver) pra não
+    // vazar memória a cada troca.
+    setLocalPreview((previous) => {
+      if (previous) URL.revokeObjectURL(previous);
+      return URL.createObjectURL(file);
+    });
+
     try {
       const formData = new FormData();
       formData.set("avatar", file);
@@ -97,6 +136,10 @@ export function AccountPanel({ user, gender, overview }: AccountPanelProps) {
 
       if (result.error) {
         setAvatarError(result.error);
+        setLocalPreview((previous) => {
+          if (previous) URL.revokeObjectURL(previous);
+          return null;
+        });
         return;
       }
 
@@ -111,8 +154,14 @@ export function AccountPanel({ user, gender, overview }: AccountPanelProps) {
     <div className={styles.wrapper}>
       <div className={styles.identity}>
         <div className={styles.avatarArea}>
-          {user.image ? (
-            <Image src={user.image} alt="" width={72} height={72} className={styles.avatar} />
+          {localPreview || user.image ? (
+            // `<img>` simples (não `next/image`): o preview local usa uma
+            // URL `blob:`, que o otimizador de imagem do Next não aceita -
+            // como o avatar é pequeno (72px) e não crítico pra
+            // performance, usar `<img>` sempre (também pro caso da URL
+            // real) evita ramificar a lógica pra um caso e outro.
+            // eslint-disable-next-line @next/next/no-img-element -- preview local via blob: URL, next/image não aceita esse esquema
+            <img src={localPreview ?? user.image!} alt="" width={72} height={72} className={styles.avatar} />
           ) : (
             <span className={styles.avatarFallback} aria-hidden="true">
               {initials(user.name)}

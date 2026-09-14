@@ -1,7 +1,7 @@
-// Mensagem sempre igual, exista ou não uma conta com o e-mail informado
-// — do contrário, o próprio formulário vira uma forma de descobrir quais
-// e-mails têm cadastro (enumeração de contas). Compartilhada entre
-// `actions.ts` (que a devolve implicitamente via `sent: true`) e o
+// Só é exibida quando a conta de verdade existe (ver `requestPasswordResetAction`
+// em `actions.ts`, que agora retorna um erro específico se o e-mail não
+// estiver cadastrado) — por isso pode ser direta em vez de genérica.
+// Compartilhada entre `actions.ts` (implícita via `sent: true`) e o
 // formulário (que a exibe), sem duplicar o texto nos dois lugares.
-export const GENERIC_RESET_REQUEST_MESSAGE =
-  "Se existir uma conta com este e-mail, enviamos um link de redefinição.";
+export const RESET_REQUEST_SENT_MESSAGE =
+  "Enviamos um link de redefinição para o seu e-mail.";

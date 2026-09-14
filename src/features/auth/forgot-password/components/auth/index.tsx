@@ -10,7 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Alert, Form, Input, Button } from "@/components";
 
 import { requestPasswordResetAction } from "@/features/auth/actions";
-import { GENERIC_RESET_REQUEST_MESSAGE } from "@/features/auth/reset-request-message";
+import { RESET_REQUEST_SENT_MESSAGE } from "@/features/auth/reset-request-message";
 import { validationSchema } from "@/validation/forgot-password-schema";
 
 import styles from "../../../auth-page.module.css";
@@ -49,7 +49,7 @@ export function Auth() {
       <section className={styles.formCard}>
         <h1>Verifique seu e-mail</h1>
 
-        <p>{GENERIC_RESET_REQUEST_MESSAGE}</p>
+        <p>{RESET_REQUEST_SENT_MESSAGE}</p>
 
         <div className={styles.authSwitch}>
           <Link className={styles.link} href="/login">

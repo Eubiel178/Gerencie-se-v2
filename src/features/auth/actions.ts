@@ -119,9 +119,12 @@ export type RequestPasswordResetState = {
   sent: boolean;
 };
 
-/** Sempre retorna a mesma mensagem de sucesso, exista ou não uma conta
- * com o e-mail informado (ver `GENERIC_RESET_REQUEST_MESSAGE` acima). O
- * envio de verdade (ou não) acontece por trás, sem afetar a resposta. */
+/** Decisão do usuário (confirmada explicitamente após alerta de trade-off
+ * de segurança): quando o e-mail não tem conta, a resposta diz isso na
+ * hora em vez da mensagem genérica de "se existir, enviamos". Isso é uma
+ * brecha de enumeração de contas por design (permite descobrir quais
+ * e-mails estão cadastrados) — aceita conscientemente em troca de um
+ * feedback mais direto pro usuário legítimo que errou o e-mail. */
 export async function requestPasswordResetAction(
   data: unknown
 ): Promise<RequestPasswordResetState> {
@@ -137,35 +140,36 @@ export async function requestPasswordResetAction(
     .where(eq(users.email, parsed.data.email))
     .limit(1);
 
-  // Nunca espera o SMTP terminar antes de responder — a mensagem de
-  // sucesso já é sempre a mesma exista ou não a conta (não depende do
-  // resultado do envio), então travar aqui só deixaria a tela parada à
-  // toa (o Gmail demora bem mais que uma API de e-mail transacional
-  // dedicada, ver `src/lib/email.ts`).
-  if (user) {
-    if (user.passwordHash) {
-      const token = await createPasswordResetToken(user.id);
-      const resetUrl = `${appUrl()}/reset-password?token=${token}`;
+  if (!user) {
+    return { error: "Não existe conta cadastrada com este e-mail.", sent: false };
+  }
 
-      sendEmail({
-        to: parsed.data.email,
-        subject: "Redefinir sua senha — Gerencie-se",
-        html: renderPasswordResetEmail({ name: user.name, resetUrl }),
-      }).then((result) => {
-        if (result.error) console.error("[auth] falha ao enviar e-mail de redefinição de senha:", result.error);
-      });
-    } else {
-      // Conta existe, mas foi criada via Google — não há senha pra
-      // redefinir. Avisamos só quem tem acesso à caixa de entrada (não é
-      // uma resposta visível pra quem só está tentando descobrir contas).
-      sendEmail({
-        to: parsed.data.email,
-        subject: "Redefinir sua senha — Gerencie-se",
-        html: renderGoogleOnlyAccountEmail({ name: user.name }),
-      }).then((result) => {
-        if (result.error) console.error("[auth] falha ao enviar e-mail de aviso de conta Google:", result.error);
-      });
-    }
+  // Nunca espera o SMTP terminar antes de responder — o link já foi
+  // gerado e salvo, então travar aqui só deixaria a tela parada à toa (o
+  // Gmail demora bem mais que uma API de e-mail transacional dedicada,
+  // ver `src/lib/email.ts`); se o envio falhar de verdade, só fica
+  // registrado no log do servidor.
+  if (user.passwordHash) {
+    const token = await createPasswordResetToken(user.id);
+    const resetUrl = `${appUrl()}/reset-password?token=${token}`;
+
+    sendEmail({
+      to: parsed.data.email,
+      subject: "Redefinir sua senha — Gerencie-se",
+      html: renderPasswordResetEmail({ name: user.name, resetUrl }),
+    }).then((result) => {
+      if (result.error) console.error("[auth] falha ao enviar e-mail de redefinição de senha:", result.error);
+    });
+  } else {
+    // Conta existe, mas foi criada via Google — não há senha pra
+    // redefinir.
+    sendEmail({
+      to: parsed.data.email,
+      subject: "Redefinir sua senha — Gerencie-se",
+      html: renderGoogleOnlyAccountEmail({ name: user.name }),
+    }).then((result) => {
+      if (result.error) console.error("[auth] falha ao enviar e-mail de aviso de conta Google:", result.error);
+    });
   }
 
   return { error: null, sent: true };

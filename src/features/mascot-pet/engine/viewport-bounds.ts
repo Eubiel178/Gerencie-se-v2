@@ -77,7 +77,17 @@ function widen(min: number, max: number, minRange: number): [number, number] {
  * aritmética, sem tocar no DOM além de ler `window.inner*`). */
 export function computeViewportBounds(spriteWidth: number, spriteHeight: number): MascotBounds {
   const mobile = isMobileViewport();
-  const marginX = mobile ? MOBILE_MARGIN_X : SIDEBAR_WIDTH + DESKTOP_MARGIN;
+  // `marginX` (a sidebar inteira + respiro, no desktop) só faz sentido do
+  // lado ESQUERDO - é o que evita o mascote andar por cima da navegação.
+  // Reutilizar o mesmo valor pra calcular o limite DIREITO (como o código
+  // fazia antes) reservava um vão vazio do tamanho da sidebar também do
+  // lado direito, onde não existe sidebar nenhuma - encolhendo a área de
+  // passeio/arrasto bem mais do que o necessário (achado relatado:
+  // "tentei arrastar ele pro canto e ele fica num limite"). Do lado
+  // direito só precisa do respiro normal (`DESKTOP_MARGIN`/
+  // `MOBILE_MARGIN_X`, sem a sidebar).
+  const leftMarginX = mobile ? MOBILE_MARGIN_X : SIDEBAR_WIDTH + DESKTOP_MARGIN;
+  const rightMarginX = mobile ? MOBILE_MARGIN_X : DESKTOP_MARGIN;
   const marginBottom = mobile ? MOBILE_MARGIN_BOTTOM : DESKTOP_MARGIN;
 
   if (isNarrowContentViewport()) {
@@ -85,9 +95,9 @@ export function computeViewportBounds(spriteWidth: number, spriteHeight: number)
     // deixar o sprite passar da borda), depois estreitados pro tamanho
     // do canto — nessa ordem, porque numa tela minúscula o limite real
     // da tela é o que manda, não o tamanho do canto.
-    const screenMaxX = Math.max(window.innerWidth - spriteWidth - marginX, marginX);
-    const maxX = Math.min(screenMaxX, marginX + NARROW_CORNER_SIZE);
-    const [minX] = widen(marginX, maxX, MIN_RANGE_PX);
+    const screenMaxX = Math.max(window.innerWidth - spriteWidth - rightMarginX, leftMarginX);
+    const maxX = Math.min(screenMaxX, leftMarginX + NARROW_CORNER_SIZE);
+    const [minX] = widen(leftMarginX, maxX, MIN_RANGE_PX);
 
     const screenMaxY = Math.max(window.innerHeight - spriteHeight - marginBottom, 0);
     const [minY] = widen(Math.max(screenMaxY - NARROW_CORNER_SIZE, 0), screenMaxY, MIN_RANGE_PX);
@@ -99,8 +109,8 @@ export function computeViewportBounds(spriteWidth: number, spriteHeight: number)
   }
 
   const [minX, maxX] = widen(
-    marginX,
-    Math.max(window.innerWidth - spriteWidth - marginX, marginX),
+    leftMarginX,
+    Math.max(window.innerWidth - spriteWidth - rightMarginX, leftMarginX),
     MIN_RANGE_PX
   );
   const [minY, maxY] = widen(
