@@ -4,7 +4,7 @@ import { useWatch } from "react-hook-form";
 
 import { validationSchema } from "@/validation/habit-schema";
 
-import { Form, Input, Modal, ModalHeader, Button, ChipGroup, SuggestionChips, CollapsibleSection } from "@/components";
+import { Alert, Form, Input, Modal, ModalHeader, Button, ChipGroup, SuggestionChips, CollapsibleSection } from "@/components";
 import { Icon } from "@/components/icon";
 
 import { createHabitAction } from "@/features/habits/actions";
@@ -146,7 +146,7 @@ export function AddHabit({ buttonText, connections, goalOptions }: IAddHabitProp
               </CollapsibleSection>
             </Form.Wrapper>
 
-            {submitError && <p className={styles.formError}>{submitError}</p>}
+            {submitError && <Alert variant="error">{submitError}</Alert>}
 
             <Button.Root loading={isSubmitting}>Adicionar Hábito</Button.Root>
           </Form.Root>

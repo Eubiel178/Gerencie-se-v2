@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { Button, Input } from "@/components";
+import { Alert, Button, ConfirmIconButton, Input } from "@/components";
 
 import {
   deleteHydrationLogAction,
@@ -112,7 +112,7 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
     <div className={styles.panel}>
       <span className={styles.amount}>{today.totalMl} ml</span>
 
-      {actionError && <p className={styles.actionError}>{actionError}</p>}
+      {actionError && <Alert variant="error">{actionError}</Alert>}
 
       {isEditingGoal ? (
         <form className={styles.goalForm} onSubmit={handleSaveGoal}>
@@ -187,15 +187,13 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
                   log.loggedAt
                 )}
               </span>
-              <Button.Preset
-                icon={{ name: "FaTrash" }}
-                root={{
-                  tone: "danger",
-                  className: styles.smallButton,
-                  "aria-label": "Remover registro",
-                  loading: deletingLogId === log.id,
-                  onClick: () => handleDelete(log.id),
-                }}
+              <ConfirmIconButton
+                icon="FaTrash"
+                ariaLabel="Remover registro"
+                confirmText={`Remover o registro de ${log.amountMl} ml?`}
+                className={styles.smallButton}
+                loading={deletingLogId === log.id}
+                onConfirm={() => handleDelete(log.id)}
               />
             </li>
           ))}

@@ -10,9 +10,15 @@
  */
 
 :root {
-  /* Superfícies — tema claro (padrão) */
-  --color-background: #f5f7fa;
-  --color-surface: #ffffff;
+  /* Superfícies — tema claro (padrão). Nem fundo nem superfície são
+     branco puro de propósito: #ffffff sobre #ffffff/quase-branco brilha
+     demais (cansa a vista em uso prolongado ou ambiente já claro) sem
+     ganhar nada em legibilidade — um branco levemente acinzentado já
+     read como "branco" pro olho, só sem o brilho. --color-surface-
+     elevated continua o único branco puro do tema, reservado pra
+     hierarquia (o que "flutua" sobre --color-surface). */
+  --color-background: #eef1f6;
+  --color-surface: #fbfcfe;
   --color-surface-elevated: #ffffff;
   --color-border: #e2e5eb;
 
@@ -28,7 +34,12 @@
    */
   --color-highlight: #0369a1;
   --color-highlight-soft: #38bdf8;
-  --color-on-highlight: #051d2c;
+  /* Branco, não quase-preto: #051d2c sobre #0369a1 só passa em ~2,9:1
+     (abaixo do mínimo de 4,5:1 do WCAG AA pra texto normal) - achado
+     numa checagem de contraste de todos os pares de token. Branco passa
+     em ~5,9:1. É o mesmo botão "primary" usado no app inteiro (Entrar,
+     Salvar, Criar Tarefa...), então valia a pena corrigir na fonte. */
+  --color-on-highlight: #ffffff;
 
   --color-success: #15803d;
   --color-warning: #b45309;

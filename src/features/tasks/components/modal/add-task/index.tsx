@@ -5,7 +5,7 @@ import { useFormTags } from "@/features/tasks/hooks/use-form-tags";
 
 import { validationSchema } from "@/validation/task-schema";
 
-import { Form, Input, Modal, ModalHeader, Button, ChipGroup, CollapsibleSection } from "@/components";
+import { Alert, Form, Input, Modal, ModalHeader, Button, ChipGroup, CollapsibleSection } from "@/components";
 import { Icon } from "@/components/icon";
 
 import { createTaskAction } from "@/features/tasks/actions";
@@ -56,7 +56,7 @@ export function AddTask({ buttonText, isGoogleConnected, connections }: IAddTask
 
   return (
     <>
-      <Button.Root type="button" onClick={openModal}>
+      <Button.Root type="button" data-tour="new-task" onClick={openModal}>
         {buttonText}
       </Button.Root>
 
@@ -158,7 +158,7 @@ export function AddTask({ buttonText, isGoogleConnected, connections }: IAddTask
               </CollapsibleSection>
             </Form.Wrapper>
 
-            {submitError && <p className={styles.formError}>{submitError}</p>}
+            {submitError && <Alert variant="error">{submitError}</Alert>}
 
             <Button.Root loading={isSubmitting}>Adicionar Tarefa</Button.Root>
           </Form.Root>

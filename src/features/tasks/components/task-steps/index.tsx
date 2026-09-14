@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { Button, Input } from "@/components";
+import { Button, ConfirmIconButton, Input } from "@/components";
 
 import {
   createTaskStepAction,
@@ -107,15 +107,13 @@ export function TaskSteps({ taskId, steps }: TaskStepsProps) {
               <span className={`${styles.stepTitle} ${step.completed ? styles.stepTitleDone : ""}`}>
                 {step.title}
               </span>
-              <Button.Preset
-                icon={{ name: "FaTrash" }}
-                root={{
-                  tone: "danger",
-                  className: styles.smallButton,
-                  "aria-label": `Remover passo ${step.title}`,
-                  loading: busyStepId === step.id,
-                  onClick: () => handleRemoveStep(step.id),
-                }}
+              <ConfirmIconButton
+                icon="FaTrash"
+                ariaLabel={`Remover passo ${step.title}`}
+                confirmText={`Remover o passo "${step.title}"?`}
+                className={styles.smallButton}
+                loading={busyStepId === step.id}
+                onConfirm={() => handleRemoveStep(step.id)}
               />
             </li>
           ))}

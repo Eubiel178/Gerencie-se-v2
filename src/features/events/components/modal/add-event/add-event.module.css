@@ -1,4 +1,3 @@
-.formError{margin:0;font-family:var(--font-sans);font-size:var(--font-size-md);color:var(--color-info)}
 .formWrapper{gap:var(--space-5)}
 .colorSwatches{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2)}
 .colorSwatch{width:1.6rem;height:1.6rem;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0;transition:transform var(--duration-fast) var(--easing-standard),border-color var(--duration-fast) var(--easing-standard)}

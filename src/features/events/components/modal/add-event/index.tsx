@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 
 import { validationSchema } from "@/validation/event-schema";
 
-import { Form, Input, Modal, ModalHeader, Button, SuggestionChips, CollapsibleSection } from "@/components";
+import { Alert, Form, Input, Modal, ModalHeader, Button, SuggestionChips, CollapsibleSection } from "@/components";
 import { Icon } from "@/components/icon";
 import inputStyles from "@/components/form/input/styles.module.css";
 
@@ -195,7 +195,7 @@ export const AddEvent = ({ buttonText }: IModalProps) => {
               </CollapsibleSection>
             </Form.Wrapper>
 
-            {submitError && <p className={styles.formError}>{submitError}</p>}
+            {submitError && <Alert variant="error">{submitError}</Alert>}
 
             <Button.Root loading={isSubmitting}>Adicionar Evento</Button.Root>
           </Form.Root>

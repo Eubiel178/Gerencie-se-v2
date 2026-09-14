@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 
-import { Button } from "@/components";
-import { IconName } from "@/components/icon";
+import { Button, Modal, ModalHeader } from "@/components";
+import { Icon, IconName } from "@/components/icon";
 
 import styles from "./confirm-icon-button.module.css";
 
@@ -12,8 +12,7 @@ export interface ConfirmIconButtonProps {
   icon: IconName;
   /** `aria-label` do botão em repouso — ex. `Excluir tarefa "${title}"`. */
   ariaLabel: string;
-  /** Texto mostrado ao lado dos ícones de confirmar/cancelar — ex.
-   * "Excluir esta tarefa?". */
+  /** Texto da pergunta de confirmação — ex. "Excluir esta tarefa?". */
   confirmText: string;
   onConfirm: () => void | Promise<void>;
   loading?: boolean;
@@ -24,16 +23,12 @@ export interface ConfirmIconButtonProps {
 }
 
 /**
- * Botão de ação destrutiva (excluir) com confirmação em duas etapas —
- * mesmo padrão visual/interativo do "Sair" no Header (troca o próprio
- * botão por uma barra de confirmar/cancelar, em vez de abrir um modal),
- * só que reaproveitável: antes cada lista (tarefas, hábitos, metas,
- * rotina, eventos, leitura, corrida, saúde, ciclo, anexos, passos)
- * excluía direto no clique, sem chance de desfazer um toque acidental.
- *
- * Cancela sozinho ao clicar fora ou apertar Escape — nunca fica "armado"
- * esperando indefinidamente se a pessoa mudar de ideia e for fazer outra
- * coisa na tela.
+ * Botão de ação destrutiva (excluir) com confirmação num popup de
+ * verdade (reaproveita `Modal` — mesmo componente usado em todo o resto
+ * do app, com fundo escurecido, cancelar no Escape/clique fora, e trava
+ * de foco) — antes cada lista (tarefas, hábitos, metas, rotina, eventos,
+ * leitura, corrida, saúde, ciclo, anexos, passos) excluía direto no
+ * clique, sem chance de desfazer um toque acidental.
  */
 export function ConfirmIconButton({
   icon,
@@ -45,32 +40,14 @@ export function ConfirmIconButton({
   className,
 }: ConfirmIconButtonProps) {
   const [isConfirming, setIsConfirming] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!isConfirming) return;
+  async function handleConfirm() {
+    await onConfirm();
+    setIsConfirming(false);
+  }
 
-    function handlePointerDown(event: PointerEvent) {
-      if (!containerRef.current?.contains(event.target as Node)) {
-        setIsConfirming(false);
-      }
-    }
-
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") setIsConfirming(false);
-    }
-
-    document.addEventListener("pointerdown", handlePointerDown);
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.removeEventListener("pointerdown", handlePointerDown);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isConfirming]);
-
-  if (!isConfirming) {
-    return (
+  return (
+    <>
       <Button.Preset
         icon={{ name: icon }}
         root={{
@@ -81,30 +58,28 @@ export function ConfirmIconButton({
           onClick: () => setIsConfirming(true),
         }}
       />
-    );
-  }
 
-  return (
-    <div ref={containerRef} className={styles.confirmRow}>
-      <span className={styles.confirmText}>{confirmText}</span>
+      {isConfirming && (
+        <Modal onClose={() => setIsConfirming(false)}>
+          <ModalHeader title="Confirmar" onClose={() => setIsConfirming(false)} />
 
-      <Button.Preset
-        icon={{ name: "MdClose" }}
-        root={{ tone: "muted", "aria-label": "Cancelar", onClick: () => setIsConfirming(false) }}
-      />
+          <div className={styles.body}>
+            <span className={styles.icon} aria-hidden="true">
+              <Icon name={icon} />
+            </span>
+            <p className={styles.text}>{confirmText}</p>
+          </div>
 
-      <Button.Preset
-        icon={{ name: "FaCheck" }}
-        root={{
-          tone: "danger",
-          "aria-label": "Confirmar exclusão",
-          loading,
-          onClick: async () => {
-            await onConfirm();
-            setIsConfirming(false);
-          },
-        }}
-      />
-    </div>
+          <div className={styles.actions}>
+            <Button.Root type="button" variant="secondary" onClick={() => setIsConfirming(false)}>
+              Cancelar
+            </Button.Root>
+            <Button.Root type="button" tone="danger" loading={loading} onClick={handleConfirm}>
+              Confirmar
+            </Button.Root>
+          </div>
+        </Modal>
+      )}
+    </>
   );
 }

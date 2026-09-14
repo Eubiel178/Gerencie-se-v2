@@ -106,7 +106,7 @@ export function Card({
   }
 
   return (
-    <li key={task.id} className={styles.taskCard}>
+    <li key={task.id} className={styles.taskCard} data-priority={task.priority}>
       <div className={styles.taskCardHeader}>
         <div className={styles.headerInner}>
           <div className={styles.headerLeft}>
@@ -159,6 +159,13 @@ export function Card({
 
       <div className={styles.cardBody}>
         <div className={styles.cardTop}>
+          {task.startedAt && !task.completed && (
+            <span className={styles.startedBadge}>
+              <Icon name="FaPlay" aria-hidden="true" size={10} />
+              Em andamento
+            </span>
+          )}
+
           <div className={styles.titleRow}>
             <div className={styles.titleGroup}>
               <h3 className={styles.taskTitle} data-completed={task.completed}>
@@ -182,13 +189,6 @@ export function Card({
                   size={12}
                   color="var(--color-text-muted)"
                 />
-              )}
-
-              {task.startedAt && !task.completed && (
-                <span className={styles.startedBadge}>
-                  <Icon name="FaPlay" aria-hidden="true" size={10} />
-                  Em andamento
-                </span>
               )}
             </div>
 

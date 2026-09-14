@@ -8,7 +8,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { Form, Input, Button } from "@/components";
+import { Alert, Form, Input, Button } from "@/components";
 import { useToast } from "@/providers/toast-context";
 
 import { resetPasswordAction } from "@/features/auth/actions";
@@ -59,13 +59,13 @@ export function Auth() {
       <h1>Redefinir senha</h1>
 
       {!token && (
-        <p className={styles.formError}>
+        <Alert variant="error">
           Link inválido ou expirado. Peça uma nova redefinição na{" "}
           <Link className={styles.link} href="/forgot-password">
             tela de recuperação
           </Link>
           .
-        </p>
+        </Alert>
       )}
 
       <Form.Root onSubmit={handleSubmit(handleOnSubmit)}>
@@ -96,7 +96,7 @@ export function Auth() {
           </Input.Root>
         </Form.Wrapper>
 
-        {formError && <p className={styles.formError}>{formError}</p>}
+        {formError && <Alert variant="error">{formError}</Alert>}
 
         <Button.Root loading={isSubmitting} disabled={!token}>
           Redefinir senha

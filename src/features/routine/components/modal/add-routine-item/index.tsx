@@ -2,7 +2,7 @@
 
 import { validationSchema } from "@/validation/routine-schema";
 
-import { Form, Input, Modal, ModalHeader, Button, SuggestionChips, CollapsibleSection } from "@/components";
+import { Alert, Form, Input, Modal, ModalHeader, Button, SuggestionChips, CollapsibleSection } from "@/components";
 import { Icon } from "@/components/icon";
 
 import { createRoutineItemAction } from "@/features/routine/actions";
@@ -132,7 +132,7 @@ export function AddRoutineItem({ buttonText, taskOptions, connections }: IAddRou
               </CollapsibleSection>
             </Form.Wrapper>
 
-            {submitError && <p className={styles.formError}>{submitError}</p>}
+            {submitError && <Alert variant="error">{submitError}</Alert>}
 
             <Button.Root loading={isSubmitting}>Adicionar à Rotina</Button.Root>
           </Form.Root>

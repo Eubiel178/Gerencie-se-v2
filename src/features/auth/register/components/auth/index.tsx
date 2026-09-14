@@ -13,7 +13,7 @@ import styles from "../../../auth-page.module.css";
 
 import { Icon } from "@/components/icon";
 
-import { Form, Input, Button } from "@/components";
+import { Alert, Form, Input, Button } from "@/components";
 
 import { registerAction } from "@/features/auth/actions";
 
@@ -48,9 +48,14 @@ export function Auth() {
     }
   };
 
-  function handleGoogleSignIn() {
+  async function handleGoogleSignIn() {
     setIsGoogleLoading(true);
-    signIn("google", { callbackUrl: "/home" });
+
+    try {
+      await signIn("google", { callbackUrl: "/home" });
+    } catch {
+      setIsGoogleLoading(false);
+    }
   }
 
   return (
@@ -64,6 +69,7 @@ export function Auth() {
               error: errors.name?.message,
             }}
           >
+            <Input.Label htmlFor="name">Nome</Input.Label>
             <Input.Wrapper>
               <Input.Field
                 {...register("name")}
@@ -76,6 +82,7 @@ export function Auth() {
           </Input.Root>
 
           <Input.Root sharedProps={{ error: errors.email?.message }}>
+            <Input.Label htmlFor="email">E-mail</Input.Label>
             <Input.Wrapper>
               <Input.Field
                 {...register("email")}
@@ -88,6 +95,7 @@ export function Auth() {
           </Input.Root>
 
           <Input.Root sharedProps={{ error: errors.password?.message }}>
+            <Input.Label htmlFor="password">Senha</Input.Label>
             <Input.Wrapper>
               <Input.FieldPassword
                 {...register("password")}
@@ -99,6 +107,7 @@ export function Auth() {
           </Input.Root>
 
           <Input.Root sharedProps={{ error: errors.confirm_password?.message }}>
+            <Input.Label htmlFor="confirm_password">Confirmar senha</Input.Label>
             <Input.Wrapper>
               <Input.FieldPassword
                 {...register("confirm_password")}
@@ -110,7 +119,7 @@ export function Auth() {
           </Input.Root>
         </Form.Wrapper>
 
-        {formError && <p className={styles.formError}>{formError}</p>}
+        {formError && <Alert variant="error">{formError}</Alert>}
 
         <Button.Root loading={isSubmitting}>Cadastrar</Button.Root>
       </Form.Root>

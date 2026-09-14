@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 
 import { validationSchema } from "@/validation/goal-schema";
 
-import { Form, Input, Modal, ModalHeader, Button, ChipGroup, SuggestionChips, CollapsibleSection } from "@/components";
+import { Alert, Form, Input, Modal, ModalHeader, Button, ChipGroup, SuggestionChips, CollapsibleSection } from "@/components";
 import { Icon } from "@/components/icon";
 
 import { createGoalAction } from "@/features/goals/actions";
@@ -142,7 +142,7 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
               </CollapsibleSection>
             </Form.Wrapper>
 
-            {submitError && <p className={styles.formError}>{submitError}</p>}
+            {submitError && <Alert variant="error">{submitError}</Alert>}
 
             <Button.Root loading={isSubmitting}>Adicionar Objetivo</Button.Root>
           </Form.Root>

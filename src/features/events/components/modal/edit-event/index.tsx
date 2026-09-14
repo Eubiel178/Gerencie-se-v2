@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 
 import { validationSchema } from "@/validation/event-schema";
 
-import { Form, Modal, ModalHeader, Input, Button, SuggestionChips, CollapsibleSection } from "@/components";
+import { Alert, Form, Modal, ModalHeader, Input, Button, SuggestionChips, CollapsibleSection } from "@/components";
 import { Icon } from "@/components/icon";
 import inputStyles from "@/components/form/input/styles.module.css";
 
@@ -201,7 +201,7 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
               </CollapsibleSection>
             </Form.Wrapper>
 
-            {submitError && <p className={styles.formError}>{submitError}</p>}
+            {submitError && <Alert variant="error">{submitError}</Alert>}
 
             <Button.Root loading={isSubmitting}>Salvar Alterações</Button.Root>
           </Form.Root>

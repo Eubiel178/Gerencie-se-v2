@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { Form, Input, Button } from "@/components";
+import { Alert, Form, Input, Button } from "@/components";
 
 import { requestPasswordResetAction } from "@/features/auth/actions";
 import { GENERIC_RESET_REQUEST_MESSAGE } from "@/features/auth/reset-request-message";
@@ -83,7 +83,7 @@ export function Auth() {
           </Input.Root>
         </Form.Wrapper>
 
-        {formError && <p className={styles.formError}>{formError}</p>}
+        {formError && <Alert variant="error">{formError}</Alert>}
 
         <Button.Root loading={isSubmitting}>Enviar link</Button.Root>
       </Form.Root>

@@ -148,10 +148,21 @@
   border-left-color: var(--color-highlight);
 }
 .profile {
+  /* Causa real do scroll horizontal na navbar (achado medindo cada
+     filho do `.sidebar`: só `.profile` vazava, e vazava exatamente a
+     largura do próprio padding somado) - `width:100%` + `padding`
+     sem `box-sizing:border-box` soma o padding POR CIMA dos 100%, em
+     vez de incluí-lo dentro. Os vizinhos (`.navigation a`, `.signOut`,
+     ver embaixo) já faziam isso certo; só faltava aqui. `min-width:0`
+     continua útil e correto (deixa `.profileName`/o próprio `.profile`
+     encolherem de verdade se precisar), mas sozinho não bastava sem
+     isto. */
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   gap: var(--space-3);
   width: 100%;
+  min-width: 0;
   margin-top: auto;
   padding: 0.6rem 0.8rem;
   border: 0;
@@ -187,6 +198,13 @@
   font-weight: 700;
 }
 .profileName {
+  /* Sem `min-width:0`, um item flex nunca encolhe abaixo da largura do
+     próprio conteúdo (comportamento padrão `min-width:auto`) - o
+     `text-overflow:ellipsis` abaixo simplesmente não tinha efeito
+     nenhum pra um nome longo, e ele esticava a sidebar inteira (scroll
+     horizontal na navbar - achado relatado). */
+  min-width: 0;
+  flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

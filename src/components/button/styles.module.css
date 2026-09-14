@@ -80,6 +80,20 @@
 .toneDanger {
   color: var(--color-danger);
 }
+/* `tone="danger"` sozinho (regra acima) é pensado pra botão ghost/ícone
+   (só o texto/ícone fica vermelho, sem fundo) - é como toda ação
+   destrutiva do app até aqui usava `tone`. Combinado com a variante
+   `primary` (preenchida) - caso novo, usado no botão "Confirmar" dos
+   popups de confirmação - precisa de um fundo vermelho sólido também,
+   senão o botão continua azul (cor de `:where(.primary)`) com um texto
+   quase ilegível por cima. */
+.primary.toneDanger {
+  background: var(--color-danger);
+  color: var(--color-on-danger);
+}
+.primary.toneDanger:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
 .toneHighlight {
   color: var(--color-highlight);
 }

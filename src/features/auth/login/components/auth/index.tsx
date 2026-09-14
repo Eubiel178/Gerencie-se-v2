@@ -14,7 +14,7 @@ import styles from "../../../auth-page.module.css";
 
 import { Icon } from "@/components/icon";
 
-import { Form, Input, Button } from "@/components";
+import { Alert, Form, Input, Button } from "@/components";
 
 import { loginAction } from "@/features/auth/actions";
 import { authErrorMessage } from "@/lib/auth-error-messages";
@@ -60,9 +60,17 @@ export function Auth() {
     }
   };
 
-  function handleGoogleSignIn() {
+  async function handleGoogleSignIn() {
     setIsGoogleLoading(true);
-    signIn("google", { callbackUrl: "/home" });
+
+    try {
+      await signIn("google", { callbackUrl: "/home" });
+    } catch {
+      // `signIn` normalmente redireciona antes de resolver — só chega
+      // aqui se falhar antes disso (ex.: rede fora do ar), caso em que
+      // o botão precisa voltar a ficar clicável em vez de travado.
+      setIsGoogleLoading(false);
+    }
   }
 
   return (
@@ -72,6 +80,7 @@ export function Auth() {
       <Form.Root onSubmit={handleSubmit(handleOnSubmit)}>
         <Form.Wrapper>
           <Input.Root sharedProps={{ error: errors.email?.message }}>
+            <Input.Label htmlFor="email">E-mail</Input.Label>
             <Input.Wrapper>
               <Input.Field
                 {...register("email")}
@@ -84,6 +93,7 @@ export function Auth() {
           </Input.Root>
 
           <Input.Root sharedProps={{ error: errors.password?.message }}>
+            <Input.Label htmlFor="password">Senha</Input.Label>
             <Input.Wrapper>
               <Input.FieldPassword
                 {...register("password")}
@@ -115,7 +125,7 @@ export function Auth() {
           </Input.Root>
         </Form.Wrapper>
 
-        {formError && <p className={styles.formError}>{formError}</p>}
+        {formError && <Alert variant="error">{formError}</Alert>}
 
         <Button.Root loading={isSubmitting}>Entrar</Button.Root>
       </Form.Root>

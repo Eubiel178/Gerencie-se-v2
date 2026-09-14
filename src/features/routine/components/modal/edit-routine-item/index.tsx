@@ -2,7 +2,7 @@
 
 import { validationSchema } from "@/validation/routine-schema";
 
-import { Form, Modal, ModalHeader, Input, Button, SuggestionChips, CollapsibleSection } from "@/components";
+import { Alert, Form, Modal, ModalHeader, Input, Button, SuggestionChips, CollapsibleSection } from "@/components";
 import { Icon } from "@/components/icon";
 
 import { updateRoutineItemAction } from "@/features/routine/actions";
@@ -139,7 +139,7 @@ export function EditRoutineItem({ itemBeingEdited, taskOptions, connections }: I
               </CollapsibleSection>
             </Form.Wrapper>
 
-            {submitError && <p className={styles.formError}>{submitError}</p>}
+            {submitError && <Alert variant="error">{submitError}</Alert>}
 
             <Button.Root loading={isSubmitting}>Salvar Alterações</Button.Root>
           </Form.Root>

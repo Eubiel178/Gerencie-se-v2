@@ -106,7 +106,7 @@ export function Card({ goal, connections }: CardProps) {
   }
 
   return (
-    <li className={styles.card}>
+    <li className={styles.card} data-priority={goal.priority}>
       <div className={styles.cardHeader}>
         <div className={styles.cardTitleGroup}>
           <h3 className={styles.cardTitle}>{goal.title}</h3>
@@ -178,15 +178,13 @@ export function Card({ goal, connections }: CardProps) {
               <span className={`${styles.stepTitle} ${step.completed ? styles.stepTitleDone : ""}`}>
                 {step.title}
               </span>
-              <Button.Preset
-                icon={{ name: "FaTrash" }}
-                root={{
-                  tone: "danger",
-                  className: styles.smallButton,
-                  "aria-label": `Remover etapa ${step.title}`,
-                  loading: busyStepId === step.id,
-                  onClick: () => handleRemoveStep(step.id),
-                }}
+              <ConfirmIconButton
+                icon="FaTrash"
+                ariaLabel={`Remover etapa ${step.title}`}
+                confirmText={`Remover a etapa "${step.title}"?`}
+                className={styles.smallButton}
+                loading={busyStepId === step.id}
+                onConfirm={() => handleRemoveStep(step.id)}
               />
             </li>
           ))}

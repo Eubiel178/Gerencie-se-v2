@@ -7,13 +7,17 @@ interface CardProps {
   href?: string;
   linkLabel?: string;
   children: React.ReactNode;
+  /** Repassado como atributo pro `<section>` - usado pelo tour guiado
+   * (ver `features/guided-tour`) pra apontar pra um widget específico
+   * sem precisar de um wrapper extra só pra isso. */
+  "data-tour"?: string;
 }
 
 /** Bloco de seção do dashboard: título + link opcional "ver tudo" +
  * conteúdo. Compartilhado por todos os widgets do resumo. */
-export function Card({ title, href, linkLabel, children }: CardProps) {
+export function Card({ title, href, linkLabel, children, ...rest }: CardProps) {
   return (
-    <section className={styles.card}>
+    <section className={styles.card} {...rest}>
       <header className={styles.header}>
         <h2 className={styles.title}>{title}</h2>
         {href && (

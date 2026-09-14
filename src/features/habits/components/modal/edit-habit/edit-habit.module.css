@@ -1,4 +1,3 @@
-.formError{margin:0;font-family:var(--font-sans);font-size:var(--font-size-md);color:var(--color-info)}
 .readOnlyNote{margin:0;font-family:var(--font-sans);font-size:var(--font-size-xs);color:var(--color-text-muted)}
 
 .titleField{border:none;border-bottom:2px solid var(--color-border);border-radius:0;padding:var(--space-2) 0;background:transparent;font-size:var(--font-size-lg);font-weight:600}

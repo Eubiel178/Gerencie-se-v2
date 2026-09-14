@@ -62,6 +62,17 @@ export async function Dashboard() {
     .sort((a, b) => a.progressPercent - b.progressPercent)
     .slice(0, 3);
 
+  // Capado no mesmo padrão de `pendingTasks`/`activeGoals` acima — sem
+  // isso, uma lista de hábitos realista (8-15 itens) esticava essa
+  // coluna do grid muito além da coluna ao lado (capada), forçando
+  // scroll vertical na página inteira mesmo com conteúdo cabendo na tela
+  // (achado numa auditoria de layout). Pendente hoje primeiro, é o que
+  // precisa de atenção.
+  const dashboardHabits = [...habits]
+    .filter((habit) => !habit.archived)
+    .sort((a, b) => Number(a.completedToday) - Number(b.completedToday))
+    .slice(0, 5);
+
   const now = dayjs();
   const today = now.format("YYYY-MM-DD");
 
@@ -76,12 +87,13 @@ export async function Dashboard() {
     <div className={styles.grid}>
       <AchievementToasts items={achievementsStatus.newlyUnlocked} />
 
-      {!onboarding.dismissed && !onboarding.allDone && (
-        <div className={styles.onboarding}>
-          <OnboardingChecklist items={onboarding.items} />
-        </div>
-      )}
-
+      {/* O <h1> da página mora dentro de `Greeting` - precisa vir ANTES de
+          qualquer <h2> no DOM (ex.: o "Primeiros passos" do checklist
+          logo abaixo), senão quem navega por heading no leitor de tela
+          encontra um H2 antes de qualquer H1 existir (ordem de leitura
+          quebrada - achado numa auditoria de acessibilidade). O grid
+          (`dashboard.module.css`) não tem `order`/`grid-row` próprios -
+          a ordem visual segue exatamente esta ordem do JSX. */}
       <div className={styles.hero}>
         <Greeting
           text={greetingForHour(now.hour(), firstName)}
@@ -93,13 +105,19 @@ export async function Dashboard() {
         <NextAction action={nextAction} />
       </div>
 
+      {!onboarding.dismissed && !onboarding.allDone && (
+        <div className={styles.onboarding} data-tour="checklist">
+          <OnboardingChecklist items={onboarding.items} />
+        </div>
+      )}
+
       <div className={styles.column}>
         <TasksSummary tasks={pendingTasks} />
         <GoalsProgress goals={activeGoals} />
       </div>
 
       <div className={styles.column}>
-        <HabitsToday habits={habits} today={today} />
+        <HabitsToday habits={dashboardHabits} today={today} />
         <MascotCard mascot={mascot} />
         <HydrationMini today={hydrationToday} />
       </div>

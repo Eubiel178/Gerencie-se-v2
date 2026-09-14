@@ -4,7 +4,7 @@ import { useWatch } from "react-hook-form";
 
 import { validationSchema } from "@/validation/habit-schema";
 
-import { Form, Modal, ModalHeader, Input, Button, ChipGroup, SuggestionChips, CollapsibleSection } from "@/components";
+import { Alert, Form, Modal, ModalHeader, Input, Button, ChipGroup, SuggestionChips, CollapsibleSection } from "@/components";
 import { Icon } from "@/components/icon";
 
 import { updateHabitAction } from "@/features/habits/actions";
@@ -163,7 +163,7 @@ export function EditHabit({ habitBeingEdited, connections, goalOptions }: IEditH
               </CollapsibleSection>
             </Form.Wrapper>
 
-            {submitError && <p className={styles.formError}>{submitError}</p>}
+            {submitError && <Alert variant="error">{submitError}</Alert>}
 
             <Button.Root loading={isSubmitting}>Salvar Alterações</Button.Root>
           </Form.Root>

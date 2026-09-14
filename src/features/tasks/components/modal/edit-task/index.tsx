@@ -5,7 +5,7 @@ import { useFormTags } from "@/features/tasks/hooks/use-form-tags";
 
 import { validationSchema } from "@/validation/task-schema";
 
-import { Form, Modal, ModalHeader, Input, Button, ChipGroup, CollapsibleSection } from "@/components";
+import { Alert, Form, Modal, ModalHeader, Input, Button, ChipGroup, CollapsibleSection } from "@/components";
 import { Icon } from "@/components/icon";
 
 import { updateTaskAction } from "@/features/tasks/actions";
@@ -186,7 +186,7 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
               </CollapsibleSection>
             </Form.Wrapper>
 
-            {submitError && <p className={styles.formError}>{submitError}</p>}
+            {submitError && <Alert variant="error">{submitError}</Alert>}
 
             <Button.Root loading={isSubmitting}>Salvar Alterações</Button.Root>
           </Form.Root>

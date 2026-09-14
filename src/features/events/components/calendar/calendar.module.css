@@ -1,13 +1,20 @@
 /*
  * Sobrescreve o toolbar padrão do FullCalendar (`.fc-*` não são classes
  * geradas pelo CSS Modules — precisam de `:global()` pra valer). Sem
- * isso, abaixo de ~640px as três seções do toolbar (prev/next/hoje,
- * título do mês, seletor de visão) tentam caber numa linha só e o
- * título sobrepõe os botões — confirmado visualmente em mobile.
- * Empilhar as três seções resolve sem precisar mexer no FullCalendar em
- * si.
+ * isso, as três seções do toolbar (prev/next/hoje, título do mês,
+ * seletor de visão) tentam caber numa linha só e o título sobrepõe os
+ * botões — confirmado visualmente. Empilhar as três seções resolve sem
+ * precisar mexer no FullCalendar em si.
+ *
+ * 968px, não 640px: o breakpoint precisa refletir a largura do
+ * CONTEÚDO, não a da janela — com a sidebar (248px) ainda visível entre
+ * 641-968px de janela, o espaço real disponível pro toolbar já é
+ * estreito o bastante pra quebrar (confirmado em tablet, 820px de
+ * janela = só 572px de conteúdo). Mesmo cálculo de "conteúdo estreito"
+ * já documentado em `viewport-bounds.ts`/`mascot-pet.module.css`
+ * (720 + 248 = 968).
  */
-@media (max-width: 640px) {
+@media (max-width: 968px) {
   .wrapper :global(.fc-header-toolbar) {
     flex-direction: column;
     align-items: stretch;
