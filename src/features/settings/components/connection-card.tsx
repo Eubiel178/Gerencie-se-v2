@@ -8,7 +8,7 @@ import {
   updateSelectedCalendarAction,
 } from "@/features/google-calendar/actions";
 
-import { Button, Input } from "@/components";
+import { Button, Input, Modal, ModalHeader } from "@/components";
 
 import type { GoogleCalendarOption } from "@/lib/google-calendar";
 
@@ -36,6 +36,7 @@ export function ConnectionCard({
   const [isDisconnecting, setIsDisconnecting] = useState(false);
   const [isChangingCalendar, setIsChangingCalendar] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [isConfirmingDisconnect, setIsConfirmingDisconnect] = useState(false);
 
   async function handleDisconnect() {
     setActionError(null);
@@ -44,6 +45,7 @@ export function ConnectionCard({
     const result = await disconnectGoogleCalendarAction();
 
     setIsDisconnecting(false);
+    setIsConfirmingDisconnect(false);
 
     if (result.error) {
       setActionError(result.error);
@@ -118,12 +120,31 @@ export function ConnectionCard({
         <Button.Root
           type="button"
           className={styles.disconnectButton}
-          loading={isDisconnecting}
-          onClick={handleDisconnect}
+          onClick={() => setIsConfirmingDisconnect(true)}
         >
           Desconectar
         </Button.Root>
       </div>
+
+      {isConfirmingDisconnect && (
+        <Modal onClose={() => setIsConfirmingDisconnect(false)}>
+          <ModalHeader title="Confirmar" onClose={() => setIsConfirmingDisconnect(false)} />
+
+          <p className={styles.confirmText}>
+            Desconectar o Google Agenda? Suas tarefas marcadas para sincronizar
+            deixam de aparecer no calendário até você conectar novamente.
+          </p>
+
+          <div className={styles.confirmActions}>
+            <Button.Root type="button" variant="secondary" onClick={() => setIsConfirmingDisconnect(false)}>
+              Cancelar
+            </Button.Root>
+            <Button.Root type="button" tone="danger" loading={isDisconnecting} onClick={handleDisconnect}>
+              Confirmar
+            </Button.Root>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }

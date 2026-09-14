@@ -50,6 +50,20 @@ export function isAttachmentTypeAllowed(mimeType: string): boolean {
   return ALLOWED_ATTACHMENT_MIME_TYPES.has(mimeType);
 }
 
+// Allowlist própria e mais estreita pra avatar — diferente de anexo de
+// tarefa (que aceita PDF/Word/etc.), avatar só pode ser imagem.
+const ALLOWED_AVATAR_MIME_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/heic",
+  "image/heif",
+]);
+
+export function isAvatarTypeAllowed(mimeType: string): boolean {
+  return ALLOWED_AVATAR_MIME_TYPES.has(mimeType);
+}
+
 /** Formata bytes como "8,2 MB" / "512 KB" — unidade amigável e
  * consistente com o que a interface mostra antes/depois do upload. */
 export function formatFileSize(bytes: number): string {

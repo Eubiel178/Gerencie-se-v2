@@ -1,5 +1,7 @@
-.modal {
-  width: min(24rem, 100%);
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
 }
 
 .identity {
@@ -10,7 +12,15 @@
   text-align: center;
 }
 
+.avatarArea {
+  position: relative;
+  width: 72px;
+  height: 72px;
+}
+
 .avatar {
+  width: 72px;
+  height: 72px;
   border-radius: var(--radius-full);
   object-fit: cover;
 }
@@ -27,6 +37,42 @@
   font-family: var(--font-sans);
   font-size: var(--font-size-lg);
   font-weight: 600;
+}
+
+.avatarEditButton {
+  position: absolute;
+  bottom: -0.25rem;
+  right: -0.25rem;
+  padding: 0.2rem var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  color: var(--color-highlight);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 0.2rem 0.5rem var(--color-shadow);
+}
+
+.avatarEditButton:hover {
+  background: var(--color-surface-elevated);
+}
+
+.avatarEditButton:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.avatarInput {
+  display: none;
+}
+
+.avatarHint {
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
 }
 
 .name {
@@ -85,11 +131,4 @@
   display: flex;
   gap: var(--space-2);
   justify-content: end;
-}
-
-.formError {
-  margin: 0;
-  font-family: var(--font-sans);
-  font-size: var(--font-size-sm);
-  color: var(--color-danger);
 }

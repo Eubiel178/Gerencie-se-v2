@@ -9,8 +9,6 @@ import { Icon, IconName } from "@/components/icon";
 
 import { Button } from "@/components";
 import { getFocusableElements } from "@/components/modal/get-focusable-elements";
-import { ProfileModal } from "./profile-modal";
-import { ProfileOverview } from "@/features/profile/get-profile-overview";
 import { Gender } from "@/features/profile/get-gender";
 import { usePaletteStore } from "@/features/search/palette-store";
 import { QuickCapture } from "@/features/tasks/components/quick-capture";
@@ -82,7 +80,6 @@ interface HeaderProps {
     image: string | null;
     gender: Gender;
   };
-  overview: ProfileOverview;
 }
 
 function initials(name: string | null): string {
@@ -98,14 +95,13 @@ function initials(name: string | null): string {
   return result.toUpperCase();
 }
 
-export const Header = ({ user, overview }: HeaderProps) => {
+export const Header = ({ user }: HeaderProps) => {
   useCaptureTimezone();
 
   const pathname = usePathname();
   const openPalette = usePaletteStore((state) => state.open);
   const [isConfirmingSignOut, setIsConfirmingSignOut] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMobileNavigationOpen, setIsMobileNavigationOpen] = useState(false);
   const mobileNavigationRef = useRef<HTMLDivElement>(null);
   const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
@@ -197,7 +193,7 @@ export const Header = ({ user, overview }: HeaderProps) => {
 
   function renderNavigation(closeOnNavigate = false) {
     return (
-      <nav aria-label="Navegação principal" className={styles.navGroups}>
+      <nav aria-label="Navegação principal" className={styles.navGroups} data-tour="nav">
         {navGroups.map((group, index) => {
           const isOpen = !group.label || openGroups.has(index);
 
@@ -330,7 +326,7 @@ export const Header = ({ user, overview }: HeaderProps) => {
         Gerencie-se
       </p>
 
-      <button type="button" className={styles.searchTrigger} onClick={openPalette}>
+      <button type="button" className={styles.searchTrigger} data-tour="search" onClick={openPalette}>
         <Icon name="FaSearch" aria-hidden="true" />
         Buscar
         <span className={styles.searchShortcut}>Ctrl+K</span>
@@ -340,7 +336,7 @@ export const Header = ({ user, overview }: HeaderProps) => {
 
         {renderNavigation()}
 
-      <button type="button" className={styles.profile} onClick={() => setIsProfileOpen(true)}>
+      <Link href="/home/settings?section=conta" className={styles.profile}>
         {user.image ? (
           <Image
             src={user.image}
@@ -355,11 +351,7 @@ export const Header = ({ user, overview }: HeaderProps) => {
           </span>
         )}
         <span className={styles.profileName}>{user.name ?? "Minha conta"}</span>
-      </button>
-
-      {isProfileOpen && (
-        <ProfileModal user={user} gender={user.gender} overview={overview} onClose={() => setIsProfileOpen(false)} />
-      )}
+      </Link>
 
       {isConfirmingSignOut ? (
         <div className={styles.signOutConfirm}>

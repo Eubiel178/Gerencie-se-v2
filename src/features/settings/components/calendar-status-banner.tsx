@@ -25,7 +25,7 @@ export function CalendarStatusBanner({
 }: CalendarStatusBannerProps) {
   if (connected) {
     return (
-      <p className={`${styles.banner} ${styles.success}`}>
+      <p role="status" className={`${styles.banner} ${styles.success}`}>
         Google Agenda conectado com sucesso.
       </p>
     );
@@ -33,7 +33,7 @@ export function CalendarStatusBanner({
 
   if (error) {
     return (
-      <p className={`${styles.banner} ${styles.error}`}>
+      <p role="alert" className={`${styles.banner} ${styles.error}`}>
         {ERROR_MESSAGES[error] ?? "Não foi possível conectar ao Google Agenda."}
       </p>
     );

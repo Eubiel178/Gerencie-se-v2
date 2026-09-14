@@ -6,8 +6,9 @@ import { TaskReminders } from "@/features/tasks/components/reminder-scheduler";
 import { CommandPalette } from "@/features/search/components/command-palette";
 import { MascotPet, characterIdForSpecies } from "@/features/mascot-pet";
 import { getMascotFetcher } from "@/features/focus/data/get-focus-fetcher";
-import { getProfileOverview } from "@/features/profile/get-profile-overview";
 import { getGender } from "@/features/profile/get-gender";
+import { GuidedTour } from "@/features/guided-tour/components/guided-tour/lazy";
+import { shouldShowGuidedTour } from "@/features/guided-tour/get-guided-tour-status";
 import styles from "./home-layout.module.css";
 
 // As tarefas e eventos são dados dinâmicos e específicos de cada usuário —
@@ -18,11 +19,11 @@ import styles from "./home-layout.module.css";
 export const dynamic = "force-dynamic";
 
 const HomeLayout = async ({ children }: { children: React.ReactNode }) => {
-  const [session, overview, gender, mascot] = await Promise.all([
+  const [session, gender, mascot, showGuidedTour] = await Promise.all([
     auth(),
-    getProfileOverview(),
     getGender(),
     getMascotFetcher().getMascot(),
+    shouldShowGuidedTour(),
   ]);
   const mascotCharacterId = characterIdForSpecies(mascot.species);
 
@@ -35,7 +36,6 @@ const HomeLayout = async ({ children }: { children: React.ReactNode }) => {
           image: session?.user?.image ?? null,
           gender,
         }}
-        overview={overview}
       />
 
       <main className={styles.main}>{children}</main>
@@ -44,6 +44,7 @@ const HomeLayout = async ({ children }: { children: React.ReactNode }) => {
       <TaskReminders />
       <CommandPalette />
       <MascotPet characterId={mascotCharacterId} />
+      <GuidedTour active={showGuidedTour} mascotName={mascot.name} />
     </div>
   );
 };

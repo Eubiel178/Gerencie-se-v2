@@ -1,20 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
+import { Alert, Button, Form, Input } from "@/components";
+import { formatFileSize, MAX_ATTACHMENT_SIZE_BYTES } from "@/lib/upload-limits";
 import { validationSchema } from "@/validation/profile-schema";
-import { updateProfileAction } from "@/features/profile/actions";
+import { updateAvatarAction, updateProfileAction } from "@/features/profile/actions";
 import { ProfileOverview } from "@/features/profile/get-profile-overview";
 import { Gender } from "@/features/profile/get-gender";
 import { useToast } from "@/providers/toast-context";
 
-import { Modal, ModalHeader, Form, Input, Button } from "..";
-
-import styles from "./profile-modal.module.css";
+import styles from "./account-panel.module.css";
 
 interface FormData {
   name: string;
@@ -27,11 +27,10 @@ const GENDER_OPTIONS = [
   { label: "Masculino", value: "masculino" },
 ];
 
-interface ProfileModalProps {
+interface AccountPanelProps {
   user: { name: string | null; email: string | null; image: string | null };
   gender: Gender;
   overview: ProfileOverview;
-  onClose: () => void;
 }
 
 function initials(name: string | null): string {
@@ -47,11 +46,15 @@ function initials(name: string | null): string {
   return result.toUpperCase();
 }
 
-export function ProfileModal({ user, gender, overview, onClose }: ProfileModalProps) {
+export function AccountPanel({ user, gender, overview }: AccountPanelProps) {
   const router = useRouter();
   const { showToast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
   const {
     handleSubmit,
@@ -78,21 +81,70 @@ export function ProfileModal({ user, gender, overview, onClose }: ProfileModalPr
     setIsEditing(false);
   }
 
-  return (
-    <Modal className={styles.modal} onClose={onClose}>
-      <ModalHeader title="Meu perfil" onClose={onClose} />
+  async function handleAvatarChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
 
+    setAvatarError(null);
+    setIsUploadingAvatar(true);
+
+    try {
+      const formData = new FormData();
+      formData.set("avatar", file);
+
+      const result = await updateAvatarAction(formData);
+
+      if (result.error) {
+        setAvatarError(result.error);
+        return;
+      }
+
+      showToast("Foto atualizada!");
+      router.refresh();
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  }
+
+  return (
+    <div className={styles.wrapper}>
       <div className={styles.identity}>
-        {user.image ? (
-          <Image src={user.image} alt="" width={72} height={72} className={styles.avatar} />
-        ) : (
-          <span className={styles.avatarFallback} aria-hidden="true">
-            {initials(user.name)}
-          </span>
-        )}
+        <div className={styles.avatarArea}>
+          {user.image ? (
+            <Image src={user.image} alt="" width={72} height={72} className={styles.avatar} />
+          ) : (
+            <span className={styles.avatarFallback} aria-hidden="true">
+              {initials(user.name)}
+            </span>
+          )}
+
+          <button
+            type="button"
+            className={styles.avatarEditButton}
+            aria-label="Alterar foto de perfil"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploadingAvatar}
+          >
+            {isUploadingAvatar ? "..." : "Alterar"}
+          </button>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+            className={styles.avatarInput}
+            onChange={handleAvatarChange}
+          />
+        </div>
 
         <p className={styles.name}>{user.name ?? "Minha conta"}</p>
         <p className={styles.email}>{user.email}</p>
+        <p className={styles.avatarHint}>
+          JPEG, PNG, WebP ou HEIC, até {formatFileSize(MAX_ATTACHMENT_SIZE_BYTES)}.
+        </p>
+
+        {avatarError && <Alert variant="error">{avatarError}</Alert>}
       </div>
 
       <div>
@@ -143,7 +195,7 @@ export function ProfileModal({ user, gender, overview, onClose }: ProfileModalPr
             </Input.Root>
           </Form.Wrapper>
 
-          {submitError && <p className={styles.formError}>{submitError}</p>}
+          {submitError && <Alert variant="error">{submitError}</Alert>}
 
           <div className={styles.editActions}>
             <Button.Root variant="secondary" type="button" onClick={() => setIsEditing(false)}>
@@ -154,9 +206,9 @@ export function ProfileModal({ user, gender, overview, onClose }: ProfileModalPr
         </Form.Root>
       ) : (
         <Button.Root variant="secondary" onClick={() => setIsEditing(true)}>
-          Editar nome
+          Editar perfil
         </Button.Root>
       )}
-    </Modal>
+    </div>
   );
 }

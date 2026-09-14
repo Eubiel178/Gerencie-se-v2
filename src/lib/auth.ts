@@ -18,7 +18,7 @@ import authConfig from "./auth.config";
  * pelo `middleware.ts`) adicionando o adapter do banco e o Credentials
  * provider, ambos Node-only.
  */
-export const { handlers, auth, signIn, signOut } = NextAuth({
+export const { handlers, auth, signIn } = NextAuth({
   ...authConfig,
   adapter: DrizzleAdapter(db, {
     usersTable: users,
@@ -26,6 +26,35 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     sessionsTable: sessions,
     verificationTokensTable: verificationTokens,
   }),
+  callbacks: {
+    ...authConfig.callbacks,
+    // Sobrescreve o `session` do `auth.config.ts` (edge-safe, sem banco) —
+    // a sessão usa estratégia JWT, então `session.user.name`/`.image`
+    // normalmente ficam CONGELADOS no valor de quando o token foi emitido
+    // (login), mesmo depois de editar o perfil ou trocar o avatar em
+    // Configurações → Conta (achado ao testar essa tela: editar nome/foto
+    // "funcionava" no banco, mas nunca aparecia atualizado sem sair e
+    // entrar de novo). Essa versão relê nome/avatar direto do banco a
+    // cada `auth()` — consulta indexada por chave primária, barata.
+    async session({ session, token }) {
+      if (session.user && token.sub) {
+        session.user.id = token.sub;
+
+        const [freshUser] = await db
+          .select({ name: users.name, image: users.image })
+          .from(users)
+          .where(eq(users.id, token.sub))
+          .limit(1);
+
+        if (freshUser) {
+          session.user.name = freshUser.name;
+          session.user.image = freshUser.image;
+        }
+      }
+
+      return session;
+    },
+  },
   providers: [
     ...authConfig.providers,
     Credentials({

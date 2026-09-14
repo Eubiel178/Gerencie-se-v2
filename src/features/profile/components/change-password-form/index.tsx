@@ -70,7 +70,7 @@ export function ChangePasswordForm() {
         <Input.Root sharedProps={{ error: errors.currentPassword?.message }}>
           <Input.Label htmlFor="currentPassword">Senha atual</Input.Label>
           <Input.Wrapper>
-            <Input.FieldPassword {...register("currentPassword")} autoFocus />
+            <Input.FieldPassword {...register("currentPassword")} autoComplete="current-password" autoFocus />
           </Input.Wrapper>
           <Input.HelperText />
         </Input.Root>
@@ -78,7 +78,7 @@ export function ChangePasswordForm() {
         <Input.Root sharedProps={{ error: errors.newPassword?.message }}>
           <Input.Label htmlFor="newPassword">Nova senha</Input.Label>
           <Input.Wrapper>
-            <Input.FieldPassword {...register("newPassword")} />
+            <Input.FieldPassword {...register("newPassword")} autoComplete="new-password" />
           </Input.Wrapper>
           <Input.HelperText />
         </Input.Root>
@@ -86,7 +86,7 @@ export function ChangePasswordForm() {
         <Input.Root sharedProps={{ error: errors.confirmNewPassword?.message }}>
           <Input.Label htmlFor="confirmNewPassword">Confirmar nova senha</Input.Label>
           <Input.Wrapper>
-            <Input.FieldPassword {...register("confirmNewPassword")} />
+            <Input.FieldPassword {...register("confirmNewPassword")} autoComplete="new-password" />
           </Input.Wrapper>
           <Input.HelperText />
         </Input.Root>

@@ -3,14 +3,21 @@
 import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
+import sharp from "sharp";
 
 import { db } from "@/db/client";
 import { users, userPreferences } from "@/db/schema";
 import { requireUserId } from "@/lib/require-user-id";
+import { isFileTooLarge, isAvatarTypeAllowed, formatFileSize, MAX_ATTACHMENT_SIZE_BYTES } from "@/lib/upload-limits";
 import { validationSchema } from "@/validation/profile-schema";
 import { changePasswordSchema } from "@/validation/change-password-schema";
 
 import type { ActionResult } from "@/types/action-result";
+
+// Lado que o avatar normalizado vira, sempre, independente do tamanho
+// enviado — evita guardar um arquivo grande à toa (o avatar nunca é
+// exibido maior que uns 72px na interface).
+const AVATAR_SIZE_PX = 256;
 
 // Mesmo custo de hash usado no cadastro (`src/features/auth/actions.ts`)
 // — nunca deve divergir entre os dois lugares que geram um hash novo.
@@ -45,6 +52,57 @@ export async function updateProfileAction(data: unknown): Promise<ActionResult> 
     return { error: null };
   } catch {
     return { error: "Não foi possível salvar. Tente novamente." };
+  }
+}
+
+export async function updateAvatarAction(formData: FormData): Promise<ActionResult> {
+  const file = formData.get("avatar");
+
+  if (!(file instanceof File)) {
+    return { error: "Nenhuma imagem selecionada." };
+  }
+
+  if (isFileTooLarge(file.size)) {
+    return {
+      error: `Imagem muito grande (máximo ${formatFileSize(MAX_ATTACHMENT_SIZE_BYTES)}).`,
+    };
+  }
+
+  if (!isAvatarTypeAllowed(file.type)) {
+    return { error: "Formato de imagem não aceito. Use JPEG, PNG, WebP ou HEIC." };
+  }
+
+  try {
+    const userId = await requireUserId();
+    const originalBuffer = Buffer.from(await file.arrayBuffer());
+
+    const avatarContent = await sharp(originalBuffer)
+      .resize(AVATAR_SIZE_PX, AVATAR_SIZE_PX, { fit: "cover" })
+      .webp()
+      .toBuffer();
+
+    // `?v=` muda a cada upload de propósito - sem isso, a URL do avatar
+    // é sempre a mesma (`/api/profile/avatar/${userId}`) pra qualquer
+    // foto nova, e o navegador (+ o cache do Next/Image, que também
+    // chaveia por URL) simplesmente reusa a imagem antiga já em cache
+    // em vez de buscar a nova. Resultado batido: a primeira troca de
+    // foto funcionava, a segunda em diante "salvava" (o toast e o banco
+    // confirmam) mas a tela continuava mostrando a foto anterior -
+    // achado relatado.
+    await db
+      .update(users)
+      .set({
+        avatarContent,
+        avatarMimeType: "image/webp",
+        image: `/api/profile/avatar/${userId}?v=${Date.now()}`,
+      })
+      .where(eq(users.id, userId));
+
+    revalidatePath("/home", "layout");
+
+    return { error: null };
+  } catch {
+    return { error: "Não foi possível enviar a imagem. Tente novamente." };
   }
 }
 

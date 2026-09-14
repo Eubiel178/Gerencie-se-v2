@@ -54,3 +54,15 @@
   outline: 2px solid var(--color-highlight);
   outline-offset: 2px;
 }
+
+.confirmText {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-md);
+  color: var(--color-text);
+}
+.confirmActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
