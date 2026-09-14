@@ -9,7 +9,9 @@ import { z } from "zod";
 // "aumente a quantidade de caractere do título das tarefas").
 const TITLE_MAX_LENGTH = 60;
 const TITLE_TOO_LONG_MESSAGE = `O título deve ter no máximo ${TITLE_MAX_LENGTH} caracteres`;
-const DESCRIPTION_MAX_LENGTH = 165;
+// Igualado ao limite de evento/objetivo (280) - era 165 antes, achado
+// relatado como "mt pouco".
+const DESCRIPTION_MAX_LENGTH = 280;
 const DESCRIPTION_TOO_LONG_MESSAGE = `A descrição deve ter no máximo ${DESCRIPTION_MAX_LENGTH} caracteres`;
 const SYNC_REQUIRES_SCHEDULED_AT_MESSAGE = "Informe data e hora para sincronizar com o Google Agenda";
 const TASK_TAGS = ["studie", "work", "exercise", "other"] as const;
