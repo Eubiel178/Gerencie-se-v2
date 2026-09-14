@@ -61,9 +61,16 @@ export function FocusSessionProvider({ initialSession, userId, children }: Focus
   const router = useRouter();
 
   const [session, setSession] = useState(initialSession);
-  const [remaining, setRemaining] = useState(() =>
-    initialSession ? secondsRemaining(initialSession, Date.now()) : 0
-  );
+  // Nunca `Date.now()` aqui (achado da auditoria pré-deploy: risco real
+  // de mismatch de hidratação) - o valor inicial do estado roda tanto no
+  // servidor quanto no cliente (hidratação), em instantes DIFERENTES;
+  // com uma sessão já em andamento ao carregar a página, os dois podem
+  // cair em segundos diferentes e produzir um `remaining` divergente no
+  // HTML do servidor vs. o primeiro render do cliente. Inicializa com a
+  // duração planejada (valor puro, sem depender do relógio) - o efeito
+  // de tick logo abaixo já corrige pro valor real na hora certa, sempre
+  // do lado do cliente, sem nunca rodar durante a própria hidratação.
+  const [remaining, setRemaining] = useState(() => initialSession?.plannedDurationSeconds ?? 0);
   const [isBusy, setIsBusy] = useState(false);
   const [lastCompletion, setLastCompletion] = useState<{ xpEarned: number; taskId: string | null } | null>(null);
 
