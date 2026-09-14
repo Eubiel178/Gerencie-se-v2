@@ -47,6 +47,18 @@ export interface MascotCharacter {
    * (ex. urso/pássaro/sapo/raposa); o gato/cachorro (arte "glossy"
    * vetorial) não usam isso, já que ali suavizar é o efeito certo. */
   pixelArt?: boolean;
+  /** Fração do PRÓPRIO frame que o bicho de verdade ocupa (0-1, medido
+   * pixel a pixel - ver CREDITS.txt) - default 1 (assume que preenche o
+   * frame quase todo, como gato/cachorro/urso/panda originais). Existe
+   * só pros personagens com bastante folga transparente reservada no
+   * frame (cães/gatos das raças novas, ~33%/38%): sem isso, um alvo de
+   * tamanho aparente (`scaleForAvatar` no widget do assistente) mira no
+   * FRAME inteiro, não no bicho - o resultado é um bicho minúsculo
+   * demais pra enxergar dentro de um avatar pequeno (achado relatado:
+   * "o icone do bicho fica tao pequeno que mal da pra ver"), mesmo já
+   * compensado pra escala de exibição normal (`displayWidth`, que
+   * resolve isso pro passeio pela tela, não pra caixas pequenas). */
+  contentFillRatio?: number;
   frameRects: Record<string, MascotFrameRect>;
   animations: Record<MascotStateName, string[]>;
   /** Frames por segundo ao tocar qualquer animação deste personagem. */

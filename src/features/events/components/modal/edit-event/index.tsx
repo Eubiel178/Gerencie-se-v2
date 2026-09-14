@@ -51,8 +51,19 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
       title: eventBeingEdited.title,
       description: eventBeingEdited.description,
       start: eventBeingEdited.start,
-      end: eventBeingEdited.end,
-      url: eventBeingEdited.url,
+      // `end`/`url` são opcionais no domínio (`IEvent.end?`/`.url?`) -
+      // um evento sem nenhum dos dois tem `undefined` de verdade aqui,
+      // não `""`. O schema espera sempre uma STRING (mesmo que vazia,
+      // ver `event-schema.ts`); passado `undefined` pro Zod, o erro
+      // embutido dele pra "esperava string, recebeu undefined" é
+      // literalmente "Required" - e como os dois campos moram dentro de
+      // "Mais opções" (`CollapsibleSection`, que desmonta o conteúdo
+      // quando fechada), esse erro ficava invisível pra quem nunca abria
+      // a seção: "Salvar Alterações" simplesmente não fazia nada (mesma
+      // causa raiz já corrigida pra `description`, achado relatado de
+      // novo aqui pro `url`).
+      end: eventBeingEdited.end || "",
+      url: eventBeingEdited.url || "",
       backgroundColor: eventBeingEdited.backgroundColor || "#3788d8",
     },
     onSubmit: async (data) => {

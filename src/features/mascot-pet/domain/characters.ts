@@ -55,6 +55,7 @@ function buildCharacter(
     displayWidth?: number;
     displayHeight?: number;
     pixelArt?: boolean;
+    contentFillRatio?: number;
     frameRate?: number;
     animations?: Record<MascotStateName, string[]>;
   }
@@ -68,6 +69,7 @@ function buildCharacter(
     displayWidth: options?.displayWidth,
     displayHeight: options?.displayHeight,
     pixelArt: options?.pixelArt,
+    contentFillRatio: options?.contentFillRatio,
     frameRects,
     frameRate: options?.frameRate ?? 10,
     animations: options?.animations ?? SHARED_ANIMATIONS,
@@ -208,6 +210,16 @@ const CAT_BREED_ANIMATIONS: Record<MascotStateName, string[]> = {
 // panda), calculado a partir da medição real, não um chute.
 const DOG_BREED_DISPLAY_SIZE = 260;
 const CAT_BREED_DISPLAY_SIZE = 220;
+// Mesma medição do comentário acima (33% dog / 38% cat), guardada como
+// dado (`contentFillRatio`) - usada por quem precisa mirar no TAMANHO
+// APARENTE DO BICHO de verdade dentro de uma caixa pequena e fixa (ex.
+// `scaleForAvatar` no avatar circular do widget do assistente), ao
+// contrário de `displayWidth` (mira no frame inteiro - correto pro
+// passeio pela tela, onde a folga transparente não aparece contra o
+// fundo vazio, mas resulta num bicho pequeno demais pra enxergar se
+// usado do mesmo jeito numa caixa pequena).
+const DOG_BREED_CONTENT_FILL_RATIO = 0.33;
+const CAT_BREED_CONTENT_FILL_RATIO = 0.38;
 
 function dogBreedOptions() {
   return {
@@ -216,6 +228,7 @@ function dogBreedOptions() {
     displayWidth: DOG_BREED_DISPLAY_SIZE,
     displayHeight: DOG_BREED_DISPLAY_SIZE,
     pixelArt: true,
+    contentFillRatio: DOG_BREED_CONTENT_FILL_RATIO,
     frameRate: 8,
     animations: DOG_BREED_ANIMATIONS,
   };
@@ -238,6 +251,7 @@ function catBreedOptions(animations: Record<MascotStateName, string[]> = CAT_BRE
     displayWidth: CAT_BREED_DISPLAY_SIZE,
     displayHeight: CAT_BREED_DISPLAY_SIZE,
     pixelArt: true,
+    contentFillRatio: CAT_BREED_CONTENT_FILL_RATIO,
     frameRate: 8,
     animations,
   };

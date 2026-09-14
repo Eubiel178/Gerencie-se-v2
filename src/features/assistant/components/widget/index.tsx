@@ -22,12 +22,20 @@ import styles from "./widget.module.css";
 // maiores que os originais, transbordavam pra fora do círculo pequeno.
 const AVATAR_CREATURE_TARGET_PX = 34;
 
+// Mira no tamanho aparente do BICHO DE VERDADE, não do frame inteiro -
+// sem dividir por `contentFillRatio`, o cálculo mirava certo no frame
+// (que já inclui a folga transparente ao redor, ver `displayWidth` em
+// characters.ts), mas isso deixava o bicho em si minúsculo demais pra
+// enxergar nas raças de cão/gato novas (só ~33-38% de conteúdo real
+// dentro do próprio frame) - achado relatado: "o icone do bicho fica
+// tao pequeno que mal da pra ver".
 function scaleForAvatar(characterId: string | null): number {
   const character = characterId ? MASCOT_CHARACTERS[characterId] : undefined;
   if (!character) return 0.3;
 
   const nativeSize = character.displayWidth ?? character.frameWidth;
-  return AVATAR_CREATURE_TARGET_PX / nativeSize;
+  const fillRatio = character.contentFillRatio ?? 1;
+  return AVATAR_CREATURE_TARGET_PX / (nativeSize * fillRatio);
 }
 
 type Mood = "idle" | "speaking" | "warning" | "celebrating";
@@ -59,6 +67,12 @@ interface WidgetProps {
 }
 
 const DISMISSED_KEY = "assistant-dismissed-message";
+
+// Mostrado quando não há mensagem contextual nenhuma - sem isso, clicar
+// no avatar sem mensagem pendente não fazia NADA (`if (!message) return`),
+// o que lia como o botão estar quebrado (achado relatado: "eu clico nao
+// faz nada"). O avatar sempre responde ao clique agora.
+const FALLBACK_TEXT = "Sem novidades por agora. Continue assim!";
 
 // `sessionStorage` não existe durante o render no servidor —
 // `useSyncExternalStore` (não `useEffect` + `setState`) é o jeito de ler
@@ -113,10 +127,13 @@ export function Widget({
     !!message && message.text !== dismissedText && !reducedPresence;
   const isOpen = manuallyToggled ?? autoOpen;
   const mood = moodFor(message);
+  const displayText = message?.text ?? FALLBACK_TEXT;
 
+  // Sempre responde ao clique, com mensagem pendente ou não - antes,
+  // sem mensagem, clicar não fazia nada (achado relatado). Sem
+  // mensagem de verdade, o balão mostra `FALLBACK_TEXT` em vez de ficar
+  // vazio.
   function handleAvatarClick() {
-    if (!message) return;
-
     setManuallyToggled(!isOpen);
   }
 
@@ -137,10 +154,10 @@ export function Widget({
 
   return (
     <div className={styles.wrapper}>
-      {isOpen && message && (
+      {isOpen && (
         <div className={styles.bubble} role="status">
           <p className={styles.bubbleName}>{mascot.name}</p>
-          <p className={styles.bubbleText}>{message.text}</p>
+          <p className={styles.bubbleText}>{displayText}</p>
 
           <div className={styles.bubbleActions}>
             <Button.Preset
@@ -152,7 +169,7 @@ export function Widget({
                 tone: "muted",
                 "aria-label": isSpeaking ? "Falando" : `Ouvir ${mascot.name}`,
                 disabled: isSpeaking,
-                onClick: () => handleSpeak(message.text),
+                onClick: () => handleSpeak(displayText),
               }}
             />
           </div>
@@ -160,7 +177,7 @@ export function Widget({
           <button
             type="button"
             className={styles.dismiss}
-            aria-label="Dispensar mensagem do assistente"
+            aria-label={message ? "Dispensar mensagem do assistente" : "Fechar"}
             onClick={handleDismiss}
           >
             <Icon name="MdClose" aria-hidden="true" />
