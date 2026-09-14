@@ -300,7 +300,9 @@ export const MASCOT_CHARACTERS: Record<string, MascotCharacter> = {
   "gato-siames": buildCharacter("gato-siames", "Gato Siamês", gatoSiamesFrameRects, catBreedOptions()),
 };
 
-export const DEFAULT_MASCOT_CHARACTER_ID: string = "cat";
+// Igualado ao default de `mascotStates.species` em `db/schema.ts`
+// (pedido: "coloque o panda pra ser o mascote default").
+export const DEFAULT_MASCOT_CHARACTER_ID: string = "panda";
 
 // Espécie escolhida em Configurações (ver
 // src/features/focus/domain/mascot-species.ts) -> personagem do mascote

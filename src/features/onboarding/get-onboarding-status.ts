@@ -46,9 +46,13 @@ export async function getOnboardingStatus(data: {
     isGoogleCalendarConnected(userId),
   ]);
 
+  // Precisa bater exatamente com o default de `mascotStates` em
+  // `db/schema.ts` - senão uma conta nova (que já nasce com esses
+  // valores, nunca "personalizou" nada de verdade) apareceria com este
+  // item já marcado como concluído à toa.
   const mascotCustomized =
     data.mascot.name !== "Chunchumaru" ||
-    data.mascot.species !== "gato" ||
+    data.mascot.species !== "panda" ||
     data.mascot.personality !== "afetuoso";
 
   const items: OnboardingItem[] = [

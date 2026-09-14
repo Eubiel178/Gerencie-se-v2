@@ -530,7 +530,7 @@ export const mascotStates = pgTable("mascot_state", {
     ],
   })
     .notNull()
-    .default("gato"),
+    .default("panda"),
   totalXp: integer("total_xp").notNull().default(0),
   updatedAt: timestamp("updated_at", { mode: "date" })
     .notNull()

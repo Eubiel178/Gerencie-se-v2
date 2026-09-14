@@ -1,0 +1,1 @@
+ALTER TABLE "mascot_state" ALTER COLUMN "species" SET DEFAULT 'panda';
