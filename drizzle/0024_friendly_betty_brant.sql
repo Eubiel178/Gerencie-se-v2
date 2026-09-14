@@ -1,0 +1,2 @@
+ALTER TABLE "focus_session" ADD COLUMN "task_id" text;--> statement-breakpoint
+ALTER TABLE "focus_session" ADD CONSTRAINT "focus_session_task_id_task_id_fk" FOREIGN KEY ("task_id") REFERENCES "public"."task"("id") ON DELETE set null ON UPDATE no action;

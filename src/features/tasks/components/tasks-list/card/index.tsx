@@ -138,6 +138,16 @@ export function Card({
               />
             )}
 
+            {!task.completed && (
+              <Button.Preset
+                icon={{ name: "MdTimer" }}
+                root={{
+                  "aria-label": `Focar nesta tarefa: ${task.title}`,
+                  onClick: () => router.push(`/home/focus?taskId=${task.id}`),
+                }}
+              />
+            )}
+
             {!task.isSharedWithMe && (
               <ConfirmIconButton
                 icon="FaTrash"

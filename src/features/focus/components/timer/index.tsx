@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { Button } from "@/components";
+import { Button, Modal, ModalHeader } from "@/components";
 
 import {
   cancelFocusSessionAction,
@@ -12,15 +12,28 @@ import {
   startFocusSessionAction,
 } from "@/features/focus/actions";
 import { IFocusSession, IMascotState, MascotEvent } from "@/features/focus/domain";
+import { toggleTaskCompleteAction } from "@/features/tasks/actions";
 import { Mascot } from "../mascot";
 
 import styles from "./timer.module.css";
 
 const PRESETS_MINUTES = [15, 25, 50];
 
+// Só o suficiente pra mostrar "Focando em: X" e oferecer marcar como
+// concluída ao final - nunca o resto dos campos da tarefa (passos,
+// recorrência etc.), que não fazem sentido aqui.
+interface FocusTask {
+  id: string;
+  title: string;
+  completed: boolean;
+}
+
 interface TimerProps {
   initialSession: IFocusSession | null;
   mascot: IMascotState;
+  // Vem de `Focus` (ver `src/features/focus/index.tsx`) - já resolvida
+  // no servidor a partir da sessão ativa ou do `?taskId=` da URL.
+  task?: FocusTask | null;
 }
 
 function secondsRemaining(session: IFocusSession, now: number): number {
@@ -34,7 +47,7 @@ function formatClock(totalSeconds: number): string {
   return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
 
-export function Timer({ initialSession, mascot }: TimerProps) {
+export function Timer({ initialSession, mascot, task }: TimerProps) {
   const router = useRouter();
 
   const [session, setSession] = useState(initialSession);
@@ -47,6 +60,11 @@ export function Timer({ initialSession, mascot }: TimerProps) {
   const [actionError, setActionError] = useState<string | null>(null);
   const [awayNudge, setAwayNudge] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  // Pergunta só depois de concluir uma sessão que tinha tarefa associada
+  // e ainda não concluída - nunca reabre sozinha depois de fechada uma
+  // vez (é sempre uma decisão pontual daquele momento).
+  const [showTaskCompleteConfirm, setShowTaskCompleteConfirm] = useState(false);
+  const [isMarkingTaskComplete, setIsMarkingTaskComplete] = useState(false);
 
   // Evita completar a mesma sessão duas vezes se o relógio e um clique em
   // "Concluir agora" chegarem no mesmo instante.
@@ -144,6 +162,7 @@ export function Timer({ initialSession, mascot }: TimerProps) {
     try {
       const result = await startFocusSessionAction({
         plannedDurationSeconds: plannedMinutes * 60,
+        taskId: task?.id ?? null,
       });
 
       if (result.session) {
@@ -154,7 +173,18 @@ export function Timer({ initialSession, mascot }: TimerProps) {
           plannedDurationSeconds: result.session.plannedDurationSeconds,
           status: "running",
           xpEarned: 0,
+          taskId: result.session.taskId,
         });
+        // Sem isso, `remaining` continua com o valor da sessão anterior
+        // (0, já que normalmente é assim que uma sessão termina) até o
+        // efeito de tick rodar - e nesse intervalo, o efeito de
+        // auto-completar (que reage a `[remaining, session]`) roda
+        // primeiro, vê `session` truthy + `remaining === 0` e conclui a
+        // sessão na mesma hora, com 0s/0 XP (bug real, confirmado batendo
+        // no banco: várias sessões de 1500s planejados terminando em 0s).
+        // Definir os dois no mesmo evento (React agrupa numa única
+        // renderização) garante que a sessão nasça com o tempo real dela.
+        setRemaining(result.session.plannedDurationSeconds);
       }
     } finally {
       setIsBusy(false);
@@ -182,11 +212,32 @@ export function Timer({ initialSession, mascot }: TimerProps) {
           : "Foco concluído!"
       );
 
+      // Só pergunta se a sessão que terminou tinha mesmo essa tarefa
+      // associada (não a tarefa "atual" por acaso — `task` só existe
+      // aqui quando `session.taskId` bate com ela, ver `Focus`) e ela
+      // ainda não estava concluída.
+      if (task && !task.completed) {
+        setShowTaskCompleteConfirm(true);
+      }
+
       setTimeout(() => setCelebration(null), 4000);
       router.refresh();
     } finally {
       setIsBusy(false);
       isCompletingRef.current = false;
+    }
+  }
+
+  async function handleConfirmTaskComplete() {
+    if (!task) return;
+
+    setIsMarkingTaskComplete(true);
+    try {
+      await toggleTaskCompleteAction({ id: task.id });
+      router.refresh();
+    } finally {
+      setIsMarkingTaskComplete(false);
+      setShowTaskCompleteConfirm(false);
     }
   }
 
@@ -226,6 +277,8 @@ export function Timer({ initialSession, mascot }: TimerProps) {
       )}
 
       <Mascot mascot={mascot} mood={mood} />
+
+      {task && <p className={styles.taskBadge}>Focando em: {task.title}</p>}
 
       {celebration && <p className={styles.celebrationMessage}>{celebration}</p>}
       {actionError && <p className={styles.errorMessage}>{actionError}</p>}
@@ -268,6 +321,34 @@ export function Timer({ initialSession, mascot }: TimerProps) {
             Iniciar Foco ({plannedMinutes} min)
           </Button.Root>
         </>
+      )}
+
+      {showTaskCompleteConfirm && task && (
+        <Modal onClose={() => setShowTaskCompleteConfirm(false)}>
+          <ModalHeader
+            title="Marcar tarefa como concluída?"
+            onClose={() => setShowTaskCompleteConfirm(false)}
+          />
+
+          <p className={styles.taskCompleteText}>{task.title}</p>
+
+          <div className={styles.taskCompleteActions}>
+            <Button.Root
+              type="button"
+              variant="secondary"
+              onClick={() => setShowTaskCompleteConfirm(false)}
+            >
+              Agora não
+            </Button.Root>
+            <Button.Root
+              type="button"
+              loading={isMarkingTaskComplete}
+              onClick={handleConfirmTaskComplete}
+            >
+              Marcar como concluída
+            </Button.Root>
+          </div>
+        </Modal>
       )}
     </div>
   );

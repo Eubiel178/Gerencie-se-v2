@@ -484,6 +484,12 @@ export const focusSessions = pgTable("focus_session", {
     .notNull()
     .default("running"),
   xpEarned: integer("xp_earned").notNull().default(0),
+  // Opcional - preenchido só quando a sessão começou a partir do botão
+  // "Focar nesta tarefa" (ver `src/features/tasks/components/tasks-list/card`).
+  // `onDelete: "set null"` de propósito: apagar a tarefa depois nunca
+  // deve apagar o histórico da sessão de foco em si, só perder essa
+  // referência.
+  taskId: text("task_id").references(() => tasks.id, { onDelete: "set null" }),
 });
 
 /** Uma linha por usuário — nível/mascote não têm histórico, só estado

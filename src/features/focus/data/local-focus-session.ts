@@ -33,11 +33,13 @@ export class LocalFocusSession
         id: existing.id,
         startedAt: existing.startedAt,
         plannedDurationSeconds: existing.plannedDurationSeconds,
+        taskId: existing.taskId,
       };
     }
 
     const id = crypto.randomUUID();
     const startedAt = new Date();
+    const taskId = params.taskId ?? null;
 
     await db.insert(focusSessions).values({
       id,
@@ -45,9 +47,10 @@ export class LocalFocusSession
       startedAt,
       plannedDurationSeconds: params.plannedDurationSeconds,
       status: "running",
+      taskId,
     });
 
-    return { id, startedAt, plannedDurationSeconds: params.plannedDurationSeconds };
+    return { id, startedAt, plannedDurationSeconds: params.plannedDurationSeconds, taskId };
   }
 
   async complete(params: domain.CompleteFocusSession.Params): Promise<domain.CompleteFocusSession.Result> {
@@ -155,5 +158,6 @@ function mapRowToFocusSession(row: typeof focusSessions.$inferSelect): domain.IF
     actualDurationSeconds: row.actualDurationSeconds,
     status: row.status,
     xpEarned: row.xpEarned,
+    taskId: row.taskId,
   };
 }

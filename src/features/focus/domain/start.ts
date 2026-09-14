@@ -8,7 +8,12 @@ export type StartFocusSession = {
 };
 
 export namespace StartFocusSession {
-  export type Params = { plannedDurationSeconds: number };
+  export type Params = { plannedDurationSeconds: number; taskId?: string | null };
 
-  export type Result = Pick<IFocusSession, "id" | "startedAt" | "plannedDurationSeconds">;
+  // Inclui `taskId` de propósito: como uma sessão já em andamento é
+  // devolvida em vez de criar outra (ver comentário acima), quem chama
+  // precisa saber a que tarefa a sessão RESULTANTE está associada - pode
+  // não ser a mesma que foi pedida em `Params`, se já havia uma sessão
+  // rodando pra outra tarefa (ou nenhuma).
+  export type Result = Pick<IFocusSession, "id" | "startedAt" | "plannedDurationSeconds" | "taskId">;
 }
