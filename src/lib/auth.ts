@@ -70,10 +70,18 @@ export const { handlers, auth, signIn } = NextAuth({
           return null;
         }
 
+        // Normaliza igual ao cadastro/convite (`registerAction`,
+        // `local-connection.ts`) - sem isso, um e-mail salvo como
+        // "user@x.com" não batia com "User@X.com"/" user@x.com " digitado
+        // depois, fazendo login (e, na mesma lógica, recuperação de
+        // senha) falhar silenciosamente pra uma conta que existe de
+        // verdade (achado da auditoria pré-deploy).
+        const normalizedEmail = email.trim().toLowerCase();
+
         const [user] = await db
           .select()
           .from(users)
-          .where(eq(users.email, email))
+          .where(eq(users.email, normalizedEmail))
           .limit(1);
 
         // Usuário não existe, ou só tem conta Google (sem senha definida):

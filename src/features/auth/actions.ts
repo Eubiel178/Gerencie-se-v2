@@ -78,7 +78,12 @@ export async function registerAction(
     return { error: "Verifique os dados informados." };
   }
 
-  const { name, email, password } = parsed.data;
+  const { name, password } = parsed.data;
+  // Mesma normalização de `local-connection.ts` (convite) - sem isso,
+  // cadastrar com "User@X.com" e depois tentar entrar/recuperar senha
+  // com "user@x.com" (ou vice-versa) falha silenciosamente pra uma
+  // conta que existe de verdade (achado da auditoria pré-deploy).
+  const email = parsed.data.email.trim().toLowerCase();
 
   const [existingUser] = await db
     .select({ id: users.id })
@@ -134,10 +139,16 @@ export async function requestPasswordResetAction(
     return { error: "Informe um e-mail válido.", sent: false };
   }
 
+  // Mesma normalização de `registerAction`/login (`auth.ts`) - sem isso,
+  // pedir redefinição com um e-mail em maiúsculas diferente do salvo
+  // dizia "não existe conta" pra uma conta que existe de verdade
+  // (achado da auditoria pré-deploy).
+  const email = parsed.data.email.trim().toLowerCase();
+
   const [user] = await db
     .select({ id: users.id, name: users.name, passwordHash: users.passwordHash })
     .from(users)
-    .where(eq(users.email, parsed.data.email))
+    .where(eq(users.email, email))
     .limit(1);
 
   if (!user) {
@@ -154,7 +165,7 @@ export async function requestPasswordResetAction(
     const resetUrl = `${appUrl()}/reset-password?token=${token}`;
 
     sendEmail({
-      to: parsed.data.email,
+      to: email,
       subject: "Redefinir sua senha — Gerencie-se",
       html: renderPasswordResetEmail({ name: user.name, resetUrl }),
     }).then((result) => {
@@ -164,7 +175,7 @@ export async function requestPasswordResetAction(
     // Conta existe, mas foi criada via Google — não há senha pra
     // redefinir.
     sendEmail({
-      to: parsed.data.email,
+      to: email,
       subject: "Redefinir sua senha — Gerencie-se",
       html: renderGoogleOnlyAccountEmail({ name: user.name }),
     }).then((result) => {
