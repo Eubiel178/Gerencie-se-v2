@@ -115,6 +115,7 @@ export function TasksListHeader({
           className={styles.lowEnergyToggle}
           data-active={lowEnergyMode}
           aria-pressed={lowEnergyMode}
+          aria-describedby="low-energy-hint"
           title="Modo de baixa energia: esconde tarefas de prioridade alta/crítica"
           onClick={() => setLowEnergyMode(!lowEnergyMode)}
         >
@@ -122,6 +123,17 @@ export function TasksListHeader({
           Baixa energia
         </button>
       </div>
+
+      {/* Texto visível (não só o tooltip nativo do `title`, que some no
+          toque/celular e é fácil de nunca notar) - explica o que o modo
+          faz assim que é ativado, quando mais importa (tarefas somem da
+          lista e a pessoa pode achar que é um bug). */}
+      {lowEnergyMode && (
+        <p id="low-energy-hint" className={styles.lowEnergyHint}>
+          <Icon name="FaBatteryQuarter" aria-hidden="true" />
+          Modo de baixa energia ativo: tarefas de prioridade alta e crítica ficam escondidas, pra sobrar só o que dá pra encarar agora.
+        </p>
+      )}
     </>
   );
 }

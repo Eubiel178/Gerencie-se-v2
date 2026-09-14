@@ -4,7 +4,10 @@ import { z } from "zod";
 // pelo schema do formulário (abaixo) e pelo schema server-side (mais
 // abaixo), pra não arriscar os dois divergirem silenciosamente com o
 // tempo (ver `createTaskSchema`/`updateTaskSchema`).
-const TITLE_MAX_LENGTH = 30;
+// Igualado ao limite de goal/habit/routine (60) - era 30 antes, bem
+// mais curto que os outros títulos do app à toa (achado relatado:
+// "aumente a quantidade de caractere do título das tarefas").
+const TITLE_MAX_LENGTH = 60;
 const TITLE_TOO_LONG_MESSAGE = `O título deve ter no máximo ${TITLE_MAX_LENGTH} caracteres`;
 const DESCRIPTION_MAX_LENGTH = 165;
 const DESCRIPTION_TOO_LONG_MESSAGE = `A descrição deve ter no máximo ${DESCRIPTION_MAX_LENGTH} caracteres`;

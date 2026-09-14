@@ -60,6 +60,22 @@
     background var(--duration-fast) var(--easing-standard),
     color var(--duration-fast) var(--easing-standard);
 }
+.lowEnergyHint {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: calc(-1 * var(--space-2)) 0 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-elevated);
+  color: var(--color-text-muted);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+}
+.lowEnergyHint svg {
+  flex-shrink: 0;
+  color: var(--color-highlight);
+}
 .lowEnergyToggle[data-active="true"] {
   background: var(--color-highlight);
   color: var(--color-on-highlight);
