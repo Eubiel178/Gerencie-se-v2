@@ -1,8 +1,8 @@
-# Configuração de e-mail (Resend)
+# Configuração de e-mail (Gmail SMTP)
 
-Este guia cobre a configuração necessária no [Resend](https://resend.com)
-para o app conseguir enviar os e-mails transacionais que envia hoje, todos
-através do mesmo `sendEmail()` em `src/lib/email.ts`:
+Este guia cobre a configuração necessária para o app conseguir enviar os
+e-mails transacionais que envia hoje, todos através do mesmo `sendEmail()`
+em `src/lib/email.ts`:
 
 - **Convite de compartilhamento** — ao compartilhar uma tarefa, item de
   rotina, hábito ou objetivo com outra pessoa (`src/features/connections`).
@@ -10,68 +10,68 @@ através do mesmo `sendEmail()` em `src/lib/email.ts`:
   mesma conta (`src/lib/login-attempt-tracker.ts`).
 - **Redefinição de senha** — link enviado em "Esqueceu sua senha?" na
   tela de login (`src/lib/password-reset.ts`).
+- **Resumo semanal** — ativado em Configurações → Notificações
+  (`src/features/weekly-summary`).
 
 Sem essa configuração, o app funciona normalmente — só não envia esses
 e-mails. O convite ainda é criado no banco e aparece pra pessoa convidada
 assim que ela entrar ou criar conta usando o mesmo e-mail; o aviso de
 login some sem consequência (nunca bloqueia a conta); e a redefinição de
-senha simplesmente não chega — o usuário precisa pedir de novo depois que
-o Resend estiver configurado.
+senha/resumo semanal simplesmente não chegam.
 
-## 1. Criar a conta
+## Por que Gmail SMTP, e não um provedor tipo Resend/SendGrid
 
-1. Acesse [resend.com](https://resend.com) e crie uma conta gratuita
-   (não pede cartão de crédito).
-2. O plano grátis inclui **3.000 e-mails/mês** e **100 e-mails/dia** —
-   folga enorme pra convites entre poucas pessoas (uso pessoal/casal).
+Qualquer provedor de e-mail transacional dedicado exige um **domínio
+próprio verificado por DNS** para entregar e-mail pra qualquer
+destinatário — sem isso, eles só entregam pro e-mail da própria conta que
+criou a chave de API (útil só pra testar sozinho). Comprar um domínio não
+é gratuito (~R$40-60/ano). Usar a infraestrutura do Gmail — uma conta
+comum + uma "Senha de app" — entrega pra qualquer destinatário sem
+precisar de domínio nenhum, porque quem está enviando "de verdade" é o
+próprio Google (confiável o bastante pra não cair em spam), não você.
 
-## 2. Gerar a chave de API
+A troca: o remetente aparece como um Gmail comum
+(`Gerencie-se <segerenciese@gmail.com>`), não um endereço com marca
+própria (`contato@seudominio.com`) — e o limite é de aproximadamente 500
+e-mails/dia, bem acima do que um app pessoal usa.
 
-1. No painel do Resend, vá em **API Keys → Create API Key**.
-2. Dê um nome (ex.: "Gerencie-se") e permissão de **Sending access**.
-3. Copie a chave gerada (só é exibida uma vez) e cole em `RESEND_API_KEY`
-   no seu `.env`.
+## 1. Ativar verificação em duas etapas
 
-## 3. Remetente do e-mail
+Senha de app só existe depois disso. Em
+[myaccount.google.com/security](https://myaccount.google.com/security),
+ative "Verificação em duas etapas" na conta que vai enviar os e-mails
+(ex.: `segerenciese@gmail.com`).
 
-Por padrão, o app envia pelo domínio de teste do próprio Resend
-(`onboarding@resend.dev`, ver `FROM_ADDRESS` em `src/lib/email.ts`). Esse
-domínio **só entrega para o e-mail da conta que criou a chave de API** —
-suficiente para testar sozinho, mas não para qualquer um dos três
-e-mails acima chegar pra outra pessoa de verdade (convidado, ou você
-mesmo com outro endereço).
+## 2. Gerar a Senha de app
 
-Para enviar para qualquer e-mail (uso real):
+1. Acesse [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords).
+2. Digite um nome pra identificar (ex.: "Gerencie-se") e crie.
+3. Copie o código de 16 caracteres gerado (aparece só uma vez) — os
+   espaços que o Google mostra ao exibir são só visuais, pode colar com
+   ou sem eles.
 
-1. Vá em **Domains → Add Domain** no painel do Resend e siga o passo a
-   passo (adicionar alguns registros DNS no seu domínio).
-2. Depois de verificado, troque `FROM_ADDRESS` em `src/lib/email.ts` para
-   um endereço desse domínio (ex.: `"Gerencie-se <contato@seudominio.com>"`)
-   — vale para os três tipos de e-mail, que compartilham o mesmo remetente.
-
-Se você não tiver um domínio próprio, pode deixar como está: convite e
-aviso de login continuam funcionando normalmente por trás (só o e-mail
-não chega), mas a redefinição de senha para outra conta que não seja a
-sua própria fica inutilizável até verificar um domínio.
-
-## 4. Variáveis de ambiente
+## 3. Variáveis de ambiente
 
 Veja `.env.example` para o modelo completo:
 
 ```
-RESEND_API_KEY=...              # chave gerada no passo 2
+GMAIL_USER=segerenciese@gmail.com       # a conta que envia
+GMAIL_APP_PASSWORD=...                  # a senha de app gerada no passo 2
 NEXT_PUBLIC_APP_URL=http://localhost:3000   # usado para montar o link dentro do e-mail
 ```
 
 Em produção, troque `NEXT_PUBLIC_APP_URL` pelo domínio real (HTTPS) e
-configure `RESEND_API_KEY` no mecanismo de variáveis de ambiente do seu
-provedor de hospedagem — nunca no código.
+configure `GMAIL_USER`/`GMAIL_APP_PASSWORD` no mecanismo de variáveis de
+ambiente do seu provedor de hospedagem — nunca no código. Marque
+`GMAIL_APP_PASSWORD` como "Sensitive"/"Secret" no painel (é uma senha de
+verdade da conta).
 
-## 5. O que acontece além do limite diário/mensal
+## 4. O que acontece se o limite diário for excedido
 
-O Resend simplesmente rejeita o envio quando o limite é excedido — não
-existe fila automática que reenvia no dia seguinte. `sendEmail()` trata
-esse retorno como qualquer outra falha de envio: o convite continua
-existindo no banco (a pessoa consegue aceitar assim que entrar), só o
-e-mail de aviso não é entregue. Para o volume esperado deste app (uso
-pessoal, algumas conexões) isso não deve ser um problema na prática.
+O Gmail simplesmente rejeita o envio quando o limite (~500/dia) é
+excedido — não existe fila automática que reenvia no dia seguinte.
+`sendEmail()` trata esse retorno como qualquer outra falha de envio: o
+convite continua existindo no banco (a pessoa consegue aceitar assim que
+entrar), só o e-mail de aviso não é entregue. Para o volume esperado
+deste app (uso pessoal, poucas conexões) isso não deve ser um problema
+na prática.

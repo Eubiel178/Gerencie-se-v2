@@ -5,12 +5,12 @@ na sua máquina). Cobre banco de dados, variáveis de ambiente e o deploy em
 si. Assume Vercel como host (é o mais direto para Next.js, feito pela
 mesma empresa), mas os passos de banco/env valem para qualquer host.
 
-Toda a stack recomendada aqui (Vercel, Neon, Resend, cron-job.org) tem
-plano gratuito para sempre — nenhum é "grátis por um tempo" que vira
-cobrança depois. Nenhum serviço de infraestrutura é literalmente
-ilimitado, mas os tetos gratuitos de cada um (100 GB de banda e 1 milhão
-de execuções de função por mês na Vercel, 100 e-mails/dia no Resend, uma
-chamada semanal no cron-job.org) são tão folgados pra um app de uso
+Toda a stack recomendada aqui (Vercel, Neon, Gmail, cron-job.org) é
+gratuita para sempre — nenhuma é "grátis por um tempo" que vira cobrança
+depois. Nenhum serviço de infraestrutura é literalmente ilimitado, mas
+os tetos gratuitos de cada um (100 GB de banda e 1 milhão de execuções
+de função por mês na Vercel, ~500 e-mails/dia no Gmail, uma chamada
+semanal no cron-job.org) são tão folgados pra um app de uso
 pessoal/poucos usuários que nunca chegam a ser um problema real na
 prática — ver os números completos na seção 1 (banco de dados) e nas
 seções de cada serviço abaixo.
@@ -69,10 +69,13 @@ valores de produção:
 | `GOOGLE_CALENDAR_CLIENT_ID` | Pode reaproveitar o mesmo Client ID acima |
 | `GOOGLE_CALENDAR_CLIENT_SECRET` | Pode reaproveitar o mesmo Client Secret acima |
 | `GOOGLE_CALENDAR_REDIRECT_URI` | `https://SEU-DOMINIO.com/api/google-calendar/callback` (com o domínio real, não localhost) |
-| `RESEND_API_KEY` | Chave da conta Resend (ver `EMAIL_SETUP.md`) — opcional; sem ela, o convite de compartilhamento é criado normalmente, só o e-mail não é enviado |
+| `GMAIL_USER` | E-mail da conta Gmail usada para enviar (ver `EMAIL_SETUP.md`) — opcional; sem isso, o convite de compartilhamento é criado normalmente, só o e-mail não é enviado |
+| `GMAIL_APP_PASSWORD` | Senha de app gerada nessa conta (`myaccount.google.com/apppasswords`, exige verificação em duas etapas ativada) — marque como "Sensitive"/"Secret" no painel |
 | `NEXT_PUBLIC_APP_URL` | `https://SEU-DOMINIO.com` (usado para montar o link dentro do e-mail de convite) |
-| `CRON_SECRET` | Gere um valor aleatório (`openssl rand -base64 32`) — obrigatório para o resumo semanal automático funcionar (ver seção 7) |
+| `CRON_SECRET` | Gere um valor aleatório (`openssl rand -base64 32`) — obrigatório para o resumo semanal E os lembretes por notificação push funcionarem (ver seção 7) |
 | `TOKEN_ENCRYPTION_KEY` | Gere um valor novo (`openssl rand -base64 32`) — protege os tokens do Google Agenda salvos no banco. **Nunca reaproveite o valor do seu `.env` local nem troque depois de definido em produção**: trocar invalida todas as conexões já feitas, forçando todo mundo a reconectar o Google Agenda |
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | Chave pública das notificações push (ver seção 7) — opcional; sem ela, o botão "Ativar notificações neste aparelho" some sozinho e o resto do app funciona normal |
+| `VAPID_PRIVATE_KEY` | Chave privada do mesmo par — **nunca** com o prefixo `NEXT_PUBLIC_`, essa não pode ir pro navegador |
 
 Na Vercel: **Project Settings → Environment Variables**. Em outro host,
 procure por "Environment Variables" ou "Config Vars" no painel.
@@ -180,6 +183,43 @@ nenhum e-mail é enviado — nada quebra, só fica desligado.
 
 ---
 
+## 7b. Notificação push (celular/PC, mesmo com o app fechado) — opcional
+
+Diferente do lembrete "de aba aberta" (que já funciona sem nada disso —
+ver `NotificationsToggle` em Configurações), a notificação push de
+verdade (chega mesmo com o navegador fechado) precisa de três coisas:
+um par de chaves VAPID, a variável `CRON_SECRET` (a mesma da seção 7) e
+um SEGUNDO cron externo. Sem VAPID configurado, o recurso fica desligado
+sozinho (o botão "Ativar notificações neste aparelho" some) — nada
+quebra, é totalmente opcional.
+
+1. Gere o par de chaves uma única vez (local, não precisa repetir a cada
+   deploy):
+   ```bash
+   npx web-push generate-vapid-keys
+   ```
+2. Configure na Vercel (ver seção 2):
+   - `NEXT_PUBLIC_VAPID_PUBLIC_KEY` = a chave pública gerada.
+   - `VAPID_PRIVATE_KEY` = a chave privada gerada (nunca a pública com o
+     prefixo `NEXT_PUBLIC_` nem vice-versa).
+3. Configure um segundo job no mesmo cron-job.org (ou equivalente),
+   chamando `POST` a cada poucos minutos (recomendado: a cada 5 min) em
+   `https://SEU-DOMINIO.com/api/cron/send-push-reminders`, com o mesmo
+   header:
+   ```
+   Authorization: Bearer <o mesmo valor de CRON_SECRET>
+   ```
+
+Reenviar o mesmo lembrete nunca acontece mesmo se esse cron rodar com
+sobreposição ou for chamado manualmente de novo — cada (tarefa, minutos
+de antecedência) só dispara push uma vez, controlado no próprio banco
+(tabela `task_reminder_sent`, ver `src/features/tasks/domain/due-reminders.ts`).
+Um lembrete que ficou mais de 2h sem ser processado (ex.: o cron ficou
+fora do ar) simplesmente deixa de ser enviado, em vez de chegar horas
+atrasado.
+
+---
+
 ## 8. Segurança — pendências conhecidas para depois do primeiro deploy
 
 - **Login por e-mail/senha sem bloqueio de conta.** Implementado, de
@@ -188,18 +228,18 @@ nenhum e-mail é enviado — nada quebra, só fica desligado.
   envia um e-mail de alerta ("tentativas de login na sua conta") depois
   de 5 tentativas malsucedidas em 30 minutos, com um cooldown de 1 hora
   entre alertas (ver `src/lib/login-attempt-guard.ts` e
-  `login-attempt-tracker.ts`). Requer `RESEND_API_KEY` configurada — sem
-  ela, o alerta simplesmente não é enviado (mesmo comportamento tolerante
-  a falha do resumo semanal). A conta nunca fica bloqueada, mesmo sem
-  e-mail configurado.
+  `login-attempt-tracker.ts`). Requer `GMAIL_USER`/`GMAIL_APP_PASSWORD`
+  configuradas — sem elas, o alerta simplesmente não é enviado (mesmo
+  comportamento tolerante a falha do resumo semanal). A conta nunca fica
+  bloqueada, mesmo sem e-mail configurado.
 - **Recuperação de senha por e-mail** (link "Esqueceu sua senha?" na tela
   de login) — implementada: `/forgot-password` gera um token de uso único
   (expira em 1h, ver `src/lib/password-reset.ts`) e envia por e-mail; a
   mensagem de sucesso é sempre a mesma exista ou não a conta, pra não
-  vazar quais e-mails têm cadastro. Também requer `RESEND_API_KEY` — sem
-  ela, o pedido "funciona" (token é criado) mas o e-mail não chega; o
-  usuário precisaria do link manualmente (via banco) até a chave ser
-  configurada.
+  vazar quais e-mails têm cadastro. Também requer
+  `GMAIL_USER`/`GMAIL_APP_PASSWORD` — sem elas, o pedido "funciona"
+  (token é criado) mas o e-mail não chega; o usuário precisaria do link
+  manualmente (via banco) até estarem configuradas.
 - Ver também `TOKEN_ENCRYPTION_KEY` acima (seção 2) — já implementado,
   mas trocar essa chave depois de configurada em produção invalida as
   conexões existentes do Google Agenda.
@@ -212,10 +252,14 @@ nenhum e-mail é enviado — nada quebra, só fica desligado.
    connection string **pooled** → copiar `DATABASE_URL`.
 2. Gerar novo `AUTH_SECRET` para produção.
 3. Adicionar URIs de redirecionamento de produção no Google Cloud Console.
-4. Configurar as 10 variáveis de ambiente no painel do host (as 6 de
-   sempre + `RESEND_API_KEY`/`NEXT_PUBLIC_APP_URL`/`CRON_SECRET`/
-   `TOKEN_ENCRYPTION_KEY`, ver `EMAIL_SETUP.md`).
+4. Configurar as variáveis de ambiente no painel do host (as 6 de sempre
+   + `GMAIL_USER`/`GMAIL_APP_PASSWORD`/`NEXT_PUBLIC_APP_URL`/
+   `CRON_SECRET`/`TOKEN_ENCRYPTION_KEY`, ver `EMAIL_SETUP.md`;
+   opcionalmente também `NEXT_PUBLIC_VAPID_PUBLIC_KEY`/`VAPID_PRIVATE_KEY`
+   para notificação push, ver seção 7b).
 5. Rodar `npm run db:migrate` apontando para o banco de produção.
 6. Deploy (push para o GitHub + importar na Vercel, ou equivalente).
 7. Configurar um cron externo (cron-job.org ou similar) chamando
-   `/api/cron/weekly-summary` com o `CRON_SECRET` — ver seção 7.
+   `/api/cron/weekly-summary` com o `CRON_SECRET` — ver seção 7. Se
+   configurou VAPID no passo 4, configurar também um segundo job chamando
+   `/api/cron/send-push-reminders` a cada poucos minutos — ver seção 7b.

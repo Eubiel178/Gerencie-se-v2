@@ -69,8 +69,7 @@ Animações precisam ter objetivo de feedback ou orientação e respeitar
 
 ## Integrações e limites de segurança
 
-- Google: login e conexão opcional ao Calendar.
-- Resend: e-mails transacionais, quando configurado.
+- Google: login, conexão opcional ao Calendar, e e-mails transacionais (via Gmail SMTP, quando configurado).
 - Edge TTS: fala opcional do mascote, limitada a 280 caracteres no endpoint.
 - Uploads: endpoints específicos de anexos, com validação de tipo e tamanho.
 
