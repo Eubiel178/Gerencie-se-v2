@@ -43,6 +43,9 @@ const SPECIES_OPTIONS = [
   { label: "Gato Preto", value: "gato-preto" },
   { label: "Gato Angorá", value: "gato-angora" },
   { label: "Gato Cinza", value: "gato-tabby" },
+  { label: "Gato Laranja", value: "gato-laranja" },
+  { label: "Gato Lilás", value: "gato-lilas" },
+  { label: "Gato Siamês", value: "gato-siames" },
 ];
 
 export function MascotSettings({ mascot }: { mascot: IMascotState }) {

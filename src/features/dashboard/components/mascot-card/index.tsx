@@ -17,6 +17,9 @@ const SPECIES_EMOJI: Record<MascotSpecies, string> = {
   "gato-preto": "🐈‍⬛",
   "gato-angora": "🐈",
   "gato-tabby": "🐈",
+  "gato-laranja": "🐈",
+  "gato-lilas": "🐈",
+  "gato-siames": "🐈",
 };
 
 export function MascotCard({ mascot }: { mascot: IMascotState }) {

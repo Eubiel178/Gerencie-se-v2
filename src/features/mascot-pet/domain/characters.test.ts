@@ -16,6 +16,9 @@ test("characterIdForSpecies: especies com atlas pronto mapeiam pro personagem ce
   assert.equal(characterIdForSpecies("gato-preto"), "gato-preto");
   assert.equal(characterIdForSpecies("gato-angora"), "gato-angora");
   assert.equal(characterIdForSpecies("gato-tabby"), "gato-tabby");
+  assert.equal(characterIdForSpecies("gato-laranja"), "gato-laranja");
+  assert.equal(characterIdForSpecies("gato-lilas"), "gato-lilas");
+  assert.equal(characterIdForSpecies("gato-siames"), "gato-siames");
 });
 
 test("characterIdForSpecies: especie sem atlas (coelho/galinha/sapo) nao mostra o bicho errado", () => {
@@ -25,6 +28,11 @@ test("characterIdForSpecies: especie sem atlas (coelho/galinha/sapo) nao mostra 
   // animacao de andar de verdade - ver CREDITS.txt) - continua mapeando
   // pra null, igual a qualquer outra especie sem personagem pronto.
   assert.equal(characterIdForSpecies("sapo"), null);
+});
+
+test("gato-lilas: sem animacao 'Itch' no pack de origem, 'sad' reaproveita os frames de 'idle'", () => {
+  const gatoLilas = MASCOT_CHARACTERS["gato-lilas"];
+  assert.deepEqual(gatoLilas.animations.sad, gatoLilas.animations.idle);
 });
 
 test("MASCOT_CHARACTERS: pelo menos idle tem frame, e todo frame referenciado existe no atlas", () => {

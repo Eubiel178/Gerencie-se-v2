@@ -17,5 +17,8 @@ test("MASCOT_SPECIES_LIST: tem as especies com personagem pronto", () => {
     "gato-preto",
     "gato-angora",
     "gato-tabby",
+    "gato-laranja",
+    "gato-lilas",
+    "gato-siames",
   ]);
 });

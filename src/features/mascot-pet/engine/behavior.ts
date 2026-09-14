@@ -33,9 +33,16 @@ const MIN_SPEED_RATIO = 0.35;
 // Chance de, ao "acordar" do idle, tirar uma soneca em vez de andar -
 // só uma variação de personalidade, não uma detecção real de inatividade
 // do usuário (essa não foi pedida - ver domain/events.ts).
-const SLEEP_CHANCE = 0.12;
+const SLEEP_CHANCE = 0.18;
 
-const IDLE_DURATION_RANGE_MS: [number, number] = [1500, 3500];
+// Uma perna de caminhada cobre facilmente 15-30s numa tela larga
+// (WALK_SPEED_PX_PER_S=42, área de passeio ampla desde o fix do
+// vazamento de sidebar em `viewport-bounds.ts`) - com a pausa antiga
+// (1,5-3,5s) o bichinho ficava andando quase o tempo todo, mal parando
+// entre um trajeto e outro (achado relatado: "ele mal dá pausas").
+// Dobrado/ampliado pra dar uma pausa de verdade, perceptível, sem virar
+// o oposto (ficar parado o tempo todo).
+const IDLE_DURATION_RANGE_MS: [number, number] = [3500, 7000];
 const SLEEP_DURATION_RANGE_MS: [number, number] = [3000, 5500];
 
 const REACTIVE_DURATION_MS: Record<Exclude<ReactiveState, "sleep">, number> = {

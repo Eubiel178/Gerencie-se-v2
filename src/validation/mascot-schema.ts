@@ -19,5 +19,8 @@ export const validationSchema = z.object({
     "gato-preto",
     "gato-angora",
     "gato-tabby",
+    "gato-laranja",
+    "gato-lilas",
+    "gato-siames",
   ]),
 });

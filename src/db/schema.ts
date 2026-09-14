@@ -524,6 +524,9 @@ export const mascotStates = pgTable("mascot_state", {
       "gato-preto",
       "gato-angora",
       "gato-tabby",
+      "gato-laranja",
+      "gato-lilas",
+      "gato-siames",
     ],
   })
     .notNull()

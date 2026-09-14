@@ -151,15 +151,17 @@ pixel art (mesma razão do parágrafo acima sobre urso/raposa/pássaro).
 ---
 
 Personagens: 3 raças de cachorro ("golden.png", "akita.png",
-"dogue-alemao.png") e 3 gatos ("gato-preto.png", "gato-angora.png",
-"gato-tabby.png") - atlas de cada um gerado localmente (sharp,
+"dogue-alemao.png") e 6 gatos ("gato-preto.png", "gato-angora.png",
+"gato-tabby.png", "gato-laranja.png", "gato-lilas.png",
+"gato-siames.png") - atlas de cada um gerado localmente (sharp,
 composição em grade de 8 linhas por estado x N colunas por frame) a
 partir dos packs abaixo, baixados pelo usuário.
 
 Fonte: "Pet Dogs Pack" (raças Golden Retriever, Akita, Great Dane -
 usados como "golden"/"akita"/"dogue-alemao") e "Pet Cats Pack"
-(variantes Cat-2/Cat-5/Cat-6 - usados como "gato-preto"/"gato-angora"/
-"gato-tabby")
+(6 das 6 variantes do pack - Cat-1/Cat-2/Cat-3/Cat-4/Cat-5/Cat-6,
+usados como "gato-laranja"/"gato-preto"/"gato-lilas"/"gato-siames"/
+"gato-angora"/"gato-tabby" respectivamente)
 Autor: não informado nos arquivos baixados (só o License.txt de cada
 pack, sem nome de autor) - packs claramente do mesmo autor/estilo (11
 estados idênticos em nome e proporção entre as raças/variantes de cada
@@ -191,6 +193,12 @@ gato entre si - mesmos nomes de estado nos dois packs):
 Sitting, Laying/Lying-down e Licking2 existem nos packs mas não têm
 mapeamento pra nenhum `MascotStateName` do motor - ficaram de fora do
 atlas final de propósito (evita atlas maior que o necessário).
+
+Exceção: Cat-3 ("gato-lilas") não tem animação "Itch" no pack de
+origem (só 10 dos 11 estados, diferente das outras 5 variantes) -
+"sad" reaproveita os frames de "idle" nesse personagem específico, em
+vez de inventar um frame que não existe (mesmo raciocínio já usado
+pro urso/panda faltando outras poses).
 
 Atlas nativo 100x100 (cachorros) / 50x50 (gatos) - ampliado pra 96x96
 igual aos outros personagens pixel art.

@@ -10,6 +10,9 @@ import dogueAlemaoFrameRects from "./dogue-alemao-frames.json";
 import gatoPretoFrameRects from "./gato-preto-frames.json";
 import gatoAngoraFrameRects from "./gato-angora-frames.json";
 import gatoTabbyFrameRects from "./gato-tabby-frames.json";
+import gatoLaranjaFrameRects from "./gato-laranja-frames.json";
+import gatoLilasFrameRects from "./gato-lilas-frames.json";
+import gatoSiamesFrameRects from "./gato-siames-frames.json";
 import { MascotCharacter, MascotFrameRect, MascotStateName } from "./types";
 
 const FRAME_WIDTH = 110;
@@ -218,7 +221,17 @@ function dogBreedOptions() {
   };
 }
 
-function catBreedOptions() {
+// Cat-3 do "Pet Cats Pack" (usado como `gato-lilas` abaixo) é o único das
+// 6 raças de gato sem uma animação "Itch" de verdade no pack de origem -
+// reaproveita os frames de "Idle" pro estado "sad" (mesmo raciocínio já
+// usado pro urso/panda faltando outras poses: uma aproximação honesta,
+// não um frame novo inventado).
+const CAT_BREED_ANIMATIONS_NO_ITCH: Record<MascotStateName, string[]> = {
+  ...CAT_BREED_ANIMATIONS,
+  sad: framesFor("Idle", 10),
+};
+
+function catBreedOptions(animations: Record<MascotStateName, string[]> = CAT_BREED_ANIMATIONS) {
   return {
     frameWidth: 50,
     frameHeight: 50,
@@ -226,7 +239,7 @@ function catBreedOptions() {
     displayHeight: CAT_BREED_DISPLAY_SIZE,
     pixelArt: true,
     frameRate: 8,
-    animations: CAT_BREED_ANIMATIONS,
+    animations,
   };
 }
 
@@ -263,6 +276,14 @@ export const MASCOT_CHARACTERS: Record<string, MascotCharacter> = {
   "gato-preto": buildCharacter("gato-preto", "Gato Preto", gatoPretoFrameRects, catBreedOptions()),
   "gato-angora": buildCharacter("gato-angora", "Gato Angorá", gatoAngoraFrameRects, catBreedOptions()),
   "gato-tabby": buildCharacter("gato-tabby", "Gato Cinza", gatoTabbyFrameRects, catBreedOptions()),
+  "gato-laranja": buildCharacter("gato-laranja", "Gato Laranja", gatoLaranjaFrameRects, catBreedOptions()),
+  "gato-lilas": buildCharacter(
+    "gato-lilas",
+    "Gato Lilás",
+    gatoLilasFrameRects,
+    catBreedOptions(CAT_BREED_ANIMATIONS_NO_ITCH)
+  ),
+  "gato-siames": buildCharacter("gato-siames", "Gato Siamês", gatoSiamesFrameRects, catBreedOptions()),
 };
 
 export const DEFAULT_MASCOT_CHARACTER_ID: string = "cat";
@@ -288,6 +309,9 @@ const SPECIES_TO_CHARACTER_ID: Record<string, string> = {
   "gato-preto": "gato-preto",
   "gato-angora": "gato-angora",
   "gato-tabby": "gato-tabby",
+  "gato-laranja": "gato-laranja",
+  "gato-lilas": "gato-lilas",
+  "gato-siames": "gato-siames",
 };
 
 export function characterIdForSpecies(species: string): string | null {

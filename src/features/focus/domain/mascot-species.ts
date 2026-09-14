@@ -15,6 +15,9 @@ export const MASCOT_SPECIES_LIST = [
   "gato-preto",
   "gato-angora",
   "gato-tabby",
+  "gato-laranja",
+  "gato-lilas",
+  "gato-siames",
 ] as const;
 
 export type MascotSpecies = (typeof MASCOT_SPECIES_LIST)[number];

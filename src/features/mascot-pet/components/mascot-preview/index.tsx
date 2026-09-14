@@ -7,6 +7,10 @@ import { MASCOT_CHARACTERS } from "@/features/mascot-pet/domain/characters";
 
 import styles from "./mascot-preview.module.css";
 
+// Teto pro tamanho do palco (px) - ver comentário completo onde é usado,
+// dentro de `MascotPreviewFrames`.
+const MAX_STAGE_PX = 180;
+
 interface MascotPreviewProps {
   /** Id de personagem (ver `MASCOT_CHARACTERS`) — `null`/id desconhecido
    * não renderiza nada. */
@@ -81,10 +85,23 @@ function MascotPreviewFrames({ character, state, scale, animated, label }: Masco
     : 1;
   const effectiveScale = scale * pixelArtScale;
 
+  // Alguns personagens (cães/gatos das raças novas) têm o bicho ocupando
+  // só uma fração pequena do próprio frame (~22-38%, medido com pixels
+  // reais - ver CREDITS.txt) - o `displayWidth` deles foi calibrado pro
+  // TAMANHO APARENTE do bicho ficar bom andando pela tela (fundo vazio,
+  // a folga transparente do frame não aparece), mas aplicado direto aqui
+  // (onde o palco é uma caixa de verdade no layout) essa mesma folga virava
+  // um espaço vazio enorme ao redor de um bicho pequeno no meio (achado
+  // relatado). Limitar o palco a um tamanho máximo - cortando a folga
+  // (nunca o bicho, que fica centralizado, ver CSS `transform-origin`) -
+  // resolve pros dois casos sem precisar de um cálculo por personagem.
+  const stageWidth = Math.min(rect.w * effectiveScale, MAX_STAGE_PX);
+  const stageHeight = Math.min(rect.h * effectiveScale, MAX_STAGE_PX);
+
   return (
     <div
       className={styles.stage}
-      style={{ width: rect.w * effectiveScale, height: rect.h * effectiveScale }}
+      style={{ width: stageWidth, height: stageHeight }}
       role="img"
       aria-label={label ?? character.label}
     >
