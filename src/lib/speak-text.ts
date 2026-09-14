@@ -2,6 +2,30 @@
 
 import { useState } from "react";
 
+/** Palavras cuja grafia informal (a que aparece NA TELA, ver
+ * `mascot-lines.ts`) não é a que soa mais natural quando lida em voz
+ * alta por um sintetizador — ex.: "vei" (gíria, "véi"/"mano") sai sem o
+ * acento porque é assim que se escreve no português informal escrito,
+ * mas lido ao pé da letra sem o acento o TTS tende a fechar a vogal
+ * errado. Nunca mexe no que é MOSTRADO (a tela sempre usa o texto
+ * original, ver `Mascot`/`Widget`) - só no que é ENVIADO pra fala, via
+ * `toSpeechText` abaixo. Lista pequena de propósito: só entra aqui uma
+ * palavra depois de confirmado que soa errado de verdade, não uma
+ * tentativa de prever tudo.
+ */
+const PRONUNCIATION_OVERRIDES: ReadonlyArray<readonly [RegExp, string]> = [
+  [/\bvei\b/gi, "véi"],
+];
+
+/** Aplica as substituições de `PRONUNCIATION_OVERRIDES` — usada por
+ * `speak` (nunca pelo texto exibido na tela). Exportada só pra teste. */
+export function toSpeechText(text: string): string {
+  return PRONUNCIATION_OVERRIDES.reduce(
+    (acc, [pattern, replacement]) => acc.replace(pattern, replacement),
+    text
+  );
+}
+
 /** Devolve uma Promise que resolve quando a fala nativa termina (ou na
  * hora, se o navegador não suportar) — sem isso, quem chama não teria
  * como saber quando liberar o botão de novo. */
@@ -30,15 +54,17 @@ function speakNative(text: string): Promise<void> {
  * ouvir até a fala acabar.
  */
 export async function speak(text: string): Promise<void> {
+  const speechText = toSpeechText(text);
+
   try {
     const response = await fetch("/api/mascot-speech", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text }),
+      body: JSON.stringify({ text: speechText }),
     });
 
     if (!response.ok) {
-      await speakNative(text);
+      await speakNative(speechText);
       return;
     }
 
@@ -51,7 +77,7 @@ export async function speak(text: string): Promise<void> {
       audio.play();
     });
   } catch {
-    await speakNative(text);
+    await speakNative(speechText);
   }
 }
 
