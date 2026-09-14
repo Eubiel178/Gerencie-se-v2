@@ -13,18 +13,38 @@ interface Tone {
   gain?: number;
 }
 
-// Um "bichinho" por entrada de MASCOT_CHARACTERS (ver domain/characters.ts)
-// - adicionar um personagem novo sem entrada aqui simplesmente não toca
-// som nenhum (nunca quebra o clique em si).
+// Som por FAMÍLIA de bicho (gato/cachorro), não por personagem
+// individual - as 3 raças de cachorro e as 6 variantes de gato soam como
+// o `dog`/`cat` original da própria família, em vez de cada um precisar
+// de um blipe só seu (um miado/latido sintetizado não muda por causa da
+// cor da pelagem). O panda ganha o tom do urso (mesmo espírito grave e
+// calmo). Um "bichinho" por entrada de MASCOT_CHARACTERS (ver
+// domain/characters.ts) - adicionar um personagem novo sem entrada aqui
+// simplesmente não toca som nenhum (nunca quebra o clique em si) - foi
+// exatamente o que faltou pro panda e pras 9 raças novas quando entraram
+// (achado relatado: "alguns mascotes tão sem som").
+const CAT_TONE: Tone[] = [{ type: "sine", startFreq: 600, endFreq: 950, durationMs: 160, gain: 0.15 }];
+const DOG_TONE: Tone[] = [{ type: "square", startFreq: 220, endFreq: 160, durationMs: 110, gain: 0.12 }];
+
 const SPECIES_SOUND: Record<string, Tone[]> = {
-  cat: [{ type: "sine", startFreq: 600, endFreq: 950, durationMs: 160, gain: 0.15 }],
-  dog: [{ type: "square", startFreq: 220, endFreq: 160, durationMs: 110, gain: 0.12 }],
+  cat: CAT_TONE,
+  dog: DOG_TONE,
   bird: [
     { type: "sine", startFreq: 1500, endFreq: 1900, durationMs: 70, gain: 0.12 },
     { type: "sine", startFreq: 1300, endFreq: 1700, durationMs: 70, gain: 0.12 },
   ],
   bear: [{ type: "sawtooth", startFreq: 110, endFreq: 80, durationMs: 260, gain: 0.1 }],
   fox: [{ type: "square", startFreq: 500, endFreq: 700, durationMs: 90, gain: 0.12 }],
+  panda: [{ type: "sawtooth", startFreq: 100, endFreq: 75, durationMs: 260, gain: 0.1 }],
+  golden: DOG_TONE,
+  akita: DOG_TONE,
+  "dogue-alemao": DOG_TONE,
+  "gato-preto": CAT_TONE,
+  "gato-angora": CAT_TONE,
+  "gato-tabby": CAT_TONE,
+  "gato-laranja": CAT_TONE,
+  "gato-lilas": CAT_TONE,
+  "gato-siames": CAT_TONE,
 };
 
 let sharedContext: AudioContext | null = null;
