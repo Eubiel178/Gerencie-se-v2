@@ -11,6 +11,15 @@ import styles from "./habit-consistency-chart.module.css";
 
 const VISIBLE_WEEKS = 26;
 
+// Antes cada clique em "anterior/próximo" pulava a janela inteira (26
+// semanas, ~6 meses) de uma vez, sem sobreposição - num gráfico cuja
+// unidade é a semana, esse salto gigante lia como se a navegação
+// estivesse quebrada ("volto e mostra semana passada", de uma vez, sem
+// nada entre o hoje e 6 meses atrás). Navegar de ~4 em 4 semanas (~1 mês,
+// janela deslizante) passa a impressão de continuidade - achado relatado
+// pelo usuário.
+const STEP_WEEKS = 4;
+
 // Área de desenho do SVG - viewBox fixo, escala com a largura real via
 // `width="100%"` no elemento (nunca recalculado em JS por resize).
 const CHART_WIDTH = 640;
@@ -22,9 +31,15 @@ const PLOT_BOTTOM = CHART_HEIGHT - 10;
 const PLOT_WIDTH = PLOT_RIGHT - PLOT_LEFT;
 const PLOT_HEIGHT = PLOT_BOTTOM - PLOT_TOP;
 
+// Inclui o ano (2 dígitos) de propósito - a janela padrão é de 26
+// semanas (~6 meses) e, dependendo de quando for hoje, cruza a virada do
+// ano (ex.: início em setembro de um ano, fim em março do ano seguinte).
+// Sem o ano, "21/09 – 15/03" lê como se a ordem estivesse invertida (a
+// primeira data "parece" mais recente que a segunda) mesmo quando a
+// ordem cronológica está correta - foi exatamente essa confusão relatada.
 function formatShortDate(date: string): string {
   const [year, month, day] = date.split("-");
-  return `${day}/${month}`;
+  return `${day}/${month}/${year.slice(2)}`;
 }
 
 function xFor(index: number, count: number): number {
@@ -53,10 +68,14 @@ export function HabitConsistencyChart({
   const [page, setPage] = useState(0);
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   const [showTable, setShowTable] = useState(false);
-  const maxPage = Math.max(0, Math.floor(fetchedWeeksBack / VISIBLE_WEEKS) - 1);
+  // A janela (26 semanas) desliza de STEP_WEEKS em STEP_WEEKS - o quanto
+  // dá pra voltar é limitado pelo que o servidor já buscou
+  // (`fetchedWeeksBack`), garantindo que a semana mais antiga da janela
+  // nunca fique sem dado carregado.
+  const maxPage = Math.max(0, Math.floor((fetchedWeeksBack - VISIBLE_WEEKS) / STEP_WEEKS));
 
   const points = useMemo(() => {
-    const referenceNow = dayjs().subtract(page * VISIBLE_WEEKS * 7, "day");
+    const referenceNow = dayjs().subtract(page * STEP_WEEKS * 7, "day");
     const weeks = buildHabitHeatmap(completionDates, totalHabits, VISIBLE_WEEKS, referenceNow);
     return buildHabitConsistencyTrend(weeks);
   }, [completionDates, totalHabits, page]);
@@ -70,6 +89,12 @@ export function HabitConsistencyChart({
     points.map((point, index) => `L ${xFor(index, points.length)} ${yFor(point.percent)}`).join(" ") +
     ` L ${xFor(points.length - 1, points.length)} ${PLOT_BOTTOM} Z`;
 
+  // A data real de hoje, não o fim da semana em andamento (`weekEndDate`
+  // é sábado - uma data futura enquanto a semana não termina, e mostrar
+  // uma data futura junto de "Hoje" seria tão confuso quanto o problema
+  // que essa etiqueta tenta resolver).
+  const todayLabel = formatShortDate(dayjs().format("YYYY-MM-DD"));
+
   const lastPoint = points[points.length - 1];
   const hovered = hoverIndex !== null ? points[hoverIndex] : null;
   const columnWidth = points.length > 0 ? PLOT_WIDTH / points.length : 0;
@@ -77,7 +102,7 @@ export function HabitConsistencyChart({
   // Só uma etiqueta a cada ~4 semanas, senão os rótulos se amontoam - o
   // primeiro e o último ponto sempre aparecem (regra "meça antes de
   // rotular": com 26 pontos, um rótulo por ponto se sobrepõe).
-  const xAxisTickEvery = 4;
+  const xAxisTickEvery = 5;
 
   return (
     <div className={styles.wrapper}>
@@ -171,20 +196,73 @@ export function HabitConsistencyChart({
               </text>
             ))}
 
-            {/* Rótulos de data - só a cada N semanas, pra não amontoar. */}
-            {points.map((point, index) =>
-              index % xAxisTickEvery === 0 || index === points.length - 1 ? (
+            {/* Rótulos de data - só a cada N semanas, pra não amontoar. O
+                último ponto da página atual é a semana EM ANDAMENTO (seu
+                fim, weekEndDate, ainda é uma data futura) - rotular com a
+                data de início dela ("13/09" quando hoje já é "14/09") lia
+                como se tivesse um dia de atraso. Por isso ganha "Hoje" -
+                mas sozinha essa palavra quebra o padrão "DD/MM/AA" dos
+                outros rótulos e lia como se a ordem tivesse virado bagunça
+                (achado relatado). A data real some junto, numa segunda
+                linha menor, pra nunca perder a referência cronológica. */}
+            {points.map((point, index) => {
+              const isCurrentInProgressWeek = page === 0 && index === points.length - 1;
+              const isLast = index === points.length - 1;
+              const isFirst = index === 0;
+              const isRegularTick = index % xAxisTickEvery === 0;
+              // Suprime um tick "regular" (múltiplo de N) caindo perto
+              // demais do último - sem isso, com labels "DD/MM/AA" mais
+              // largos que o espaço entre pontos, o penúltimo tick regular
+              // colidia visualmente com o último ("Hoje"/data final).
+              const tooCloseToLast = !isLast && points.length - 1 - index < xAxisTickEvery;
+
+              if (!isFirst && !isLast && (!isRegularTick || tooCloseToLast)) return null;
+
+              if (isCurrentInProgressWeek) {
+                // `textAnchor="end"` aqui, não "middle" como os outros -
+                // esse rótulo tem duas linhas e é mais largo que uma data
+                // sozinha; centralizado, a segunda linha ("Hoje" + a data)
+                // ultrapassava a borda direita do viewBox e cortava o
+                // texto (ex.: "14/09/26" virava "14/09/2") - igual ao
+                // rótulo de valor (`endLabel`) do ponto mais recente, que
+                // já ancora pela direita por causa disso.
+                return (
+                  <text
+                    key={point.weekStartDate}
+                    x={PLOT_RIGHT}
+                    y={CHART_HEIGHT - 10}
+                    className={styles.axisLabel}
+                    textAnchor="end"
+                  >
+                    <tspan x={PLOT_RIGHT} dy="0" className={styles.axisLabelStrong}>
+                      Hoje
+                    </tspan>
+                    <tspan x={PLOT_RIGHT} dy="9">
+                      {todayLabel}
+                    </tspan>
+                  </text>
+                );
+              }
+
+              // O último ponto de QUALQUER página (não só "Hoje") tem seu
+              // centro exatamente em `PLOT_RIGHT` - um rótulo "DD/MM/AA"
+              // centralizado ali (`textAnchor="middle"`) ultrapassa a
+              // borda direita do viewBox e é cortado pelo navegador (ex.:
+              // "21/06/26" vira "21/06/2") - o mesmo problema do rótulo
+              // "Hoje" acima, só que também acontecia ao navegar pra
+              // páginas anteriores, onde o último ponto é uma data comum.
+              return (
                 <text
                   key={point.weekStartDate}
-                  x={xFor(index, points.length)}
+                  x={isLast ? PLOT_RIGHT : xFor(index, points.length)}
                   y={CHART_HEIGHT - 2}
                   className={styles.axisLabel}
-                  textAnchor="middle"
+                  textAnchor={isLast ? "end" : "middle"}
                 >
                   {formatShortDate(point.weekStartDate)}
                 </text>
-              ) : null
-            )}
+              );
+            })}
 
             <path d={areaPath} fill={`url(#${gradientId})`} />
             <path d={linePath} className={styles.line} fill="none" />

@@ -54,9 +54,9 @@ export default function TermsOfServicePage() {
 
       <h2>5. Integrações de terceiros</h2>
       <p>
-        O login e a sincronização com Google Agenda dependem de serviços do Google, sujeitos aos
-        próprios termos deles. O envio de e-mails depende de um provedor terceiro (Resend). Não
-        somos responsáveis por indisponibilidade desses serviços externos.
+        O login, a sincronização com Google Agenda e o envio de e-mails dependem de serviços do
+        Google, sujeitos aos próprios termos deles. Não somos responsáveis por indisponibilidade
+        desses serviços externos.
       </p>
 
       <h2>6. Disponibilidade do serviço</h2>

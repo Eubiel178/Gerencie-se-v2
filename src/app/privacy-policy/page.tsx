@@ -77,12 +77,10 @@ export default function PrivacyPolicyPage() {
       </p>
       <ul>
         <li>
-          <strong>Google</strong> — para login (&ldquo;Continuar com Google&rdquo;) e, opcionalmente, para
-          sincronizar eventos com o Google Agenda.
-        </li>
-        <li>
-          <strong>Resend</strong> — para envio dos e-mails transacionais mencionados acima
-          (convite, resumo semanal, avisos de segurança, redefinição de senha).
+          <strong>Google</strong> — para login (&ldquo;Continuar com Google&rdquo;), opcionalmente para
+          sincronizar eventos com o Google Agenda, e para o envio dos e-mails transacionais
+          mencionados acima (convite, resumo semanal, avisos de segurança, redefinição de senha),
+          que sai por uma conta de e-mail do projeto no Gmail.
         </li>
         <li>
           <strong>Provedor de hospedagem e de banco de dados</strong> — onde a aplicação e seus

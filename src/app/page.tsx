@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Icon } from "@/components/icon";
 import { ThemeToggle } from "@/design-system/theme/theme-toggle";
+import { MascotSwarm } from "@/features/mascot-pet/components/mascot-swarm/lazy";
 import styles from "./landing-page.module.css";
 
 const highlights = [
@@ -12,12 +13,12 @@ const highlights = [
   {
     icon: "FiClock",
     title: "Foco com intenção",
-    text: "Transforme tempo protegido em progresso real.",
+    text: "Um bloco de tempo só pra uma coisa, sem trocar de aba a cada dois minutos.",
   },
   {
     icon: "FiHeart",
-    title: "Ritmo sustentável",
-    text: "Hábitos e bem-estar sem sobrecarregar sua rotina.",
+    title: "Hábitos sem culpa",
+    text: "Constrói aos poucos, e um dia perdido não zera o esforço todo.",
   },
 ] as const;
 
@@ -146,7 +147,7 @@ export default function LandingPage() {
       <section className={styles.features} id="recursos">
         <div className={styles.sectionIntro}>
           <p className={styles.eyebrow}>
-            <span /> Feito para a vida real
+            <span /> Sem enrolação
           </p>
           <h2>Produtividade não precisa ser complicada.</h2>
         </div>
@@ -162,11 +163,23 @@ export default function LandingPage() {
           ))}
         </div>
       </section>
+      <section className={styles.mascots} aria-label="Mascotes do Gerencie-se">
+        <div className={styles.sectionIntro}>
+          <p className={styles.eyebrow}>Você não está sozinho nessa</p>
+          <h2>Escolha um companheiro.</h2>
+          <p className={styles.mascotsIntroText}>
+            Ele anda pela tela, comemora quando você termina algo, e também
+            aceita um cafuné de vez em quando. Passe o mouse ou toque em cada um
+            pra conhecer.
+          </p>
+        </div>
+
+        <MascotSwarm />
+      </section>
+
       <section className={styles.steps} id="como-funciona">
         <div className={styles.stepsCopy}>
-          <p className={styles.eyebrow}>
-            <span /> Uma rotina possível
-          </p>
+          <p className={styles.eyebrow}>Uma rotina possível</p>
           <h2>Comece pequeno. Continue com leveza.</h2>
           <p>
             O Gerencie-se transforma objetivos distantes em próximos passos que
@@ -201,10 +214,12 @@ export default function LandingPage() {
         </ol>
       </section>
       <section className={styles.cta}>
-        <Icon name="FiBarChart2" className={styles.ctaIcon} aria-hidden="true" />
-        <p className={styles.eyebrow}>
-          <span /> Seu próximo capítulo
-        </p>
+        <Icon
+          name="FiBarChart2"
+          className={styles.ctaIcon}
+          aria-hidden="true"
+        />
+        <p className={styles.eyebrow}>Seu próximo capítulo</p>
         <h2>Um dia mais intencional começa agora.</h2>
         <Link className={styles.primaryAction} href="/register">
           Criar conta grátis <Icon name="FiArrowRight" aria-hidden="true" />

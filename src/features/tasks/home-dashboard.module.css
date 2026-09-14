@@ -100,6 +100,7 @@
   min-height: 12rem;
   overflow: hidden;
   border: 1px solid var(--color-border);
+  border-left: 0.3rem solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-surface);
   box-shadow: 0 0.5rem 1.25rem var(--color-shadow);
@@ -110,6 +111,22 @@
 .taskCard:hover {
   transform: translateY(-0.25rem);
   box-shadow: 0 1rem 2rem var(--color-shadow);
+}
+/* Cor da borda esquerda = prioridade, pra dar pra escanear a lista sem
+   precisar ler o rótulo de cada card - mesmas cores já usadas no seletor
+   de prioridade do formulário (ChipGroup), então é a mesma linguagem
+   visual em vez de uma paleta nova só pro card. */
+.taskCard[data-priority="baixa"] {
+  border-left-color: var(--color-success);
+}
+.taskCard[data-priority="media"] {
+  border-left-color: var(--color-warning);
+}
+.taskCard[data-priority="alta"] {
+  border-left-color: var(--color-priority-high);
+}
+.taskCard[data-priority="critica"] {
+  border-left-color: var(--color-danger);
 }
 .taskCardHeader {
   display: flex;
@@ -149,9 +166,13 @@
 }
 .tagLabel {
   margin: 0;
+  padding: 0.2rem var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--color-highlight-soft);
   font-family: var(--font-sans);
   color: var(--color-highlight);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
 }
 .cardBody {
   display: flex;
@@ -169,12 +190,15 @@
 }
 .titleRow {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
+  gap: var(--space-2);
   color: var(--color-text);
 }
 .titleGroup {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-2);
   align-items: center;
   color: var(--color-text);

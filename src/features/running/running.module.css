@@ -14,7 +14,8 @@
 .liveLabel{font-size:var(--font-size-xs);color:var(--color-text-muted)}
 .liveControls{display:flex;gap:var(--space-2);justify-content:center}
 .list{display:flex;flex-direction:column;gap:var(--space-2);padding:0;margin:0;list-style:none}
-.item{display:flex;align-items:center;justify-content:space-between;gap:var(--space-3);padding:var(--space-3);border:1px solid var(--color-border);border-radius:var(--radius-md);background:var(--color-surface)}
+.item{display:flex;align-items:center;justify-content:space-between;gap:var(--space-3);padding:var(--space-3);border:1px solid var(--color-border);border-radius:var(--radius-lg);background:var(--color-surface);box-shadow:0 .5rem 1.25rem var(--color-shadow);transition:transform var(--duration-base) var(--easing-standard),box-shadow var(--duration-base) var(--easing-standard)}
+.item:hover{transform:translateY(-.25rem);box-shadow:0 1rem 2rem var(--color-shadow)}
 .itemStats{display:flex;flex-direction:column;gap:var(--space-1)}
 .itemDate{color:var(--color-text-muted);font-size:var(--font-size-xs)}
 .itemMain{color:var(--color-text);font-size:var(--font-size-sm)}

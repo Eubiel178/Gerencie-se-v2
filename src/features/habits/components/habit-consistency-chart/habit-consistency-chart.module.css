@@ -58,6 +58,11 @@
   font-family: var(--font-sans);
 }
 
+.axisLabelStrong {
+  fill: var(--color-text);
+  font-weight: 600;
+}
+
 .line {
   stroke: var(--color-highlight);
   stroke-width: 2;

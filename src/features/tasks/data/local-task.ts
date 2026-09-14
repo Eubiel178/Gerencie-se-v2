@@ -445,7 +445,7 @@ function mapRowToTask(
  * números pequena) — ver comentário no schema. Qualquer valor inesperado
  * (coluna corrompida manualmente, por exemplo) vira "sem lembrete" em vez
  * de derrubar a leitura da tarefa. */
-function deserializeReminders(value: string | null): number[] | null {
+export function deserializeReminders(value: string | null): number[] | null {
   if (!value) return null;
 
   try {

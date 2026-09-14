@@ -343,10 +343,33 @@
   background: var(--color-highlight);
 }
 .features,
-.steps {
+.steps,
+.mascots {
   max-width: 1180px;
   margin: auto;
   padding: clamp(5rem, 10vw, 9rem) 0;
+}
+.mascots {
+  padding-top: 0;
+}
+.mascotsIntroText {
+  max-width: 34rem;
+  margin: var(--space-5) auto 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  line-height: 1.65;
+}
+.mascots .sectionIntro {
+  text-align: center;
+}
+.mascots .eyebrow {
+  justify-content: center;
+}
+.mascots .sectionIntro h2 {
+  max-width: none;
+}
+.mascots > :last-child {
+  margin-top: var(--space-7);
 }
 .sectionIntro h2,
 .steps h2 {
