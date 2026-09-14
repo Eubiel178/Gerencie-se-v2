@@ -10,13 +10,20 @@ const SPECIES_EMOJI: Record<MascotSpecies, string> = {
   passaro: "🐦",
   urso: "🐻",
   raposa: "🦊",
+  panda: "🐼",
+  golden: "🐕",
+  akita: "🐕",
+  "dogue-alemao": "🐕",
+  "gato-preto": "🐈‍⬛",
+  "gato-angora": "🐈",
+  "gato-tabby": "🐈",
 };
 
 export function MascotCard({ mascot }: { mascot: IMascotState }) {
   const percent = Math.round((mascot.xpIntoCurrentLevel / mascot.xpForNextLevel) * 100);
 
   return (
-    <Card title="Foco" href="/home/focus" linkLabel="Iniciar foco">
+    <Card title="Foco" href="/home/focus" linkLabel="Iniciar foco" data-tour="mascot">
       <div className={styles.row}>
         <span className={styles.mascotEmoji} aria-hidden="true">
           {SPECIES_EMOJI[mascot.species]}

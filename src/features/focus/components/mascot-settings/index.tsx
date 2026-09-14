@@ -32,10 +32,17 @@ const PERSONALITY_OPTIONS = [
 
 const SPECIES_OPTIONS = [
   { label: "Gato", value: "gato" },
-  { label: "Cachorro", value: "cachorro" },
+  { label: "Shiba", value: "cachorro" },
   { label: "Pássaro", value: "passaro" },
   { label: "Urso", value: "urso" },
   { label: "Raposa", value: "raposa" },
+  { label: "Panda", value: "panda" },
+  { label: "Golden Retriever", value: "golden" },
+  { label: "Akita", value: "akita" },
+  { label: "Dogue Alemão", value: "dogue-alemao" },
+  { label: "Gato Preto", value: "gato-preto" },
+  { label: "Gato Angorá", value: "gato-angora" },
+  { label: "Gato Cinza", value: "gato-tabby" },
 ];
 
 export function MascotSettings({ mascot }: { mascot: IMascotState }) {

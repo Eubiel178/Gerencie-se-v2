@@ -3,7 +3,7 @@ import { AnimatedSprite, Application, Assets, Rectangle, Texture, Ticker } from 
 import { MascotCharacter, MascotStateName, MascotVector2 } from "../domain/types";
 import { emitMascotEvent, subscribeMascotEvent } from "../domain/events";
 
-import { MascotBehavior } from "./behavior";
+import { MascotBehavior, WALK_SPEED_PX_PER_S } from "./behavior";
 import { watchUserIdle } from "./idle-watcher";
 import { MascotBounds } from "./movement";
 import { playMascotSound } from "./sound-effects";
@@ -25,20 +25,49 @@ export interface MascotRuntimeHandles {
   wrapper: HTMLDivElement;
 }
 
-/** Só uma instância viva por vez - o mascote é montado uma única vez no
- * layout autenticado; isso é uma rede de segurança contra montagem
- * duplicada por engano, não o mecanismo principal de garantia. */
-let activeRuntime: MascotRuntime | null = null;
+export interface MascotRuntimeOptions {
+  /** Só bloqueia montagem duplicada de instâncias com a MESMA chave -
+   * permite vários bichos simultâneos (ex.: vitrine de mascotes da
+   * Landing Page, um `MascotRuntime` por personagem) desde que cada um
+   * use uma chave diferente. Default `"global-pet"`: mesma chave de
+   * sempre, preserva a proteção original (o mascote que anda pela tela
+   * autenticada é montado uma única vez em `home/layout.tsx` - isso
+   * continua valendo sem que quem chama precise saber desta opção). */
+  instanceGroup?: string;
+  /** Substitui `computeViewportBounds` (tela inteira, ciente da sidebar)
+   * por uma área própria - usado pra confinar o passeio a um container
+   * específico (ex.: a seção de mascotes da Landing Page) em vez da
+   * janela inteira. As coordenadas devolvidas precisam estar no MESMO
+   * espaço em que `wrapper` é posicionado (`position: fixed` = tela,
+   * `position: absolute` num ancestral `position: relative` = local ao
+   * container - ver `mascot-swarm` pro segundo caso). */
+  boundsProvider?: (displayWidth: number, displayHeight: number) => MascotBounds;
+}
+
+/** Uma instância ativa por CHAVE (não uma só pra sempre) - ver
+ * `MascotRuntimeOptions.instanceGroup`. Pra quem nunca passa a opção
+ * (o mascote único de `home/layout.tsx`), isso continua sendo, na
+ * prática, uma única instância global: uma rede de segurança contra
+ * montagem duplicada por engano, não o mecanismo principal de garantia. */
+const activeRuntimesByGroup = new Map<string, MascotRuntime>();
 
 export class MascotRuntime {
   private readonly character: MascotCharacter;
   private readonly wrapper: HTMLDivElement;
   private readonly behavior: MascotBehavior;
   private readonly reducedMotionQuery: MediaQueryList;
+  private readonly instanceGroup: string;
+  private readonly boundsProvider: (displayWidth: number, displayHeight: number) => MascotBounds;
 
   private app: Application | null = null;
   private sprite: AnimatedSprite | null = null;
   private texturesByState: Partial<Record<MascotStateName, Texture[]>> = {};
+  // fps "de repouso" do ciclo de sprite deste personagem - durante
+  // walk/run, o fps real é escalado a partir daqui pela velocidade
+  // atual (ver `handleTick`), em vez de tocar sempre neste valor fixo
+  // (que fazia o ciclo de pernas "patinar" em `run`, mais rápido na
+  // posição do que no desenho - achado relatado).
+  private baseAnimationSpeed = 0;
   private bounds: MascotBounds;
   private mobile: boolean;
   private reducedMotion: boolean;
@@ -64,12 +93,14 @@ export class MascotRuntime {
     return this.character.displayHeight ?? this.character.frameHeight;
   }
 
-  constructor(handles: MascotRuntimeHandles, character: MascotCharacter) {
+  constructor(handles: MascotRuntimeHandles, character: MascotCharacter, options: MascotRuntimeOptions = {}) {
     this.character = character;
     this.wrapper = handles.wrapper;
+    this.instanceGroup = options.instanceGroup ?? "global-pet";
+    this.boundsProvider = options.boundsProvider ?? computeViewportBounds;
 
     this.mobile = isMobileViewport();
-    this.bounds = computeViewportBounds(this.displayWidth, this.displayHeight);
+    this.bounds = this.boundsProvider(this.displayWidth, this.displayHeight);
 
     const initialPosition: MascotVector2 = {
       x: (this.bounds.minX + this.bounds.maxX) / 2,
@@ -83,11 +114,14 @@ export class MascotRuntime {
   }
 
   async mount(): Promise<void> {
-    if (activeRuntime && activeRuntime !== this) {
-      console.warn("[mascot-pet] outra instância já está ativa; ignorando montagem duplicada.");
+    const existing = activeRuntimesByGroup.get(this.instanceGroup);
+    if (existing && existing !== this) {
+      console.warn(
+        `[mascot-pet] outra instância do grupo "${this.instanceGroup}" já está ativa; ignorando montagem duplicada.`
+      );
       return;
     }
-    activeRuntime = this;
+    activeRuntimesByGroup.set(this.instanceGroup, this);
 
     const app = new Application();
     await app.init({
@@ -127,10 +161,12 @@ export class MascotRuntime {
 
     this.texturesByState = this.buildTexturesByState(baseTexture);
 
+    this.baseAnimationSpeed = this.character.frameRate / 60;
+
     const idleTextures = this.texturesByState.idle ?? [baseTexture];
     const sprite = new AnimatedSprite({
       textures: idleTextures,
-      animationSpeed: this.character.frameRate / 60,
+      animationSpeed: this.baseAnimationSpeed,
       loop: true,
       autoPlay: !this.reducedMotion,
     });
@@ -162,9 +198,21 @@ export class MascotRuntime {
     this.positionWrapper(this.behavior.snapshot().position);
   }
 
+  /** Modo Foco (`/home/focus`): presença reduzida de propósito - o
+   * bichinho para de sair andando sozinho pela tela enquanto a pessoa
+   * está tentando se concentrar (continua reagindo a clique/eventos
+   * normalmente, só não inicia passeio autônomo). Chamado pelo
+   * componente React ao entrar/sair da rota, não uma preferência
+   * persistida. */
+  setQuietMode(quiet: boolean): void {
+    this.behavior.setQuietMode(quiet);
+  }
+
   destroy(): void {
     this.destroyed = true;
-    if (activeRuntime === this) activeRuntime = null;
+    if (activeRuntimesByGroup.get(this.instanceGroup) === this) {
+      activeRuntimesByGroup.delete(this.instanceGroup);
+    }
 
     window.removeEventListener("resize", this.handleResize);
     this.reducedMotionQuery.removeEventListener("change", this.handleReducedMotionChange);
@@ -236,6 +284,16 @@ export class MascotRuntime {
       this.currentRenderedState = snapshot.state;
     }
 
+    // Ciclo de passos sincronizado com a velocidade REAL deste tick
+    // (já com o easing de `behavior.ts` aplicado) - uma razão sobre a
+    // taxa base do próprio personagem, não um valor fixo, então funciona
+    // igual pra todo mundo (inclusive quem tem só 4 frames de walk).
+    if (snapshot.state === "walk" || snapshot.state === "run") {
+      this.sprite.animationSpeed = this.baseAnimationSpeed * (snapshot.speed / WALK_SPEED_PX_PER_S);
+    } else if (this.sprite.animationSpeed !== this.baseAnimationSpeed) {
+      this.sprite.animationSpeed = this.baseAnimationSpeed;
+    }
+
     const facingScale = snapshot.facingLeft ? -1 : 1;
     // Amplia do frame nativo do atlas pro tamanho de exibição (1 pros
     // personagens que não declaram `displayWidth`/`displayHeight` - ver
@@ -249,7 +307,7 @@ export class MascotRuntime {
 
   private handleResize = (): void => {
     this.mobile = isMobileViewport();
-    this.bounds = computeViewportBounds(this.displayWidth, this.displayHeight);
+    this.bounds = this.boundsProvider(this.displayWidth, this.displayHeight);
     this.behavior.clampToBounds(this.bounds);
   };
 

@@ -29,96 +29,96 @@ function periodOfDay(hour: number): "manhã" | "tarde" | "noite" {
  * pé da letra por um sintetizador de voz. */
 const AFETUOSO: Record<MascotEvent, Line[]> = {
   idle: [
-    (p) => `Boa ${periodOfDay(p.hour)}! Tô aqui, na torcida por você.`,
-    (p) => `Faltam só ${p.xpToNextLevel} XP pro nível ${p.level + 1}. Quando quiser começar, eu tô pronto.`,
-    () => "Sem pressa nenhuma. Eu espero você começar quando estiver bem.",
+    (p) => `Boa ${periodOfDay(p.hour)}. Nada ainda por aqui, tudo bem, eu tô com paciência hoje.`,
+    (p) => `Faltam ${p.xpToNextLevel} XP pro nível ${p.level + 1}. Sem prazo pra isso, viu.`,
+    () => "Fica à vontade. Eu só tô aqui fazendo companhia mesmo.",
   ],
   working: [
-    () => "Isso aí, só mais um pouco!",
-    (p) => `Você tá indo bem. Faltam ${p.xpToNextLevel} XP pro próximo nível.`,
-    () => "Continua, eu acredito em você.",
+    () => "Boa, você entrou. Isso já conta.",
+    (p) => `Mais um pouco e são ${p.xpToNextLevel} XP a menos no caminho.`,
+    () => "Vou ficar quietinho aqui do lado pra não atrapalhar.",
   ],
   happy: [
-    (p) => `Mandou muito bem! Nível ${p.level} por aqui.`,
-    () => "Que orgulho de você!",
-    (p) => `Boa ${periodOfDay(p.hour)} produtiva, hein?`,
+    (p) => `Nível ${p.level} agora. Fiquei genuinamente feliz por você.`,
+    () => "Foi bonito ver você terminando isso.",
+    (p) => `Essa ${periodOfDay(p.hour)} valeu a pena, hein. Descansa um pouco agora.`,
   ],
 };
 
 // Deboche com tempero baiano de propósito (pedido explícito) — gírias e
-// interjeições ("oxente", "vixe", "eita", "véi") entram no meio da
+// interjeições ("oxente", "vixe", "eita", "vei") entram no meio da
 // implicância, sem depender de gênero de quem lê (nada de "meu rei"/
 // "minha rainha" — o app não presume gênero de ninguém pra se dirigir a
 // elas).
 const SARCASTICO: Record<MascotEvent, Line[]> = {
   idle: [
-    (p) => `Oxente, boa ${periodOfDay(p.hour)}. Reparei que produtividade não é bem o seu forte hoje.`,
-    (p) => `Vixe, faltam ${p.xpToNextLevel} XP pro nível ${p.level + 1}. Nesse ritmo eu chego lá primeiro, véi.`,
-    () => "Eita, sentado aí só admirando o vazio? Vai fazer alguma coisa hoje ou não?",
+    (p) => `Boa ${periodOfDay(p.hour)}. Já reparei que a tela tá aberta faz tempo e nada acontece.`,
+    (p) => `${p.xpToNextLevel} XP faltando pro nível ${p.level + 1}. Nesse ritmo isso vira aposentadoria, vei.`,
+    () => "Oxente, tá esperando o quê, uma intimação?",
   ],
   working: [
-    () => "Ata, véi, hoje é dia de fingir que trabalha. Que evolução.",
-    (p) => `Faltam ${p.xpToNextLevel} XP. Continua assim que talvez eu pare de duvidar de você, viu? Talvez.`,
-    () => "Olha só, focado de verdade. Vixe, anota a data, isso não acontece todo dia.",
+    () => "Ata, hoje resolveu trabalhar. Marca no calendário.",
+    (p) => `Faltam ${p.xpToNextLevel} XP. Vai que cola essa fase de pessoa produtiva.`,
+    () => "Foco de verdade? Vixe, isso sim que é plot twist.",
   ],
   happy: [
-    () => "Terminou? Oxente, alguém me belisca, isso é surreal.",
-    (p) => `Nível ${p.level}, véi. Guarda esse print, porque duvido que se repita amanhã.`,
-    (p) => `Boa ${periodOfDay(p.hour)} produtiva? Eita, quem diria. Nem eu apostava nisso.`,
+    () => "Terminou. Nem eu apostava, confesso.",
+    (p) => `Nível ${p.level}, vei. Guarda esse dia, ele é raro.`,
+    (p) => `Boa ${periodOfDay(p.hour)} produtiva. Quem te viu, quem te vê.`,
   ],
 };
 
 const ENGRACADO: Record<MascotEvent, Line[]> = {
   idle: [
-    (p) => `Boa ${periodOfDay(p.hour)}! Bora fazer alguma coisa antes que eu comece a contar piada ruim.`,
-    (p) => `Faltam ${p.xpToNextLevel} XP pro nível ${p.level + 1}, quase tão longe quanto minha vontade de trabalhar.`,
-    () => "Tic-tac, tic-tac. Ok, eu não sei fazer relógio, mas o tempo tá passando.",
+    (p) => `Boa ${periodOfDay(p.hour)}. Eu já ensaiei três piadas esperando você abrir alguma tarefa.`,
+    (p) => `Faltam ${p.xpToNextLevel} XP pro nível ${p.level + 1}, ou seja, uma eternidade e meia.`,
+    () => "O cursor pisca, o tempo passa, e eu aqui de plantão sem plateia.",
   ],
   working: [
-    () => "Modo foco ativado! Bipe bipe, sons de robô bem convincentes.",
-    (p) => `Faltam ${p.xpToNextLevel} XP, mais rápido que eu contando até três.`,
-    () => "Psiu, não me distrai, eu tô fingindo que também tô trabalhando.",
+    () => "Modo foco ligado. Prometo não fazer barulho, quase.",
+    (p) => `Faltam ${p.xpToNextLevel} XP. Rápido assim até parece que você combinou com alguém.`,
+    () => "Psiu, deixa eu fingir que também tô ocupado.",
   ],
   happy: [
-    (p) => `Nível ${p.level}! Chama a imprensa, ou pelo menos sua mãe.`,
-    () => "Confete imaginário voando por todo lado. Imagina aí.",
-    (p) => `Boa ${periodOfDay(p.hour)} de quem venceu! Ou de quem teve sorte. Dá no mesmo hoje.`,
+    (p) => `Nível ${p.level}. Alguém chama a família, isso merece uma nota de rodapé na história.`,
+    () => "Se existisse aplauso de mentirinha, era agora.",
+    (p) => `Boa ${periodOfDay(p.hour)}, campeão ou sortudo, tanto faz, deu certo.`,
   ],
 };
 
 const MOTIVADOR: Record<MascotEvent, Line[]> = {
   idle: [
-    (p) => `Boa ${periodOfDay(p.hour)}! Hoje é um ótimo dia pra começar de novo.`,
-    (p) => `Só ${p.xpToNextLevel} XP separam você do próximo nível. Vamos lá!`,
-    () => "O primeiro passo é sempre o mais difícil, e você já tá aqui. Então já começou.",
+    (p) => `Boa ${periodOfDay(p.hour)}. Ainda dá tempo de fazer esse dia valer.`,
+    (p) => `${p.xpToNextLevel} XP separam você do nível ${p.level + 1}. Começa pelo mais fácil.`,
+    () => "Ninguém precisa do dia perfeito pra começar. Só precisa começar.",
   ],
   working: [
-    () => "Isso! Cada minuto de foco é uma vitória.",
-    (p) => `Faltam ${p.xpToNextLevel} XP. Você tá mais perto do que imagina.`,
-    () => "Não pare agora, o resultado já tá vindo.",
+    () => "Isso, mantém o ritmo, é só isso que importa agora.",
+    (p) => `Faltam ${p.xpToNextLevel} XP. Você já passou da parte mais difícil, que é começar.`,
+    () => "Cansaço no meio é normal. Só não para.",
   ],
   happy: [
-    (p) => `Nível ${p.level} conquistado! Isso é disciplina de verdade.`,
-    () => "Você provou pra si mesmo que é capaz, de novo.",
-    (p) => `Essa ${periodOfDay(p.hour)} valeu a pena, e amanhã vale ainda mais.`,
+    (p) => `Nível ${p.level}. Isso não caiu do céu, foi trabalho seu.`,
+    () => "Guarda esse resultado, ele prova o que você é capaz de fazer.",
+    (p) => `Boa ${periodOfDay(p.hour)}. Amanhã você repete, só isso.`,
   ],
 };
 
 const ZEN: Record<MascotEvent, Line[]> = {
   idle: [
-    (p) => `Boa ${periodOfDay(p.hour)}. Respire fundo. Quando estiver pronto, eu estarei aqui.`,
-    (p) => `Faltam ${p.xpToNextLevel} XP pro nível ${p.level + 1}. Sem pressa, um passo de cada vez.`,
-    () => "Nem todo momento precisa de produtividade. Este pode ser só de pausa.",
+    (p) => `Boa ${periodOfDay(p.hour)}. Não tem nada urgente aqui, só quando você quiser.`,
+    (p) => `Faltam ${p.xpToNextLevel} XP pro nível ${p.level + 1}. Isso pode esperar o tempo que precisar.`,
+    () => "Ficar parado um pouco também é permitido.",
   ],
   working: [
-    () => "Presente, aqui, agora. Só isso já é o suficiente.",
-    (p) => `Faltam ${p.xpToNextLevel} XP. O caminho importa tanto quanto o fim dele.`,
-    () => "Um foco de cada vez. O resto pode esperar.",
+    () => "Você tá aqui, é o que basta por enquanto.",
+    (p) => `Faltam ${p.xpToNextLevel} XP. Sem pressa, um de cada vez chega lá.`,
+    () => "Não precisa terminar rápido, só precisa continuar.",
   ],
   happy: [
-    (p) => `Nível ${p.level}. Reconheça esse momento, com calma.`,
-    () => "Uma conquista tranquila também é uma conquista.",
-    (p) => `Uma ${periodOfDay(p.hour)} bem vivida, sem pressa nenhuma.`,
+    (p) => `Nível ${p.level}. Vale parar um segundo antes de seguir pro próximo.`,
+    () => "Terminou. Aproveita essa sensação sem já pensar no que vem depois.",
+    (p) => `Essa ${periodOfDay(p.hour)} rendeu. Descansa sem culpa agora.`,
   ],
 };
 

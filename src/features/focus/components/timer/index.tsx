@@ -264,7 +264,7 @@ export function Timer({ initialSession, mascot }: TimerProps) {
             ))}
           </div>
 
-          <Button.Root loading={isBusy} onClick={handleStart}>
+          <Button.Root data-tour="focus-start" loading={isBusy} onClick={handleStart}>
             Iniciar Foco ({plannedMinutes} min)
           </Button.Root>
         </>

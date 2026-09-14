@@ -41,15 +41,18 @@
  * documentado aqui.
  */
 @media (max-width: 968px) {
-  .wrapper {
-    pointer-events: none;
-    /* Nessa faixa o mascote ocasionalmente pousa em cima de um card (ver
-       comentário acima) - `pointer-events: none` já garante que isso
-       nunca bloqueia um toque, mas visualmente ainda tampava texto por
-       baixo (ex.: um badge de prioridade cortado ao meio). Uma opacidade
-       um pouco menor deixa claro que é um elemento decorativo "passando
-       por cima", nunca um bloco sólido cobrindo conteúdo - sem precisar
-       saber a posição de scroll nem a geometria de nenhum card. */
-    opacity: 0.8;
+  /* Nessa faixa o "canto vazio" pressupõe que a página não rola - falso
+     em qualquer lista de cards de uma coluna só (Tarefas, Hábitos,
+     Dashboard...): o mascote é `position: fixed`, então fica sempre no
+     MESMO canto da TELA enquanto a página rola por baixo - e qualquer
+     card que passar por ali tem a tag/status cobertos de verdade
+     (confirmado visualmente: reduzir a opacidade ainda deixava o texto
+     ilegível, não só "decorativo por cima"). Sem uma forma barata de
+     saber a geometria de scroll/cards daqui, a solução robusta é não
+     deixar o bichinho passear nessa faixa - a bolha do assistente
+     (sempre fixa no canto inferior direito) já mantém a presença do
+     mascote sem esse problema. */
+  .stage {
+    display: none;
   }
 }

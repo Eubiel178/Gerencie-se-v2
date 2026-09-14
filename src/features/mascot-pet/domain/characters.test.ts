@@ -9,6 +9,13 @@ test("characterIdForSpecies: especies com atlas pronto mapeiam pro personagem ce
   assert.equal(characterIdForSpecies("passaro"), "bird");
   assert.equal(characterIdForSpecies("urso"), "bear");
   assert.equal(characterIdForSpecies("raposa"), "fox");
+  assert.equal(characterIdForSpecies("panda"), "panda");
+  assert.equal(characterIdForSpecies("golden"), "golden");
+  assert.equal(characterIdForSpecies("akita"), "akita");
+  assert.equal(characterIdForSpecies("dogue-alemao"), "dogue-alemao");
+  assert.equal(characterIdForSpecies("gato-preto"), "gato-preto");
+  assert.equal(characterIdForSpecies("gato-angora"), "gato-angora");
+  assert.equal(characterIdForSpecies("gato-tabby"), "gato-tabby");
 });
 
 test("characterIdForSpecies: especie sem atlas (coelho/galinha/sapo) nao mostra o bicho errado", () => {

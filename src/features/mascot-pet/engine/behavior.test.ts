@@ -133,3 +133,53 @@ test("MascotBehavior: clampToBounds traz posição/alvo de volta pra dentro de l
   const snapshot = behavior.snapshot();
   assert.ok(snapshot.position.x <= 100 && snapshot.position.y <= 100);
 });
+
+test("MascotBehavior: com modo quieto (Foco), nunca sai do idle sozinho (só reage a clique/evento)", () => {
+  const behavior = new MascotBehavior({ x: 100, y: 100 });
+  behavior.setQuietMode(true);
+
+  behavior.tick(30_000, BOUNDS);
+  assert.equal(behavior.snapshot().state, "idle");
+
+  behavior.handleClick();
+  assert.equal(behavior.snapshot().state, "interaction");
+});
+
+test("MascotBehavior: velocidade no snapshot é 0 parado/reagindo e positiva durante walk/run", () => {
+  const behavior = new MascotBehavior({ x: 100, y: 100 });
+  assert.equal(behavior.snapshot().speed, 0);
+
+  // Força sair do idle repetidamente até cair num tick de walk/run (tem
+  // chance de dormir também - refaz até achar um estado de movimento).
+  let moving = false;
+  for (let attempt = 0; attempt < 50 && !moving; attempt++) {
+    const fresh = new MascotBehavior({ x: 100, y: 100 });
+    fresh.tick(5000, BOUNDS);
+    if (fresh.snapshot().state === "walk" || fresh.snapshot().state === "run") {
+      fresh.tick(16, BOUNDS);
+      assert.ok(fresh.snapshot().speed > 0, "velocidade deveria ser positiva durante o movimento");
+      moving = true;
+    }
+  }
+  assert.ok(moving, "nenhuma das tentativas caiu em walk/run - improvável, checar RUN_CHANCE/SLEEP_CHANCE");
+});
+
+test("MascotBehavior: velocidade começa baixa (rampa de entrada) e não salta direto pro máximo no primeiro tick de movimento", () => {
+  // Roda até cair num walk/run recém-iniciado (moveElapsedMs≈0) e mede a
+  // velocidade num primeiro tick curto - deve ser bem menor que a
+  // velocidade de cruzeiro (42 ou 95px/s), nunca o valor cheio instantâneo.
+  let checked = false;
+  for (let attempt = 0; attempt < 50 && !checked; attempt++) {
+    const fresh = new MascotBehavior({ x: 100, y: 100 });
+    fresh.tick(5000, BOUNDS);
+    const state = fresh.snapshot().state;
+    if (state === "walk" || state === "run") {
+      fresh.tick(16, BOUNDS);
+      const speed = fresh.snapshot().speed;
+      const cruiseSpeed = state === "run" ? 95 : 42;
+      assert.ok(speed < cruiseSpeed, "primeiro tick de movimento não deveria já estar na velocidade de cruzeiro");
+      checked = true;
+    }
+  }
+  assert.ok(checked, "nenhuma tentativa caiu em walk/run");
+});

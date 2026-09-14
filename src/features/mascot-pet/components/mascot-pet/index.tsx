@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 
 import { DEFAULT_MASCOT_CHARACTER_ID, MASCOT_CHARACTERS } from "@/features/mascot-pet/domain/characters";
 import { MascotRuntime } from "@/features/mascot-pet/engine/runtime";
@@ -26,6 +27,8 @@ interface MascotPetProps {
  */
 export function MascotPet({ characterId }: MascotPetProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const runtimeRef = useRef<MascotRuntime | null>(null);
+  const pathname = usePathname();
   const resolvedId = characterId === null ? null : (characterId ?? DEFAULT_MASCOT_CHARACTER_ID);
   const character = resolvedId ? MASCOT_CHARACTERS[resolvedId] : undefined;
 
@@ -34,6 +37,7 @@ export function MascotPet({ characterId }: MascotPetProps) {
     if (!wrapper || !character) return;
 
     const runtime = new MascotRuntime({ wrapper }, character);
+    runtimeRef.current = runtime;
     let cancelled = false;
 
     runtime.mount().catch((error: unknown) => {
@@ -42,12 +46,22 @@ export function MascotPet({ characterId }: MascotPetProps) {
 
     return () => {
       cancelled = true;
+      runtimeRef.current = null;
       runtime.destroy();
     };
     // Reexecuta (destrói e remonta com o novo bicho) quando a espécie
     // escolhida em Configurações muda - `character` já é a referência
     // certa pro id atual.
   }, [character]);
+
+  // Modo Foco: presença reduzida enquanto a pessoa está tentando se
+  // concentrar - "no conflito entre personalidade e concentração,
+  // concentração vence" (pedido explícito). Efeito separado do de
+  // montagem: só precisa reagir a MUDANÇA de rota, nunca remonta o
+  // runtime inteiro por isso.
+  useEffect(() => {
+    runtimeRef.current?.setQuietMode(pathname.startsWith("/home/focus"));
+  }, [pathname]);
 
   if (!character) return null;
 

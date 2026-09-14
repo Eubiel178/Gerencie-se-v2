@@ -29,180 +29,180 @@ const PHRASERS: Record<MascotPersonality, Record<InsightFact["kind"], Phraser>> 
     "overdue-tasks": (f) => {
       const fact = f as Extract<InsightFact, { kind: "overdue-tasks" }>;
       return fact.count === 1
-        ? `A tarefa "${fact.oldestTitle}" está atrasada. Sem culpa, só um lembrete carinhoso.`
-        : `Você tem ${fact.count} tarefas atrasadas. A mais antiga é "${fact.oldestTitle}". Vamos organizar juntos?`;
+        ? `A tarefa "${fact.oldestTitle}" ficou pra trás. Ninguém vai te cobrar por isso, só lembrando que ela existe.`
+        : `${fact.count} tarefas atrasadas, a mais velha é "${fact.oldestTitle}". Escolhe uma pra tirar do papel hoje.`;
     },
     "priority-tasks-done": (f) => {
       const fact = f as Extract<InsightFact, { kind: "priority-tasks-done" }>;
-      return `Você concluiu todas as ${fact.count} tarefas prioritárias de hoje. Que orgulho!`;
+      return `Terminou as ${fact.count} tarefas prioritárias de hoje. Você merece parar um pouco agora.`;
     },
     "priority-tasks-progress": (f) => {
       const fact = f as Extract<InsightFact, { kind: "priority-tasks-progress" }>;
-      return `Você já concluiu ${fact.done} das ${fact.total} tarefas prioritárias. Continua assim.`;
+      return `${fact.done} de ${fact.total} tarefas prioritárias prontas. Falta pouco, e você já provou que dá conta.`;
     },
     "task-overload": (f) => {
       const fact = f as Extract<InsightFact, { kind: "task-overload" }>;
-      return `Você tem ${fact.count} tarefas pendentes. Talvez seja um bom momento pra respirar e reorganizar as prioridades.`;
+      return `${fact.count} tarefas na fila. Não precisa resolver tudo hoje, só o que fizer sentido.`;
     },
     "habit-streak-at-risk": (f) => {
       const fact = f as Extract<InsightFact, { kind: "habit-streak-at-risk" }>;
-      return `Sua sequência em "${fact.title}" está em ${fact.streak} dias. Não deixa acabar hoje, você tá indo tão bem.`;
+      return `"${fact.title}" tá em ${fact.streak} dias seguidos. Seria uma pena parar bem agora.`;
     },
     "goal-deadline-near": (f) => {
       const fact = f as Extract<InsightFact, { kind: "goal-deadline-near" }>;
       return fact.daysLeft === 0
-        ? `O prazo de "${fact.title}" é hoje, com ${fact.progress}% de progresso. Você consegue terminar com calma.`
-        : `O prazo de "${fact.title}" é em ${fact.daysLeft} dia(s), com ${fact.progress}% de progresso. Ainda dá tempo.`;
+        ? `"${fact.title}" vence hoje, e você já tá em ${fact.progress}%. Ainda dá tempo de fechar com calma.`
+        : `Faltam ${fact.daysLeft} dia(s) pra "${fact.title}", em ${fact.progress}%. Você tá construindo isso aos poucos.`;
     },
     "next-routine-item": (f) => {
       const fact = f as Extract<InsightFact, { kind: "next-routine-item" }>;
-      return `Daqui a pouco, às ${fact.time}, é hora de "${fact.title}". Tô aqui torcendo por você.`;
+      return `Às ${fact.time} é "${fact.title}". Vou lembrar você quando chegar a hora.`;
     },
-    "all-clear": () => "Nenhuma tarefa pendente agora. Bom momento pra descansar ou planejar o que vem por aí.",
+    "all-clear": () => "Nada pendente agora. Aproveita esse respiro, ele é raro.",
   },
 
   sarcastico: {
     "overdue-tasks": (f) => {
       const fact = f as Extract<InsightFact, { kind: "overdue-tasks" }>;
       return fact.count === 1
-        ? `Oxente, a tarefa "${fact.oldestTitle}" tá atrasada. Quem diria.`
-        : `Vixe, ${fact.count} tarefas atrasadas. A mais antiga, "${fact.oldestTitle}", já deve tá com saudade.`;
+        ? `"${fact.oldestTitle}" tá atrasada. Ela já deve achar que você esqueceu que ela existe.`
+        : `${fact.count} tarefas atrasadas, lideradas por "${fact.oldestTitle}". Parabéns pela coleção.`;
     },
     "priority-tasks-done": (f) => {
       const fact = f as Extract<InsightFact, { kind: "priority-tasks-done" }>;
-      return `Terminou as ${fact.count} tarefas prioritárias. Milagre do dia, véi.`;
+      return `As ${fact.count} prioritárias, todas feitas. Nem eu vi vindo essa.`;
     },
     "priority-tasks-progress": (f) => {
       const fact = f as Extract<InsightFact, { kind: "priority-tasks-progress" }>;
-      return `${fact.done} de ${fact.total} tarefas prioritárias feitas. Faltam só as outras, sem pressa nenhuma, né.`;
+      return `${fact.done} de ${fact.total} prioritárias prontas. As outras devem tá com medo de aparecer.`;
     },
     "task-overload": (f) => {
       const fact = f as Extract<InsightFact, { kind: "task-overload" }>;
-      return `${fact.count} tarefas pendentes. Eita, coleciona tarefa ou vai fazer alguma coisa?`;
+      return `${fact.count} tarefas na lista. Isso já é hobbie ou ainda conta como trabalho?`;
     },
     "habit-streak-at-risk": (f) => {
       const fact = f as Extract<InsightFact, { kind: "habit-streak-at-risk" }>;
-      return `Sua sequência em "${fact.title}" tá em ${fact.streak} dias. Vai jogar isso fora hoje mesmo?`;
+      return `${fact.streak} dias de sequência em "${fact.title}". Ia ser engraçado perder isso hoje, tipo, muito.`;
     },
     "goal-deadline-near": (f) => {
       const fact = f as Extract<InsightFact, { kind: "goal-deadline-near" }>;
       return fact.daysLeft === 0
-        ? `O prazo de "${fact.title}" é hoje e o progresso tá em ${fact.progress}%. Oxente, boa sorte.`
-        : `Faltam ${fact.daysLeft} dia(s) pro prazo de "${fact.title}", progresso em ${fact.progress}%. Nesse ritmo, véi.`;
+        ? `"${fact.title}" vence hoje e o progresso tá em ${fact.progress}%. Boa sorte, vai precisar.`
+        : `${fact.daysLeft} dia(s) pro prazo de "${fact.title}", ${fact.progress}% feito. O relógio não parou pra te esperar, viu.`;
     },
     "next-routine-item": (f) => {
       const fact = f as Extract<InsightFact, { kind: "next-routine-item" }>;
-      return `Às ${fact.time} é "${fact.title}". Vai lembrar sozinho ou precisa que eu grite?`;
+      return `Às ${fact.time} tem "${fact.title}". Vou lembrar, porque contar com sua memória é arriscado.`;
     },
-    "all-clear": () => "Nenhuma tarefa pendente. Vixe, você ou terminou tudo ou tá enrolando muito bem.",
+    "all-clear": () => "Nada pendente. Ou você é eficiente ou virou mestre em adiar sem culpa.",
   },
 
   engracado: {
     "overdue-tasks": (f) => {
       const fact = f as Extract<InsightFact, { kind: "overdue-tasks" }>;
       return fact.count === 1
-        ? `A tarefa "${fact.oldestTitle}" tá atrasada. Ela já tá pedindo socorro.`
-        : `${fact.count} tarefas atrasadas, lideradas por "${fact.oldestTitle}". Já formaram um grupo de apoio.`;
+        ? `"${fact.oldestTitle}" tá atrasada e já deve tá ensaiando um discurso de abandono.`
+        : `${fact.count} tarefas atrasadas, o grupo já tem nome e tudo, lideradas por "${fact.oldestTitle}".`;
     },
     "priority-tasks-done": (f) => {
       const fact = f as Extract<InsightFact, { kind: "priority-tasks-done" }>;
-      return `Todas as ${fact.count} tarefas prioritárias concluídas! Chama a imprensa.`;
+      return `${fact.count} prioritárias, todas resolvidas. Bota confete, mesmo que só na imaginação.`;
     },
     "priority-tasks-progress": (f) => {
       const fact = f as Extract<InsightFact, { kind: "priority-tasks-progress" }>;
-      return `${fact.done} de ${fact.total} tarefas prioritárias prontas. O resto deve tá com timidez.`;
+      return `${fact.done} de ${fact.total} prontas. O resto deve tá esperando uma senha pra entrar.`;
     },
     "task-overload": (f) => {
       const fact = f as Extract<InsightFact, { kind: "task-overload" }>;
-      return `${fact.count} tarefas pendentes. Isso já é quase uma coleção colecionável.`;
+      return `${fact.count} tarefas na fila. Isso já rendia um museu.`;
     },
     "habit-streak-at-risk": (f) => {
       const fact = f as Extract<InsightFact, { kind: "habit-streak-at-risk" }>;
-      return `"${fact.title}" tá numa sequência de ${fact.streak} dias. Ela confia em você, não vacila.`;
+      return `"${fact.title}" tá numa sequência de ${fact.streak} dias e conta com você pra não zerar hoje.`;
     },
     "goal-deadline-near": (f) => {
       const fact = f as Extract<InsightFact, { kind: "goal-deadline-near" }>;
       return fact.daysLeft === 0
-        ? `Hoje é o prazo de "${fact.title}", progresso em ${fact.progress}%. Sem pressão, só o dia inteiro em jogo.`
-        : `Faltam ${fact.daysLeft} dia(s) pra "${fact.title}", em ${fact.progress}%. O relógio faz tic-tac, discretamente.`;
+        ? `Hoje vence "${fact.title}", em ${fact.progress}%. Sem pressão, só o dia inteiro dependendo disso.`
+        : `Faltam ${fact.daysLeft} dia(s) pra "${fact.title}", ${fact.progress}% feito. O relógio faz tic-tac baixinho aí no canto.`;
     },
     "next-routine-item": (f) => {
       const fact = f as Extract<InsightFact, { kind: "next-routine-item" }>;
-      return `Às ${fact.time}: "${fact.title}". Já separei a trilha sonora dramática.`;
+      return `Às ${fact.time}, "${fact.title}" entra em cena. Já separei a trilha sonora.`;
     },
-    "all-clear": () => "Nenhuma tarefa pendente. Ou você é muito eficiente, ou muito corajoso.",
+    "all-clear": () => "Nada pendente. Suspeito, mas vou aceitar.",
   },
 
   motivador: {
     "overdue-tasks": (f) => {
       const fact = f as Extract<InsightFact, { kind: "overdue-tasks" }>;
       return fact.count === 1
-        ? `A tarefa "${fact.oldestTitle}" está esperando por você. Um passo agora já muda o dia.`
-        : `${fact.count} tarefas atrasadas, começando por "${fact.oldestTitle}". Escolha uma e comece agora.`;
+        ? `"${fact.oldestTitle}" tá esperando. Um passo agora já destrava o resto do dia.`
+        : `${fact.count} tarefas atrasadas, começando por "${fact.oldestTitle}". Escolhe uma e ataca só ela.`;
     },
     "priority-tasks-done": (f) => {
       const fact = f as Extract<InsightFact, { kind: "priority-tasks-done" }>;
-      return `Você concluiu as ${fact.count} tarefas prioritárias. Isso é disciplina de verdade.`;
+      return `As ${fact.count} prioritárias, resolvidas. Isso não é sorte, é rotina funcionando.`;
     },
     "priority-tasks-progress": (f) => {
       const fact = f as Extract<InsightFact, { kind: "priority-tasks-progress" }>;
-      return `${fact.done} de ${fact.total} tarefas prioritárias concluídas. Você está mais perto do que imagina.`;
+      return `${fact.done} de ${fact.total} prioritárias feitas. Você tá mais perto do fim do que do começo.`;
     },
     "task-overload": (f) => {
       const fact = f as Extract<InsightFact, { kind: "task-overload" }>;
-      return `${fact.count} tarefas pendentes. Escolha a mais importante e comece só por ela.`;
+      return `${fact.count} tarefas na fila. Pega a mais pesada primeiro, o resto fica mais leve depois.`;
     },
     "habit-streak-at-risk": (f) => {
       const fact = f as Extract<InsightFact, { kind: "habit-streak-at-risk" }>;
-      return `${fact.streak} dias de sequência em "${fact.title}". Não pare agora, cada dia conta mais que o anterior.`;
+      return `${fact.streak} dias seguidos em "${fact.title}". Não é hora de soltar isso.`;
     },
     "goal-deadline-near": (f) => {
       const fact = f as Extract<InsightFact, { kind: "goal-deadline-near" }>;
       return fact.daysLeft === 0
-        ? `Hoje é o prazo de "${fact.title}", com ${fact.progress}% feito. Termine forte.`
-        : `Faltam ${fact.daysLeft} dia(s) pra "${fact.title}", em ${fact.progress}%. Dá pra chegar lá.`;
+        ? `"${fact.title}" vence hoje, ${fact.progress}% feito. Fecha com o que já tem, isso já é vitória.`
+        : `Faltam ${fact.daysLeft} dia(s) pra "${fact.title}", em ${fact.progress}%. Segue no ritmo, você tá construindo algo real.`;
     },
     "next-routine-item": (f) => {
       const fact = f as Extract<InsightFact, { kind: "next-routine-item" }>;
-      return `Às ${fact.time}: "${fact.title}". Mais um compromisso com você mesmo.`;
+      return `Às ${fact.time} é "${fact.title}". Mais um compromisso que só depende de você.`;
     },
-    "all-clear": () => "Nenhuma tarefa pendente agora. Aproveite pra planejar o próximo passo com calma.",
+    "all-clear": () => "Nada pendente agora. Usa esse tempo pra escolher o próximo passo com cabeça fria.",
   },
 
   zen: {
     "overdue-tasks": (f) => {
       const fact = f as Extract<InsightFact, { kind: "overdue-tasks" }>;
       return fact.count === 1
-        ? `A tarefa "${fact.oldestTitle}" está atrasada. Sem pressa, um passo de cada vez.`
-        : `${fact.count} tarefas atrasadas, a mais antiga é "${fact.oldestTitle}". Respire, e comece por uma só.`;
+        ? `"${fact.oldestTitle}" ficou atrasada. Não precisa carregar isso como peso, só como próximo passo.`
+        : `${fact.count} tarefas atrasadas, a mais antiga é "${fact.oldestTitle}". Escolhe uma e deixa o resto esperar.`;
     },
     "priority-tasks-done": (f) => {
       const fact = f as Extract<InsightFact, { kind: "priority-tasks-done" }>;
-      return `As ${fact.count} tarefas prioritárias estão concluídas. Reconheça esse momento.`;
+      return `As ${fact.count} prioritárias estão prontas. Sente esse alívio por um instante antes de seguir.`;
     },
     "priority-tasks-progress": (f) => {
       const fact = f as Extract<InsightFact, { kind: "priority-tasks-progress" }>;
-      return `${fact.done} de ${fact.total} tarefas prioritárias concluídas. O caminho já está sendo percorrido.`;
+      return `${fact.done} de ${fact.total} prioritárias feitas. O que falta chega no tempo certo.`;
     },
     "task-overload": (f) => {
       const fact = f as Extract<InsightFact, { kind: "task-overload" }>;
-      return `${fact.count} tarefas pendentes. Talvez seja hora de simplificar, não de acelerar.`;
+      return `${fact.count} tarefas na fila. Talvez a resposta não seja fazer mais rápido, e sim escolher menos.`;
     },
     "habit-streak-at-risk": (f) => {
       const fact = f as Extract<InsightFact, { kind: "habit-streak-at-risk" }>;
-      return `${fact.streak} dias de sequência em "${fact.title}". Um momento de atenção hoje mantém o ritmo.`;
+      return `${fact.streak} dias em "${fact.title}". Um momento de atenção hoje mantém o que você construiu.`;
     },
     "goal-deadline-near": (f) => {
       const fact = f as Extract<InsightFact, { kind: "goal-deadline-near" }>;
       return fact.daysLeft === 0
-        ? `O prazo de "${fact.title}" é hoje, com ${fact.progress}% de progresso. Siga com calma até o fim.`
-        : `Faltam ${fact.daysLeft} dia(s) pra "${fact.title}", em ${fact.progress}%. Ainda há tempo, sem pressa.`;
+        ? `"${fact.title}" vence hoje, ${fact.progress}% percorrido. Termina no seu ritmo, sem pressa.`
+        : `Faltam ${fact.daysLeft} dia(s) pra "${fact.title}", em ${fact.progress}%. Ainda há espaço, respira.`;
     },
     "next-routine-item": (f) => {
       const fact = f as Extract<InsightFact, { kind: "next-routine-item" }>;
-      return `Às ${fact.time}, é hora de "${fact.title}". Um compromisso de cada vez.`;
+      return `Às ${fact.time} é "${fact.title}". Só mais um momento do dia, nada além disso.`;
     },
-    "all-clear": () => "Nenhuma tarefa pendente agora. Um bom momento para simplesmente estar presente.",
+    "all-clear": () => "Nada pendente agora. Um bom instante pra simplesmente parar.",
   },
 };
 

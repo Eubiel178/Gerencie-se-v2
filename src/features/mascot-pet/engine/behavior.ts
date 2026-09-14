@@ -13,9 +13,23 @@ import {
 
 type ReactiveState = "happy" | "sad" | "celebrate" | "interaction" | "sleep";
 
-const WALK_SPEED_PX_PER_S = 42;
+export const WALK_SPEED_PX_PER_S = 42;
 const RUN_SPEED_PX_PER_S = 95;
 const RUN_CHANCE = 0.3;
+
+// Easing da VELOCIDADE (não da posição - `stepToward` continua recebendo
+// só um número por chamada, sem precisar saber de easing) - sem isso,
+// andar/correr começava e parava a velocidade constante, instantânea,
+// dando a sensação de "deslizar" em vez de acelerar/desacelerar como um
+// passo de verdade (achado relatado). `MOVE_EASE_MS`: rampa de entrada
+// ao começar um trajeto novo OU depois de uma virada de direção de
+// verdade na borda. `DECEL_DISTANCE_PX`: desacelera nos últimos X px
+// antes de chegar no alvo, em vez de parar de repente.
+const MOVE_EASE_MS = 220;
+const DECEL_DISTANCE_PX = 40;
+// Nunca deixa a velocidade cair a ponto do ciclo de passos (que escala
+// junto, ver `runtime.ts`) quase congelar durante a rampa de entrada.
+const MIN_SPEED_RATIO = 0.35;
 // Chance de, ao "acordar" do idle, tirar uma soneca em vez de andar -
 // só uma variação de personalidade, não uma detecção real de inatividade
 // do usuário (essa não foi pedida - ver domain/events.ts).
@@ -50,6 +64,16 @@ export interface MascotBehaviorSnapshot {
   state: MascotStateName;
   position: MascotVector2;
   facingLeft: boolean;
+  /** px/s de verdade neste tick (já com o easing aplicado) - só != 0
+   * durante `walk`/`run`. O runtime usa isto pra escalar o fps do ciclo
+   * de passos proporcionalmente à velocidade real, não um valor fixo por
+   * estado (ver `runtime.ts`). */
+  speed: number;
+}
+
+function smoothstep(t: number): number {
+  const clamped = Math.max(0, Math.min(1, t));
+  return clamped * clamped * (3 - 2 * clamped);
 }
 
 /**
@@ -66,7 +90,10 @@ export class MascotBehavior {
   private facingLeft = false;
   private stateTimerMs = randomBetween(IDLE_DURATION_RANGE_MS);
   private reducedMotion = false;
+  private quietMode = false;
   private dragging = false;
+  private moveElapsedMs = 0;
+  private currentSpeed = 0;
 
   constructor(initialPosition: MascotVector2) {
     this.position = initialPosition;
@@ -74,7 +101,7 @@ export class MascotBehavior {
   }
 
   snapshot(): MascotBehaviorSnapshot {
-    return { state: this.state, position: this.position, facingLeft: this.facingLeft };
+    return { state: this.state, position: this.position, facingLeft: this.facingLeft, speed: this.currentSpeed };
   }
 
   /** `prefers-reduced-motion`: nunca mais entra em walk/run sozinho (só
@@ -82,6 +109,15 @@ export class MascotBehavior {
    * já que essas são ações diretas, não passeio autônomo. */
   setReducedMotion(reduced: boolean): void {
     this.reducedMotion = reduced;
+  }
+
+  /** Modo Foco: presença reduzida de propósito (regra "no conflito entre
+   * personalidade e concentração, concentração vence") - mesmo efeito de
+   * `reducedMotion` (só fica idle, nunca sai andando sozinho), mas por
+   * um motivo diferente (rota atual, não preferência de acessibilidade),
+   * por isso é uma flag própria em vez de reaproveitar a mesma. */
+  setQuietMode(quiet: boolean): void {
+    this.quietMode = quiet;
   }
 
   /** Reação ao clique (regra 9) - sempre pode interromper o que estava
@@ -159,7 +195,7 @@ export class MascotBehavior {
   }
 
   private startNextMove(bounds: MascotBounds): void {
-    if (this.reducedMotion) {
+    if (this.reducedMotion || this.quietMode) {
       this.goIdle();
       return;
     }
@@ -172,11 +208,19 @@ export class MascotBehavior {
     this.target = pickRandomTarget(bounds);
     this.facingLeft = this.target.x < this.position.x;
     this.state = Math.random() < RUN_CHANCE ? "run" : "walk";
+    this.moveElapsedMs = 0;
   }
 
   private advanceMovement(deltaMs: number, bounds: MascotBounds): void {
-    const speed = this.state === "run" ? RUN_SPEED_PX_PER_S : WALK_SPEED_PX_PER_S;
-    this.position = stepToward(this.position, this.target, speed, deltaMs);
+    const targetSpeed = this.state === "run" ? RUN_SPEED_PX_PER_S : WALK_SPEED_PX_PER_S;
+    this.moveElapsedMs += deltaMs;
+
+    const remaining = distance(this.position, this.target);
+    const easeIn = Math.max(MIN_SPEED_RATIO, smoothstep(this.moveElapsedMs / MOVE_EASE_MS));
+    const easeOut = Math.max(MIN_SPEED_RATIO, Math.min(1, remaining / DECEL_DISTANCE_PX));
+    this.currentSpeed = targetSpeed * Math.min(easeIn, easeOut);
+
+    this.position = stepToward(this.position, this.target, this.currentSpeed, deltaMs);
 
     if (distance(this.position, this.target) <= ARRIVAL_THRESHOLD) {
       this.goIdle();
@@ -184,15 +228,21 @@ export class MascotBehavior {
     }
 
     // Regra 6: perto da borda, muda de direção sem esperar chegar no
-    // alvo (que pode nem existir mais se a janela encolheu).
+    // alvo (que pode nem existir mais se a janela encolheu). Só reseta a
+    // rampa de aceleração quando a direção REALMENTE inverte (não em todo
+    // re-alvo perto da borda que mantém o mesmo sentido geral) - assim um
+    // giro de verdade desacelera/vira/acelera de novo, sem "teleporte".
     if (isNearEdge(this.position, bounds)) {
+      const previousFacingLeft = this.facingLeft;
       this.target = pickRandomTarget(bounds);
       this.facingLeft = this.target.x < this.position.x;
+      if (this.facingLeft !== previousFacingLeft) this.moveElapsedMs = 0;
     }
   }
 
   private goIdle(): void {
     this.state = "idle";
+    this.currentSpeed = 0;
     this.stateTimerMs = randomBetween(IDLE_DURATION_RANGE_MS);
   }
 }

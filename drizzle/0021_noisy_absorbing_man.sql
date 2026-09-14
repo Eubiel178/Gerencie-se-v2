@@ -1,0 +1,1 @@
+ALTER TABLE "user_preference" ADD COLUMN "guided_tour_dismissed" boolean DEFAULT false NOT NULL;
