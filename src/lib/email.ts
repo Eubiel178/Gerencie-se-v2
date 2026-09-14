@@ -1,25 +1,34 @@
 import "server-only";
 
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 
 /**
- * Envio de e-mail transacional (convites de colaboração) via Resend
- * (resend.com) - plano grátis cobre folgadamente o volume de um app
- * pessoal (100 e-mails/dia). Chave nunca fica no cliente - só usada
- * aqui, dentro de Server Actions.
+ * Envio de e-mail transacional (convites, redefinição de senha, alerta
+ * de login, resumo semanal) via SMTP do Gmail, usando uma conta comum
+ * (`segerenciese@gmail.com`) + uma "Senha de app" — não um provedor de
+ * e-mail transacional dedicado (Resend/SendGrid/etc). Escolhido de
+ * propósito: qualquer provedor desses exige um domínio próprio
+ * verificado pra entregar em qualquer destinatário (não só pro dono da
+ * conta), e comprar um domínio não é gratuito. Usar a própria
+ * infraestrutura do Gmail (que já é confiável o bastante pra outros
+ * provedores não jogarem pra spam) resolve isso sem custo nenhum — a
+ * troca é o remetente aparecer como um Gmail comum, não um endereço
+ * "@seudominio.com" com marca própria.
  *
- * Sem `RESEND_API_KEY` configurada, falha de forma clara e silenciosa
- * (nunca derruba o fluxo que chamou) - mesmo padrão do Google Agenda
- * quando as credenciais não estão configuradas ainda.
+ * Sem `GMAIL_USER`/`GMAIL_APP_PASSWORD` configuradas, falha de forma
+ * clara e silenciosa (nunca derruba o fluxo que chamou) — mesmo padrão
+ * do Google Agenda quando as credenciais não estão configuradas ainda.
  */
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+const gmailUser = process.env.GMAIL_USER;
+const gmailAppPassword = process.env.GMAIL_APP_PASSWORD;
 
-// Domínio de teste do próprio Resend - funciona sem verificar domínio
-// próprio, mas só entrega pro e-mail da conta que criou a chave de API.
-// Para enviar convites pra qualquer e-mail (uso real, não só teste),
-// verifique um domínio seu em resend.com/domains e troque este valor
-// pelo remetente daquele domínio (ex.: "convites@seudominio.com").
-const FROM_ADDRESS = "Gerencie-se <onboarding@resend.dev>";
+const transporter =
+  gmailUser && gmailAppPassword
+    ? nodemailer.createTransport({
+        service: "gmail",
+        auth: { user: gmailUser, pass: gmailAppPassword },
+      })
+    : null;
 
 export interface SendEmailParams {
   to: string;
@@ -27,25 +36,23 @@ export interface SendEmailParams {
   html: string;
 }
 
-export async function sendEmail(params: SendEmailParams): Promise<{ error: string | null }> {
-  if (!resend) {
+export async function sendEmail(
+  params: SendEmailParams,
+): Promise<{ error: string | null }> {
+  if (!transporter || !gmailUser) {
     return {
       error:
-        "Envio de e-mail não configurado (RESEND_API_KEY ausente). Veja docs/EMAIL_SETUP.md.",
+        "Envio de e-mail não configurado (GMAIL_USER/GMAIL_APP_PASSWORD ausentes). Veja docs/EMAIL_SETUP.md.",
     };
   }
 
   try {
-    const result = await resend.emails.send({
-      from: FROM_ADDRESS,
+    await transporter.sendMail({
+      from: `Gerencie-se <${gmailUser}>`,
       to: params.to,
       subject: params.subject,
       html: params.html,
     });
-
-    if (result.error) {
-      return { error: result.error.message };
-    }
 
     return { error: null };
   } catch {

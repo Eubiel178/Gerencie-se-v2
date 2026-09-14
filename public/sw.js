@@ -67,3 +67,43 @@ self.addEventListener("fetch", (event) => {
     );
   }
 });
+
+// Notificação push (lembretes de tarefa, mesmo com o site fechado - ver
+// `src/lib/web-push.ts`). O payload é o JSON que o servidor manda em
+// `webpush.sendNotification`, então tudo aqui é dado que o próprio app
+// gerou, nunca conteúdo de terceiro.
+self.addEventListener("push", (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch {
+    // Payload não era JSON válido - mostra uma notificação genérica em
+    // vez de deixar o evento em silêncio.
+  }
+
+  const title = data.title || "Gerencie-se";
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body: data.body || "",
+      tag: data.tag,
+      icon: "/icon-512.png",
+      badge: "/icon-512.png",
+      data: { url: data.url || "/home/tasks" },
+    })
+  );
+});
+
+// Clique na notificação: foca uma aba já aberta na URL certa, ou abre uma
+// nova - nunca duas abas do mesmo app por causa de um clique.
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = event.notification.data?.url || "/home/tasks";
+
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientsArr) => {
+      const existing = clientsArr.find((client) => client.url.includes(url));
+      if (existing) return existing.focus();
+      return self.clients.openWindow(url);
+    })
+  );
+});

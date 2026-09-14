@@ -10,6 +10,9 @@ import { requireUserId } from "@/lib/require-user-id";
 import { deleteCalendarEventForTask } from "@/lib/google-calendar";
 import { getMascotFetcher } from "@/features/focus/data/get-focus-fetcher";
 
+import { db } from "@/db/client";
+import { userPreferences } from "@/db/schema";
+
 import { syncTaskToGoogle } from "./sync";
 
 /**
@@ -285,5 +288,28 @@ export async function retryTaskSyncAction(
     return { error: null };
   } catch {
     return { error: "Não foi possível sincronizar agora. Tente novamente." };
+  }
+}
+
+/** Liga/desliga o 2º canal (e-mail) de lembrete de tarefa — mesmo padrão
+ * de `updateWeeklySummaryPreferenceAction` (upsert numa única coluna
+ * boolean em `user_preference`, desligado por padrão). */
+export async function updateEmailTaskRemindersPreferenceAction(enabled: boolean): Promise<ActionResult> {
+  try {
+    const userId = await requireUserId();
+
+    await db
+      .insert(userPreferences)
+      .values({ userId, emailTaskReminders: enabled })
+      .onConflictDoUpdate({
+        target: userPreferences.userId,
+        set: { emailTaskReminders: enabled },
+      });
+
+    revalidatePath("/home/settings");
+
+    return { error: null };
+  } catch {
+    return { error: "Não foi possível salvar a preferência. Tente novamente." };
   }
 }

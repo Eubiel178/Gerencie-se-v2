@@ -29,6 +29,15 @@ export const users = pgTable("user", {
   emailVerified: timestamp("email_verified", { mode: "date" }),
   image: text("image"),
 
+  // Avatar enviado pelo próprio usuário (Configurações → Conta) — mesmo
+  // padrão de `taskAttachments`: binário guardado direto como `bytea` no
+  // Postgres, sem storage externo. `image` continua sendo a URL usada
+  // pra exibir (aponta pra `/api/profile/avatar/[userId]` quando o
+  // usuário tem um avatar próprio); estas duas colunas só guardam o
+  // conteúdo servido por trás dessa rota.
+  avatarContent: bytea("avatar_content"),
+  avatarMimeType: text("avatar_mime_type"),
+
   // Login por e-mail/senha (Credentials Provider) — ausente para usuários
   // que só entraram via Google.
   passwordHash: text("password_hash"),
@@ -495,7 +504,22 @@ export const mascotStates = pgTable("mascot_state", {
   // characterIdForSpecies e public/mascot/pet/CREDITS.txt). Coluna `text`
   // simples (não um enum nativo do Postgres): adicionar espécie nova é só
   // atualizar esta lista de tipos, sem migração.
-  species: text("species", { enum: ["gato", "cachorro", "passaro", "urso", "raposa"] })
+  species: text("species", {
+    enum: [
+      "gato",
+      "cachorro",
+      "passaro",
+      "urso",
+      "raposa",
+      "panda",
+      "golden",
+      "akita",
+      "dogue-alemao",
+      "gato-preto",
+      "gato-angora",
+      "gato-tabby",
+    ],
+  })
     .notNull()
     .default("gato"),
   totalXp: integer("total_xp").notNull().default(0),
@@ -537,10 +561,22 @@ export const userPreferences = pgTable("user_preference", {
   // nunca deve começar a disparar sozinho sem o usuário pedir (ver
   // `features/weekly-summary`).
   weeklySummaryEnabled: boolean("weekly_summary_enabled").notNull().default(false),
+  // Segundo canal (além do push, `push_subscription`) pra lembrete de
+  // tarefa — mesmo raciocínio de `weeklySummaryEnabled` (desligado por
+  // padrão, e-mail nunca começa a disparar sozinho). Só cobre tarefas
+  // porque é a única entidade com lógica de vencimento pronta
+  // (`computeDueReminders`) — objetivos/eventos não têm isso ainda.
+  emailTaskReminders: boolean("email_task_reminders").notNull().default(false),
   // Marcado quando o usuário fecha ou pula o checklist de primeiro acesso
   // (ver `features/onboarding`) — nunca reaparece depois disso, mesmo que
   // algum item continue incompleto.
   onboardingDismissed: boolean("onboarding_dismissed").notNull().default(false),
+  // Marcado quando o usuário termina ou pula o tour guiado (balões
+  // apontando pra navegação/busca/checklist/mascote no Dashboard - ver
+  // `features/guided-tour`) - mesmo raciocínio de `onboardingDismissed`
+  // (nunca reaparece sozinho), só que separado porque são dois fluxos
+  // independentes: dá pra pular o tour e ainda ver o checklist, ou vice-versa.
+  guidedTourDismissed: boolean("guided_tour_dismissed").notNull().default(false),
   // Limite de interrupções (Modo Assistido): quantas mensagens contextuais
   // já foram auto-abertas HOJE (ver MAX_DAILY_INSIGHTS em
   // `local-assistant-preferences.ts`) — zera sozinho quando a data muda,
@@ -642,6 +678,53 @@ export const healthCheckups = pgTable("health_checkup", {
   lastDoneAt: text("last_done_at"), // "YYYY-MM-DD"
   notes: text("notes"),
 });
+
+/**
+ * Inscrição de notificação push do navegador (Web Push) — uma linha por
+ * combinação usuário+dispositivo/navegador (a mesma pessoa pode ter o app
+ * instalado no celular E aberto no PC, cada um com seu próprio `endpoint`).
+ * `p256dh`/`auth` são as chaves públicas que o navegador gerou para
+ * cifrar a mensagem — sem elas o envio (`web-push`) não consegue montar
+ * a requisição. Nenhuma tem valor fora do par (endpoint, chaves): revogar
+ * o acesso é só apagar a linha, nunca precisa "desativar" nada do lado do
+ * navegador.
+ */
+export const pushSubscriptions = pgTable("push_subscription", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  endpoint: text("endpoint").notNull().unique(),
+  p256dh: text("p256dh").notNull(),
+  auth: text("auth").notNull(),
+  createdAt: timestamp("created_at", { mode: "date" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
+/**
+ * Marca que o lembrete de UM offset de UMA tarefa já foi enviado por push
+ * — existir aqui é o que impede reenviar o mesmo lembrete a cada vez que
+ * o cron roda (ver `/api/cron/send-push-reminders`). Sem dono próprio de
+ * propósito: a chave primária composta (taskId, offsetMinutes) já garante
+ * no máximo um envio por combinação, então uma segunda tentativa de
+ * inserir é só descartada (`onConflictDoNothing`), nunca lida de volta.
+ */
+export const taskReminderSent = pgTable(
+  "task_reminder_sent",
+  {
+    taskId: text("task_id")
+      .notNull()
+      .references(() => tasks.id, { onDelete: "cascade" }),
+    offsetMinutes: integer("offset_minutes").notNull(),
+    sentAt: timestamp("sent_at", { mode: "date" })
+      .notNull()
+      .$defaultFn(() => new Date()),
+  },
+  (table) => [primaryKey({ columns: [table.taskId, table.offsetMinutes] })]
+);
 
 /** Cada linha é o início de um ciclo relatado pelo usuário. Duração média e
  * previsão do próximo ciclo são sempre calculadas a partir daqui (nunca

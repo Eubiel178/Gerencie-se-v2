@@ -1,10 +1,9 @@
-import { timingSafeEqual } from "node:crypto";
-
 import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import { userPreferences } from "@/db/schema";
+import { isValidCronSecret } from "@/lib/cron-auth";
 import { getWeeklySummaryForUser } from "@/features/weekly-summary/get-weekly-summary-for-user";
 import { sendWeeklySummaryEmail } from "@/features/weekly-summary/send-weekly-summary";
 
@@ -52,20 +51,4 @@ export async function POST(request: Request) {
     sent: results.filter((result) => result.sent).length,
     failed: results.filter((result) => !result.sent),
   });
-}
-
-/**
- * Compara em tempo constante para não vazar o `CRON_SECRET` por
- * temporização (cada byte igual antecipadamente sairia mais rápido numa
- * comparação `!==` comum). Chamada externa (cron-job.org, GitHub Actions
- * etc.) manda o segredo pela internet — vale a proteção mesmo sendo um
- * endpoint de baixo valor de ataque.
- */
-function isValidCronSecret(authHeader: string, secret: string): boolean {
-  const expected = Buffer.from(`Bearer ${secret}`);
-  const received = Buffer.from(authHeader);
-
-  if (received.length !== expected.length) return false;
-
-  return timingSafeEqual(received, expected);
 }

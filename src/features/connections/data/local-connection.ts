@@ -66,13 +66,22 @@ export class LocalConnection
       addresseeEmail: email,
     });
 
-    const emailResult = await sendEmail({
+    // Convite já existe no banco nesse ponto — o e-mail é só um aviso por
+    // cima, nunca deve travar a resposta esperando o SMTP (o Gmail
+    // demora bem mais que uma API de e-mail transacional dedicada, ver
+    // `src/lib/email.ts`). Erro de envio só vai pro log do servidor, não
+    // trava/mostra erro pra quem convidou — o vínculo já existe e some
+    // pra pessoa convidada assim que ela entrar/criar conta com esse
+    // e-mail de qualquer forma.
+    sendEmail({
       to: email,
       subject: "Convite para colaborar no Gerencie-se",
       html: inviteEmailHtml({ inviterName: me.email, hasAccount: !!existingAccount }),
+    }).then((result) => {
+      if (result.error) console.error("[connections] falha ao enviar e-mail de convite:", result.error);
     });
 
-    return { id, error: emailResult.error };
+    return { id, error: null };
   }
 
   async loadAll(): Promise<domain.LoadAllConnections.Model> {

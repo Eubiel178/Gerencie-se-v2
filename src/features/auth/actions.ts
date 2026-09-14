@@ -95,7 +95,13 @@ export async function registerAction(
 
   const passwordHash = await bcrypt.hash(password, 12);
 
-  await db.insert(users).values({ name, email, passwordHash });
+  try {
+    await db.insert(users).values({ name, email, passwordHash });
+  } catch {
+    return {
+      error: "Não foi possível criar sua conta agora. Tente novamente.",
+    };
+  }
 
   try {
     await signIn("credentials", { email, password, redirect: false });
@@ -131,24 +137,33 @@ export async function requestPasswordResetAction(
     .where(eq(users.email, parsed.data.email))
     .limit(1);
 
+  // Nunca espera o SMTP terminar antes de responder — a mensagem de
+  // sucesso já é sempre a mesma exista ou não a conta (não depende do
+  // resultado do envio), então travar aqui só deixaria a tela parada à
+  // toa (o Gmail demora bem mais que uma API de e-mail transacional
+  // dedicada, ver `src/lib/email.ts`).
   if (user) {
     if (user.passwordHash) {
       const token = await createPasswordResetToken(user.id);
       const resetUrl = `${appUrl()}/reset-password?token=${token}`;
 
-      await sendEmail({
+      sendEmail({
         to: parsed.data.email,
         subject: "Redefinir sua senha — Gerencie-se",
         html: renderPasswordResetEmail({ name: user.name, resetUrl }),
+      }).then((result) => {
+        if (result.error) console.error("[auth] falha ao enviar e-mail de redefinição de senha:", result.error);
       });
     } else {
       // Conta existe, mas foi criada via Google — não há senha pra
       // redefinir. Avisamos só quem tem acesso à caixa de entrada (não é
       // uma resposta visível pra quem só está tentando descobrir contas).
-      await sendEmail({
+      sendEmail({
         to: parsed.data.email,
         subject: "Redefinir sua senha — Gerencie-se",
         html: renderGoogleOnlyAccountEmail({ name: user.name }),
+      }).then((result) => {
+        if (result.error) console.error("[auth] falha ao enviar e-mail de aviso de conta Google:", result.error);
       });
     }
   }

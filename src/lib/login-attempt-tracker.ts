@@ -56,10 +56,15 @@ export async function handleFailedLoginAttempt(userId: string): Promise<void> {
 
     if (!user?.email) return;
 
-    await sendEmail({
+    // Não espera o SMTP — isso roda dentro do fluxo de login (tentativa
+    // errada), travar aqui deixaria a tela de "senha incorreta" parada
+    // à toa esperando um e-mail que o usuário nem vê na hora.
+    sendEmail({
       to: user.email,
       subject: "Tentativas de login na sua conta — Gerencie-se",
       html: renderLoginAlertEmail({ name: user.name }),
+    }).then((result) => {
+      if (result.error) console.error("[login-attempt-tracker] falha ao enviar alerta:", result.error);
     });
   } catch (error) {
     console.error("[login-attempt-tracker] falha ao processar tentativa malsucedida", error);
