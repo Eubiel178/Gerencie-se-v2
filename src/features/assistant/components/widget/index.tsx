@@ -6,7 +6,7 @@ import { Button } from "@/components";
 import { Icon } from "@/components/icon";
 
 import { IAssistantMessage } from "@/features/assistant/domain";
-import { IMascotState, SPECIES_EMOJI } from "@/features/focus/domain";
+import { IMascotState } from "@/features/focus/domain";
 import { useSpeak } from "@/lib/speak-text";
 
 import styles from "./widget.module.css";
@@ -164,15 +164,12 @@ export function Widget({
         aria-expanded={isOpen}
         onClick={handleAvatarClick}
       >
-        {/* Emoji, não o sprite pixel art real (`MascotPreview`) - dentro
-            de um círculo pequeno o sprite nunca ficava bom (minúsculo
-            demais ou cortado, dependendo do personagem - achado
-            relatado várias vezes: "a foto do pet fica bugado"). Um
-            emoji sempre renderiza nítido em qualquer tamanho, sem
-            depender de atlas/frame/escala nenhum. */}
-        <span className={styles.avatarEmoji} aria-hidden="true">
-          {SPECIES_EMOJI[mascot.species]}
-        </span>
+        {/* Ícone neutro, sem nenhuma ligação com o mascote/bicho - nem
+            sprite (nunca ficava bom, achado relatado várias vezes) nem
+            emoji do bicho (pedido explícito: "eu falei que não queria
+            [o mascote na bolha]"). Só comunica "isto abre uma
+            mensagem", que é literalmente o que o botão faz. */}
+        <Icon name="FaCommentDots" aria-hidden="true" className={styles.avatarIcon} />
         {!isOpen && message && (
           <span className={styles.pingDot} aria-hidden="true" />
         )}
