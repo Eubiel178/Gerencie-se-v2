@@ -69,49 +69,112 @@ function makeLaneBoundsProvider(
   };
 }
 
-// Posição/tamanho/opacidade de cada árvore decorativa - valores fixos
-// (não geometria calculada), pensados só pra dar profundidade de "clareira"
-// sem competir com os bichos: menores e mais claras ao fundo, maiores e
-// mais nítidas na frente, nunca no centro (onde os bichos passeiam).
-const TREES = [
-  { left: "4%", scale: 0.8, opacity: 0.35 },
-  { left: "13%", scale: 1.05, opacity: 0.5 },
-  { left: "88%", scale: 0.9, opacity: 0.4 },
-  { left: "95%", scale: 1.15, opacity: 0.55 },
-] as const;
+type TreeVariant = "round" | "pine" | "slim";
 
-// Redesenhada (achado relatado: "a floresta da lp tá feia") - a versão
-// antiga era 4 círculos do MESMO tamanho e da MESMA cor espalhados sem
-// hierarquia nenhuma, lendo como uma pilha de bolinhas verdes, não uma
-// árvore. Agora são 3 elipses decrescendo de baixo pra cima (dá a
-// silhueta afunilada de uma copa de verdade) com 3 tons de verde
-// (mais escuro embaixo/atrás, mais claro em cima/na frente - a mesma
-// lógica barata de "sombra embaixo, luz em cima" de qualquer ilustração
-// simples) + um tronco com um leve gradiente pra não ficar um retângulo
-// chapado. Cores do tronco fixas de propósito (não são um token do
-// design system - é só a paleta desta ilustração decorativa, mesmo
-// espírito das cores fixas no e-mail de convite).
-function Tree({ scale, opacity }: { scale: number; opacity: number }) {
+// Posição/variante/tamanho/opacidade de cada árvore decorativa - valores
+// fixos (não geometria calculada), pensados só pra dar profundidade de
+// "clareira" sem competir com os bichos: menores e mais claras ao fundo,
+// maiores e mais nítidas na frente, nunca no centro (onde os bichos
+// passeiam). Variam tanto de FORMA (3 silhuetas diferentes - `TreeVariant`)
+// quanto de ALTURA de verdade (não só escala uniforme do mesmo desenho -
+// achado relatado: "crie árvores altas e diferentes") - cada uma com sua
+// própria proporção largura/altura, não um reescalonamento isotrópico da
+// mesma arte.
+const TREES: { left: string; variant: TreeVariant; scale: number; opacity: number }[] = [
+  { left: "3%", variant: "pine", scale: 0.75, opacity: 0.32 },
+  { left: "10%", variant: "round", scale: 1, opacity: 0.48 },
+  { left: "18%", variant: "slim", scale: 0.85, opacity: 0.38 },
+  { left: "84%", variant: "slim", scale: 0.9, opacity: 0.4 },
+  { left: "90%", variant: "pine", scale: 1.05, opacity: 0.5 },
+  { left: "97%", variant: "round", scale: 1.2, opacity: 0.58 },
+];
+
+// 3 silhuetas bem diferentes entre si (não a mesma arte reescalada) -
+// achado relatado: "crie árvores altas e diferentes" (a versão anterior,
+// embora já corrigida de "feia" pra uma copa de verdade, ainda repetia a
+// MESMA árvore em todo slot, só maior/menor/mais opaca). Todas nascem de
+// um `viewBox` mais alto que largo pra reforçar a sensação de altura.
+// Cores do tronco/copa fixas de propósito (não são token do design
+// system - é só a paleta desta ilustração decorativa, mesmo espírito das
+// cores fixas no e-mail de convite).
+
+/** Frondosa - copa em 3 elipses decrescendo de baixo pra cima (silhueta
+ * afunilada clássica) com 3 tons de verde (mais escuro embaixo/atrás,
+ * mais claro em cima/na frente). */
+function RoundTree() {
   return (
-    <svg
-      viewBox="0 0 44 60"
-      width={44 * scale}
-      height={60 * scale}
-      className={styles.tree}
-      style={{ opacity }}
-    >
-      <rect x="19" y="42" width="6" height="18" rx="2" fill="#8a6a48" />
-      <rect x="19" y="42" width="3" height="18" rx="1.5" fill="#9c7a55" />
+    <>
+      <rect x="19" y="46" width="6" height="20" rx="2" fill="#8a6a48" />
+      <rect x="19" y="46" width="3" height="20" rx="1.5" fill="#9c7a55" />
 
-      <ellipse cx="22" cy="38" rx="16" ry="13" fill="var(--color-success)" opacity="0.75" />
-      <ellipse cx="22" cy="26" rx="13" ry="11" fill="var(--color-success)" opacity="0.88" />
+      <ellipse cx="22" cy="42" rx="17" ry="14" fill="var(--color-success)" opacity="0.75" />
+      <ellipse cx="22" cy="28" rx="14" ry="12" fill="var(--color-success)" opacity="0.88" />
       <ellipse
         cx="22"
         cy="15"
-        rx="10"
-        ry="9"
+        rx="10.5"
+        ry="9.5"
         fill="color-mix(in srgb, var(--color-success) 70%, white)"
       />
+    </>
+  );
+}
+
+/** Conífera alta e estreita - 4 "camadas" triangulares empilhadas,
+ * encolhendo pra cima, tronco fino e comprido - a mais alta das 3 pra
+ * variar a "linha do horizonte" da clareira. */
+function PineTree() {
+  return (
+    <>
+      <rect x="20" y="58" width="4" height="14" rx="1.5" fill="#8a6a48" />
+
+      <path d="M22 4 L34 24 L10 24 Z" fill="color-mix(in srgb, var(--color-success) 65%, white)" />
+      <path d="M22 16 L36 38 L8 38 Z" fill="var(--color-success)" opacity="0.85" />
+      <path d="M22 30 L38 52 L6 52 Z" fill="var(--color-success)" opacity="0.75" />
+      <path d="M22 44 L40 66 L4 66 Z" fill="var(--color-success)" opacity="0.65" />
+    </>
+  );
+}
+
+/** Esguia - tronco longo e fino com uma copa pequena e alta no topo
+ * (tipo bétula/pau-de-vela) - contraste de silhueta com as outras duas,
+ * mais "vazia" embaixo. */
+function SlimTree() {
+  return (
+    <>
+      <rect x="20" y="30" width="4" height="42" rx="1.5" fill="#a68763" />
+      <rect x="20" y="30" width="2" height="42" rx="1" fill="#bb9c78" />
+
+      <ellipse cx="22" cy="20" rx="9" ry="12" fill="var(--color-success)" opacity="0.8" />
+      <ellipse
+        cx="22"
+        cy="8"
+        rx="6.5"
+        ry="8.5"
+        fill="color-mix(in srgb, var(--color-success) 70%, white)"
+      />
+    </>
+  );
+}
+
+const TREE_VARIANTS: Record<TreeVariant, () => React.ReactElement> = {
+  round: RoundTree,
+  pine: PineTree,
+  slim: SlimTree,
+};
+
+function Tree({ variant, scale, opacity }: { variant: TreeVariant; scale: number; opacity: number }) {
+  const Variant = TREE_VARIANTS[variant];
+
+  return (
+    <svg
+      viewBox="0 0 44 72"
+      width={44 * scale}
+      height={72 * scale}
+      className={styles.tree}
+      style={{ opacity }}
+    >
+      <Variant />
     </svg>
   );
 }
@@ -125,7 +188,7 @@ function Scenery() {
     <div className={styles.scenery} aria-hidden="true">
       {TREES.map((tree, index) => (
         <div key={index} className={styles.treeSlot} style={{ left: tree.left }}>
-          <Tree scale={tree.scale} opacity={tree.opacity} />
+          <Tree variant={tree.variant} scale={tree.scale} opacity={tree.opacity} />
         </div>
       ))}
     </div>

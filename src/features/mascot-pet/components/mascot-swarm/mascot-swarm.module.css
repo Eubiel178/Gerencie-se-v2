@@ -85,9 +85,13 @@
   transform: translate(-50%, 0);
 }
 
+/* 13rem (achado relatado: "mascotes colado no chão") mal cabia um
+   bichinho de ~96px de altura com folga nenhuma pra passear na vertical
+   - a "raia" de movimento (`makeLaneBoundsProvider` em `index.tsx`) ficava
+   baixa o bastante pra parecer grudado na grama do fundo. */
 @media (max-width: 760px) {
   .stage {
-    min-height: 13rem;
+    min-height: 18rem;
   }
 }
 
