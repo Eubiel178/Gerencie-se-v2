@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import * as domain from "@/features/health/domain";
 import { getHealthFetcher } from "@/features/health/data/get-health-fetcher";
-import { createHealthCheckupSchema } from "@/validation/health-schema";
+import { createHealthCheckupSchema, updateHealthCheckupSchema } from "@/validation/health-schema";
 
 import type { ActionResult } from "@/types/action-result";
 
@@ -18,6 +18,27 @@ export async function createHealthCheckupAction(
 
   try {
     await getHealthFetcher().create(parsed.data);
+    revalidatePath("/home/health");
+
+    return { error: null };
+  } catch {
+    return { error: "Não foi possível salvar. Tente novamente." };
+  }
+}
+
+// A camada de dados (`LocalHealth.update`) já existia — só faltava esta
+// Server Action e um jeito de chamá-la pela UI (não havia modal de
+// editar, só criar/marcar feito/excluir).
+export async function updateHealthCheckupAction(
+  data: domain.UpdateHealthCheckup.Params
+): Promise<ActionResult> {
+  const parsed = updateHealthCheckupSchema.safeParse(data);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Dados inválidos." };
+  }
+
+  try {
+    await getHealthFetcher().update({ ...parsed.data, id: data.id });
     revalidatePath("/home/health");
 
     return { error: null };

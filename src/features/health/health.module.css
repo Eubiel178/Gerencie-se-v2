@@ -2,16 +2,20 @@
 .heading{margin:0;color:var(--color-text);font-size:clamp(1.8rem,4vw,2.7rem);line-height:var(--line-height-tight);letter-spacing:-.055em}
 .subheading{margin:var(--space-2) 0 0;color:var(--color-text-muted);font-size:var(--font-size-sm)}
 .disclaimer{padding:var(--space-3);border:1px dashed var(--color-border);border-radius:var(--radius-md);color:var(--color-text-muted);font-size:var(--font-size-xs);background:var(--color-surface)}
-.addForm{display:flex;gap:var(--space-2);flex-wrap:wrap}
+.addForm{display:flex;gap:var(--space-2);flex-wrap:wrap;align-items:flex-start}
 .addForm>*{flex:1;min-width:9rem}
+.groups{display:flex;flex-direction:column;gap:var(--space-5)}
+.categoryGroup{display:flex;flex-direction:column;gap:var(--space-3)}
+.categoryGroupTitle{margin:0;color:var(--color-text-muted);font-size:var(--font-size-xs);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
 .list{display:flex;flex-direction:column;gap:var(--space-3);padding:0;margin:0;list-style:none}
-.item{display:flex;align-items:center;justify-content:space-between;gap:var(--space-3);padding:var(--space-3);border:1px solid var(--color-border);border-radius:var(--radius-lg);background:var(--color-surface)}
-.itemOverdue{border-color:var(--color-danger)}
+.item{display:flex;align-items:center;justify-content:space-between;gap:var(--space-3);padding:var(--space-3);border:1px solid var(--color-border);border-left:0.3rem solid var(--color-border);border-radius:var(--radius-lg);background:var(--color-surface);box-shadow:0 .5rem 1.25rem var(--color-shadow);transition:transform var(--duration-base) var(--easing-standard),box-shadow var(--duration-base) var(--easing-standard)}
+.item:hover{transform:translateY(-.25rem);box-shadow:0 1rem 2rem var(--color-shadow)}
+.itemOverdue{border-left-color:var(--color-danger)}
 .itemInfo{display:flex;flex-direction:column;gap:var(--space-1)}
 .itemTitle{margin:0;color:var(--color-text);font-size:1rem}
 .itemMeta{color:var(--color-text-muted);font-size:var(--font-size-xs)}
-.overdueLabel{color:var(--color-danger);font-weight:600}
+.itemNotes{margin:0;color:var(--color-text-muted);font-size:var(--font-size-xs);font-style:italic}
+.overdueBadge{display:inline-flex;align-items:center;gap:.3rem;margin-top:.15rem;padding:.1rem .5rem;border-radius:var(--radius-full);background:color-mix(in srgb,var(--color-danger) 14%,transparent);color:var(--color-danger);font-size:var(--font-size-xs);font-weight:600;width:fit-content}
 .actions{display:flex;align-items:center;gap:var(--space-1)}
-.formError{margin:0;font-family:var(--font-sans);color:var(--color-danger);font-size:var(--font-size-md)}
 .emptyMessage{margin:0;font-family:var(--font-sans);color:var(--color-info);font-size:var(--font-size-md)}
 .markDoneButton{background:var(--color-surface-elevated);border-color:var(--color-border);color:var(--color-text);box-shadow:0 1px 2px var(--color-shadow);padding:.45rem var(--space-3);font-size:var(--font-size-sm)}

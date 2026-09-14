@@ -1,90 +1,93 @@
 "use client";
 
 import { useState } from "react";
-
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-import { Button, Input } from "@/components";
+import { Alert, Button, Input } from "@/components";
 
 import { createHealthCheckupAction } from "@/features/health/actions";
+import { healthCheckupFormSchema, HealthCheckupFormData } from "@/validation/health-schema";
 
 import styles from "../health.module.css";
 
 export function AddForm() {
   const router = useRouter();
-  const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("");
-  const [intervalDays, setIntervalDays] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  async function handleSubmit(event: React.FormEvent) {
-    event.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<HealthCheckupFormData>({
+    mode: "onChange",
+    resolver: zodResolver(healthCheckupFormSchema),
+    defaultValues: { title: "", category: "", intervalDays: "", notes: "" },
+  });
 
-    const trimmedTitle = title.trim();
-    const trimmedCategory = category.trim();
+  async function onSubmit(data: HealthCheckupFormData) {
+    setSubmitError(null);
 
-    if (!trimmedTitle) {
-      setError("Informe o nome do cuidado.");
+    const result = await createHealthCheckupAction({
+      title: data.title,
+      category: data.category,
+      intervalDays: data.intervalDays ? Number(data.intervalDays) : null,
+      notes: null,
+    });
+
+    if (result.error) {
+      setSubmitError(result.error);
       return;
     }
-    if (!trimmedCategory) {
-      setError("Informe a categoria.");
-      return;
-    }
 
-    setIsSubmitting(true);
-    setError(null);
-
-    try {
-      const result = await createHealthCheckupAction({
-        title: trimmedTitle,
-        category: trimmedCategory,
-        intervalDays: intervalDays ? Number(intervalDays) : null,
-        notes: null,
-      });
-
-      if (result.error) {
-        setError(result.error);
-        return;
-      }
-
-      setTitle("");
-      setCategory("");
-      setIntervalDays("");
-      router.refresh();
-    } finally {
-      setIsSubmitting(false);
-    }
+    reset();
+    router.refresh();
   }
 
   return (
-    <form className={styles.addForm} onSubmit={handleSubmit}>
-      <Input.Field
-        aria-label="Nome do cuidado"
-        placeholder="Ex.: Exame de vista"
-        value={title}
-        onChange={(event) => setTitle(event.target.value)}
-      />
-      <Input.Field
-        aria-label="Categoria"
-        placeholder="Categoria (ex.: Check-up)"
-        value={category}
-        onChange={(event) => setCategory(event.target.value)}
-      />
-      <Input.Field
-        type="number"
-        min={1}
-        aria-label="Intervalo em dias entre repetições"
-        placeholder="A cada quantos dias (opcional)"
-        value={intervalDays}
-        onChange={(event) => setIntervalDays(event.target.value)}
-      />
+    <form className={styles.addForm} onSubmit={handleSubmit(onSubmit)}>
+      <Input.Root sharedProps={{ error: errors.title?.message }}>
+        <Input.Wrapper>
+          <Input.Field
+            {...register("title")}
+            aria-label="Nome do cuidado"
+            placeholder="Ex.: Exame de vista"
+          />
+        </Input.Wrapper>
+        <Input.HelperText />
+      </Input.Root>
+
+      <Input.Root sharedProps={{ error: errors.category?.message }}>
+        <Input.Wrapper>
+          <Input.Field
+            {...register("category")}
+            aria-label="Categoria"
+            placeholder="Categoria (ex.: Check-up)"
+          />
+        </Input.Wrapper>
+        <Input.HelperText />
+      </Input.Root>
+
+      <Input.Root sharedProps={{ error: errors.intervalDays?.message }}>
+        <Input.Wrapper>
+          <Input.Field
+            {...register("intervalDays")}
+            type="number"
+            min={1}
+            aria-label="Intervalo em dias entre repetições"
+            placeholder="A cada quantos dias (opcional)"
+          />
+        </Input.Wrapper>
+        <Input.HelperText />
+      </Input.Root>
+
       <Button.Root type="submit" loading={isSubmitting}>
         Adicionar
       </Button.Root>
 
-      {error && <p className={styles.formError}>{error}</p>}
+      {submitError && <Alert variant="error">{submitError}</Alert>}
     </form>
   );
 }
