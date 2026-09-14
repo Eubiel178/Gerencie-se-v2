@@ -6,12 +6,10 @@ import { useRouter } from "next/navigation";
 
 import { Button, Modal, ModalHeader } from "@/components";
 
-import {
-  cancelFocusSessionAction,
-  completeFocusSessionAction,
-  startFocusSessionAction,
-} from "@/features/focus/actions";
-import { IFocusSession, IMascotState, MascotEvent } from "@/features/focus/domain";
+import { IMascotState, MascotEvent } from "@/features/focus/domain";
+import { useFocusSession } from "@/features/focus/focus-session-context";
+import { formatClock } from "@/features/focus/format-clock";
+import { EXTEND_PRESETS_MINUTES } from "@/features/focus/extend-presets";
 import { toggleTaskCompleteAction } from "@/features/tasks/actions";
 import { Mascot } from "../mascot";
 
@@ -29,33 +27,25 @@ interface FocusTask {
 }
 
 interface TimerProps {
-  initialSession: IFocusSession | null;
   mascot: IMascotState;
   // Vem de `Focus` (ver `src/features/focus/index.tsx`) - já resolvida
   // no servidor a partir da sessão ativa ou do `?taskId=` da URL.
   task?: FocusTask | null;
 }
 
-function secondsRemaining(session: IFocusSession, now: number): number {
-  const elapsed = Math.floor((now - session.startedAt.getTime()) / 1000);
-  return Math.max(0, session.plannedDurationSeconds - elapsed);
-}
-
-function formatClock(totalSeconds: number): string {
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-}
-
-export function Timer({ initialSession, mascot, task }: TimerProps) {
+/**
+ * Painel completo do foco (`/home/focus`) - o relógio/estado em si mora
+ * em `FocusSessionProvider` (montado no layout, único pra qualquer
+ * página), aqui só consome via `useFocusSession`. Sem isso, duas fontes
+ * de verdade (esta página + `FocusMiniWidget`) disputariam quem conclui
+ * a sessão quando o tempo acaba - ver comentário completo no provider.
+ */
+export function Timer({ mascot, task }: TimerProps) {
   const router = useRouter();
+  const { session, remaining, isBusy, lastCompletion, start, complete, cancel, extend, clearLastCompletion } =
+    useFocusSession();
 
-  const [session, setSession] = useState(initialSession);
   const [plannedMinutes, setPlannedMinutes] = useState(25);
-  const [remaining, setRemaining] = useState(() =>
-    initialSession ? secondsRemaining(initialSession, Date.now()) : 0
-  );
-  const [isBusy, setIsBusy] = useState(false);
   const [celebration, setCelebration] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [awayNudge, setAwayNudge] = useState<string | null>(null);
@@ -66,42 +56,54 @@ export function Timer({ initialSession, mascot, task }: TimerProps) {
   const [showTaskCompleteConfirm, setShowTaskCompleteConfirm] = useState(false);
   const [isMarkingTaskComplete, setIsMarkingTaskComplete] = useState(false);
 
-  // Evita completar a mesma sessão duas vezes se o relógio e um clique em
-  // "Concluir agora" chegarem no mesmo instante.
-  const isCompletingRef = useRef(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const hiddenAtRef = useRef<number | null>(null);
 
-  useEffect(() => {
-    if (!session) return;
+  // Reage a uma conclusão (automática OU manual, de QUALQUER página -
+  // ver provider) assim que ela existir: mostra a celebração e, se a
+  // sessão tinha a tarefa atual associada e ela ainda não tava
+  // concluída, oferece marcar como concluída. Ajuste do estado LOCAL
+  // durante a renderização (não em `useEffect`), padrão recomendado pra
+  // "reagir a uma mudança vinda de fora" sem o re-render em cascata que
+  // um efeito chamando `setState` causaria - `useState` (não `useRef`:
+  // ref não pode ser lido/alterado durante a renderização) guarda a
+  // última conclusão já tratada, pra não repetir pra a MESMA conclusão
+  // em renders seguintes.
+  const [handledCompletion, setHandledCompletion] = useState<typeof lastCompletion>(null);
+  if (lastCompletion && lastCompletion !== handledCompletion) {
+    setHandledCompletion(lastCompletion);
 
-    const tick = () => setRemaining(secondsRemaining(session, Date.now()));
-    tick();
+    setCelebration(
+      lastCompletion.xpEarned > 0 ? `Foco concluído! +${lastCompletion.xpEarned} XP` : "Foco concluído!"
+    );
 
-    const interval = setInterval(tick, 1000);
-    return () => clearInterval(interval);
-  }, [session]);
-
-  // Bloqueio de distração real que um app web consegue oferecer (ver item
-  // 26 do plano): nunca é possível impedir o usuário de trocar de aba ou
-  // fechar o navegador de verdade — só avisar/lembrar. Três coisas, todas
-  // dentro do que a plataforma web permite:
-  // 1. Aviso nativo do navegador ao tentar fechar/recarregar a aba com uma
-  //    sessão em andamento (beforeunload).
-  useEffect(() => {
-    if (!session) return;
-
-    function handleBeforeUnload(event: BeforeUnloadEvent) {
-      event.preventDefault();
-      event.returnValue = "";
+    if (task && lastCompletion.taskId === task.id && !task.completed) {
+      setShowTaskCompleteConfirm(true);
     }
+  }
 
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [session]);
+  // Consumir o sinal no provider (`clearLastCompletion`) É um efeito de
+  // verdade - muda o estado de OUTRO componente (o provider), o que o
+  // React não permite fazer direto durante a própria renderização deste
+  // aqui. Sem isso, sair e voltar pra esta página reapresentaria a
+  // mesma celebração/pergunta de novo.
+  useEffect(() => {
+    if (lastCompletion) clearLastCompletion();
+  }, [lastCompletion, clearLastCompletion]);
 
-  // 2. Lembrete gentil (não punitivo) de quanto tempo a aba ficou em
-  //    segundo plano durante a sessão, ao voltar pra ela.
+  // A celebração se apaga sozinha depois de um tempo - efeito de
+  // verdade também (sincroniza com um timer externo), só dispara de
+  // novo quando `celebration` muda pra um texto novo.
+  useEffect(() => {
+    if (!celebration) return;
+    const timeout = setTimeout(() => setCelebration(null), 4000);
+    return () => clearTimeout(timeout);
+  }, [celebration]);
+
+  // Lembrete gentil (não punitivo) de quanto tempo a aba ficou em
+  // segundo plano durante a sessão, ao voltar pra ela - só faz sentido
+  // como decoração desta página específica (o aviso de fechar/recarregar
+  // a aba, que precisa valer em qualquer página, mora no provider).
   useEffect(() => {
     if (!session) return;
 
@@ -126,8 +128,8 @@ export function Timer({ initialSession, mascot, task }: TimerProps) {
     return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, [session]);
 
-  // 3. Modo tela cheia opcional, reduz a visibilidade de outras abas/UI do
-  //    sistema operacional enquanto a sessão está ativa.
+  // Modo tela cheia opcional, reduz a visibilidade de outras abas/UI do
+  // sistema operacional enquanto a sessão está ativa.
   useEffect(() => {
     function handleFullscreenChange() {
       setIsFullscreen(document.fullscreenElement === panelRef.current);
@@ -149,83 +151,28 @@ export function Timer({ initialSession, mascot, task }: TimerProps) {
     });
   }
 
-  useEffect(() => {
-    if (session && remaining === 0 && !isCompletingRef.current) {
-      handleComplete();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [remaining, session]);
-
   async function handleStart() {
-    setIsBusy(true);
-
-    try {
-      const result = await startFocusSessionAction({
-        plannedDurationSeconds: plannedMinutes * 60,
-        taskId: task?.id ?? null,
-      });
-
-      if (result.session) {
-        setSession({
-          id: result.session.id,
-          userId: mascot.userId,
-          startedAt: result.session.startedAt,
-          plannedDurationSeconds: result.session.plannedDurationSeconds,
-          status: "running",
-          xpEarned: 0,
-          taskId: result.session.taskId,
-        });
-        // Sem isso, `remaining` continua com o valor da sessão anterior
-        // (0, já que normalmente é assim que uma sessão termina) até o
-        // efeito de tick rodar - e nesse intervalo, o efeito de
-        // auto-completar (que reage a `[remaining, session]`) roda
-        // primeiro, vê `session` truthy + `remaining === 0` e conclui a
-        // sessão na mesma hora, com 0s/0 XP (bug real, confirmado batendo
-        // no banco: várias sessões de 1500s planejados terminando em 0s).
-        // Definir os dois no mesmo evento (React agrupa numa única
-        // renderização) garante que a sessão nasça com o tempo real dela.
-        setRemaining(result.session.plannedDurationSeconds);
-      }
-    } finally {
-      setIsBusy(false);
-    }
+    setActionError(null);
+    const result = await start({ plannedDurationSeconds: plannedMinutes * 60, taskId: task?.id ?? null });
+    if (result.error) setActionError(result.error);
   }
 
   async function handleComplete() {
-    if (!session || isCompletingRef.current) return;
-    isCompletingRef.current = true;
-    setIsBusy(true);
     setActionError(null);
+    const result = await complete();
+    if (result.error) setActionError(result.error);
+  }
 
-    try {
-      const result = await completeFocusSessionAction({ id: session.id });
+  async function handleCancel() {
+    setActionError(null);
+    const result = await cancel();
+    if (result.error) setActionError(result.error);
+  }
 
-      if (result.error) {
-        setActionError(result.error);
-        return;
-      }
-
-      setSession(null);
-      setCelebration(
-        result.xpEarned && result.xpEarned > 0
-          ? `Foco concluído! +${result.xpEarned} XP`
-          : "Foco concluído!"
-      );
-
-      // Só pergunta se a sessão que terminou tinha mesmo essa tarefa
-      // associada (não a tarefa "atual" por acaso — `task` só existe
-      // aqui quando `session.taskId` bate com ela, ver `Focus`) e ela
-      // ainda não estava concluída.
-      if (task && !task.completed) {
-        setShowTaskCompleteConfirm(true);
-      }
-
-      setTimeout(() => setCelebration(null), 4000);
-      router.refresh();
-    } finally {
-      setIsBusy(false);
-      isCompletingRef.current = false;
-    }
+  async function handleExtend(minutes: number) {
+    setActionError(null);
+    const result = await extend(minutes * 60);
+    if (result.error) setActionError(result.error);
   }
 
   async function handleConfirmTaskComplete() {
@@ -238,26 +185,6 @@ export function Timer({ initialSession, mascot, task }: TimerProps) {
     } finally {
       setIsMarkingTaskComplete(false);
       setShowTaskCompleteConfirm(false);
-    }
-  }
-
-  async function handleCancel() {
-    if (!session) return;
-    setIsBusy(true);
-    setActionError(null);
-
-    try {
-      const result = await cancelFocusSessionAction({ id: session.id });
-
-      if (result.error) {
-        setActionError(result.error);
-        return;
-      }
-
-      setSession(null);
-      router.refresh();
-    } finally {
-      setIsBusy(false);
     }
   }
 
@@ -287,6 +214,20 @@ export function Timer({ initialSession, mascot, task }: TimerProps) {
       {session ? (
         <>
           <span className={styles.clock}>{formatClock(remaining)}</span>
+
+          <div className={styles.extendRow}>
+            {EXTEND_PRESETS_MINUTES.map((minutes) => (
+              <Button.Root
+                key={minutes}
+                type="button"
+                variant="secondary"
+                disabled={isBusy}
+                onClick={() => handleExtend(minutes)}
+              >
+                +{minutes} min
+              </Button.Root>
+            ))}
+          </div>
 
           <div className={styles.controls}>
             <Button.Root variant="secondary" loading={isBusy} onClick={handleComplete}>

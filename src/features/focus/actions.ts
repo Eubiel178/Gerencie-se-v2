@@ -46,6 +46,19 @@ export async function completeFocusSessionAction(
   }
 }
 
+export async function extendFocusSessionAction(
+  params: domain.ExtendFocusSession.Params
+): Promise<ActionResult & { plannedDurationSeconds?: number }> {
+  try {
+    const result = await getFocusFetcher().extend(params);
+    revalidatePath("/home/focus");
+
+    return { error: null, plannedDurationSeconds: result.plannedDurationSeconds };
+  } catch {
+    return { error: "Não foi possível adicionar tempo à sessão. Tente novamente." };
+  }
+}
+
 export async function cancelFocusSessionAction(
   params: domain.CancelFocusSession.Params
 ): Promise<ActionResult> {

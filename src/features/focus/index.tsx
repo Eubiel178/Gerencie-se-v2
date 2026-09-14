@@ -11,6 +11,8 @@ export * from "./domain";
 export * from "./actions";
 export { getFocusFetcher, getMascotFetcher } from "./data/get-focus-fetcher";
 export { MascotSettings } from "./components/mascot-settings";
+export { FocusSessionProvider, useFocusSession } from "./focus-session-context";
+export { FocusMiniWidget } from "./components/focus-mini-widget";
 
 interface FocusProps {
   // Vem de `?taskId=...` (ver botão "Focar nesta tarefa" no card de
@@ -44,7 +46,7 @@ export async function Focus({ taskId }: FocusProps = {}) {
         <p className={styles.subheading}>Escolha um tempo e mergulhe em uma única tarefa.</p>
       </div>
 
-      <Timer initialSession={activeSession} mascot={mascot} task={task} />
+      <Timer mascot={mascot} task={task} />
 
       <div>
         <h2 className={styles.historyTitle}>Histórico</h2>

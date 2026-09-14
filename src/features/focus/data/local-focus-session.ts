@@ -20,6 +20,7 @@ export class LocalFocusSession
     domain.StartFocusSession,
     domain.CompleteFocusSession,
     domain.CancelFocusSession,
+    domain.ExtendFocusSession,
     domain.GetActiveFocusSession,
     domain.LoadFocusHistory,
     domain.LoadFocusHistoryInRange
@@ -79,6 +80,29 @@ export class LocalFocusSession
       .where(eq(focusSessions.id, params.id));
 
     return { xpEarned, actualDurationSeconds };
+  }
+
+  async extend(params: domain.ExtendFocusSession.Params): Promise<domain.ExtendFocusSession.Result> {
+    const userId = await requireUserId();
+
+    const [session] = await db
+      .select()
+      .from(focusSessions)
+      .where(and(eq(focusSessions.id, params.id), eq(focusSessions.userId, userId)))
+      .limit(1);
+
+    if (!session || session.status !== "running") {
+      return { plannedDurationSeconds: session?.plannedDurationSeconds ?? 0 };
+    }
+
+    const plannedDurationSeconds = session.plannedDurationSeconds + params.additionalSeconds;
+
+    await db
+      .update(focusSessions)
+      .set({ plannedDurationSeconds })
+      .where(eq(focusSessions.id, params.id));
+
+    return { plannedDurationSeconds };
   }
 
   async cancel(params: domain.CancelFocusSession.Params): Promise<void> {

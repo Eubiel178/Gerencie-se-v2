@@ -2,6 +2,7 @@ export * from "./focus-session";
 export * from "./start";
 export * from "./complete";
 export * from "./cancel";
+export * from "./extend";
 export * from "./get-active";
 export * from "./load-history";
 export * from "./load-history-range";

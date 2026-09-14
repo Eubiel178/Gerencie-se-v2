@@ -3,6 +3,7 @@
 .fullscreenToggle{position:absolute;top:var(--space-3);right:var(--space-3)}
 .clock{font-variant-numeric:tabular-nums;font-size:clamp(2.4rem,8vw,3.6rem);font-weight:700;color:var(--color-text);letter-spacing:-.03em}
 .presets{display:flex;gap:var(--space-2);flex-wrap:wrap;justify-content:center}
+.extendRow{display:flex;gap:var(--space-2);flex-wrap:wrap;justify-content:center}
 .controls{display:flex;gap:var(--space-3)}
 .message{color:var(--color-success);font-weight:600}
 .celebrationMessage{margin:0;font-family:var(--font-sans);color:var(--color-success);font-size:var(--font-size-md)}

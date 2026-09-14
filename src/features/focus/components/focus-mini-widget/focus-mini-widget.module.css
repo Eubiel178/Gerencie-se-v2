@@ -1,0 +1,93 @@
+.wrapper {
+  position: fixed;
+  top: var(--space-4);
+  right: var(--space-4);
+  z-index: var(--z-sticky);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-surface-elevated);
+  box-shadow: 0 0.5rem 1.25rem var(--color-shadow);
+  animation: pop var(--duration-base) var(--easing-standard);
+}
+
+.clockRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-text);
+}
+.clockRow svg {
+  width: 1rem;
+  height: 1rem;
+  color: var(--color-highlight);
+}
+.clock {
+  font-variant-numeric: tabular-nums;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.extendRow {
+  display: flex;
+  gap: var(--space-1);
+}
+.extendChip {
+  padding: 0.2rem 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-text-muted);
+  font: inherit;
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--easing-standard),
+    color var(--duration-fast) var(--easing-standard);
+}
+.extendChip:hover:not(:disabled) {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+.extendChip:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-1);
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translateY(-0.4rem) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wrapper {
+    animation: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .wrapper {
+    top: calc(3.75rem + var(--space-3));
+    right: var(--space-3);
+    gap: var(--space-2);
+    padding: var(--space-2);
+  }
+  .extendRow {
+    display: none;
+  }
+}
