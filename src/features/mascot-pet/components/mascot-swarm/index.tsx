@@ -80,20 +80,38 @@ const TREES = [
   { left: "95%", scale: 1.15, opacity: 0.55 },
 ] as const;
 
+// Redesenhada (achado relatado: "a floresta da lp tá feia") - a versão
+// antiga era 4 círculos do MESMO tamanho e da MESMA cor espalhados sem
+// hierarquia nenhuma, lendo como uma pilha de bolinhas verdes, não uma
+// árvore. Agora são 3 elipses decrescendo de baixo pra cima (dá a
+// silhueta afunilada de uma copa de verdade) com 3 tons de verde
+// (mais escuro embaixo/atrás, mais claro em cima/na frente - a mesma
+// lógica barata de "sombra embaixo, luz em cima" de qualquer ilustração
+// simples) + um tronco com um leve gradiente pra não ficar um retângulo
+// chapado. Cores do tronco fixas de propósito (não são um token do
+// design system - é só a paleta desta ilustração decorativa, mesmo
+// espírito das cores fixas no e-mail de convite).
 function Tree({ scale, opacity }: { scale: number; opacity: number }) {
   return (
     <svg
-      viewBox="0 0 40 56"
-      width={40 * scale}
-      height={56 * scale}
+      viewBox="0 0 44 60"
+      width={44 * scale}
+      height={60 * scale}
       className={styles.tree}
       style={{ opacity }}
     >
-      <rect x="17" y="38" width="6" height="18" rx="1.5" fill="var(--color-text)" />
-      <circle cx="20" cy="30" r="12" fill="var(--color-success)" />
-      <circle cx="11" cy="22" r="9" fill="var(--color-success)" />
-      <circle cx="29" cy="22" r="9" fill="var(--color-success)" />
-      <circle cx="20" cy="14" r="10" fill="var(--color-success)" />
+      <rect x="19" y="42" width="6" height="18" rx="2" fill="#8a6a48" />
+      <rect x="19" y="42" width="3" height="18" rx="1.5" fill="#9c7a55" />
+
+      <ellipse cx="22" cy="38" rx="16" ry="13" fill="var(--color-success)" opacity="0.75" />
+      <ellipse cx="22" cy="26" rx="13" ry="11" fill="var(--color-success)" opacity="0.88" />
+      <ellipse
+        cx="22"
+        cy="15"
+        rx="10"
+        ry="9"
+        fill="color-mix(in srgb, var(--color-success) 70%, white)"
+      />
     </svg>
   );
 }
