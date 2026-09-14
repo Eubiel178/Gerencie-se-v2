@@ -35,7 +35,11 @@ export function Card(event: IEvent) {
   }
 
   return (
-    <li key={event.id} className={styles.eventCard}>
+    <li
+      key={event.id}
+      className={styles.eventCard}
+      style={event.backgroundColor ? { borderLeftColor: event.backgroundColor } : undefined}
+    >
       <div className={styles.eventCardBody}>
         <div className={styles.eventCardHeader}>
           <h4>{event.title}</h4>
