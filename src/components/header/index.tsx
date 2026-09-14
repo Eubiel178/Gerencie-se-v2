@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -8,6 +8,7 @@ import { signOut } from "next-auth/react";
 import { Icon, IconName } from "@/components/icon";
 
 import { Button } from "@/components";
+import { getFocusableElements } from "@/components/modal/get-focusable-elements";
 import { ProfileModal } from "./profile-modal";
 import { ProfileOverview } from "@/features/profile/get-profile-overview";
 import { Gender } from "@/features/profile/get-gender";
@@ -105,6 +106,9 @@ export const Header = ({ user, overview }: HeaderProps) => {
   const [isConfirmingSignOut, setIsConfirmingSignOut] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isMobileNavigationOpen, setIsMobileNavigationOpen] = useState(false);
+  const mobileNavigationRef = useRef<HTMLDivElement>(null);
+  const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
 
   function handleSignOut() {
     if (isSigningOut) return;
@@ -141,9 +145,158 @@ export const Header = ({ user, overview }: HeaderProps) => {
     });
   }
 
+  useEffect(() => {
+    if (!isMobileNavigationOpen) return;
+
+    const navigationPanel = mobileNavigationRef.current;
+    if (!navigationPanel) return;
+    // Mantém um valor não anulável para o callback de teclado. O narrowing
+    // de refs não é preservado pelo TypeScript dentro de closures.
+    const focusTrapContainer: HTMLDivElement = navigationPanel;
+    const menuButton = mobileMenuButtonRef.current;
+
+    const previousBodyOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const [firstFocusable] = getFocusableElements(focusTrapContainer);
+    (firstFocusable ?? focusTrapContainer).focus();
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setIsMobileNavigationOpen(false);
+        return;
+      }
+
+      if (event.key !== "Tab") return;
+
+      const focusable = getFocusableElements(focusTrapContainer);
+      if (focusable.length === 0) {
+        event.preventDefault();
+        return;
+      }
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousBodyOverflow;
+      menuButton?.focus();
+    };
+  }, [isMobileNavigationOpen]);
+
+  function renderNavigation(closeOnNavigate = false) {
+    return (
+      <nav aria-label="Navegação principal" className={styles.navGroups}>
+        {navGroups.map((group, index) => {
+          const isOpen = !group.label || openGroups.has(index);
+
+          return (
+            <div key={index} className={styles.navGroup}>
+              {group.label && (
+                <button
+                  type="button"
+                  className={styles.navGroupToggle}
+                  aria-expanded={isOpen}
+                  onClick={() => toggleGroup(index)}
+                >
+                  {group.label}
+                  <Icon name={isOpen ? "MdExpandLess" : "MdExpandMore"} aria-hidden="true" />
+                </button>
+              )}
+
+              {isOpen && (
+                <ul className={styles.navigation}>
+                  {group.links.map(({ href, label, icon }) => (
+                    <li key={href}>
+                      <Link
+                        href={href}
+                        data-active={pathname === href}
+                        onClick={closeOnNavigate ? () => setIsMobileNavigationOpen(false) : undefined}
+                      >
+                        <Icon name={icon} aria-hidden="true" />
+                        {label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          );
+        })}
+      </nav>
+    );
+  }
+
   return (
-    <aside className={styles.sidebar}>
-      <p className={styles.brand}>
+    <>
+      <header className={styles.mobileHeader}>
+        <p className={styles.mobileBrand}>Gerencie-se</p>
+        <button
+          type="button"
+          className={styles.mobileMenuButton}
+          ref={mobileMenuButtonRef}
+          aria-expanded={isMobileNavigationOpen}
+          aria-controls="mobile-navigation"
+          onClick={() => setIsMobileNavigationOpen(true)}
+        >
+          <Icon name="MdMenu" aria-hidden="true" />
+          Menu
+        </button>
+      </header>
+
+      {isMobileNavigationOpen && (
+        <div
+          className={styles.mobileNavigationOverlay}
+          role="presentation"
+          onClick={(event) => {
+            if (event.target === event.currentTarget) setIsMobileNavigationOpen(false);
+          }}
+        >
+          <div
+            ref={mobileNavigationRef}
+            id="mobile-navigation"
+            className={styles.mobileNavigationPanel}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Menu de navegação"
+            tabIndex={-1}
+          >
+            <div className={styles.mobileNavigationHeader}>
+              <p className={styles.mobileBrand}>Gerencie-se</p>
+              <button
+                type="button"
+                className={styles.mobileMenuButton}
+                onClick={() => setIsMobileNavigationOpen(false)}
+              >
+                <Icon name="MdClose" aria-hidden="true" />
+                Fechar
+              </button>
+            </div>
+
+            <button type="button" className={styles.searchTrigger} onClick={openPalette}>
+              <Icon name="FaSearch" aria-hidden="true" />
+              Buscar
+            </button>
+
+            <QuickCapture triggerClassName={styles.searchTrigger} />
+            {renderNavigation(true)}
+          </div>
+        </div>
+      )}
+
+      <aside className={styles.sidebar}>
+        <p className={styles.brand}>
         <span className={styles.brandMark} aria-hidden="true">
           <svg viewBox="0 0 64 64" width="20" height="20" fill="none">
             <circle
@@ -185,40 +338,7 @@ export const Header = ({ user, overview }: HeaderProps) => {
 
       <QuickCapture triggerClassName={styles.searchTrigger} />
 
-      <nav aria-label="Navegação principal" className={styles.navGroups}>
-        {navGroups.map((group, index) => {
-          const isOpen = !group.label || openGroups.has(index);
-
-          return (
-            <div key={index} className={styles.navGroup}>
-              {group.label && (
-                <button
-                  type="button"
-                  className={styles.navGroupToggle}
-                  aria-expanded={isOpen}
-                  onClick={() => toggleGroup(index)}
-                >
-                  {group.label}
-                  <Icon name={isOpen ? "MdExpandLess" : "MdExpandMore"} aria-hidden="true" />
-                </button>
-              )}
-
-              {isOpen && (
-                <ul className={styles.navigation}>
-                  {group.links.map(({ href, label, icon }) => (
-                    <li key={href}>
-                      <Link href={href} data-active={pathname === href}>
-                        <Icon name={icon} aria-hidden="true" />
-                        {label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          );
-        })}
-      </nav>
+        {renderNavigation()}
 
       <button type="button" className={styles.profile} onClick={() => setIsProfileOpen(true)}>
         {user.image ? (
@@ -276,6 +396,7 @@ export const Header = ({ user, overview }: HeaderProps) => {
           Sair
         </button>
       )}
-    </aside>
+      </aside>
+    </>
   );
 };

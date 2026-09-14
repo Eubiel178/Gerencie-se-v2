@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Icon } from "@/components/icon";
+import { getFocusableElements } from "@/components/modal/get-focusable-elements";
 import { searchEverythingAction, SearchResult } from "@/features/search/actions";
 import { usePaletteStore } from "@/features/search/palette-store";
 
@@ -29,8 +30,10 @@ export function CommandPalette() {
   const [isSearching, setIsSearching] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
+  const paletteRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const requestIdRef = useRef(0);
+  const previouslyFocusedRef = useRef<HTMLElement | null>(null);
 
   // Fecha e já limpa a busca local — nunca reabre com resultado antigo na
   // tela. Centralizado aqui (em vez de um `useEffect` reagindo a `isOpen`)
@@ -60,9 +63,44 @@ export function CommandPalette() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  // Foco automático assim que abre.
+  // Foco automático assim que abre, trava de scroll/Tab enquanto aberto
+  // (mesmo padrão do `Modal`, ver `components/modal/index.tsx`) e devolução
+  // do foco pra quem abriu ao fechar.
   useEffect(() => {
-    if (isOpen) inputRef.current?.focus();
+    if (!isOpen) return;
+
+    previouslyFocusedRef.current = document.activeElement as HTMLElement | null;
+    inputRef.current?.focus();
+
+    const previousBodyOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    function handleTrapKeyDown(event: KeyboardEvent) {
+      if (event.key !== "Tab") return;
+
+      const container = paletteRef.current;
+      const focusable = container ? getFocusableElements(container) : [];
+      if (focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+
+    document.addEventListener("keydown", handleTrapKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleTrapKeyDown);
+      document.body.style.overflow = previousBodyOverflow;
+      previouslyFocusedRef.current?.focus?.();
+    };
   }, [isOpen]);
 
   function handleQueryChange(value: string) {
@@ -115,7 +153,14 @@ export function CommandPalette() {
 
   return (
     <div className={styles.overlay} onClick={handleClose}>
-      <div className={styles.palette} onClick={(event) => event.stopPropagation()}>
+      <div
+        ref={paletteRef}
+        className={styles.palette}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Busca global"
+        onClick={(event) => event.stopPropagation()}
+      >
         <div className={styles.searchRow}>
           <Icon name="FaSearch" aria-hidden="true" />
           <input

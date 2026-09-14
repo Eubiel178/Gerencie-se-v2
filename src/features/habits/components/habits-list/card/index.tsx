@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { Icon } from "@/components/icon";
 
-import { Button } from "@/components";
+import { Button, ConfirmIconButton } from "@/components";
 import { SharedBadge } from "@/features/connections/components/shared-badge";
 
 import {
@@ -88,14 +88,12 @@ export function Card({
           />
 
           {!habit.isSharedWithMe && (
-            <Button.Preset
-              icon={{ name: "FaTrash" }}
-              root={{
-                tone: "danger",
-                "aria-label": `Excluir hábito ${habit.title}`,
-                loading: isRemoving,
-                onClick: handleRemove,
-              }}
+            <ConfirmIconButton
+              icon="FaTrash"
+              ariaLabel={`Excluir hábito ${habit.title}`}
+              confirmText="Excluir este hábito?"
+              loading={isRemoving}
+              onConfirm={handleRemove}
             />
           )}
         </div>

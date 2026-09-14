@@ -160,7 +160,7 @@ export function AddTask({ buttonText, isGoogleConnected, connections }: IAddTask
 
             {submitError && <p className={styles.formError}>{submitError}</p>}
 
-            <Button.Root loading={isSubmitting}>Nova Tarefa</Button.Root>
+            <Button.Root loading={isSubmitting}>Adicionar Tarefa</Button.Root>
           </Form.Root>
         </Modal>
       )}

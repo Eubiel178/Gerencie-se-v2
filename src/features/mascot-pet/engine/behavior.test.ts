@@ -87,6 +87,22 @@ test("MascotBehavior: arrastar suspende o passeio autônomo e move só via updat
   assert.deepEqual(behavior.snapshot().position, { x: 150, y: 120 });
 });
 
+test("MascotBehavior: soltar um clique parado (wasClick=true) toca a reação completa, não vai direto pro idle", () => {
+  const behavior = new MascotBehavior({ x: 100, y: 100 });
+
+  behavior.startDrag();
+  behavior.endDrag(true);
+  assert.equal(behavior.snapshot().state, "interaction");
+
+  // A reação dura um tempo, igual a um clique normal (handleClick) - não
+  // volta pro idle no mesmo tick.
+  behavior.tick(500, BOUNDS);
+  assert.equal(behavior.snapshot().state, "interaction");
+
+  behavior.tick(5_000, BOUNDS);
+  assert.equal(behavior.snapshot().state, "idle");
+});
+
 test("MascotBehavior: updateDragPosition nunca solta o bichinho fora dos limites", () => {
   const behavior = new MascotBehavior({ x: 100, y: 100 });
 

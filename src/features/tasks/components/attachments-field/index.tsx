@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useState } from "react";
 
-import { Button } from "@/components";
+import { Button, ConfirmIconButton } from "@/components";
 import { Icon } from "@/components/icon";
 import { ITaskAttachment } from "@/features/tasks/domain";
 import {
@@ -40,6 +40,7 @@ export function AttachmentsField({ taskId }: AttachmentsFieldProps) {
   const [listError, setListError] = useState<string | null>(null);
   const [pending, setPending] = useState<PendingFile[]>([]);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -120,10 +121,19 @@ export function AttachmentsField({ taskId }: AttachmentsFieldProps) {
   async function handleDelete(id: string) {
     if (deletingId) return;
     setDeletingId(id);
+    setDeleteError(null);
 
     try {
-      await fetch(`/api/tasks/${taskId}/attachments/${id}`, { method: "DELETE" });
+      const response = await fetch(`/api/tasks/${taskId}/attachments/${id}`, { method: "DELETE" });
+
+      if (!response.ok) {
+        setDeleteError("Não foi possível remover o anexo.");
+        return;
+      }
+
       setAttachments((current) => (current ?? []).filter((item) => item.id !== id));
+    } catch {
+      setDeleteError("Falha de conexão.");
     } finally {
       setDeletingId(null);
     }
@@ -152,6 +162,7 @@ export function AttachmentsField({ taskId }: AttachmentsFieldProps) {
       />
 
       {listError && <p className={styles.error}>{listError}</p>}
+      {deleteError && <p className={styles.error}>{deleteError}</p>}
 
       {hasItems && (
         <ul className={styles.list}>
@@ -169,14 +180,12 @@ export function AttachmentsField({ taskId }: AttachmentsFieldProps) {
 
               <span className={styles.size}>{formatFileSize(attachment.sizeBytes)}</span>
 
-              <Button.Preset
-                icon={{ name: "FaTrash" }}
-                root={{
-                  tone: "danger",
-                  "aria-label": `Remover ${attachment.fileName}`,
-                  loading: deletingId === attachment.id,
-                  onClick: () => handleDelete(attachment.id),
-                }}
+              <ConfirmIconButton
+                icon="FaTrash"
+                ariaLabel={`Remover ${attachment.fileName}`}
+                confirmText="Remover este anexo?"
+                loading={deletingId === attachment.id}
+                onConfirm={() => handleDelete(attachment.id)}
               />
             </li>
           ))}

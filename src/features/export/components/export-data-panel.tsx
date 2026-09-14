@@ -50,10 +50,6 @@ export function ExportDataPanel() {
           Baixar planilha
         </a>
       </div>
-
-      <a className={styles.advancedLink} href="/api/export?format=json" download="gerencie-se-dados.json">
-        Baixar tudo em um arquivo técnico (JSON), pra quem sabe usar
-      </a>
     </div>
   );
 }

@@ -17,9 +17,14 @@ type Mood = "idle" | "speaking" | "warning" | "celebrating";
 
 function moodFor(message: IAssistantMessage | null): Mood {
   if (!message) return "idle";
-  if (message.tone === "warning") return "warning";
-  if (message.tone === "success") return "celebrating";
-  return "speaking";
+
+  const messages: Record<IAssistantMessage["tone"], Mood> = {
+    warning: "warning",
+    success: "celebrating",
+    info: "speaking",
+  };
+
+  return messages[message.tone];
 }
 
 // O avatar só tem 2 poses (não 4 como o widget) — "celebrating" usa a
@@ -72,7 +77,11 @@ function getDismissedServerSnapshot(): string | null {
  * abertura/fechamento manual pelo avatar, que sempre pode sobrepor essa
  * regra (mesmo com presença reduzida ou mensagem já dispensada).
  */
-export function Widget({ initialMessage, reducedPresence, mascot }: WidgetProps) {
+export function Widget({
+  initialMessage,
+  reducedPresence,
+  mascot,
+}: WidgetProps) {
   const [message, setMessage] = useState(initialMessage);
   const [manuallyToggled, setManuallyToggled] = useState<boolean | null>(null);
   const { isSpeaking, speak: handleSpeak } = useSpeak();
@@ -80,10 +89,11 @@ export function Widget({ initialMessage, reducedPresence, mascot }: WidgetProps)
   const dismissedText = useSyncExternalStore(
     subscribeNoop,
     getDismissedSnapshot,
-    getDismissedServerSnapshot
+    getDismissedServerSnapshot,
   );
 
-  const autoOpen = !!message && message.text !== dismissedText && !reducedPresence;
+  const autoOpen =
+    !!message && message.text !== dismissedText && !reducedPresence;
   const isOpen = manuallyToggled ?? autoOpen;
   const mood = moodFor(message);
 
@@ -117,7 +127,10 @@ export function Widget({ initialMessage, reducedPresence, mascot }: WidgetProps)
 
           <div className={styles.bubbleActions}>
             <Button.Preset
-              icon={{ name: "FaVolumeUp", className: isSpeaking ? styles.speakingIcon : undefined }}
+              icon={{
+                name: "FaVolumeUp",
+                className: isSpeaking ? styles.speakingIcon : undefined,
+              }}
               root={{
                 tone: "muted",
                 "aria-label": isSpeaking ? "Falando" : `Ouvir ${mascot.name}`,
@@ -143,7 +156,9 @@ export function Widget({ initialMessage, reducedPresence, mascot }: WidgetProps)
         className={styles.avatar}
         data-mood={mood}
         aria-label={
-          isOpen ? `Fechar mensagem de ${mascot.name}` : `Abrir mensagem de ${mascot.name}`
+          isOpen
+            ? `Fechar mensagem de ${mascot.name}`
+            : `Abrir mensagem de ${mascot.name}`
         }
         aria-expanded={isOpen}
         onClick={handleAvatarClick}

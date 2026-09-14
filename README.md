@@ -40,4 +40,6 @@ npm run dev
 
 Guias de configuração e deploy ficam em [`docs/`](./docs): integração com
 Google (`GOOGLE_SETUP.md`), e-mail transacional (`EMAIL_SETUP.md`) e
-publicação em produção (`DEPLOY.md`).
+publicação em produção (`DEPLOY.md`). Para o mapa atual de módulos, fluxo de
+dados, decisões de UI e comandos de qualidade, consulte
+[`ARCHITECTURE.md`](./docs/ARCHITECTURE.md).

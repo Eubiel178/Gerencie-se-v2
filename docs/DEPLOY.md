@@ -5,22 +5,41 @@ na sua máquina). Cobre banco de dados, variáveis de ambiente e o deploy em
 si. Assume Vercel como host (é o mais direto para Next.js, feito pela
 mesma empresa), mas os passos de banco/env valem para qualquer host.
 
+Toda a stack recomendada aqui (Vercel, Neon, Resend, cron-job.org) tem
+plano gratuito para sempre — nenhum é "grátis por um tempo" que vira
+cobrança depois. Nenhum serviço de infraestrutura é literalmente
+ilimitado, mas os tetos gratuitos de cada um (100 GB de banda e 1 milhão
+de execuções de função por mês na Vercel, 100 e-mails/dia no Resend, uma
+chamada semanal no cron-job.org) são tão folgados pra um app de uso
+pessoal/poucos usuários que nunca chegam a ser um problema real na
+prática — ver os números completos na seção 1 (banco de dados) e nas
+seções de cada serviço abaixo.
+
 ---
 
 ## 1. Banco de dados (Postgres hospedado)
 
 Hoje seu `DATABASE_URL` aponta para um Postgres local — só existe na sua
-máquina. Para publicar, você precisa de um Postgres hospedado, sempre
-ligado. Três opções com plano gratuito, escolha uma:
+máquina. Para publicar, você precisa de um Postgres hospedado.
+**Recomendado: [Neon](https://neon.tech)** — é o único, dos três
+cogitados abaixo, que continua genuinamente grátis indefinidamente sem
+deixar o app fora do ar sozinho:
 
-- **[Neon](https://neon.tech)** — Postgres serverless, integração nativa
-  com Vercel (recomendado se for usar Vercel).
-- **[Supabase](https://supabase.com)** — Postgres + extras (não precisa
-  usar os extras).
-- **[Railway](https://railway.app)** — Postgres simples, bom se preferir
-  hospedar o app lá também.
+- **[Neon](https://neon.tech)** (recomendado) — 0,5 GB de storage, 100
+  CU-hours de compute/mês grátis para sempre. O compute "dorme" após 5
+  min sem uso, mas acorda sozinho em ~1s na próxima requisição — nunca
+  fica indisponível de verdade, só um cold-start ocasional.
+- **[Supabase](https://supabase.com)** — 500 MB grátis, mas o projeto é
+  **pausado por completo depois de 1 semana sem nenhuma requisição** e
+  só volta quando você entra no painel e reativa manualmente. Para um
+  app pessoal (fácil ficar mais de uma semana sem abrir), isso significa
+  o app ficando fora do ar até você notar e reativar — evite, a menos
+  que tenha certeza de que vai usar com frequência.
+- ~~Railway~~ — não é mais opção gratuita de verdade: desde 2026 só dá
+  $5 de crédito único (dura poucos dias de uso) e depois cobra, mesmo no
+  plano de entrada. Não recomendado se o objetivo é "grátis pra sempre".
 
-Passos (usando Neon como exemplo — os outros são parecidos):
+Passos (usando Neon):
 
 1. Crie uma conta e um projeto novo.
 2. Copie a **connection string em modo "pooled"/"pgbouncer"** (Neon e
@@ -137,14 +156,24 @@ o banco for para uso de verdade.
 
 ## 7. Resumo semanal automático (cron externo)
 
-O app não tem agendador próprio — `/api/cron/weekly-summary` precisa ser
-chamado periodicamente por algo de fora (ex. [cron-job.org](https://cron-job.org),
-gratuito). Configure lá uma chamada `POST` semanal para
+O app não tem agendador próprio — `/api/cron/weekly-summary` é a única
+rota que precisa ser chamada periodicamente por algo de fora. Recomendado:
+**[cron-job.org](https://cron-job.org)** (gratuito, sem limite chato para
+uma chamada semanal). Configure lá uma chamada `POST` semanal para
 `https://SEU-DOMINIO.com/api/cron/weekly-summary` com o header:
 
 ```
 Authorization: Bearer <o mesmo valor de CRON_SECRET>
 ```
+
+**Por que não GitHub Actions (`schedule:`)**: parece a opção óbvia (já se
+usa GitHub para hospedar o repositório), mas workflows agendados são
+**desativados automaticamente depois de 60 dias sem nenhum commit no
+repositório** — e isso acontece em silêncio, sem nenhum aviso. Como este
+é um projeto pessoal, onde é comum passar meses sem mexer no código
+depois de estável, esse é exatamente o cenário em que o resumo semanal
+pararia de chegar sem ninguém perceber. Um serviço de cron dedicado (como
+o cron-job.org) não tem essa dependência de atividade no repositório.
 
 Sem `CRON_SECRET` configurado na Vercel, a rota sempre responde 503 e
 nenhum e-mail é enviado — nada quebra, só fica desligado.
@@ -163,12 +192,14 @@ nenhum e-mail é enviado — nada quebra, só fica desligado.
   ela, o alerta simplesmente não é enviado (mesmo comportamento tolerante
   a falha do resumo semanal). A conta nunca fica bloqueada, mesmo sem
   e-mail configurado.
-- **"Esqueceu sua senha?" na tela de login ainda é um link vazio**
-  (`href="#"`) — um fluxo de recuperação de senha via e-mail (token,
-  expiração, tela dedicada) não foi implementado nesta rodada. O que
-  existe hoje é trocar a senha **estando logado** (Configurações → Conta
-  → Trocar senha, exige a senha atual) — não ajuda quem esqueceu a senha
-  de verdade e não consegue entrar.
+- **Recuperação de senha por e-mail** (link "Esqueceu sua senha?" na tela
+  de login) — implementada: `/forgot-password` gera um token de uso único
+  (expira em 1h, ver `src/lib/password-reset.ts`) e envia por e-mail; a
+  mensagem de sucesso é sempre a mesma exista ou não a conta, pra não
+  vazar quais e-mails têm cadastro. Também requer `RESEND_API_KEY` — sem
+  ela, o pedido "funciona" (token é criado) mas o e-mail não chega; o
+  usuário precisaria do link manualmente (via banco) até a chave ser
+  configurada.
 - Ver também `TOKEN_ENCRYPTION_KEY` acima (seção 2) — já implementado,
   mas trocar essa chave depois de configurada em produção invalida as
   conexões existentes do Google Agenda.
@@ -177,8 +208,8 @@ nenhum e-mail é enviado — nada quebra, só fica desligado.
 
 ## Resumo rápido (se já souber o que está fazendo)
 
-1. Criar Postgres hospedado (Neon/Supabase/Railway), usando a connection
-   string **pooled** → copiar `DATABASE_URL`.
+1. Criar Postgres hospedado (Neon, recomendado — ver seção 1), usando a
+   connection string **pooled** → copiar `DATABASE_URL`.
 2. Gerar novo `AUTH_SECRET` para produção.
 3. Adicionar URIs de redirecionamento de produção no Google Cloud Console.
 4. Configurar as 10 variáveis de ambiente no painel do host (as 6 de

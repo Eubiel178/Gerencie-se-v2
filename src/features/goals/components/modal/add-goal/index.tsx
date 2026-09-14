@@ -144,7 +144,7 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
 
             {submitError && <p className={styles.formError}>{submitError}</p>}
 
-            <Button.Root loading={isSubmitting}>Criar Objetivo</Button.Root>
+            <Button.Root loading={isSubmitting}>Adicionar Objetivo</Button.Root>
           </Form.Root>
         </Modal>
       )}

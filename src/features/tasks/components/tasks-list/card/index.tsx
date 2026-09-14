@@ -13,7 +13,7 @@ import {
   toggleTaskCompleteAction,
 } from "@/features/tasks/actions";
 
-import { Button } from "@/components";
+import { Button, ConfirmIconButton } from "@/components";
 import { SharedBadge } from "@/features/connections/components/shared-badge";
 import { EditTask } from "../../modal";
 import { PRIORITY_LABELS } from "../../modal/interfaces";
@@ -139,14 +139,12 @@ export function Card({
             )}
 
             {!task.isSharedWithMe && (
-              <Button.Preset
-                icon={{ name: "FaTrash" }}
-                root={{
-                  tone: "danger",
-                  "aria-label": `Excluir tarefa ${task.title}`,
-                  loading: isRemoving,
-                  onClick: handleTaskRemove,
-                }}
+              <ConfirmIconButton
+                icon="FaTrash"
+                ariaLabel={`Excluir tarefa ${task.title}`}
+                confirmText="Excluir esta tarefa?"
+                loading={isRemoving}
+                onConfirm={handleTaskRemove}
               />
             )}
 

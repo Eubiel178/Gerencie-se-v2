@@ -70,7 +70,7 @@ const PHRASERS: Record<MascotPersonality, Record<InsightFact["kind"], Phraser>> 
     },
     "priority-tasks-done": (f) => {
       const fact = f as Extract<InsightFact, { kind: "priority-tasks-done" }>;
-      return `Terminou as ${fact.count} tarefas prioritárias. Milagre do dia, vey.`;
+      return `Terminou as ${fact.count} tarefas prioritárias. Milagre do dia, véi.`;
     },
     "priority-tasks-progress": (f) => {
       const fact = f as Extract<InsightFact, { kind: "priority-tasks-progress" }>;
@@ -88,7 +88,7 @@ const PHRASERS: Record<MascotPersonality, Record<InsightFact["kind"], Phraser>> 
       const fact = f as Extract<InsightFact, { kind: "goal-deadline-near" }>;
       return fact.daysLeft === 0
         ? `O prazo de "${fact.title}" é hoje e o progresso tá em ${fact.progress}%. Oxente, boa sorte.`
-        : `Faltam ${fact.daysLeft} dia(s) pro prazo de "${fact.title}", progresso em ${fact.progress}%. Nesse ritmo, vey.`;
+        : `Faltam ${fact.daysLeft} dia(s) pro prazo de "${fact.title}", progresso em ${fact.progress}%. Nesse ritmo, véi.`;
     },
     "next-routine-item": (f) => {
       const fact = f as Extract<InsightFact, { kind: "next-routine-item" }>;

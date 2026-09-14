@@ -23,7 +23,15 @@ export function AddForm() {
 
     const trimmedTitle = title.trim();
     const trimmedCategory = category.trim();
-    if (!trimmedTitle || !trimmedCategory) return;
+
+    if (!trimmedTitle) {
+      setError("Informe o nome do cuidado.");
+      return;
+    }
+    if (!trimmedCategory) {
+      setError("Informe a categoria.");
+      return;
+    }
 
     setIsSubmitting(true);
     setError(null);

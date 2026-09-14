@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 import { getHabitFetcher } from "@/features/habits/data/get-habit-fetcher";
 import { getGoalFetcher } from "@/features/goals/data/get-goal-fetcher";
 import { getConnectionFetcher } from "@/features/connections/data/get-connection-fetcher";
-import { HabitHeatmap } from "./components/habit-heatmap";
+import { HabitConsistencyChart } from "./components/habit-consistency-chart";
 
 import { HabitsHeader, HabitsList } from "./components";
 
@@ -40,9 +40,10 @@ export async function Habits() {
         <div className={styles.heatmapSection}>
           <h2 className={styles.heatmapTitle}>Consistência</h2>
           <p className={styles.subheading}>
-            Cada quadrado é um dia. Quanto mais escuro, mais hábitos você concluiu naquele dia.
+            Cada ponto é uma semana. Quanto mais alto, maior a % de hábitos que você concluiu
+            naquela semana, em média.
           </p>
-          <HabitHeatmap
+          <HabitConsistencyChart
             completionDates={completionDates}
             totalHabits={habitsList.length}
             fetchedWeeksBack={HEATMAP_WEEKS_BACK}

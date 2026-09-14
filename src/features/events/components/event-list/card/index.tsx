@@ -9,7 +9,7 @@ import { Icon } from "@/components/icon";
 import { deleteEventAction } from "@/features/events/actions";
 import { dateFormatedToFront } from "@/utils";
 
-import { Button } from "@/components";
+import { Button, ConfirmIconButton } from "@/components";
 
 import { EditEvent } from "../../modal";
 
@@ -41,14 +41,12 @@ export function Card(event: IEvent) {
           <h4>{event.title}</h4>
 
           <div className={styles.eventCardActions}>
-            <Button.Preset
-              icon={{ name: "FaTrash" }}
-              root={{
-                tone: "danger",
-                "aria-label": `Excluir evento ${event.title}`,
-                loading: isRemoving,
-                onClick: handleRemoveEvent,
-              }}
+            <ConfirmIconButton
+              icon="FaTrash"
+              ariaLabel={`Excluir evento ${event.title}`}
+              confirmText="Excluir este evento?"
+              loading={isRemoving}
+              onConfirm={handleRemoveEvent}
             />
 
             <EditEvent eventBeingEdited={event} />

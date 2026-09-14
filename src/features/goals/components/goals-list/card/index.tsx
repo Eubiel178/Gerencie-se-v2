@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { Button, Input } from "@/components";
+import { Button, ConfirmIconButton, Input } from "@/components";
 import { SharedBadge } from "@/features/connections/components/shared-badge";
 
 import {
@@ -126,14 +126,12 @@ export function Card({ goal, connections }: CardProps) {
           <EditGoal goalBeingEdited={goal} connections={connections} />
 
           {!goal.isSharedWithMe && (
-            <Button.Preset
-              icon={{ name: "FaTrash" }}
-              root={{
-                tone: "danger",
-                "aria-label": `Excluir objetivo ${goal.title}`,
-                loading: isRemoving,
-                onClick: handleRemoveGoal,
-              }}
+            <ConfirmIconButton
+              icon="FaTrash"
+              ariaLabel={`Excluir objetivo ${goal.title}`}
+              confirmText="Excluir este objetivo?"
+              loading={isRemoving}
+              onConfirm={handleRemoveGoal}
             />
           )}
         </div>

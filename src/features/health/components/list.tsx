@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { Icon } from "@/components/icon";
 
-import { Button } from "@/components";
+import { Button, ConfirmIconButton } from "@/components";
 
 import {
   deleteHealthCheckupAction,
@@ -89,14 +89,12 @@ export function List({ checkups }: { checkups: IHealthCheckup[] }) {
               <Icon name="FaCheck" />
             </Button.Root>
 
-            <Button.Preset
-              icon={{ name: "FaTrash" }}
-              root={{
-                tone: "danger",
-                "aria-label": `Excluir ${checkup.title}`,
-                loading: busyId === checkup.id,
-                onClick: () => handleDelete(checkup.id),
-              }}
+            <ConfirmIconButton
+              icon="FaTrash"
+              ariaLabel={`Excluir ${checkup.title}`}
+              confirmText="Excluir este cuidado?"
+              loading={busyId === checkup.id}
+              onConfirm={() => handleDelete(checkup.id)}
             />
           </div>
         </li>

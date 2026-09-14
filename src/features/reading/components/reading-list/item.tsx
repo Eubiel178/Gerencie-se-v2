@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { Button, Input } from "@/components";
+import { Button, ConfirmIconButton, Input } from "@/components";
 
 import { deleteReadingItemAction, updateReadingItemAction } from "@/features/reading/actions";
 import { IReadingItem, ReadingStatus } from "@/features/reading/domain";
@@ -102,14 +102,12 @@ export function Item({ item }: { item: IReadingItem }) {
           {item.author && <p className={styles.itemAuthor}>{item.author}</p>}
         </div>
 
-        <Button.Preset
-          icon={{ name: "FaTrash" }}
-          root={{
-            tone: "danger",
-            "aria-label": `Remover ${item.title}`,
-            loading: isRemoving,
-            onClick: handleRemove,
-          }}
+        <ConfirmIconButton
+          icon="FaTrash"
+          ariaLabel={`Remover ${item.title}`}
+          confirmText="Remover este item?"
+          loading={isRemoving}
+          onConfirm={handleRemove}
         />
       </div>
 

@@ -21,3 +21,4 @@ export { ChipGroup } from "./chip-group";
 export type { ChipOption } from "./chip-group";
 export { SuggestionChips } from "./suggestion-chips";
 export { CollapsibleSection } from "./collapsible-section";
+export { ConfirmIconButton } from "./confirm-icon-button";

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { requireUserId } from "@/lib/require-user-id";
 import { synthesizeSpeech } from "@/lib/edge-tts";
+import { isMascotSpeechValid } from "@/lib/mascot-speech";
 
 /**
  * Só existe pra dar voz à fala do mascote (ver `speak()` em
@@ -14,8 +15,11 @@ export async function POST(request: Request) {
 
   const { text } = await request.json();
 
-  if (typeof text !== "string" || !text.trim()) {
-    return NextResponse.json({ error: "Texto inválido." }, { status: 400 });
+  if (typeof text !== "string" || !isMascotSpeechValid(text)) {
+    return NextResponse.json(
+      { error: "A fala precisa ter entre 1 e 280 caracteres." },
+      { status: 400 }
+    );
   }
 
   try {

@@ -46,24 +46,24 @@ const AFETUOSO: Record<MascotEvent, Line[]> = {
 };
 
 // Deboche com tempero baiano de propósito (pedido explícito) — gírias e
-// interjeições ("oxente", "vixe", "eita", "vey") entram no meio da
+// interjeições ("oxente", "vixe", "eita", "véi") entram no meio da
 // implicância, sem depender de gênero de quem lê (nada de "meu rei"/
 // "minha rainha" — o app não presume gênero de ninguém pra se dirigir a
 // elas).
 const SARCASTICO: Record<MascotEvent, Line[]> = {
   idle: [
     (p) => `Oxente, boa ${periodOfDay(p.hour)}. Reparei que produtividade não é bem o seu forte hoje.`,
-    (p) => `Vixe, faltam ${p.xpToNextLevel} XP pro nível ${p.level + 1}. Nesse ritmo eu chego lá primeiro, vey.`,
+    (p) => `Vixe, faltam ${p.xpToNextLevel} XP pro nível ${p.level + 1}. Nesse ritmo eu chego lá primeiro, véi.`,
     () => "Eita, sentado aí só admirando o vazio? Vai fazer alguma coisa hoje ou não?",
   ],
   working: [
-    () => "Ata, vey, hoje é dia de fingir que trabalha. Que evolução.",
+    () => "Ata, véi, hoje é dia de fingir que trabalha. Que evolução.",
     (p) => `Faltam ${p.xpToNextLevel} XP. Continua assim que talvez eu pare de duvidar de você, viu? Talvez.`,
     () => "Olha só, focado de verdade. Vixe, anota a data, isso não acontece todo dia.",
   ],
   happy: [
     () => "Terminou? Oxente, alguém me belisca, isso é surreal.",
-    (p) => `Nível ${p.level}, vey. Guarda esse print, porque duvido que se repita amanhã.`,
+    (p) => `Nível ${p.level}, véi. Guarda esse print, porque duvido que se repita amanhã.`,
     (p) => `Boa ${periodOfDay(p.hour)} produtiva? Eita, quem diria. Nem eu apostava nisso.`,
   ],
 };

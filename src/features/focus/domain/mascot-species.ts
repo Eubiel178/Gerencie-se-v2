@@ -2,6 +2,6 @@
 // no mascote que anda pela tela (ver src/features/mascot-pet/domain/
 // characters.ts e characterIdForSpecies). Não existe mais conceito de
 // "raça": o visual é só o personagem PixiJS, um por espécie.
-export const MASCOT_SPECIES_LIST = ["gato", "cachorro"] as const;
+export const MASCOT_SPECIES_LIST = ["gato", "cachorro", "passaro", "urso", "raposa"] as const;
 
 export type MascotSpecies = (typeof MASCOT_SPECIES_LIST)[number];

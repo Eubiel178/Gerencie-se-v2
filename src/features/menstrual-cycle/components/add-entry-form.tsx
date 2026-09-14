@@ -19,6 +19,7 @@ export function AddEntryForm() {
   const [periodLengthDays, setPeriodLengthDays] = useState("");
   const [symptoms, setSymptoms] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   function toggleSymptom(symptom: string) {
     setSymptoms((current) =>
@@ -28,9 +29,14 @@ export function AddEntryForm() {
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
-    if (!startDate) return;
+
+    if (!startDate) {
+      setError("Informe a data de início.");
+      return;
+    }
 
     setIsSubmitting(true);
+    setError(null);
 
     try {
       await createCycleEntryAction({
@@ -88,6 +94,8 @@ export function AddEntryForm() {
           </button>
         ))}
       </div>
+
+      {error && <p className={styles.formError}>{error}</p>}
 
       <Button.Root type="submit" loading={isSubmitting}>
         Registrar

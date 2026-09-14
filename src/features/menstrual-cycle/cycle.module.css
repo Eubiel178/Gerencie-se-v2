@@ -15,3 +15,4 @@
 .itemDate{color:var(--color-text);font-weight:600;font-size:var(--font-size-sm)}
 .itemMeta{color:var(--color-text-muted);font-size:var(--font-size-xs)}
 .emptyMessage{margin:0;font-family:var(--font-sans);color:var(--color-info);font-size:var(--font-size-md)}
+.formError{margin:0;font-family:var(--font-sans);color:var(--color-danger);font-size:var(--font-size-md)}

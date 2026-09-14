@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 import dayjs from "dayjs";
 
-import { Button } from "@/components";
+import { Button, ConfirmIconButton } from "@/components";
 import { SharedBadge } from "@/features/connections/components/shared-badge";
 
 import { deleteRoutineItemAction, toggleRoutineItemLogAction } from "@/features/routine/actions";
@@ -94,14 +94,12 @@ export function RoutineListItem({ item, taskOptions, connections, linkedTaskTitl
         <EditRoutineItem itemBeingEdited={item} taskOptions={taskOptions} connections={connections} />
 
         {!item.isSharedWithMe && (
-          <Button.Preset
-            icon={{ name: "FaTrash" }}
-            root={{
-              tone: "danger",
-              "aria-label": `Remover ${item.title} da rotina`,
-              loading: isRemoving,
-              onClick: handleRemove,
-            }}
+          <ConfirmIconButton
+            icon="FaTrash"
+            ariaLabel={`Remover ${item.title} da rotina`}
+            confirmText="Remover da rotina?"
+            loading={isRemoving}
+            onConfirm={handleRemove}
           />
         )}
       </div>

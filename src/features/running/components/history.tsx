@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { Button } from "@/components";
+import { Button, ConfirmIconButton } from "@/components";
 
 import { deleteRunningSessionAction } from "@/features/running/actions";
 import { IRunningSession } from "@/features/running/domain";
@@ -50,14 +50,12 @@ export function History({ sessions }: HistoryProps) {
             </span>
           </div>
 
-          <Button.Preset
-            icon={{ name: "FaTrash" }}
-            root={{
-              tone: "danger",
-              "aria-label": "Excluir corrida",
-              loading: removingId === session.id,
-              onClick: () => handleDelete(session.id),
-            }}
+          <ConfirmIconButton
+            icon="FaTrash"
+            ariaLabel="Excluir corrida"
+            confirmText="Excluir esta corrida?"
+            loading={removingId === session.id}
+            onConfirm={() => handleDelete(session.id)}
           />
         </li>
       ))}

@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { Button } from "@/components";
+import { Button, ConfirmIconButton } from "@/components";
 
 import { deleteCycleEntryAction } from "@/features/menstrual-cycle/actions";
 import { ICycleEntry } from "@/features/menstrual-cycle/domain";
@@ -42,14 +42,12 @@ export function History({ entries }: { entries: ICycleEntry[] }) {
             </span>
           </div>
 
-          <Button.Preset
-            icon={{ name: "FaTrash" }}
-            root={{
-              tone: "danger",
-              "aria-label": "Remover registro",
-              loading: removingId === entry.id,
-              onClick: () => handleDelete(entry.id),
-            }}
+          <ConfirmIconButton
+            icon="FaTrash"
+            ariaLabel="Remover registro"
+            confirmText="Remover este registro?"
+            loading={removingId === entry.id}
+            onConfirm={() => handleDelete(entry.id)}
           />
         </li>
       ))}

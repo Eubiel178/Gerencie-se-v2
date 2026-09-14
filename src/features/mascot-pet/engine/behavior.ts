@@ -108,11 +108,21 @@ export class MascotBehavior {
   }
 
   /** Solta o bichinho - o passeio autônomo recomeça a partir de onde foi
-   * largado (nunca "salta" de volta pra um alvo antigo). */
-  endDrag(): void {
+   * largado (nunca "salta" de volta pra um alvo antigo). `wasClick=true`
+   * (ponteiro nunca se moveu o bastante pra contar como arraste de
+   * verdade - ver `runtime.ts`) toca a reação de clique completa (regra
+   * 9) em vez de ir direto pro idle - sem isso, todo clique simples
+   * (sem arrastar) entrava e saía de "interaction" no mesmo frame,
+   * rápido demais pra a animação chegar a aparecer. */
+  endDrag(wasClick: boolean = false): void {
     this.dragging = false;
     this.target = this.position;
-    this.goIdle();
+
+    if (wasClick) {
+      this.handleClick();
+    } else {
+      this.goIdle();
+    }
   }
 
   tick(deltaMs: number, bounds: MascotBounds): void {

@@ -49,6 +49,11 @@
   --color-shadow: rgba(15, 23, 42, 0.12);
   --color-overlay: rgba(15, 18, 30, 0.45);
 
+  /* Elevação — valores semânticos para camadas sobre o conteúdo. */
+  --shadow-lg: 0 1rem 3rem var(--color-shadow);
+  --z-sticky: 20;
+  --z-modal: 50;
+
   /* Espaçamento — escala em rem (base 4px) */
   --space-1: 0.25rem;
   --space-2: 0.5rem;

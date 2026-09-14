@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import * as domain from "@/features/events/domain";
 import { getEventFetcher } from "@/features/events/data/get-event-fetcher";
+import { validationSchema } from "@/validation/event-schema";
 
 /**
  * Server Actions de Event.
@@ -20,8 +21,17 @@ import type { ActionResult } from "@/types/action-result";
 export async function createEventAction(
   data: domain.CreateEvent.Params
 ): Promise<ActionResult> {
+  const parsed = validationSchema.safeParse(data);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Dados inválidos." };
+  }
+
   try {
-    await getEventFetcher().create(data);
+    await getEventFetcher().create({
+      ...parsed.data,
+      end: parsed.data.end || undefined,
+      url: parsed.data.url || undefined,
+    });
     revalidatePath("/home/event");
 
     return { error: null };
@@ -33,8 +43,18 @@ export async function createEventAction(
 export async function updateEventAction(
   data: domain.UpdateEvent.Params
 ): Promise<ActionResult> {
+  const parsed = validationSchema.safeParse(data);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Dados inválidos." };
+  }
+
   try {
-    await getEventFetcher().update(data);
+    await getEventFetcher().update({
+      ...parsed.data,
+      id: data.id,
+      end: parsed.data.end || undefined,
+      url: parsed.data.url || undefined,
+    });
     revalidatePath("/home/event");
 
     return { error: null };

@@ -491,9 +491,11 @@ export const mascotStates = pgTable("mascot_state", {
     .notNull()
     .default("afetuoso"),
   // Personagem do mascote que anda pela tela (PixiJS, ver
-  // src/features/mascot-pet) — só existem esses dois hoje (ver
-  // characterIdForSpecies e public/mascot/pet/CREDITS.txt).
-  species: text("species", { enum: ["gato", "cachorro"] })
+  // src/features/mascot-pet) — só existem esses hoje (ver
+  // characterIdForSpecies e public/mascot/pet/CREDITS.txt). Coluna `text`
+  // simples (não um enum nativo do Postgres): adicionar espécie nova é só
+  // atualizar esta lista de tipos, sem migração.
+  species: text("species", { enum: ["gato", "cachorro", "passaro", "urso", "raposa"] })
     .notNull()
     .default("gato"),
   totalXp: integer("total_xp").notNull().default(0),

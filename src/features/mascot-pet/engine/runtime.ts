@@ -6,10 +6,17 @@ import { emitMascotEvent, subscribeMascotEvent } from "../domain/events";
 import { MascotBehavior } from "./behavior";
 import { watchUserIdle } from "./idle-watcher";
 import { MascotBounds } from "./movement";
+import { playMascotSound } from "./sound-effects";
 import { computeViewportBounds, isMobileViewport } from "./viewport-bounds";
 
 const MOBILE_SCALE = 0.72;
 const STATIC_STATES = new Set<MascotStateName>(["idle", "sleep"]);
+
+// Abaixo desta distância (em px, entre onde o ponteiro desceu e onde
+// subiu), conta como clique/toque parado - não arraste de verdade. Sem
+// essa tolerância, o tremor inevitável da mão/touch faria até um clique
+// parado nunca soltar com `wasClick=true`.
+const CLICK_TOLERANCE_PX = 6;
 
 export interface MascotRuntimeHandles {
   /** Div pequeno (do tamanho do sprite) que hospeda o canvas e é de fato
@@ -47,12 +54,22 @@ export class MascotRuntime {
   private dragStartClient: MascotVector2 = { x: 0, y: 0 };
   private dragStartPosition: MascotVector2 = { x: 0, y: 0 };
 
+  // Tamanho de exibição na tela - igual ao frame nativo do atlas, a menos
+  // que o personagem declare `displayWidth`/`displayHeight` (ver
+  // `MascotCharacter` em domain/types.ts pro raciocínio completo).
+  private get displayWidth(): number {
+    return this.character.displayWidth ?? this.character.frameWidth;
+  }
+  private get displayHeight(): number {
+    return this.character.displayHeight ?? this.character.frameHeight;
+  }
+
   constructor(handles: MascotRuntimeHandles, character: MascotCharacter) {
     this.character = character;
     this.wrapper = handles.wrapper;
 
     this.mobile = isMobileViewport();
-    this.bounds = computeViewportBounds(character.frameWidth, character.frameHeight);
+    this.bounds = computeViewportBounds(this.displayWidth, this.displayHeight);
 
     const initialPosition: MascotVector2 = {
       x: (this.bounds.minX + this.bounds.maxX) / 2,
@@ -74,8 +91,8 @@ export class MascotRuntime {
 
     const app = new Application();
     await app.init({
-      width: this.character.frameWidth,
-      height: this.character.frameHeight,
+      width: this.displayWidth,
+      height: this.displayHeight,
       backgroundAlpha: 0,
       antialias: true,
       autoDensity: true,
@@ -87,8 +104,8 @@ export class MascotRuntime {
       return;
     }
 
-    this.wrapper.style.width = `${this.character.frameWidth}px`;
-    this.wrapper.style.height = `${this.character.frameHeight}px`;
+    this.wrapper.style.width = `${this.displayWidth}px`;
+    this.wrapper.style.height = `${this.displayHeight}px`;
     this.wrapper.appendChild(app.canvas);
     this.app = app;
 
@@ -98,6 +115,14 @@ export class MascotRuntime {
       app.destroy(true, { children: true, texture: false, textureSource: false });
       this.app = null;
       return;
+    }
+
+    // Pixel art ampliado (ver `displayWidth`/`displayHeight` em
+    // domain/types.ts) precisa de escala "nearest" pra não borrar - o
+    // gato/cachorro (arte "glossy" vetorial) nunca marcam `pixelArt`, e
+    // continuam com a suavização padrão do PixiJS.
+    if (this.character.pixelArt) {
+      baseTexture.source.scaleMode = "nearest";
     }
 
     this.texturesByState = this.buildTexturesByState(baseTexture);
@@ -110,8 +135,8 @@ export class MascotRuntime {
       autoPlay: !this.reducedMotion,
     });
     sprite.anchor.set(0.5, 0.5);
-    sprite.x = this.character.frameWidth / 2;
-    sprite.y = this.character.frameHeight / 2;
+    sprite.x = this.displayWidth / 2;
+    sprite.y = this.displayHeight / 2;
 
     this.sprite = sprite;
     this.currentRenderedState = "idle";
@@ -212,7 +237,11 @@ export class MascotRuntime {
     }
 
     const facingScale = snapshot.facingLeft ? -1 : 1;
-    const baseScale = this.mobile ? MOBILE_SCALE : 1;
+    // Amplia do frame nativo do atlas pro tamanho de exibição (1 pros
+    // personagens que não declaram `displayWidth`/`displayHeight` - ver
+    // domain/types.ts), antes de aplicar a redução extra do mobile.
+    const pixelScale = this.displayWidth / this.character.frameWidth;
+    const baseScale = (this.mobile ? MOBILE_SCALE : 1) * pixelScale;
     this.sprite.scale.set(facingScale * baseScale, baseScale);
 
     this.positionWrapper(snapshot.position);
@@ -220,7 +249,7 @@ export class MascotRuntime {
 
   private handleResize = (): void => {
     this.mobile = isMobileViewport();
-    this.bounds = computeViewportBounds(this.character.frameWidth, this.character.frameHeight);
+    this.bounds = computeViewportBounds(this.displayWidth, this.displayHeight);
     this.behavior.clampToBounds(this.bounds);
   };
 
@@ -289,6 +318,15 @@ export class MascotRuntime {
       this.wrapper.releasePointerCapture(event.pointerId);
     }
     this.wrapper.style.cursor = "grab";
-    this.behavior.endDrag();
+
+    const distanceMoved = Math.hypot(
+      event.clientX - this.dragStartClient.x,
+      event.clientY - this.dragStartClient.y
+    );
+    const wasClick = distanceMoved <= CLICK_TOLERANCE_PX;
+
+    if (wasClick) playMascotSound(this.character.id);
+
+    this.behavior.endDrag(wasClick);
   };
 }

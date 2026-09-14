@@ -69,6 +69,19 @@
   flex-shrink: 0;
 }
 
+.confirmRemoveRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+.confirmRemoveText {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
 .smallButton {
   padding: 0.45rem var(--space-3);
   font-size: var(--font-size-sm);

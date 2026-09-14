@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button, Input } from "@/components";
@@ -26,6 +26,30 @@ export function PeoplePanel({ connections }: { connections: IConnection[] }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [confirmingRemoveId, setConfirmingRemoveId] = useState<string | null>(null);
+  const confirmRowRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!confirmingRemoveId) return;
+
+    function handlePointerDown(event: PointerEvent) {
+      if (!confirmRowRef.current?.contains(event.target as Node)) {
+        setConfirmingRemoveId(null);
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setConfirmingRemoveId(null);
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [confirmingRemoveId]);
 
   async function handleInvite(event: React.FormEvent) {
     event.preventDefault();
@@ -78,6 +102,7 @@ export function PeoplePanel({ connections }: { connections: IConnection[] }) {
       router.refresh();
     } finally {
       setPendingId(null);
+      setConfirmingRemoveId(null);
     }
   }
 
@@ -88,7 +113,7 @@ export function PeoplePanel({ connections }: { connections: IConnection[] }) {
           <Input.Field
             type="email"
             required
-            placeholder="e-mail da pessoa"
+            placeholder="E-mail da pessoa"
             aria-label="E-mail para convidar"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
@@ -143,6 +168,30 @@ export function PeoplePanel({ connections }: { connections: IConnection[] }) {
                       Recusar
                     </Button.Root>
                   </>
+                ) : confirmingRemoveId === connection.id ? (
+                  <div ref={confirmRowRef} className={styles.confirmRemoveRow}>
+                    <span className={styles.confirmRemoveText}>Remover esta conexão?</span>
+
+                    <Button.Root
+                      type="button"
+                      variant="ghost"
+                      className={styles.smallButton}
+                      onClick={() => setConfirmingRemoveId(null)}
+                    >
+                      Cancelar
+                    </Button.Root>
+
+                    <Button.Root
+                      type="button"
+                      variant="ghost"
+                      tone="danger"
+                      className={styles.smallButton}
+                      loading={pendingId === connection.id}
+                      onClick={() => handleRemove(connection.id)}
+                    >
+                      Confirmar
+                    </Button.Root>
+                  </div>
                 ) : (
                   <Button.Root
                     type="button"
@@ -150,8 +199,7 @@ export function PeoplePanel({ connections }: { connections: IConnection[] }) {
                     tone="danger"
                     className={styles.smallButton}
                     aria-label={`Remover conexão com ${connection.otherPersonEmail}`}
-                    loading={pendingId === connection.id}
-                    onClick={() => handleRemove(connection.id)}
+                    onClick={() => setConfirmingRemoveId(connection.id)}
                   >
                     Remover
                   </Button.Root>

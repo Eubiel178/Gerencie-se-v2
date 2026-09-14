@@ -91,8 +91,13 @@
 }
 .taskCard {
   display: flex;
-  min-height: 18rem;
   flex-direction: column;
+  /* Piso razoável pra um card com pouco conteúdo (sem descrição, sem
+     passos) não parecer pequeno/cortado demais - bem menor que o
+     min-height antigo (18rem), que deixava um vão enorme e vazio em
+     qualquer tarefa simples. Conteúdo maior que isso continua esticando
+     o card normalmente (min-height nunca limita o crescimento). */
+  min-height: 12rem;
   overflow: hidden;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
@@ -111,7 +116,6 @@
   align-items: flex-start;
   background: var(--color-surface-elevated);
   color: var(--color-text);
-  min-height: 8rem;
 }
 .taskTitle {
   margin: 0;

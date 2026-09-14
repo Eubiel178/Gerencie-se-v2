@@ -197,7 +197,7 @@ export const AddEvent = ({ buttonText }: IModalProps) => {
 
             {submitError && <p className={styles.formError}>{submitError}</p>}
 
-            <Button.Root loading={isSubmitting}>Novo Evento</Button.Root>
+            <Button.Root loading={isSubmitting}>Adicionar Evento</Button.Root>
           </Form.Root>
         </Modal>
       )}

@@ -1,7 +1,7 @@
 import { IEvent } from "./event";
 
 export type UpdateEvent = {
-  update: (params: UpdateEvent.Params) => Promise<any>;
+  update: (params: UpdateEvent.Params) => Promise<void>;
 };
 
 export namespace UpdateEvent {

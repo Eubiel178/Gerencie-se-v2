@@ -56,7 +56,11 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
   async function handleCustomSubmit(event: React.FormEvent) {
     event.preventDefault();
     const amountMl = Number(customAmount);
-    if (!Number.isFinite(amountMl) || amountMl <= 0) return;
+
+    if (!Number.isFinite(amountMl) || amountMl <= 0) {
+      setActionError("Informe uma quantidade válida, maior que zero.");
+      return;
+    }
 
     await handleLog(amountMl);
     setCustomAmount("");
@@ -84,7 +88,11 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
   async function handleSaveGoal(event: React.FormEvent) {
     event.preventDefault();
     const goalMl = Number(goalInput);
-    if (!Number.isFinite(goalMl) || goalMl <= 0) return;
+
+    if (!Number.isFinite(goalMl) || goalMl <= 0) {
+      setActionError("Informe uma meta válida, maior que zero.");
+      return;
+    }
 
     setActionError(null);
     const result = await updateHydrationGoalAction(goalMl);

@@ -6,17 +6,30 @@ import { MASCOT_CHARACTERS, characterIdForSpecies } from "./characters";
 test("characterIdForSpecies: especies com atlas pronto mapeiam pro personagem certo", () => {
   assert.equal(characterIdForSpecies("gato"), "cat");
   assert.equal(characterIdForSpecies("cachorro"), "dog");
+  assert.equal(characterIdForSpecies("passaro"), "bird");
+  assert.equal(characterIdForSpecies("urso"), "bear");
+  assert.equal(characterIdForSpecies("raposa"), "fox");
 });
 
-test("characterIdForSpecies: especie sem atlas ainda (coelho/galinha) nao mostra o bicho errado", () => {
+test("characterIdForSpecies: especie sem atlas (coelho/galinha/sapo) nao mostra o bicho errado", () => {
   assert.equal(characterIdForSpecies("coelho"), null);
   assert.equal(characterIdForSpecies("galinha"), null);
+  // "sapo" foi tentado e removido (pack de origem so tinha Idle, sem
+  // animacao de andar de verdade - ver CREDITS.txt) - continua mapeando
+  // pra null, igual a qualquer outra especie sem personagem pronto.
+  assert.equal(characterIdForSpecies("sapo"), null);
 });
 
-test("MASCOT_CHARACTERS: cada personagem cadastrado tem todos os estados com pelo menos um frame", () => {
+test("MASCOT_CHARACTERS: pelo menos idle tem frame, e todo frame referenciado existe no atlas", () => {
+  // Nem todo personagem tem as 8 animacoes (pacotes de asset variam - ver
+  // CREDITS.txt pro passaro/urso/raposa, cada um com um subconjunto).
+  // idle e o unico obrigatorio de verdade: sem ele nem a pose parada
+  // existe. Estados sem frame proprio ficam com array vazio (o motor
+  // mantem a ultima animacao tocando - ver runtime.ts).
   for (const character of Object.values(MASCOT_CHARACTERS)) {
+    assert.ok(character.animations.idle.length > 0, `${character.id} sem frame de idle`);
+
     for (const frames of Object.values(character.animations)) {
-      assert.ok(frames.length > 0, `${character.id} tem um estado sem frame`);
       for (const frameName of frames) {
         assert.ok(character.frameRects[frameName], `${character.id}: frame "${frameName}" nao existe no atlas`);
       }

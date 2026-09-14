@@ -21,7 +21,10 @@ export function AddForm() {
     event.preventDefault();
 
     const trimmedTitle = title.trim();
-    if (!trimmedTitle) return;
+    if (!trimmedTitle) {
+      setError("Informe o título do livro.");
+      return;
+    }
 
     setIsSubmitting(true);
     setError(null);

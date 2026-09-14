@@ -72,14 +72,31 @@ function MascotPreviewFrames({ character, state, scale, animated, label }: Masco
   const rect: MascotFrameRect | undefined = frameName ? character.frameRects[frameName] : undefined;
   if (!rect) return null;
 
+  // Personagens em atlas pixel art pequeno (32x32) declaram
+  // `displayWidth`/`pixelArt` pro motor que anda pela tela (ver
+  // engine/runtime.ts) - essa prévia (sem PixiJS) precisa do mesmo ajuste
+  // pra não mostrar o bicho minúsculo/borrado aqui também.
+  const pixelArtScale = character.pixelArt && character.displayWidth
+    ? character.displayWidth / character.frameWidth
+    : 1;
+  const effectiveScale = scale * pixelArtScale;
+
   return (
     <div
       className={styles.stage}
-      style={{ width: rect.w * scale, height: rect.h * scale }}
+      style={{ width: rect.w * effectiveScale, height: rect.h * effectiveScale }}
       role="img"
       aria-label={label ?? character.label}
     >
-      <div className={styles.crop} style={{ width: rect.w, height: rect.h, transform: `scale(${scale})` }}>
+      <div
+        className={styles.crop}
+        style={{
+          width: rect.w,
+          height: rect.h,
+          transform: `scale(${effectiveScale})`,
+          imageRendering: character.pixelArt ? "pixelated" : undefined,
+        }}
+      >
         {/* eslint-disable-next-line @next/next/no-img-element -- precisa de posicionamento em pixel exato do atlas, o que foge do que <Image> otimiza */}
         <img
           src={character.atlasImageUrl}

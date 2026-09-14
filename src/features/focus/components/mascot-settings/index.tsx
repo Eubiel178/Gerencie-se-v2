@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { validationSchema } from "@/validation/mascot-schema";
@@ -33,6 +33,9 @@ const PERSONALITY_OPTIONS = [
 const SPECIES_OPTIONS = [
   { label: "Gato", value: "gato" },
   { label: "Cachorro", value: "cachorro" },
+  { label: "Pássaro", value: "passaro" },
+  { label: "Urso", value: "urso" },
+  { label: "Raposa", value: "raposa" },
 ];
 
 export function MascotSettings({ mascot }: { mascot: IMascotState }) {
@@ -43,7 +46,7 @@ export function MascotSettings({ mascot }: { mascot: IMascotState }) {
   const {
     handleSubmit,
     register,
-    watch,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     mode: "onChange",
@@ -55,7 +58,7 @@ export function MascotSettings({ mascot }: { mascot: IMascotState }) {
     },
   });
 
-  const previewSpecies = watch("species");
+  const previewSpecies = useWatch({ control, name: "species" });
 
   async function handleFormSubmit(data: FormData) {
     setSubmitError(null);
