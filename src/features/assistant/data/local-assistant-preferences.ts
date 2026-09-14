@@ -8,6 +8,7 @@ import * as domain from "@/features/assistant/domain";
 import { db } from "@/db/client";
 import { userPreferences } from "@/db/schema";
 import { requireUserId } from "@/lib/require-user-id";
+import { getOrCreateUserPreferencesRow } from "@/lib/get-or-create-user-preferences";
 
 // No máximo 5 interrupções auto-abertas por dia — depois disso o
 // widget continua existindo (avatar visível), só para de auto-abrir o
@@ -23,29 +24,9 @@ export class LocalAssistantPreferences
 {
   async getPreferences(): Promise<domain.IAssistantPreferences> {
     const userId = await requireUserId();
+    const row = await getOrCreateUserPreferencesRow(userId);
 
-    const [row] = await db
-      .select({
-        assistantEnabled: userPreferences.assistantEnabled,
-        assistantReducedPresence: userPreferences.assistantReducedPresence,
-      })
-      .from(userPreferences)
-      .where(eq(userPreferences.userId, userId))
-      .limit(1);
-
-    if (row) {
-      return { enabled: row.assistantEnabled, reducedPresence: row.assistantReducedPresence };
-    }
-
-    const [created] = await db
-      .insert(userPreferences)
-      .values({ userId })
-      .returning({
-        assistantEnabled: userPreferences.assistantEnabled,
-        assistantReducedPresence: userPreferences.assistantReducedPresence,
-      });
-
-    return { enabled: created.assistantEnabled, reducedPresence: created.assistantReducedPresence };
+    return { enabled: row.assistantEnabled, reducedPresence: row.assistantReducedPresence };
   }
 
   async updatePreferences(params: Partial<domain.IAssistantPreferences>): Promise<void> {

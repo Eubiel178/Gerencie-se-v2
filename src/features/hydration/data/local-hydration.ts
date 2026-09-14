@@ -8,6 +8,7 @@ import * as domain from "@/features/hydration/domain";
 import { db } from "@/db/client";
 import { hydrationLogs, userPreferences } from "@/db/schema";
 import { requireUserId } from "@/lib/require-user-id";
+import { getOrCreateUserPreferencesRow } from "@/lib/get-or-create-user-preferences";
 
 const HISTORY_WINDOW_DAYS = 7;
 
@@ -109,20 +110,8 @@ export class LocalHydration
   }
 
   private async getGoal(userId: string): Promise<number> {
-    const [row] = await db
-      .select({ hydrationDailyGoalMl: userPreferences.hydrationDailyGoalMl })
-      .from(userPreferences)
-      .where(eq(userPreferences.userId, userId))
-      .limit(1);
-
-    if (row) return row.hydrationDailyGoalMl;
-
-    const [created] = await db
-      .insert(userPreferences)
-      .values({ userId })
-      .returning({ hydrationDailyGoalMl: userPreferences.hydrationDailyGoalMl });
-
-    return created.hydrationDailyGoalMl;
+    const row = await getOrCreateUserPreferencesRow(userId);
+    return row.hydrationDailyGoalMl;
   }
 }
 
