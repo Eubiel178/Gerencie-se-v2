@@ -1,0 +1,131 @@
+/* Acima do Modal (z-index 50) e da paleta de comando (60) - o tour
+   precisa ficar por cima de qualquer outra coisa que porventura esteja
+   aberta. */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 12, 20, 0.62);
+}
+
+/* Realce visual em volta do elemento apontado - não é um "buraco" de
+   verdade no fundo escuro (ver comentário no componente): só uma borda +
+   leve brilho, suficiente pra guiar o olho sem precisar recortar a
+   camada de baixo. */
+.spotlight {
+  position: fixed;
+  border: 2px solid var(--color-highlight);
+  border-radius: var(--radius-md);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-highlight) 22%, transparent);
+  pointer-events: none;
+  transition:
+    top var(--duration-base) var(--easing-standard),
+    left var(--duration-base) var(--easing-standard),
+    width var(--duration-base) var(--easing-standard),
+    height var(--duration-base) var(--easing-standard);
+}
+
+.tooltip {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: 0 1.5rem 3rem var(--color-shadow);
+  color: var(--color-text);
+}
+
+.step {
+  margin: 0;
+  color: var(--color-highlight);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 1.2rem;
+  letter-spacing: -0.02em;
+}
+
+.body {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.skip {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text-muted);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.skip:hover {
+  color: var(--color-text);
+}
+
+.navButtons {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.back,
+.next {
+  padding: 0.5rem var(--space-4);
+  border: 0;
+  border-radius: var(--radius-full);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.back {
+  background: var(--color-surface-elevated);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+.back:hover {
+  border-color: var(--color-highlight);
+}
+
+.next {
+  background: var(--color-highlight);
+  color: var(--color-on-highlight);
+}
+.next:hover {
+  transform: translateY(-1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spotlight {
+    transition: none;
+  }
+  .next:hover {
+    transform: none;
+  }
+}
