@@ -226,8 +226,14 @@ export default function LandingPage() {
         </Link>
       </section>
       <footer className={styles.footer}>
-        <span>© {new Date().getFullYear()} Gerencie-se</span>
-        <span>Feito para dias que fazem sentido.</span>
+        <span>
+          © {new Date().getFullYear()} Gerencie-se — Feito para dias que fazem
+          sentido.
+        </span>
+        <nav className={styles.footerLinks} aria-label="Legal">
+          <Link href="/privacy-policy">Política de Privacidade</Link>
+          <Link href="/terms-of-service">Termos de Uso</Link>
+        </nav>
       </footer>
     </main>
   );

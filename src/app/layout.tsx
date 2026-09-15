@@ -26,6 +26,16 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
     title: "Gerencie-se",
   },
+  // Preenchida só quando o Google Search Console pedir a verificação do
+  // domínio pelo método "tag HTML" (o único viável num domínio *.vercel.app
+  // — não dá pra fazer verificação por DNS aí, quem controla esse DNS é a
+  // Vercel, não o dono do projeto). Cole o código que o Search Console
+  // mostrar (só o valor do atributo `content`, sem a tag inteira) na
+  // variável de ambiente `GOOGLE_SITE_VERIFICATION`. Sem essa variável
+  // configurada, a tag simplesmente não é renderizada — nada quebra.
+  verification: process.env.GOOGLE_SITE_VERIFICATION
+    ? { google: process.env.GOOGLE_SITE_VERIFICATION }
+    : undefined,
 };
 
 export const viewport: Viewport = {

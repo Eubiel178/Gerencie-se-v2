@@ -501,11 +501,25 @@
 .footer {
   max-width: 1180px;
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
+  gap: var(--space-3);
   margin: auto;
   padding: var(--space-5) 0 var(--space-6);
   color: var(--color-text-muted);
   font-size: var(--font-size-xs);
+}
+.footerLinks {
+  display: flex;
+  gap: var(--space-4);
+}
+.footerLinks a {
+  color: var(--color-text-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.footerLinks a:hover {
+  color: var(--color-text);
 }
 @keyframes pulse {
   50% {

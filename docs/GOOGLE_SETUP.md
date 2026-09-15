@@ -100,6 +100,54 @@ coloque essas credenciais em código).
   o escopo sensível do Calendar, passa pelo processo de verificação do
   Google.
 
+## 8. Verificação de propriedade do domínio (obrigatória pra publicar o app)
+
+Ao clicar em "Publicar app" (sair do modo Teste) ou pedir a verificação de
+marca no **Google Auth Platform → Branding**, o Google recusa com uma
+mensagem do tipo:
+
+> O site do URL da sua página inicial `https://SEU-DOMINIO` não está
+> registrado para você.
+
+Isso não é sobre o conteúdo do app — é sobre provar, no **Google Search
+Console**, que o domínio configurado como página inicial é seu.
+
+**Se o domínio for um subdomínio `*.vercel.app`**: a verificação por DNS
+(TXT record) **não é uma opção viável** — quem controla o DNS de
+`vercel.app` é a própria Vercel, não o dono do projeto. O Search Console
+precisa oferecer um método alternativo: **"tag HTML"** (um `<meta
+name="google-site-verification">` no `<head>`) ou **"arquivo HTML"** (um
+arquivo estático servido na raiz do domínio). Ambos já têm suporte pronto
+neste projeto:
+
+- **Tag HTML** (recomendado — mais simples): copie só o valor do atributo
+  `content` que o Search Console mostrar e cole na variável de ambiente
+  `GOOGLE_SITE_VERIFICATION` (ver `.env.example`). A tag é renderizada
+  automaticamente em `src/app/layout.tsx` — sem essa variável, ela
+  simplesmente não aparece.
+- **Arquivo HTML**: se o Search Console oferecer só esse método, baixe o
+  arquivo (`googleXXXXXXXXXXXXXXXX.html`) e coloque em `public/` — a
+  Vercel serve qualquer arquivo dessa pasta na raiz do domínio sem
+  configuração extra.
+
+Depois de verificado no Search Console, volte em **Google Auth Platform →
+Branding** e confira que **Página inicial**, **Política de privacidade**
+e **Domínio autorizado** apontam todos para o mesmo domínio verificado, e
+peça a nova verificação.
+
+**Requisitos que o Google confere na página inicial** (já cobertos pela
+landing page deste projeto, `src/app/page.tsx`):
+
+- pública, sem exigir login — ✅ (`/` é a landing page, o login fica em `/login`);
+- explica o que o app é e o que faz — ✅ (seção hero + "Como funciona" + "Recursos");
+- link visível para a Política de Privacidade — ✅ no rodapé (`/privacy-policy`, `/terms-of-service`).
+
+**Domínio definitivo ou domínio próprio depois?** Se a ideia é trocar
+`gerenciese.vercel.app` por um domínio próprio mais adiante, vale decidir
+isso *antes* de fazer a verificação — trocar de domínio depois exige
+repetir toda a verificação (Search Console + Branding) e atualizar as
+URIs de redirecionamento no passo 3 deste guia outra vez.
+
 ## Fontes consultadas (setembro de 2026)
 
 - https://developers.google.com/identity/protocols/oauth2/web-server
