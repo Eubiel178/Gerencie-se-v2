@@ -1,4 +1,8 @@
 .section{display:flex;flex-direction:column;gap:var(--space-6);max-width:48rem;margin:0 auto}
+/* Mesma moldura de cabeçalho de Tarefas/Hábitos/Rotina/Objetivos/Eventos
+   (ver comentário equivalente em health.module.css) - achado de
+   auditoria: "3 padrões visuais diferentes entre as 6 telas de tracker". */
+.toolbar{display:flex;align-items:end;justify-content:space-between;gap:var(--space-4);padding-bottom:var(--space-5);border-bottom:1px solid var(--color-border)}
 .heading{margin:0;color:var(--color-text);font-size:clamp(1.8rem,4vw,2.7rem);line-height:var(--line-height-tight);letter-spacing:-.055em}
 .subheading{margin:var(--space-2) 0 0;color:var(--color-text-muted);font-size:var(--font-size-sm)}
 .addForm{display:flex;gap:var(--space-2);flex-wrap:wrap}

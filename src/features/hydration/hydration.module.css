@@ -1,6 +1,12 @@
 .section{display:flex;flex-direction:column;gap:var(--space-6);max-width:36rem;margin:0 auto}
-.heading{margin:0;color:var(--color-text);font-size:clamp(1.8rem,4vw,2.7rem);line-height:var(--line-height-tight);letter-spacing:-.055em;text-align:center}
-.subheading{margin:var(--space-2) 0 0;color:var(--color-text-muted);font-size:var(--font-size-sm);text-align:center}
+/* Cabeçalho alinhado à esquerda (não mais centralizado) + mesma moldura
+   de borda inferior de Tarefas/Hábitos/Rotina/Objetivos/Eventos - era a
+   única divergência de alinhamento real entre as 6 telas de tracker
+   (achado de auditoria), sem nenhuma razão de conteúdo pra ser diferente
+   aqui (o painel de hidratação abaixo já é centralizado por si só). */
+.toolbar{display:flex;align-items:end;justify-content:space-between;gap:var(--space-4);padding-bottom:var(--space-5);border-bottom:1px solid var(--color-border)}
+.heading{margin:0;color:var(--color-text);font-size:clamp(1.8rem,4vw,2.7rem);line-height:var(--line-height-tight);letter-spacing:-.055em}
+.subheading{margin:var(--space-2) 0 0;color:var(--color-text-muted);font-size:var(--font-size-sm)}
 .panel{display:flex;flex-direction:column;align-items:center;gap:var(--space-4);padding:var(--space-6);border:1px solid var(--color-border);border-radius:var(--radius-lg);background:var(--color-surface);box-shadow:0 .5rem 1.25rem var(--color-shadow)}
 .amount{font-size:clamp(2rem,7vw,2.8rem);font-weight:700;color:var(--color-text)}
 .goal{color:var(--color-text-muted);font-size:var(--font-size-sm)}

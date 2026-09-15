@@ -15,10 +15,12 @@ export async function MenstrualCycle() {
 
   return (
     <section className={styles.section}>
-      <div>
-        <h1 className={styles.heading}>Ciclo menstrual</h1>
-        <p className={styles.subheading}>Registre o início de cada ciclo e acompanhe estimativas.</p>
-      </div>
+      <header className={styles.toolbar}>
+        <div>
+          <h1 className={styles.heading}>Ciclo menstrual</h1>
+          <p className={styles.subheading}>Registre o início de cada ciclo e acompanhe estimativas.</p>
+        </div>
+      </header>
 
       <p className={styles.disclaimer}>
         Tudo aqui é estimativa, calculada a partir dos seus próprios registros

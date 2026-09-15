@@ -15,10 +15,12 @@ export async function Running() {
 
   return (
     <section className={styles.section}>
-      <div>
-        <h1 className={styles.heading}>Corrida</h1>
-        <p className={styles.subheading}>Registre manualmente ou acompanhe ao vivo com GPS.</p>
-      </div>
+      <header className={styles.toolbar}>
+        <div>
+          <h1 className={styles.heading}>Corrida</h1>
+          <p className={styles.subheading}>Registre manualmente ou acompanhe ao vivo com GPS.</p>
+        </div>
+      </header>
 
       <Totals totals={totals} />
       <RunningTracker />

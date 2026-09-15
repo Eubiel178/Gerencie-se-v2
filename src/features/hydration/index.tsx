@@ -17,10 +17,12 @@ export async function Hydration() {
 
   return (
     <section className={styles.section}>
-      <div>
-        <h1 className={styles.heading}>Hidratação</h1>
-        <p className={styles.subheading}>Registre a água que você bebeu hoje.</p>
-      </div>
+      <header className={styles.toolbar}>
+        <div>
+          <h1 className={styles.heading}>Hidratação</h1>
+          <p className={styles.subheading}>Registre a água que você bebeu hoje.</p>
+        </div>
+      </header>
 
       <HydrationTracker today={today} week={week} />
     </section>

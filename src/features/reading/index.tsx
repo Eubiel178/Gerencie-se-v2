@@ -17,10 +17,12 @@ export async function Reading() {
 
   return (
     <section className={styles.section}>
-      <div>
-        <h1 className={styles.heading}>Leitura</h1>
-        <p className={styles.subheading}>Sua lista de livros e o progresso de cada um.</p>
-      </div>
+      <header className={styles.toolbar}>
+        <div>
+          <h1 className={styles.heading}>Leitura</h1>
+          <p className={styles.subheading}>Sua lista de livros e o progresso de cada um.</p>
+        </div>
+      </header>
 
       <ReadingList items={items} />
       <Recommendations />

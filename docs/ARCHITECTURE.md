@@ -675,3 +675,45 @@ disputando o índice único) — confirmado: exatamente 1 vencedor em cada
 disputa, exatamente 1 sessão "running" no final, nas duas rodadas.
 Script de teste era um arquivo descartável, removido depois de rodar
 (nunca fez parte do código do projeto).
+
+## Unificação parcial dos 6 padrões de tracker (2026-09)
+
+O usuário pediu pra decidir sozinho como resolver a divergência visual
+entre Hábitos/Rotina/Hidratação/Corrida/Saúde/Leitura/Ciclo menstrual
+(a pergunta original — qual dos dois padrões usar em TODAS as 7 telas —
+foi feita ao usuário via `AskUserQuestion`, mas ele preferiu que eu
+decidisse sozinho em vez de responder).
+
+Investigação confirmou que a divergência real tem duas origens bem
+diferentes, e só uma delas é "inconsistência de verdade":
+
+1. **Forma do conteúdo é genuinamente diferente entre as telas** — grid
+   de cards com modal (Tarefas/Hábitos/Rotina/Objetivos/Eventos) faz
+   sentido pra uma lista de itens editáveis; formulário sempre visível
+   (Saúde/Leitura) ou widget único sem lista de criação
+   (Hidratação/um total do dia; Corrida/abas manual+GPS ao vivo) fazem
+   sentido pros seus respectivos conteúdos. Forçar Hidratação ou Corrida
+   a virar "grid de cards com modal" não resolveria inconsistência — só
+   trocaria uma UI adequada por uma inadequada ao dado real. **Decisão:
+   manter como está** — reescrever essa camada é a "reescrita maior" que
+   o próprio achado original já apontava como arriscada, sem ganho real
+   de UX pro usuário final.
+2. **Tratamento do CABEÇALHO da página era arbitrariamente diferente**,
+   sem nenhuma razão de conteúdo: Hidratação/Corrida/Ciclo menstrual
+   centralizavam título+subtítulo (`text-align:center`) enquanto
+   Tarefas/Hábitos/Rotina/Objetivos/Eventos alinhavam à esquerda; Saúde/
+   Leitura eram um `<div>` solto sem a moldura (borda inferior + respiro)
+   que as outras 5 telas já tinham. Essa parte era mesmo "inconsistência
+   por descuido", não uma decisão de design — **corrigida** nas 7 telas:
+   todas agora usam o mesmo `<header className={styles.toolbar}>`
+   (alinhado à esquerda, mesma tipografia, mesma borda inferior),
+   com ou sem botão de ação ao lado do título. `.section{max-width:...}`
+   de cada tela foi mantido como estava (varia de propósito, de acordo
+   com a forma real do conteúdo abaixo do cabeçalho — grid largo vs.
+   widget estreito).
+
+Arquivos tocados: `hydration`, `running`, `health`, `reading`,
+`menstrual-cycle` (`index.tsx` + `*.module.css` de cada um). Verificado
+com screenshot lado a lado das 7 telas — cabeçalho visualmente idêntico
+em todas agora. Validado com typecheck + lint + 186 testes + build de
+produção.

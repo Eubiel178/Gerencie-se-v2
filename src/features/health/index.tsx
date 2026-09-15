@@ -15,10 +15,12 @@ export async function Health() {
 
   return (
     <section className={styles.section}>
-      <div>
-        <h1 className={styles.heading}>Saúde preventiva</h1>
-        <p className={styles.subheading}>Lembretes de check-ups, vacinas e exames de rotina.</p>
-      </div>
+      <header className={styles.toolbar}>
+        <div>
+          <h1 className={styles.heading}>Saúde preventiva</h1>
+          <p className={styles.subheading}>Lembretes de check-ups, vacinas e exames de rotina.</p>
+        </div>
+      </header>
 
       <p className={styles.disclaimer}>
         Isso é só organização e lembrete — não é diagnóstico nem substitui
