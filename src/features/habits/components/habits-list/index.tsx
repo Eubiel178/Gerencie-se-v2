@@ -3,7 +3,7 @@
 import { useState } from "react";
 import dayjs from "dayjs";
 
-import { Input } from "@/components";
+import { EmptyState, Input } from "@/components";
 import { IHabit } from "@/features/habits/domain";
 import { LoadAcceptedConnections } from "@/features/connections/domain";
 import { GoalOption } from "../modal/interfaces";
@@ -36,11 +36,7 @@ export function HabitsList({ habitsList, connections, goalOptions }: HabitsListP
   const [statusFilter, setStatusFilter] = useState<HabitStatusFilter>("all");
 
   if (habitsList.length === 0) {
-    return (
-      <div className={styles.empty}>
-        <p className={styles.emptyState}>Você ainda não tem hábitos. Comece adicionando o primeiro.</p>
-      </div>
-    );
+    return <EmptyState variant="box">Você ainda não tem hábitos. Comece adicionando o primeiro.</EmptyState>;
   }
 
   const today = dayjs().format("YYYY-MM-DD");
@@ -86,9 +82,7 @@ export function HabitsList({ habitsList, connections, goalOptions }: HabitsListP
       </div>
 
       {filteredHabits.length === 0 ? (
-        <div className={styles.empty}>
-          <p className={styles.emptyState}>Nenhum hábito encontrado com esses filtros.</p>
-        </div>
+        <EmptyState variant="box">Nenhum hábito encontrado com esses filtros.</EmptyState>
       ) : (
         <ul className={styles.grid}>
           {filteredHabits.map((habit) => (

@@ -9,16 +9,10 @@ import { buildHabitConsistencyTrend, ConsistencyWeekPoint } from "@/features/hab
 
 import styles from "./habit-consistency-chart.module.css";
 
-const VISIBLE_WEEKS = 26;
-
-// Antes cada clique em "anterior/próximo" pulava a janela inteira (26
-// semanas, ~6 meses) de uma vez, sem sobreposição - num gráfico cuja
-// unidade é a semana, esse salto gigante lia como se a navegação
-// estivesse quebrada ("volto e mostra semana passada", de uma vez, sem
-// nada entre o hoje e 6 meses atrás). Navegar de ~4 em 4 semanas (~1 mês,
-// janela deslizante) passa a impressão de continuidade - achado relatado
-// pelo usuário.
-const STEP_WEEKS = 4;
+// `buildHabitHeatmap` sempre começa a semana no domingo (ver comentário
+// lá) - mesma ordem aqui, usada só na versão em tabela (o gráfico em
+// linha não desce a esse nível de detalhe por dia).
+const DAY_LABELS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
 // Área de desenho do SVG - viewBox fixo, escala com a largura real via
 // `width="100%"` no elemento (nunca recalculado em JS por resize).
@@ -65,20 +59,23 @@ export function HabitConsistencyChart({
   fetchedWeeksBack,
 }: HabitConsistencyChartProps) {
   const gradientId = useId();
-  const [page, setPage] = useState(0);
+  // Abre só na semana atual (1 ponto) - cada clique em "anterior" soma
+  // mais uma semana ao início da linha (2 pontos, depois 3...), em vez
+  // de pular direto pra uma janela de vários meses (achado relatado: um
+  // gráfico que já nasce mostrando 6 meses de uma vez era barulho demais
+  // antes mesmo de a pessoa pedir por isso). O fim da linha é sempre a
+  // semana de hoje - só o início recua.
+  const [visibleWeeks, setVisibleWeeks] = useState(1);
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   const [showTable, setShowTable] = useState(false);
-  // A janela (26 semanas) desliza de STEP_WEEKS em STEP_WEEKS - o quanto
-  // dá pra voltar é limitado pelo que o servidor já buscou
-  // (`fetchedWeeksBack`), garantindo que a semana mais antiga da janela
-  // nunca fique sem dado carregado.
-  const maxPage = Math.max(0, Math.floor((fetchedWeeksBack - VISIBLE_WEEKS) / STEP_WEEKS));
+  // Não dá pra crescer além do que o servidor já buscou.
+  const maxVisibleWeeks = fetchedWeeksBack;
 
-  const points = useMemo(() => {
-    const referenceNow = dayjs().subtract(page * STEP_WEEKS * 7, "day");
-    const weeks = buildHabitHeatmap(completionDates, totalHabits, VISIBLE_WEEKS, referenceNow);
-    return buildHabitConsistencyTrend(weeks);
-  }, [completionDates, totalHabits, page]);
+  const weeks = useMemo(
+    () => buildHabitHeatmap(completionDates, totalHabits, visibleWeeks, dayjs()),
+    [completionDates, totalHabits, visibleWeeks]
+  );
+  const points = useMemo(() => buildHabitConsistencyTrend(weeks), [weeks]);
 
   const linePath = points
     .map((point, index) => `${index === 0 ? "M" : "L"} ${xFor(index, points.length)} ${yFor(point.percent)}`)
@@ -127,17 +124,17 @@ export function HabitConsistencyChart({
             <Button.Preset
               icon={{ name: "FaChevronLeft" }}
               root={{
-                "aria-label": "Meses anteriores",
-                disabled: page >= maxPage,
-                onClick: () => setPage((current) => Math.min(maxPage, current + 1)),
+                "aria-label": "Uma semana mais atrás",
+                disabled: visibleWeeks >= maxVisibleWeeks,
+                onClick: () => setVisibleWeeks((current) => Math.min(maxVisibleWeeks, current + 1)),
               }}
             />
             <Button.Preset
               icon={{ name: "FaChevronRight" }}
               root={{
-                "aria-label": "Meses mais recentes",
-                disabled: page === 0,
-                onClick: () => setPage((current) => Math.max(0, current - 1)),
+                "aria-label": "Uma semana mais recente",
+                disabled: visibleWeeks <= 1,
+                onClick: () => setVisibleWeeks((current) => Math.max(1, current - 1)),
               }}
             />
           </div>
@@ -145,25 +142,38 @@ export function HabitConsistencyChart({
       </div>
 
       {showTable ? (
-        <table className={styles.table}>
-          <caption className={styles.tableCaption}>Consistência semanal (% de hábitos concluídos)</caption>
-          <thead>
-            <tr>
-              <th scope="col">Semana</th>
-              <th scope="col">Consistência</th>
-            </tr>
-          </thead>
-          <tbody>
-            {points.map((point) => (
-              <tr key={point.weekStartDate}>
-                <td>
-                  {formatShortDate(point.weekStartDate)} – {formatShortDate(point.weekEndDate)}
-                </td>
-                <td>{point.percent}%</td>
+        <div className={styles.tableScroll}>
+          <table className={styles.table}>
+            <caption className={styles.tableCaption}>
+              Consistência semanal (% de hábitos concluídos), com o detalhe de cada dia
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Semana</th>
+                {DAY_LABELS.map((label) => (
+                  <th key={label} scope="col">
+                    {label}
+                  </th>
+                ))}
+                <th scope="col">Consistência</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {weeks.map((week, weekIndex) => (
+                <tr key={points[weekIndex].weekStartDate}>
+                  <td>
+                    {formatShortDate(points[weekIndex].weekStartDate)} –{" "}
+                    {formatShortDate(points[weekIndex].weekEndDate)}
+                  </td>
+                  {week.map((day) => (
+                    <td key={day.date}>{day.isFuture ? "—" : `${Math.round(Math.min(day.ratio, 1) * 100)}%`}</td>
+                  ))}
+                  <td>{points[weekIndex].percent}%</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       ) : (
         <div className={styles.chartArea}>
           <svg
@@ -206,8 +216,10 @@ export function HabitConsistencyChart({
                 (achado relatado). A data real some junto, numa segunda
                 linha menor, pra nunca perder a referência cronológica. */}
             {points.map((point, index) => {
-              const isCurrentInProgressWeek = page === 0 && index === points.length - 1;
+              // O fim da linha é sempre a semana de hoje (ver `points`
+              // acima - âncora fixa em `dayjs()`, só o início recua).
               const isLast = index === points.length - 1;
+              const isCurrentInProgressWeek = isLast;
               const isFirst = index === 0;
               const isRegularTick = index % xAxisTickEvery === 0;
               // Suprime um tick "regular" (múltiplo de N) caindo perto

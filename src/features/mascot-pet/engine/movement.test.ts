@@ -1,7 +1,15 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { ARRIVAL_THRESHOLD, clampToBounds, distance, isNearEdge, pickRandomTarget, stepToward } from "./movement";
+import {
+  ARRIVAL_THRESHOLD,
+  clampToBounds,
+  distance,
+  isNearEdge,
+  nearestCornerTarget,
+  pickRandomTarget,
+  stepToward,
+} from "./movement";
 
 const BOUNDS = { minX: 0, maxX: 100, minY: 0, maxY: 100 };
 
@@ -48,6 +56,18 @@ test("pickRandomTarget: sempre cai dentro dos limites, mesmo com o viés de cant
     assert.ok(target.x >= BOUNDS.minX && target.x <= BOUNDS.maxX, `x fora dos limites: ${target.x}`);
     assert.ok(target.y >= BOUNDS.minY && target.y <= BOUNDS.maxY, `y fora dos limites: ${target.y}`);
   }
+});
+
+test("nearestCornerTarget: escolhe o canto do mesmo quadrante da posição atual, não um aleatório", () => {
+  assert.deepEqual(nearestCornerTarget({ x: 10, y: 10 }, BOUNDS), { x: 12, y: 12 }); // canto superior-esquerdo (inset 12% de 100px)
+  assert.deepEqual(nearestCornerTarget({ x: 90, y: 90 }, BOUNDS), { x: 88, y: 88 }); // canto inferior-direito
+  assert.deepEqual(nearestCornerTarget({ x: 90, y: 10 }, BOUNDS), { x: 88, y: 12 }); // canto superior-direito
+});
+
+test("nearestCornerTarget: sempre cai dentro dos limites", () => {
+  const target = nearestCornerTarget({ x: 200, y: -50 }, BOUNDS);
+  assert.ok(target.x >= BOUNDS.minX && target.x <= BOUNDS.maxX);
+  assert.ok(target.y >= BOUNDS.minY && target.y <= BOUNDS.maxY);
 });
 
 test("pickRandomTarget: a maioria dos alvos cai perto de um dos 4 cantos, não no centro (achado relatado: 'deveria parar nos cantos')", () => {

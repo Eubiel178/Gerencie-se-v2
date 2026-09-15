@@ -24,3 +24,5 @@ export { CollapsibleSection } from "./collapsible-section";
 export { ConfirmIconButton } from "./confirm-icon-button";
 export { Alert } from "./alert";
 export type { AlertVariant } from "./alert";
+export { EmptyState } from "./empty-state";
+export type { EmptyStateProps } from "./empty-state";

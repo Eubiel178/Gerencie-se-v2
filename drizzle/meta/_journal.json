@@ -183,6 +183,13 @@
       "when": 1789424266145,
       "tag": "0025_natural_fenris",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1789511706492,
+      "tag": "0026_fantastic_tyger_tiger",
+      "breakpoints": true
     }
   ]
 }

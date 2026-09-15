@@ -1,5 +1,5 @@
-import { relations } from "drizzle-orm";
-import { boolean, customType, integer, pgTable, primaryKey, text, timestamp } from "drizzle-orm/pg-core";
+import { relations, sql } from "drizzle-orm";
+import { boolean, customType, integer, pgTable, primaryKey, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
 
 // O driver `postgres` mapeia `bytea` <-> `Buffer` nativamente — só falta
 // dizer ao Drizzle que tipo de coluna SQL essa é (não existe um builder
@@ -467,30 +467,47 @@ export const habitLogs = pgTable(
   ]
 );
 
-export const focusSessions = pgTable("focus_session", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  startedAt: timestamp("started_at", { mode: "date" })
-    .notNull()
-    .$defaultFn(() => new Date()),
-  endedAt: timestamp("ended_at", { mode: "date" }),
-  plannedDurationSeconds: integer("planned_duration_seconds").notNull(),
-  actualDurationSeconds: integer("actual_duration_seconds"),
-  status: text("status", { enum: ["running", "completed", "cancelled"] })
-    .notNull()
-    .default("running"),
-  xpEarned: integer("xp_earned").notNull().default(0),
-  // Opcional - preenchido só quando a sessão começou a partir do botão
-  // "Focar nesta tarefa" (ver `src/features/tasks/components/tasks-list/card`).
-  // `onDelete: "set null"` de propósito: apagar a tarefa depois nunca
-  // deve apagar o histórico da sessão de foco em si, só perder essa
-  // referência.
-  taskId: text("task_id").references(() => tasks.id, { onDelete: "set null" }),
-});
+export const focusSessions = pgTable(
+  "focus_session",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    startedAt: timestamp("started_at", { mode: "date" })
+      .notNull()
+      .$defaultFn(() => new Date()),
+    endedAt: timestamp("ended_at", { mode: "date" }),
+    plannedDurationSeconds: integer("planned_duration_seconds").notNull(),
+    actualDurationSeconds: integer("actual_duration_seconds"),
+    status: text("status", { enum: ["running", "completed", "cancelled"] })
+      .notNull()
+      .default("running"),
+    xpEarned: integer("xp_earned").notNull().default(0),
+    // Opcional - preenchido só quando a sessão começou a partir do botão
+    // "Focar nesta tarefa" (ver `src/features/tasks/components/tasks-list/card`).
+    // `onDelete: "set null"` de propósito: apagar a tarefa depois nunca
+    // deve apagar o histórico da sessão de foco em si, só perder essa
+    // referência.
+    taskId: text("task_id").references(() => tasks.id, { onDelete: "set null" }),
+  },
+  (table) => [
+    // Garante no banco o que `LocalFocusSession.start()` já assume: no
+    // máximo UMA sessão "running" por usuário. Sem isto, duas chamadas de
+    // `start()` bem próximas (duplo-clique, duas abas) liam a mesma sessão
+    // órfã expirada antes de qualquer uma terminar de finalizá-la, e as
+    // duas inseriam sua própria sessão nova — XP da sessão órfã creditado
+    // 2x, e duas sessões "running" ao mesmo tempo (achado numa revisão de
+    // código). Índice PARCIAL (só sobre linhas com `status = 'running'`):
+    // várias sessões "completed"/"cancelled" do mesmo usuário continuam
+    // permitidas, só nunca duas "running" simultâneas.
+    uniqueIndex("focus_session_one_running_per_user")
+      .on(table.userId)
+      .where(sql`${table.status} = 'running'`),
+  ]
+);
 
 /** Uma linha por usuário — nível/mascote não têm histórico, só estado
  * atual. Humor do mascote é calculado a partir da atividade recente, não

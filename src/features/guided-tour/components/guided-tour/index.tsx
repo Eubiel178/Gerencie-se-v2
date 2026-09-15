@@ -77,6 +77,7 @@ function tooltipPositionFor(rect: Rect | null): TooltipPosition {
 interface GuidedTourProps {
   active: boolean;
   mascotName: string;
+  userId: string;
 }
 
 // Quanto tempo esperar (tentando de novo a cada 150ms) até desistir de
@@ -87,6 +88,58 @@ interface GuidedTourProps {
 const TARGET_WAIT_MS_SAME_PAGE = 1000;
 const TARGET_WAIT_MS_AFTER_NAVIGATION = 4000;
 const TARGET_POLL_INTERVAL_MS = 150;
+
+// Sem isto, qualquer recarregamento de página (F5, ou um link/atalho que
+// force navegação completa em vez de troca de rota via cliente) reiniciava
+// o passo pra 0 - como o passo 0 quase sempre aponta pra `/home`, isso
+// arrastava de volta pro painel geral qualquer pessoa que tivesse
+// recarregado a página no meio do tour em QUALQUER outra rota (achado:
+// confirmado navegando direto pra uma URL de outra página com o tour
+// ainda ativo). `sessionStorage` (não `localStorage`): é progresso de
+// UMA sessão de tour, não uma preferência que devesse sobreviver a fechar
+// a aba.
+const STEP_INDEX_STORAGE_KEY = "gerencie-se:guided-tour-step-index";
+
+// Guardado por ID do usuário (não uma chave fixa) - sem isso, trocar de
+// conta no mesmo navegador com as duas ainda com tour ativo (nenhuma
+// dispensou ainda) herdava o passo salvo da conta anterior, porque o guard
+// de "só lê se `active`" não ajuda quando as DUAS contas têm `active: true`
+// (achado numa revisão de código). E guardado pelo `id` do passo, não pelo
+// índice numérico: a lista de passos disponíveis (`computeInitialSteps`)
+// varia por rota/DOM, então o mesmo índice pode apontar pra um passo
+// totalmente diferente depois de um F5 numa rota diferente da que o tour
+// estava quando salvou.
+function storageKey(userId: string): string {
+  return `${STEP_INDEX_STORAGE_KEY}:${userId}`;
+}
+
+function readStoredStepId(userId: string): string | null {
+  try {
+    return window.sessionStorage.getItem(storageKey(userId));
+  } catch {
+    // Navegação privada ou storage bloqueado - continua funcionando,
+    // só sem lembrar o passo entre recarregamentos.
+    return null;
+  }
+}
+
+function writeStoredStepId(userId: string, stepId: string | null): void {
+  try {
+    if (stepId === null) {
+      window.sessionStorage.removeItem(storageKey(userId));
+    } else {
+      window.sessionStorage.setItem(storageKey(userId), stepId);
+    }
+  } catch {
+    // Mesmo caso de `readStoredStepId` - falha silenciosa.
+  }
+}
+
+function resolveStepIndex(steps: GuidedTourStep[], storedStepId: string | null): number {
+  if (!storedStepId) return 0;
+  const index = steps.findIndex((step) => step.id === storedStepId);
+  return index === -1 ? 0 : index;
+}
 
 // Monta a lista de passos, filtrando o que já dá pra saber de antemão
 // que não vai rolar: no mobile a navegação vira um menu por trás de um
@@ -138,10 +191,36 @@ function waitForTarget(selector: string, timeoutMs: number): Promise<Element | n
   });
 }
 
-export function GuidedTour({ active, mascotName }: GuidedTourProps) {
+export function GuidedTour({ active, mascotName, userId }: GuidedTourProps) {
   const router = useRouter();
-  const [steps, setSteps] = useState<GuidedTourStep[] | null>(() => computeInitialSteps(active, mascotName));
-  const [stepIndex, setStepIndex] = useState(0);
+  // Ref (não outro useState) só pra não rodar `computeInitialSteps` -
+  // que filtra passos e faz `document.querySelector` por passo - duas
+  // vezes na mesma montagem só porque `steps` e `stepIndex` precisam do
+  // mesmo array inicial (achado numa revisão de código). Mutação durante a
+  // renderização é segura aqui porque é idempotente e só acontece uma vez,
+  // no cálculo lazy dos dois `useState` abaixo.
+  const initialStepsRef = useRef<GuidedTourStep[] | null | undefined>(undefined);
+  function getInitialSteps(): GuidedTourStep[] | null {
+    if (initialStepsRef.current === undefined) {
+      initialStepsRef.current = computeInitialSteps(active, mascotName);
+    }
+    return initialStepsRef.current;
+  }
+
+  const [steps, setSteps] = useState<GuidedTourStep[] | null>(() => getInitialSteps());
+  const [stepIndex, setStepIndex] = useState(() => {
+    const initialSteps = getInitialSteps();
+    // Só lê o passo salvo se o tour estiver de fato ativo agora - sem
+    // isso, entrar numa conta que já dispensou o tour podia herdar o
+    // passo salvo de uma sessão de tour anterior (a chave já é isolada
+    // por `userId`, isto aqui cobre o caso de reativar o tour da MESMA
+    // conta puxando um resíduo antigo).
+    if (!active || !initialSteps) {
+      writeStoredStepId(userId, null);
+      return 0;
+    }
+    return resolveStepIndex(initialSteps, readStoredStepId(userId));
+  });
   const [finished, setFinished] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const wasActiveRef = useRef(active);
@@ -161,9 +240,21 @@ export function GuidedTour({ active, mascotName }: GuidedTourProps) {
       setSteps(computeInitialSteps(true, mascotName));
       setStepIndex(0);
       setFinished(false);
+      // "Rever tour guiado" começa do zero de propósito - nunca deveria
+      // reaproveitar o passo salvo de uma sessão de tour anterior.
+      writeStoredStepId(userId, null);
     }
     wasActiveRef.current = active;
-  }, [active, mascotName]);
+  }, [active, mascotName, userId]);
+
+  // Lembra o passo atual entre recarregamentos de página (ver comentário
+  // de `STEP_INDEX_STORAGE_KEY`) - grava a cada mudança de passo, nunca
+  // no passo inicial lido do storage (senão reescreveria o mesmo valor
+  // à toa a cada montagem).
+  useEffect(() => {
+    if (!steps) return;
+    writeStoredStepId(userId, steps[stepIndex]?.id ?? null);
+  }, [steps, stepIndex, userId]);
 
   const step = steps?.[stepIndex] ?? null;
   const [rect, setRect] = useState<Rect | null>(null);
@@ -222,6 +313,7 @@ export function GuidedTour({ active, mascotName }: GuidedTourProps) {
 
   async function finish() {
     setFinished(true);
+    writeStoredStepId(userId, null);
     await dismissGuidedTourAction();
   }
 

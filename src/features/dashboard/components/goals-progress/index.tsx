@@ -1,3 +1,4 @@
+import { EmptyState } from "@/components";
 import { Card } from "@/features/dashboard/components/shared";
 
 import { IGoal } from "@/features/goals/domain";
@@ -8,7 +9,7 @@ export function GoalsProgress({ goals }: { goals: IGoal[] }) {
   return (
     <Card title="Progresso das metas" href="/home/goals" linkLabel="Ver todas">
       {goals.length === 0 ? (
-        <p className={styles.empty}>Nenhum objetivo cadastrado ainda.</p>
+        <EmptyState tone="muted">Nenhum objetivo cadastrado ainda.</EmptyState>
       ) : (
         <ul className={styles.list}>
           {goals.map((goal) => (

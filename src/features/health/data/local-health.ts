@@ -77,14 +77,7 @@ export class LocalHealth
 }
 
 function mapRowToCheckup(row: typeof healthCheckups.$inferSelect): domain.IHealthCheckup {
-  let nextDueDate: string | null = null;
-  let isOverdue = false;
-
-  if (row.lastDoneAt && row.intervalDays) {
-    const due = dayjs(row.lastDoneAt).add(row.intervalDays, "day");
-    nextDueDate = due.format("YYYY-MM-DD");
-    isOverdue = due.isBefore(dayjs(), "day");
-  }
+  const { nextDueDate, isOverdue } = domain.computeCheckupDueState(row.lastDoneAt, row.intervalDays);
 
   return {
     id: row.id,

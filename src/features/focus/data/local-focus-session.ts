@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, desc, eq, gte, ne } from "drizzle-orm";
+import { and, desc, eq, gte, ne, sql } from "drizzle-orm";
 
 import * as domain from "@/features/focus/domain";
 
@@ -29,29 +29,80 @@ export class LocalFocusSession
     const userId = await requireUserId();
 
     const existing = await this.getActive();
+    // Preenchido só se `start` precisar finalizar sozinho uma sessão órfã
+    // vencida abaixo - quem chama (`startFocusSessionAction`) usa isso pra
+    // creditar o XP dela no mascote, já que essa conclusão nunca passa por
+    // `CompleteFocusSession` (o caminho normal que credita XP).
+    let finalizedExpiredSessionXp: number | undefined;
+
     if (existing) {
-      return {
-        id: existing.id,
-        startedAt: existing.startedAt,
-        plannedDurationSeconds: existing.plannedDurationSeconds,
-        taskId: existing.taskId,
-      };
+      if (!domain.isFocusSessionExpired(existing)) {
+        return {
+          id: existing.id,
+          startedAt: existing.startedAt,
+          plannedDurationSeconds: existing.plannedDurationSeconds,
+          taskId: existing.taskId,
+        };
+      }
+
+      // Sessão órfã (aba fechada, hot-reload em dev, queda do app) cujo prazo
+      // já passou: finaliza como concluída antes de abrir uma sessão nova.
+      // Sem isso, a 1ª tentativa de iniciar o foco reaproveitava essa sessão
+      // vencida e o relógio do cliente zerava quase na hora, mostrando "Foco
+      // concluído!" prematuramente — a 2ª tentativa "funcionava" só porque a
+      // sessão órfã já tinha sido concluída por essa mesma reação.
+      finalizedExpiredSessionXp = await this.finalizeExpiredSession(existing);
     }
 
     const id = crypto.randomUUID();
     const startedAt = new Date();
     const taskId = params.taskId ?? null;
 
-    await db.insert(focusSessions).values({
-      id,
-      userId,
-      startedAt,
-      plannedDurationSeconds: params.plannedDurationSeconds,
-      status: "running",
-      taskId,
-    });
+    // `onConflictDoNothing` mira o índice único parcial de schema.ts (no
+    // máximo 1 sessão "running" por usuário) - cobre a janela entre o
+    // `getActive()` no topo desta função e este INSERT, onde uma segunda
+    // chamada concorrente (duplo-clique, duas abas) podia ler a mesma
+    // ausência de sessão ativa e inserir a sua própria também (achado numa
+    // revisão de código). Em vez de estourar o erro de constraint pro
+    // usuário, trata como "perdeu a corrida" e devolve quem ganhou.
+    const [inserted] = await db
+      .insert(focusSessions)
+      .values({
+        id,
+        userId,
+        startedAt,
+        plannedDurationSeconds: params.plannedDurationSeconds,
+        status: "running",
+        taskId,
+      })
+      .onConflictDoNothing({ target: focusSessions.userId, where: sql`${focusSessions.status} = 'running'` })
+      .returning();
 
-    return { id, startedAt, plannedDurationSeconds: params.plannedDurationSeconds, taskId };
+    if (!inserted) {
+      const winner = await this.getActive();
+
+      if (winner) {
+        return {
+          id: winner.id,
+          startedAt: winner.startedAt,
+          plannedDurationSeconds: winner.plannedDurationSeconds,
+          taskId: winner.taskId,
+        };
+      }
+
+      // Não deveria ser alcançável (o conflito só dispara se já existe uma
+      // sessão "running" pro usuário) - mas não deixa a função retornar
+      // silenciosamente undefined se algo mudar aqui no futuro.
+      throw new Error("Conflito ao iniciar sessão de foco, mas nenhuma sessão ativa foi encontrada.");
+    }
+
+    return {
+      id: inserted.id,
+      startedAt: inserted.startedAt,
+      plannedDurationSeconds: inserted.plannedDurationSeconds,
+      taskId: inserted.taskId,
+      finalizedExpiredSessionXp,
+    };
   }
 
   async complete(params: domain.CompleteFocusSession.Params): Promise<domain.CompleteFocusSession.Result> {
@@ -126,6 +177,35 @@ export class LocalFocusSession
       .update(focusSessions)
       .set({ status: "cancelled", endedAt, actualDurationSeconds })
       .where(eq(focusSessions.id, params.id));
+  }
+
+  // Credita o tempo planejado (não o tempo real decorrido) — o usuário
+  // completou o que se propôs a fazer, só não voltou a tempo de ver o
+  // relógio zerar. Não usa `Date.now()` como fim para não inflar XP de uma
+  // sessão esquecida por horas ou dias. Devolve o XP calculado (em vez de
+  // creditar direto no mascote aqui) porque esse repositório só é dono da
+  // sessão de foco — creditar o mascote é orquestração de quem chama `start`
+  // (mesmo raciocínio de `completeFocusSessionAction`, ver `actions.ts`).
+  private async finalizeExpiredSession(session: domain.IFocusSession): Promise<number> {
+    const actualDurationSeconds = session.plannedDurationSeconds;
+    const endedAt = new Date(session.startedAt.getTime() + actualDurationSeconds * 1000);
+    const xpEarned = calculateXp(actualDurationSeconds);
+
+    // `AND status = 'running'` + `.returning()` torna isto uma atualização
+    // condicional: se uma chamada concorrente já finalizou esta MESMA
+    // sessão órfã primeiro, o status já não é mais "running" quando esta
+    // instrução roda, então 0 linhas são afetadas aqui. Sem essa checagem,
+    // duas chamadas de `start()` quase simultâneas podiam finalizar a
+    // mesma sessão órfã cada uma na sua vez e as duas creditarem XP no
+    // mascote pra um único período de foco (achado numa revisão de
+    // código) - só quem realmente ganhou a corrida devolve um XP > 0 aqui.
+    const [updated] = await db
+      .update(focusSessions)
+      .set({ status: "completed", endedAt, actualDurationSeconds, xpEarned })
+      .where(and(eq(focusSessions.id, session.id), eq(focusSessions.status, "running")))
+      .returning();
+
+    return updated ? xpEarned : 0;
   }
 
   async getActive(): Promise<domain.IFocusSession | null> {

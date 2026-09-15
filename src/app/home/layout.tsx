@@ -52,7 +52,7 @@ const HomeLayout = async ({ children }: { children: React.ReactNode }) => {
         <TaskReminders />
         <CommandPalette />
         <MascotPet characterId={mascotCharacterId} />
-        <GuidedTour active={showGuidedTour} mascotName={mascot.name} />
+        <GuidedTour active={showGuidedTour} mascotName={mascot.name} userId={session?.user?.id ?? ""} />
         <FocusMiniWidget />
       </div>
     </FocusSessionProvider>

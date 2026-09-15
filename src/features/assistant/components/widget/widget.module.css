@@ -12,6 +12,15 @@
 .bubble {
   position: relative;
   max-width: 18rem;
+  /* Limite de altura + scroll interno: numa tela baixa (celular), um
+     balão sem teto podia crescer o bastante pra cobrir um cartão ou
+     campo inteiro atrás dele (achado em auditoria visual mobile — a
+     mesma altura sem limite em telas de ~700-800px de altura chegava a
+     tampar conteúdo real). O balão nunca precisa de mais que uma
+     mensagem curta + o botão de ouvir, então este teto é generoso, não
+     apertado. */
+  max-height: min(60vh, 20rem);
+  overflow-y: auto;
   padding: var(--space-3) var(--space-6) var(--space-3) var(--space-3);
   border-radius: var(--radius-lg);
   background: var(--color-surface-elevated);

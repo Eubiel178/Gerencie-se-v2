@@ -23,7 +23,7 @@ export const validationSchema = z
     // e um union de literais não aceita `""` no tipo — o `.refine` cobre a
     // validação de "é uma tag válida" sem estreitar o tipo do campo.
     tag: z.string().refine((value) => (TASK_TAGS as readonly string[]).includes(value), {
-      message: "Selecione uma tag",
+      message: "Selecione um tipo de tarefa",
     }),
     title: z.string().min(1, "Campo obrigatório").max(TITLE_MAX_LENGTH, TITLE_TOO_LONG_MESSAGE),
     description: z.string().max(DESCRIPTION_MAX_LENGTH, DESCRIPTION_TOO_LONG_MESSAGE),
@@ -66,7 +66,7 @@ export const validationSchema = z
 // `validationSchema` acima, sobre o formato já tipado que chega na action
 // (ex.: `reminderOffsetsMinutes` já como number[], não string[] de form).
 const taskFieldsShape = {
-  tag: z.enum(TASK_TAGS, { message: "Selecione uma tag" }),
+  tag: z.enum(TASK_TAGS, { message: "Selecione um tipo de tarefa" }),
   title: z.string().min(1, "Campo obrigatório").max(TITLE_MAX_LENGTH, TITLE_TOO_LONG_MESSAGE),
   description: z.string().max(DESCRIPTION_MAX_LENGTH, DESCRIPTION_TOO_LONG_MESSAGE),
   priority: z.enum(["baixa", "media", "alta", "critica"]),

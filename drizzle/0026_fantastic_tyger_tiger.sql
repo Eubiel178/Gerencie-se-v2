@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "focus_session_one_running_per_user" ON "focus_session" USING btree ("user_id") WHERE "focus_session"."status" = 'running';

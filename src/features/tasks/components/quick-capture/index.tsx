@@ -91,7 +91,7 @@ export function QuickCapture({ triggerClassName }: { triggerClassName?: string }
               </Input.Root>
 
               <p className={styles.hint}>
-                Vira uma tarefa sem categoria/prioridade definida — ajuste depois, se quiser.
+                Vira uma tarefa sem tipo/prioridade definidos — ajuste depois, se quiser.
               </p>
             </Form.Wrapper>
 

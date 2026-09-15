@@ -20,7 +20,6 @@
 .itemDate{color:var(--color-text-muted);font-size:var(--font-size-xs)}
 .itemMain{color:var(--color-text);font-size:var(--font-size-sm)}
 .sourceTag{color:var(--color-text-muted);font-size:var(--font-size-xs)}
-.emptyMessage{margin:0;font-family:var(--font-sans);color:var(--color-info);font-size:var(--font-size-md)}
 .inlineMessage{margin:0;font-family:var(--font-sans);color:var(--color-info);font-size:var(--font-size-md)}
 .tabButton{background:var(--color-surface-elevated);border-color:var(--color-border);color:var(--color-text);box-shadow:0 1px 2px var(--color-shadow)}
 .finishButton{background:var(--color-surface-elevated);border-color:var(--color-border);color:var(--color-danger);box-shadow:0 1px 2px var(--color-shadow)}

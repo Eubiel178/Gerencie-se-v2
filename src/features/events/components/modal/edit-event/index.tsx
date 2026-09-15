@@ -99,6 +99,8 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
           <Form.Root onSubmit={handleFormSubmit}>
             <Form.Wrapper>
               <Input.Root sharedProps={{ error: errors.title?.message }}>
+                <Input.Label htmlFor="title">Título</Input.Label>
+
                 <Input.Wrapper>
                   <Input.Field
                     className={styles.titleField}

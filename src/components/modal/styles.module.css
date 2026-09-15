@@ -7,6 +7,18 @@
   justify-content: center;
   background: var(--color-overlay);
   padding: var(--space-4);
+  /* `opacity: 1` declarado aqui FORA da animação, de propósito (achado em
+     auditoria visual: modal reportado preso em ~24% de opacidade,
+     ilegível, em desktop — sem reproduzir de forma determinística, mas o
+     mecanismo mais provável é este: sem um valor de repouso próprio, a
+     opacidade do elemento depende inteiramente da animação abaixo
+     terminar limpa; qualquer interrupção dela por throttling do navegador
+     (aba em segundo plano, pressão de GPU) podia deixar o elemento preso
+     num quadro intermediário, sem nada garantindo o valor final). Com
+     `opacity: 1` já sendo o estado de repouso, a animação continua
+     fazendo o fade visual normalmente, mas nunca é a ÚNICA fonte da
+     opacidade final. */
+  opacity: 1;
   animation: overlayIn var(--duration-fast) var(--easing-standard);
 }
 
@@ -23,6 +35,8 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   box-shadow: 0 1.5rem 3rem var(--color-shadow);
+  /* Mesmo raciocínio do `opacity: 1` em `.overlay` acima. */
+  opacity: 1;
   animation: modalIn var(--duration-base) var(--easing-standard);
 }
 

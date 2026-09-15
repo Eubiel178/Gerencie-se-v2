@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { Alert, Button, ConfirmIconButton, Input } from "@/components";
+import { Alert, Button, ConfirmIconButton, EmptyState, Input } from "@/components";
 
 import {
   deleteConnectionAction,
@@ -104,10 +104,10 @@ export function PeoplePanel({ connections }: { connections: IConnection[] }) {
       {error && <Alert variant="error">{error}</Alert>}
 
       {connections.length === 0 ? (
-        <p className={styles.empty}>
+        <EmptyState tone="muted">
           Ninguém conectado ainda. Convide alguém pra compartilhar tarefas,
           rotina, hábitos ou metas.
-        </p>
+        </EmptyState>
       ) : (
         <ul className={styles.list}>
           {connections.map((connection) => (

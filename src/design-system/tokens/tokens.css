@@ -113,14 +113,23 @@
    *           habits, routine, assistant/widget)
    *   720px — colapso da sidebar em `home-layout.module.css` (decisão
    *           estrutural, não mexer sem testar visualmente em várias
-   *           larguras — não é só cosmético)
-   *   760px — landing page + tela de auth (login/registro)
-   *   768px — dashboard
+   *           larguras — não é só cosmético). Reaproveitado tal-e-qual
+   *           por `focus-mini-widget.module.css` e por
+   *           `mascot-pet/viewport-bounds.ts` (mesmo corte: é quando a
+   *           sidebar deixa de existir de verdade).
+   *   760px — corte mobile↔tablet em telas SEM sidebar (landing page,
+   *           login/registro, vitrine de mascotes da landing) — usado
+   *           de forma consistente nos 3 lugares, nada pra unificar.
    *
-   * 720/760/768 são conceitualmente "o mesmo" corte mobile↔tablet mas
-   * divergiram com o tempo — unificar é uma melhoria real, mas exige
-   * validação visual em cada breakpoint antes de mudar (ver seção 84 do
-   * guia do projeto), não incluída nesta limpeza.
+   * Reavaliado (2026-09): uma versão anterior deste comentário também
+   * listava "768px — dashboard" como um 3º valor divergente dos dois
+   * acima. Não é: o dashboard nunca usa `768px` como breakpoint de
+   * verdade — usa `@media (max-width: 1016px)`
+   * (`dashboard.module.css`), onde 1016 = 768 (largura de CONTEÚDO
+   * desejada pra 2 colunas) + 248 (largura da sidebar). É um cálculo
+   * diferente em natureza de 720/760 (que são largura de JANELA, sem
+   * sidebar no cálculo), não a mesma medida "divergida" — misturar os
+   * dois seria o bug, não uma correção.
    */
 }
 

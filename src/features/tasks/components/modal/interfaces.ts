@@ -4,7 +4,8 @@ import { validationSchema } from "@/validation/task-schema";
 
 import { ITask } from "@/features/tasks/domain";
 import { LoadAcceptedConnections } from "@/features/connections/domain";
-import { ChipOption } from "@/components";
+
+export { PRIORITY_OPTIONS, PRIORITY_LABELS } from "@/lib/priority";
 
 export interface FormData extends z.infer<typeof validationSchema> {}
 
@@ -23,17 +24,3 @@ export interface IAddTaskProps {
   isGoogleConnected: boolean;
   connections: LoadAcceptedConnections.Model;
 }
-
-export const PRIORITY_OPTIONS: ChipOption[] = [
-  { label: "Baixa", value: "baixa", tone: "low" },
-  { label: "Média", value: "media", tone: "medium" },
-  { label: "Alta", value: "alta", tone: "high" },
-  { label: "Crítica", value: "critica", tone: "critical" },
-];
-
-export const PRIORITY_LABELS: Record<string, string> = {
-  baixa: "Baixa",
-  media: "Média",
-  alta: "Alta",
-  critica: "Crítica",
-};

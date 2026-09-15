@@ -142,13 +142,14 @@ export function PushToggle() {
     );
   }
 
+  // Push usa a MESMA permissão do navegador que `NotificationsToggle`
+  // (não existe uma permissão "só push" separada) - sem isso, os dois
+  // ficavam bloqueados ao mesmo tempo e mostravam o aviso idêntico duas
+  // vezes seguidas na tela (achado em auditoria visual: "parece bug").
+  // `NotificationsToggle` já mostra o aviso (vem antes na seção
+  // "Lembretes", ver `settings/index.tsx`) - aqui só omite a repetição.
   if (status === "denied") {
-    return (
-      <p className={styles.mutedText}>
-        Notificações bloqueadas para este site. Para ativar, permita
-        notificações do Gerencie-se nas configurações do seu navegador.
-      </p>
-    );
+    return null;
   }
 
   if (status === "subscribed") {

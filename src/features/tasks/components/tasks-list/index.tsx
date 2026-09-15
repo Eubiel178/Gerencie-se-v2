@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { useFormTags } from "@/features/tasks/hooks/use-form-tags";
 import { useParamsUrl } from "@/hooks/use-params-url";
 
+import { EmptyState } from "@/components";
 import { Card } from "./card";
 
 import { ITask } from "@/features/tasks/domain";
@@ -61,9 +62,7 @@ export function TasksList({ tasksList, isGoogleConnected, connections }: TasksLi
           ))}
         </ul>
       ) : (
-        <div className={styles.empty}>
-          <p className={styles.emptyMessage}>Nenhuma tarefa adicionada</p>
-        </div>
+        <EmptyState variant="box">Nenhuma tarefa adicionada</EmptyState>
       )}
     </>
   );

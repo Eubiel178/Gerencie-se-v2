@@ -60,6 +60,24 @@ export function pickRandomTarget(bounds: MascotBounds): MascotVector2 {
   };
 }
 
+/** Canto mais próximo da posição atual (não aleatório) - usado pra
+ * recolher o bichinho pra fora do caminho ao entrar em modo quieto (ver
+ * `MascotBehavior.setQuietMode`), nunca pra passeio autônomo comum. */
+export function nearestCornerTarget(position: MascotVector2, bounds: MascotBounds): MascotVector2 {
+  const width = Math.max(bounds.maxX - bounds.minX, 0);
+  const height = Math.max(bounds.maxY - bounds.minY, 0);
+  const insetX = width * CORNER_INSET_RATIO;
+  const insetY = height * CORNER_INSET_RATIO;
+
+  const centerX = (bounds.minX + bounds.maxX) / 2;
+  const centerY = (bounds.minY + bounds.maxY) / 2;
+
+  const cornerX = position.x < centerX ? bounds.minX + insetX : bounds.maxX - insetX;
+  const cornerY = position.y < centerY ? bounds.minY + insetY : bounds.maxY - insetY;
+
+  return clampToBounds({ x: cornerX, y: cornerY }, bounds);
+}
+
 function pickCornerTarget(bounds: MascotBounds, width: number, height: number): MascotVector2 {
   const insetX = width * CORNER_INSET_RATIO;
   const insetY = height * CORNER_INSET_RATIO;

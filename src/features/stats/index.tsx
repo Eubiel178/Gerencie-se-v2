@@ -15,12 +15,14 @@ import { FocusWeeksChart } from "./focus-weeks-chart";
 import { HydrationWeeksChart } from "./hydration-weeks-chart";
 import { RunningWeeksChart } from "./running-weeks-chart";
 import { HabitsWeeksChart } from "./habits-weeks-chart";
+import { TopTasksByFocusTime } from "./top-tasks-by-focus-time";
 
 import {
   calculateAverageGoalProgress,
   calculateBestHabitStreak,
   calculateHydrationAdherence,
   calculateTaskStats,
+  calculateTopTasksByFocusTime,
   calculateWeeklyFocusHours,
   calculateWeeklyRunningStats,
 } from "./calculations";
@@ -71,6 +73,7 @@ export async function Stats() {
   const hydrationDays = calculateHydrationAdherence(hydrationWeek, hydrationToday.goalMl);
   const avgGoalProgress = calculateAverageGoalProgress(goals);
   const weeklyRunning = calculateWeeklyRunningStats(running.sessions);
+  const topTasksByFocusTime = calculateTopTasksByFocusTime(focusHistoryForChart, tasks);
 
   return (
     <section className={styles.section}>
@@ -128,6 +131,10 @@ export async function Stats() {
           <RunningWeeksChart sessions={runningHistoryForChart} fetchedWeeksBack={WEEKS_BACK} />
         </Card>
       </div>
+
+      <Card title="Tarefas em que mais focou (últimos 6 meses)">
+        <TopTasksByFocusTime tasks={topTasksByFocusTime} />
+      </Card>
 
       <Card title="Conquistas">
         <AchievementsGrid achievements={achievements} />

@@ -19,4 +19,13 @@
 .googleButtonContent{display:flex;align-items:center;gap:var(--space-2);background:transparent}
 .authSwitch{display:flex;align-items:center;gap:var(--space-2)}
 .authSwitchText{margin:0;font-family:var(--font-sans);color:var(--color-text)}
-@media(max-width:760px){.authPage{display:block;min-height:auto}.visual{display:none}.main{min-height:100vh;min-height:100dvh;padding:var(--space-5)}.formCard{max-width:30rem}}
+/* No mobile a ilustração some (`.visual{display:none}`) e o formulário
+   vira o único conteúdo da tela - centralizar verticalmente (herdado da
+   regra base, pensada pra quando `.visual` existe ao lado) deixava até
+   ~45-50% da tela em branco acima/abaixo em formulários mais curtos
+   (Esqueci a senha, Login) porque cada tela tem uma altura de conteúdo
+   diferente flutuando no meio de um container de 100dvh (achado de
+   auditoria visual). `align-items:flex-start` + um respiro fixo no topo
+   (em vez de centralizar) resolve pras 4 telas de uma vez, sem depender
+   da altura de cada uma. */
+@media(max-width:760px){.authPage{display:block;min-height:auto}.visual{display:none}.main{min-height:100vh;min-height:100dvh;padding:var(--space-5);align-items:flex-start;padding-top:var(--space-7)}.formCard{max-width:30rem}}

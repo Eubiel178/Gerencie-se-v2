@@ -10,11 +10,22 @@ const OPTIONS: { value: ThemePreference; label: string }[] = [
   { value: "dark", label: "Escuro" },
 ];
 
-export function ThemeToggle() {
+interface ThemeToggleProps {
+  /** Encolhe em telas estreitas (ver `.compact` no CSS) - só tem efeito
+   * dentro do breakpoint mobile já documentado em `tokens.css`, nunca no
+   * tamanho normal do componente em telas largas. Usado hoje só no
+   * cabeçalho da landing page, o único lugar onde o seletor de tema
+   * precisa dividir espaço com marca + "Entrar" numa faixa estreita
+   * (achado em auditoria visual: sem isso, "Entrar" ficava cortado). */
+  compact?: boolean;
+}
+
+export function ThemeToggle({ compact }: ThemeToggleProps = {}) {
   const { preference, setPreference } = useTheme();
+  const groupClassName = compact ? `${styles.group} ${styles.compact}` : styles.group;
 
   return (
-    <div className={styles.group} role="group" aria-label="Tema da interface">
+    <div className={groupClassName} role="group" aria-label="Tema da interface">
       {OPTIONS.map((option) => {
         const isActive = preference === option.value;
 

@@ -41,7 +41,7 @@ export default function LandingPage() {
           <a href="#recursos">Recursos</a>
         </nav>
         <div className={styles.headerActions}>
-          <ThemeToggle />
+          <ThemeToggle compact />
           <Link className={styles.loginLink} href="/login">
             Entrar
           </Link>

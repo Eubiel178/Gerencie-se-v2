@@ -145,6 +145,54 @@ test("MascotBehavior: com modo quieto (Foco), nunca sai do idle sozinho (só rea
   assert.equal(behavior.snapshot().state, "interaction");
 });
 
+test("MascotBehavior: ao ligar o modo quieto longe de um canto, reposiciona na hora pro canto mais próximo (nunca anda até lá, achado: podia atravessar o relógio do Foco por cima)", () => {
+  const behavior = new MascotBehavior({ x: 100, y: 100 }); // centro exato de BOUNDS (0-200)
+
+  behavior.setQuietMode(true, BOUNDS);
+
+  const snapshot = behavior.snapshot();
+  assert.equal(snapshot.state, "idle");
+  assert.notDeepEqual(snapshot.position, { x: 100, y: 100 });
+});
+
+test("MascotBehavior: depois de reposicionado pro canto, fica idle lá pra sempre (modo quieto continua ligado)", () => {
+  const behavior = new MascotBehavior({ x: 100, y: 100 });
+  behavior.setQuietMode(true, BOUNDS);
+  const afterEnter = behavior.snapshot();
+
+  behavior.tick(30_000, BOUNDS);
+  assert.equal(behavior.snapshot().state, "idle");
+  assert.deepEqual(behavior.snapshot().position, afterEnter.position);
+});
+
+test("MascotBehavior: já perto de um canto ao ligar o modo quieto, não muda de posição", () => {
+  const corner = { x: 24, y: 24 }; // já em cima do canto mais próximo (inset de 12% de 200px)
+  const behavior = new MascotBehavior(corner);
+
+  behavior.setQuietMode(true, BOUNDS);
+
+  assert.equal(behavior.snapshot().state, "idle");
+  assert.deepEqual(behavior.snapshot().position, corner);
+});
+
+test("MascotBehavior: sem bounds, ligar modo quieto não reposiciona (mesmo efeito de antes de existir o recuo)", () => {
+  const behavior = new MascotBehavior({ x: 100, y: 100 });
+  behavior.setQuietMode(true);
+
+  assert.equal(behavior.snapshot().state, "idle");
+  assert.deepEqual(behavior.snapshot().position, { x: 100, y: 100 });
+});
+
+test("MascotBehavior: arrastando quando o modo quieto liga, nunca reposiciona sozinho (arrasto sempre manda)", () => {
+  const behavior = new MascotBehavior({ x: 100, y: 100 });
+  behavior.startDrag();
+
+  behavior.setQuietMode(true, BOUNDS);
+
+  assert.equal(behavior.snapshot().state, "interaction");
+  assert.deepEqual(behavior.snapshot().position, { x: 100, y: 100 });
+});
+
 test("MascotBehavior: velocidade no snapshot é 0 parado/reagindo e positiva durante walk/run", () => {
   const behavior = new MascotBehavior({ x: 100, y: 100 });
   assert.equal(behavior.snapshot().speed, 0);

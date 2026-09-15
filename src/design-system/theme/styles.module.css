@@ -36,3 +36,16 @@
 .optionActive:hover {
   color: var(--color-on-highlight);
 }
+
+/* Só tem efeito dentro do breakpoint mobile (ver `ThemeToggleProps.compact`)
+   - em telas largas, `.compact` some e o grupo usa o tamanho normal. */
+@media (max-width: 640px) {
+  .compact {
+    gap: 0;
+    padding: 0.15rem;
+  }
+  .compact .option {
+    padding: 0.4rem 0.5rem;
+    font-size: var(--font-size-xs);
+  }
+}

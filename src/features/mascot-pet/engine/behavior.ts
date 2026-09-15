@@ -7,6 +7,7 @@ import {
   clampToBounds,
   distance,
   isNearEdge,
+  nearestCornerTarget,
   pickRandomTarget,
   stepToward,
 } from "./movement";
@@ -122,9 +123,31 @@ export class MascotBehavior {
    * personalidade e concentração, concentração vence") - mesmo efeito de
    * `reducedMotion` (só fica idle, nunca sai andando sozinho), mas por
    * um motivo diferente (rota atual, não preferência de acessibilidade),
-   * por isso é uma flag própria em vez de reaproveitar a mesma. */
-  setQuietMode(quiet: boolean): void {
+   * por isso é uma flag própria em vez de reaproveitar a mesma.
+   *
+   * Ao LIGAR o modo quieto, reposiciona na hora pro canto mais próximo
+   * (nunca anda até lá) - sem isso, o bichinho ficava parado onde quer
+   * que estivesse no instante da troca de rota, o que podia ser bem no
+   * meio da tela (é literalmente onde ele nasce, ver `MascotRuntime` -
+   * constructor) - em cima do relógio do Foco, por exemplo (achado em
+   * teste manual). Andar até o canto em vez de reposicionar na hora
+   * *parece* mais natural, mas significa atravessar o painel de conteúdo
+   * por cima durante vários segundos primeiro - exatamente o que o modo
+   * quieto tenta evitar; a troca de rota já é um corte abrupto por si só,
+   * então reaparecer já recolhido no canto não chama mais atenção do que
+   * isso. `bounds` é opcional só pra não quebrar quem ainda não passa
+   * (nenhum reposicionamento acontece sem ele).
+   */
+  setQuietMode(quiet: boolean, bounds?: MascotBounds): void {
+    const enteringQuiet = quiet && !this.quietMode;
     this.quietMode = quiet;
+
+    if (!enteringQuiet || this.dragging || !bounds) return;
+
+    const corner = nearestCornerTarget(this.position, bounds);
+    this.position = corner;
+    this.target = corner;
+    this.goIdle();
   }
 
   /** Reação ao clique (regra 9) - sempre pode interromper o que estava

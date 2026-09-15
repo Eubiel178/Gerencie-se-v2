@@ -205,6 +205,44 @@ export function calculateWeeklyRunningDistanceByWeek(
   return weeks;
 }
 
+export interface TaskFocusTime {
+  taskId: string;
+  title: string;
+  totalMinutes: number;
+}
+
+/** Quanto tempo de foco (soma de todas as sessões, concluídas ou
+ * canceladas — o tempo foi gasto de verdade nos dois casos) foi
+ * dedicado a cada tarefa, do maior pro menor. Sessões sem `taskId`
+ * (foco livre, sem tarefa associada) não entram — não têm o que
+ * agrupar. Uma tarefa apagada depois de ter sessões de foco continua
+ * aparecendo (`título` cai pro rótulo genérico), em vez de sumir do
+ * relatório. */
+export function calculateTopTasksByFocusTime(
+  sessions: Pick<IFocusSession, "taskId" | "actualDurationSeconds">[],
+  tasks: Pick<ITask, "id" | "title">[],
+  limit: number = 5
+): TaskFocusTime[] {
+  const titleByTaskId = new Map(tasks.map((task) => [task.id, task.title]));
+  const secondsByTaskId = new Map<string, number>();
+
+  for (const session of sessions) {
+    if (!session.taskId) continue;
+    const previous = secondsByTaskId.get(session.taskId) ?? 0;
+    secondsByTaskId.set(session.taskId, previous + (session.actualDurationSeconds ?? 0));
+  }
+
+  return [...secondsByTaskId.entries()]
+    .map(([taskId, totalSeconds]) => ({
+      taskId,
+      title: titleByTaskId.get(taskId) ?? "Tarefa removida",
+      totalMinutes: Math.round(totalSeconds / 60),
+    }))
+    .filter((entry) => entry.totalMinutes > 0)
+    .sort((a, b) => b.totalMinutes - a.totalMinutes)
+    .slice(0, limit);
+}
+
 /** Progresso médio só entre metas ATIVAS (arquivadas não contam — já
  * foram concluídas ou abandonadas, distorceriam a média). */
 export function calculateAverageGoalProgress(

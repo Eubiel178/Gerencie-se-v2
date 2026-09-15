@@ -89,22 +89,6 @@
   margin: 0;
   list-style: none;
 }
-.empty {
-  display: grid;
-  place-items: center;
-  min-height: 14rem;
-  padding: var(--space-6);
-  border: 1px dashed var(--color-border);
-  border-radius: var(--radius-lg);
-  text-align: center;
-  background: var(--color-surface);
-}
-.emptyMessage {
-  margin: 0;
-  font-family: var(--font-sans);
-  color: var(--color-info);
-  font-size: var(--font-size-md);
-}
 .taskCard {
   display: flex;
   flex-direction: column;
@@ -164,6 +148,14 @@
 .headerInner {
   display: flex;
   flex: 1;
+  /* Sem isso, um item flex nunca encolhe abaixo da largura do próprio
+     conteúdo (padrão `min-width:auto`) - com até 4 botões de ação
+     visíveis ao mesmo tempo (Começar/Focar/Excluir/Editar) + a tag, o
+     cabeçalho ficava mais largo que o card e o último ícone (Editar)
+     saía cortado pelo `overflow:hidden` do card (achado em auditoria
+     visual). `.tagLabel` abaixo é quem cede espaço primeiro (trunca),
+     nunca os botões de ação. */
+  min-width: 0;
   justify-content: space-between;
   align-items: center;
   padding: var(--space-2);
@@ -171,16 +163,22 @@
 }
 .headerLeft {
   display: flex;
+  min-width: 0;
   gap: var(--space-2);
   align-items: center;
   color: var(--color-text);
 }
 .headerActions {
   display: flex;
+  flex-shrink: 0;
   gap: var(--space-3);
   color: var(--color-text);
 }
 .tagLabel {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   margin: 0;
   padding: 0.2rem var(--space-2);
   border-radius: var(--radius-full);

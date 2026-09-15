@@ -96,8 +96,8 @@ export function RoutineListItem({ item, taskOptions, connections, linkedTaskTitl
         {!item.isSharedWithMe && (
           <ConfirmIconButton
             icon="FaTrash"
-            ariaLabel={`Remover ${item.title} da rotina`}
-            confirmText="Remover da rotina?"
+            ariaLabel={`Excluir ${item.title} da rotina`}
+            confirmText="Excluir este item da rotina?"
             loading={isRemoving}
             onConfirm={handleRemove}
           />

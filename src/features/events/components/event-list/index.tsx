@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 
+import { EmptyState } from "@/components";
 import { Card } from "./card";
 
 import { IEvent } from "@/features/events/domain";
@@ -27,7 +28,7 @@ export function EventList({ eventsList }: { eventsList: IEvent[] }) {
           ))}
         </ul>
       ) : (
-        <p className={styles.emptyState}>Nenhum evento adicionado</p>
+        <EmptyState>Nenhum evento adicionado</EmptyState>
       )}
     </>
   );

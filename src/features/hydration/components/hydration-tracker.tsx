@@ -11,7 +11,7 @@ import {
   logWaterAction,
   updateHydrationGoalAction,
 } from "@/features/hydration/actions";
-import { IHydrationDay, IHydrationSummary } from "@/features/hydration/domain";
+import { IHydrationDay, IHydrationSummary, calculateHydrationGoalPercent } from "@/features/hydration/domain";
 
 import { emitMascotEvent } from "@/features/mascot-pet";
 
@@ -105,7 +105,7 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
     router.refresh();
   }
 
-  const percent = Math.min(100, Math.round((today.totalMl / today.goalMl) * 100));
+  const percent = calculateHydrationGoalPercent(today);
   const maxWeekMl = Math.max(...week.map((day) => day.totalMl), today.goalMl);
 
   return (

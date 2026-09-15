@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { Button, Modal, ModalHeader } from "@/components";
+import { Button, Input, Modal, ModalHeader } from "@/components";
 
 import { IMascotState, MascotEvent } from "@/features/focus/domain";
 import { useFocusSession } from "@/features/focus/focus-session-context";
@@ -26,11 +26,20 @@ interface FocusTask {
   completed: boolean;
 }
 
+interface PendingTaskOption {
+  id: string;
+  title: string;
+}
+
 interface TimerProps {
   mascot: IMascotState;
   // Vem de `Focus` (ver `src/features/focus/index.tsx`) - já resolvida
   // no servidor a partir da sessão ativa ou do `?taskId=` da URL.
   task?: FocusTask | null;
+  // Tarefas pendentes pra escolher direto aqui (sem precisar vir da tela
+  // de Tarefas com "Focar nesta tarefa") - só usado quando nenhuma sessão
+  // está rodando (ver `pickerTask` abaixo).
+  pendingTasks: PendingTaskOption[];
 }
 
 /**
@@ -40,12 +49,27 @@ interface TimerProps {
  * de verdade (esta página + `FocusMiniWidget`) disputariam quem conclui
  * a sessão quando o tempo acaba - ver comentário completo no provider.
  */
-export function Timer({ mascot, task }: TimerProps) {
+export function Timer({ mascot, task, pendingTasks }: TimerProps) {
   const router = useRouter();
   const { session, remaining, isBusy, lastCompletion, start, complete, cancel, extend, clearLastCompletion } =
     useFocusSession();
 
   const [plannedMinutes, setPlannedMinutes] = useState(25);
+  // Escolha feita aqui na tela de Foco, pra quando NENHUMA tarefa já veio
+  // pré-selecionada da URL (`task`) - permite focar numa tarefa específica
+  // sem precisar voltar pra tela de Tarefas primeiro. `task` sempre manda
+  // quando existe (pré-seleção explícita ou sessão já em andamento).
+  const [pickedTaskId, setPickedTaskId] = useState<string>(task?.id ?? "");
+
+  const pickedTask = useMemo(
+    () => pendingTasks.find((candidate) => candidate.id === pickedTaskId) ?? null,
+    [pendingTasks, pickedTaskId]
+  );
+
+  // Só pra exibição/início da sessão antes de existir uma sessão de
+  // verdade - uma vez que a sessão começa, `task` (resolvido no servidor a
+  // partir da sessão ativa) volta a ser a fonte única de verdade.
+  const displayTask: FocusTask | null = task ?? (pickedTask ? { ...pickedTask, completed: false } : null);
   const [celebration, setCelebration] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [awayNudge, setAwayNudge] = useState<string | null>(null);
@@ -153,7 +177,10 @@ export function Timer({ mascot, task }: TimerProps) {
 
   async function handleStart() {
     setActionError(null);
-    const result = await start({ plannedDurationSeconds: plannedMinutes * 60, taskId: task?.id ?? null });
+    const result = await start({
+      plannedDurationSeconds: plannedMinutes * 60,
+      taskId: task?.id ?? (pickedTaskId || null),
+    });
     if (result.error) setActionError(result.error);
   }
 
@@ -205,7 +232,7 @@ export function Timer({ mascot, task }: TimerProps) {
 
       <Mascot mascot={mascot} mood={mood} />
 
-      {task && <p className={styles.taskBadge}>Focando em: {task.title}</p>}
+      {displayTask && <p className={styles.taskBadge}>Focando em: {displayTask.title}</p>}
 
       {celebration && <p className={styles.celebrationMessage}>{celebration}</p>}
       {actionError && <p className={styles.errorMessage}>{actionError}</p>}
@@ -245,6 +272,23 @@ export function Timer({ mascot, task }: TimerProps) {
         </>
       ) : (
         <>
+          {!task && pendingTasks.length > 0 && (
+            <Input.Root>
+              <Input.Label htmlFor="focus-task-picker">Focar em uma tarefa (opcional)</Input.Label>
+              <Input.Wrapper>
+                <Input.FieldSelect
+                  name="focus-task-picker"
+                  value={pickedTaskId}
+                  onChange={(event) => setPickedTaskId(event.target.value)}
+                  optionsArray={[
+                    { value: "", label: "Sem tarefa (foco livre)" },
+                    ...pendingTasks.map((option) => ({ value: option.id, label: option.title })),
+                  ]}
+                />
+              </Input.Wrapper>
+            </Input.Root>
+          )}
+
           <div className={styles.presets}>
             {PRESETS_MINUTES.map((minutes) => (
               <Button.Root

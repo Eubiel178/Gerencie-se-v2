@@ -65,7 +65,7 @@ export function TasksListHeader({
         <Input.Root>
           <Input.Wrapper>
             <Input.FieldSelect
-              title="Listar tarefas por tag"
+              title="Listar tarefas por tipo"
               optionsArray={listingTypeOptions}
               onChange={handleTag}
             />

@@ -75,7 +75,7 @@ export function Auth() {
 
   return (
     <section className={styles.formCard}>
-      <h1>Login</h1>
+      <h1>Entrar</h1>
 
       <Form.Root onSubmit={handleSubmit(handleOnSubmit)}>
         <Form.Wrapper>
@@ -84,7 +84,7 @@ export function Auth() {
             <Input.Wrapper>
               <Input.Field
                 {...register("email")}
-                placeholder="Seu email aqui"
+                placeholder="nome@exemplo.com"
                 autoFocus
               />
             </Input.Wrapper>
@@ -95,10 +95,7 @@ export function Auth() {
           <Input.Root sharedProps={{ error: errors.password?.message }}>
             <Input.Label htmlFor="password">Senha</Input.Label>
             <Input.Wrapper>
-              <Input.FieldPassword
-                {...register("password")}
-                placeholder="Sua senha aqui"
-              />
+              <Input.FieldPassword {...register("password")} />
             </Input.Wrapper>
 
             <Input.HelperText />

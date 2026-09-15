@@ -205,7 +205,7 @@ export class MascotRuntime {
    * componente React ao entrar/sair da rota, não uma preferência
    * persistida. */
   setQuietMode(quiet: boolean): void {
-    this.behavior.setQuietMode(quiet);
+    this.behavior.setQuietMode(quiet, this.bounds);
   }
 
   destroy(): void {

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { EmptyState } from "@/components";
 import { Card } from "@/features/dashboard/components/shared";
 
 import { toggleHabitLogAction } from "@/features/habits/actions";
@@ -34,7 +35,7 @@ export function HabitsToday({ habits, today }: HabitsTodayProps) {
   return (
     <Card title="Hábitos de hoje" href="/home/habits" linkLabel="Ver todos">
       {active.length === 0 ? (
-        <p className={styles.empty}>Nenhum hábito cadastrado ainda.</p>
+        <EmptyState tone="muted">Nenhum hábito cadastrado ainda.</EmptyState>
       ) : (
         <ul className={styles.list}>
           {active.map((habit) => (

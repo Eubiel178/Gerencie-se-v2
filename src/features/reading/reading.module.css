@@ -20,6 +20,5 @@
 .recTitle{margin:0;color:var(--color-text);font-size:var(--font-size-sm);font-weight:600}
 .recReason{margin:var(--space-1) 0 0;color:var(--color-text-muted);font-size:var(--font-size-xs)}
 .formError{margin:0;font-family:var(--font-sans);color:var(--color-danger);font-size:var(--font-size-md)}
-.emptyMessage{margin:0;font-family:var(--font-sans);color:var(--color-info);font-size:var(--font-size-md)}
 .progressPercent{margin:0;font-family:var(--font-sans);color:var(--color-info);font-size:var(--font-size-sm)}
 .itemError{margin:0;font-family:var(--font-sans);color:var(--color-danger);font-size:var(--font-size-md)}

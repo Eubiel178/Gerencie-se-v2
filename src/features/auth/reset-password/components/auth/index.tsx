@@ -76,7 +76,6 @@ export function Auth() {
               <Input.FieldPassword
                 {...register("password")}
                 id="password"
-                placeholder="Sua nova senha aqui"
                 autoFocus
               />
             </Input.Wrapper>
@@ -89,7 +88,6 @@ export function Auth() {
               <Input.FieldPassword
                 {...register("confirm_password")}
                 id="confirm_password"
-                placeholder="Confirme sua nova senha aqui"
               />
             </Input.Wrapper>
             <Input.HelperText />

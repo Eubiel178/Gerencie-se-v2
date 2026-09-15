@@ -1,8 +1,10 @@
 import Link from "next/link";
 
+import { EmptyState } from "@/components";
 import { Badge, Card } from "@/features/dashboard/components/shared";
 
 import { ITask } from "@/features/tasks/domain";
+import { PRIORITY_LABELS } from "@/lib/priority";
 
 import styles from "./tasks-summary.module.css";
 
@@ -17,7 +19,7 @@ export function TasksSummary({ tasks }: { tasks: ITask[] }) {
   return (
     <Card title="Tarefas pendentes" href="/home/tasks" linkLabel="Ver todas">
       {tasks.length === 0 ? (
-        <p className={styles.empty}>Nenhuma tarefa pendente. 🎉</p>
+        <EmptyState tone="muted">Nenhuma tarefa pendente. 🎉</EmptyState>
       ) : (
         <ul className={styles.list}>
           {tasks.map((task) => (
@@ -25,7 +27,7 @@ export function TasksSummary({ tasks }: { tasks: ITask[] }) {
               <Link href="/home/tasks" className={styles.link}>
                 {task.title}
               </Link>
-              <Badge tone={PRIORITY_TONE[task.priority]}>{task.priority}</Badge>
+              <Badge tone={PRIORITY_TONE[task.priority]}>{PRIORITY_LABELS[task.priority]}</Badge>
             </li>
           ))}
         </ul>

@@ -20,6 +20,7 @@ import { IGoal, calculateGoalProgress } from "@/features/goals/domain";
 import { LoadAcceptedConnections } from "@/features/connections/domain";
 
 import { emitMascotEvent } from "@/features/mascot-pet";
+import { useStepChecklist } from "@/hooks/use-step-checklist";
 
 import styles from "../../../goals.module.css";
 
@@ -31,28 +32,19 @@ interface CardProps {
 export function Card({ goal, connections }: CardProps) {
   const router = useRouter();
   const [isRemoving, setIsRemoving] = useState(false);
-  const [newStepTitle, setNewStepTitle] = useState("");
-  const [isAddingStep, setIsAddingStep] = useState(false);
-  // Uma etapa ocupada por vez — as outras continuam clicáveis normalmente,
-  // só a que está em requisição fica travada contra clique repetido.
-  const [busyStepId, setBusyStepId] = useState<string | null>(null);
 
-  async function handleRemoveGoal() {
-    setIsRemoving(true);
-
-    try {
-      await deleteGoalAction({ id: goal.id });
-      router.refresh();
-    } finally {
-      setIsRemoving(false);
-    }
-  }
-
-  async function handleToggleStep(stepId: string, completed: boolean) {
-    if (busyStepId) return;
-
-    setBusyStepId(stepId);
-    try {
+  const {
+    newTitle: newStepTitle,
+    setNewTitle: setNewStepTitle,
+    isAdding: isAddingStep,
+    busyStepId,
+    handleAddStep: submitNewStep,
+    handleToggleStep,
+    handleRemoveStep,
+  } = useStepChecklist({
+    addStep: (title) => createGoalStepAction({ goalId: goal.id, title }),
+    removeStep: (id) => deleteGoalStepAction({ id }),
+    toggleStep: async (stepId, completed) => {
       const result = await updateGoalStepAction({ id: stepId, completed });
 
       if (result.error) {
@@ -69,40 +61,26 @@ export function Card({ goal, connections }: CardProps) {
         const isNowComplete = calculateGoalProgress(stepsAfterToggle) >= 100;
         if (isNowComplete && !wasComplete) emitMascotEvent("goal-completed");
       }
+    },
+  });
 
-      router.refresh();
-    } finally {
-      setBusyStepId(null);
-    }
-  }
+  async function handleRemoveGoal() {
+    setIsRemoving(true);
 
-  async function handleRemoveStep(stepId: string) {
-    if (busyStepId) return;
-
-    setBusyStepId(stepId);
     try {
-      await deleteGoalStepAction({ id: stepId });
+      await deleteGoalAction({ id: goal.id });
       router.refresh();
     } finally {
-      setBusyStepId(null);
+      setIsRemoving(false);
     }
   }
 
-  async function handleAddStep(event: React.FormEvent) {
+  // `useStepChecklist.handleAddStep` não recebe evento - o form daqui
+  // (diferente do de `TaskSteps`, que não é um <form> de verdade) precisa
+  // impedir o recarregamento padrão do navegador antes de chamar ele.
+  function handleAddStep(event: React.FormEvent) {
     event.preventDefault();
-
-    const title = newStepTitle.trim();
-    if (!title) return;
-
-    setIsAddingStep(true);
-
-    try {
-      await createGoalStepAction({ goalId: goal.id, title });
-      setNewStepTitle("");
-      router.refresh();
-    } finally {
-      setIsAddingStep(false);
-    }
+    submitNewStep();
   }
 
   return (

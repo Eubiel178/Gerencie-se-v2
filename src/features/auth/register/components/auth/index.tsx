@@ -73,7 +73,7 @@ export function Auth() {
             <Input.Wrapper>
               <Input.Field
                 {...register("name")}
-                placeholder="Seu nome aqui"
+                placeholder="Maria Silva"
                 autoFocus
               />
             </Input.Wrapper>
@@ -86,8 +86,7 @@ export function Auth() {
             <Input.Wrapper>
               <Input.Field
                 {...register("email")}
-                type="email"
-                placeholder="Seu email aqui"
+                placeholder="nome@exemplo.com"
               />
             </Input.Wrapper>
 
@@ -97,10 +96,7 @@ export function Auth() {
           <Input.Root sharedProps={{ error: errors.password?.message }}>
             <Input.Label htmlFor="password">Senha</Input.Label>
             <Input.Wrapper>
-              <Input.FieldPassword
-                {...register("password")}
-                placeholder="Sua senha aqui"
-              />
+              <Input.FieldPassword {...register("password")} />
             </Input.Wrapper>
 
             <Input.HelperText />
@@ -109,10 +105,7 @@ export function Auth() {
           <Input.Root sharedProps={{ error: errors.confirm_password?.message }}>
             <Input.Label htmlFor="confirm_password">Confirmar senha</Input.Label>
             <Input.Wrapper>
-              <Input.FieldPassword
-                {...register("confirm_password")}
-                placeholder="Confirme sua senha aqui"
-              />
+              <Input.FieldPassword {...register("confirm_password")} />
             </Input.Wrapper>
 
             <Input.HelperText />
@@ -140,7 +133,7 @@ export function Auth() {
         <p className={styles.authSwitchText}>Já tem uma conta?</p>
 
         <Link className={styles.link} href="/login">
-          Logar
+          Entrar
         </Link>
       </div>
     </section>

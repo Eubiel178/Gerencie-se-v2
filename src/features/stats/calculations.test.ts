@@ -10,6 +10,7 @@ import {
   calculateHydrationAdherence,
   calculateHydrationAdherenceByWeek,
   calculateTaskStats,
+  calculateTopTasksByFocusTime,
   calculateWeeklyFocusHours,
   calculateWeeklyFocusHoursByWeek,
   calculateWeeklyRunningDistanceByWeek,
@@ -218,5 +219,49 @@ test("calculateHabitCompletionsByWeek: conta conclusões por semana", () => {
   ];
 
   assert.deepEqual(calculateHabitCompletionsByWeek(dates, 4, NOW), [0, 1, 0, 2]);
+});
+
+test("calculateTopTasksByFocusTime: soma sessões da mesma tarefa e ordena da maior pra menor", () => {
+  const tasks = [
+    { id: "t1", title: "Escrever relatório" },
+    { id: "t2", title: "Estudar para prova" },
+  ];
+  const sessions = [
+    { taskId: "t1", actualDurationSeconds: 600 },
+    { taskId: "t1", actualDurationSeconds: 900 },
+    { taskId: "t2", actualDurationSeconds: 1800 },
+  ];
+
+  assert.deepEqual(calculateTopTasksByFocusTime(sessions, tasks), [
+    { taskId: "t2", title: "Estudar para prova", totalMinutes: 30 },
+    { taskId: "t1", title: "Escrever relatório", totalMinutes: 25 },
+  ]);
+});
+
+test("calculateTopTasksByFocusTime: ignora sessões sem tarefa associada (foco livre)", () => {
+  const sessions = [{ taskId: null, actualDurationSeconds: 6000 }];
+  assert.deepEqual(calculateTopTasksByFocusTime(sessions, []), []);
+});
+
+test("calculateTopTasksByFocusTime: tarefa apagada continua aparecendo, com rótulo genérico", () => {
+  const sessions = [{ taskId: "gone", actualDurationSeconds: 600 }];
+  assert.deepEqual(calculateTopTasksByFocusTime(sessions, []), [
+    { taskId: "gone", title: "Tarefa removida", totalMinutes: 10 },
+  ]);
+});
+
+test("calculateTopTasksByFocusTime: respeita o limite pedido", () => {
+  const tasks = [
+    { id: "t1", title: "A" },
+    { id: "t2", title: "B" },
+    { id: "t3", title: "C" },
+  ];
+  const sessions = [
+    { taskId: "t1", actualDurationSeconds: 300 },
+    { taskId: "t2", actualDurationSeconds: 600 },
+    { taskId: "t3", actualDurationSeconds: 900 },
+  ];
+
+  assert.equal(calculateTopTasksByFocusTime(sessions, tasks, 2).length, 2);
 });
 

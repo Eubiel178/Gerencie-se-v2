@@ -122,7 +122,7 @@ export async function Settings({ searchParams }: SettingsProps) {
       description: "Tema claro, escuro ou do sistema",
       icon: "FaPalette",
       content: (
-        <section className={styles.settingPanel}>
+        <section className={`${styles.settingPanel} ${styles.settingPanelNarrow}`}>
           <div className={styles.panelHeader}>
             <h3>Aparência</h3>
             <p className={styles.panelText}>

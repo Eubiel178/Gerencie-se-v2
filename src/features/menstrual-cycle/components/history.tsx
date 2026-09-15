@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { Button, ConfirmIconButton } from "@/components";
+import { Button, ConfirmIconButton, EmptyState } from "@/components";
 
 import { deleteCycleEntryAction } from "@/features/menstrual-cycle/actions";
 import { ICycleEntry } from "@/features/menstrual-cycle/domain";
@@ -27,7 +27,7 @@ export function History({ entries }: { entries: ICycleEntry[] }) {
   }
 
   if (entries.length === 0) {
-    return <p className={styles.emptyMessage}>Nenhum registro ainda.</p>;
+    return <EmptyState>Nenhum registro ainda.</EmptyState>;
   }
 
   return (

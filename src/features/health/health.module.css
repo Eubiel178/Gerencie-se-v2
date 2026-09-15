@@ -4,6 +4,14 @@
 .disclaimer{padding:var(--space-3);border:1px dashed var(--color-border);border-radius:var(--radius-md);color:var(--color-text-muted);font-size:var(--font-size-xs);background:var(--color-surface)}
 .addForm{display:flex;gap:var(--space-2);flex-wrap:wrap;align-items:flex-start}
 .addForm>*{flex:1;min-width:9rem}
+/* Abaixo de 640px (mesmo corte de workspace/tasks/goals/habits/routine),
+   9rem de largura mínima por campo não sobra espaço pra 2 por linha sem
+   espremer - o campo de intervalo cortava o placeholder e o botão
+   "Adicionar" ficava espremido do lado dele (achado em auditoria visual
+   mobile). Cada campo/botão vira largura cheia, uma linha por vez. */
+@media (max-width: 640px) {
+  .addForm>*{flex:1 1 100%;min-width:0}
+}
 .groups{display:flex;flex-direction:column;gap:var(--space-5)}
 .categoryGroup{display:flex;flex-direction:column;gap:var(--space-3)}
 .categoryGroupTitle{margin:0;color:var(--color-text-muted);font-size:var(--font-size-xs);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
@@ -17,5 +25,4 @@
 .itemNotes{margin:0;color:var(--color-text-muted);font-size:var(--font-size-xs);font-style:italic}
 .overdueBadge{display:inline-flex;align-items:center;gap:.3rem;margin-top:.15rem;padding:.1rem .5rem;border-radius:var(--radius-full);background:color-mix(in srgb,var(--color-danger) 14%,transparent);color:var(--color-danger);font-size:var(--font-size-xs);font-weight:600;width:fit-content}
 .actions{display:flex;align-items:center;gap:var(--space-1)}
-.emptyMessage{margin:0;font-family:var(--font-sans);color:var(--color-info);font-size:var(--font-size-md)}
 .markDoneButton{background:var(--color-surface-elevated);border-color:var(--color-border);color:var(--color-text);box-shadow:0 1px 2px var(--color-shadow);padding:.45rem var(--space-3);font-size:var(--font-size-sm)}

@@ -9,6 +9,7 @@ import { and, eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import { accounts, sessions, users, verificationTokens } from "@/db/schema";
 import { handleFailedLoginAttempt, handleSuccessfulLogin } from "@/lib/login-attempt-tracker";
+import { normalizeEmail } from "@/utils/normalize-email";
 
 import authConfig from "./auth.config";
 
@@ -70,13 +71,7 @@ export const { handlers, auth, signIn } = NextAuth({
           return null;
         }
 
-        // Normaliza igual ao cadastro/convite (`registerAction`,
-        // `local-connection.ts`) - sem isso, um e-mail salvo como
-        // "user@x.com" não batia com "User@X.com"/" user@x.com " digitado
-        // depois, fazendo login (e, na mesma lógica, recuperação de
-        // senha) falhar silenciosamente pra uma conta que existe de
-        // verdade (achado da auditoria pré-deploy).
-        const normalizedEmail = email.trim().toLowerCase();
+        const normalizedEmail = normalizeEmail(email);
 
         const [user] = await db
           .select()

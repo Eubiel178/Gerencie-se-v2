@@ -120,8 +120,15 @@
   color: var(--color-text-muted);
 }
 
+.tableScroll {
+  /* Com o detalhe por dia, a tabela ganhou 7 colunas a mais - em telas
+     estreitas ela não cabe mais de largura inteira; rola só a tabela
+     (nunca a página) em vez de cortar/espremer o conteúdo. */
+  overflow-x: auto;
+}
 .table {
   width: 100%;
+  min-width: 34rem;
   border-collapse: collapse;
   font-family: var(--font-sans);
   font-size: var(--font-size-sm);
@@ -138,4 +145,9 @@
   text-align: left;
   padding: var(--space-2);
   border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+.table th:not(:first-child):not(:last-child),
+.table td:not(:first-child):not(:last-child) {
+  text-align: center;
 }

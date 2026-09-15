@@ -74,7 +74,7 @@ export function Auth() {
               <Input.Field
                 {...register("email")}
                 id="email"
-                placeholder="Seu email aqui"
+                placeholder="nome@exemplo.com"
                 autoFocus
               />
             </Input.Wrapper>

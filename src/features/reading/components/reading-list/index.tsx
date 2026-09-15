@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Input } from "@/components";
+import { EmptyState, Input } from "@/components";
 import { IReadingItem, ReadingStatus } from "@/features/reading/domain";
 import { filterReadingItems } from "@/features/reading/filter-reading-items";
 import { AddForm } from "./add-form";
@@ -32,7 +32,7 @@ export function ReadingList({ items }: ReadingListProps) {
       <AddForm />
 
       {items.length === 0 ? (
-        <p className={styles.emptyMessage}>Sua lista de leitura está vazia.</p>
+        <EmptyState>Sua lista de leitura está vazia.</EmptyState>
       ) : (
         <>
           <div className={styles.searchRow}>
@@ -61,7 +61,7 @@ export function ReadingList({ items }: ReadingListProps) {
           </div>
 
           {filteredItems.length === 0 ? (
-            <p className={styles.emptyMessage}>Nenhum item encontrado com esses filtros.</p>
+            <EmptyState>Nenhum item encontrado com esses filtros.</EmptyState>
           ) : (
             <ul className={styles.list}>
               {filteredItems.map((item) => (

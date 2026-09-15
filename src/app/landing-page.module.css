@@ -534,9 +534,35 @@
   .header {
     min-height: 4.5rem;
   }
-  .navigation,
-  .headerActions :first-child {
+  /* Sem isso, "Gerencie-se" quebrava em duas linhas assim que o resto do
+     cabeçalho (seletor de tema + "Entrar") disputava espaço - achado em
+     auditoria visual mobile. */
+  .brand {
+    flex-shrink: 0;
+    white-space: nowrap;
+    font-size: 0.95rem;
+  }
+  /* Os links de âncora ("Como funciona"/"Recursos") somem — continuam a
+     uma rolagem de distância, é uma página só. O seletor de tema NÃO
+     some mais: sumia sem nenhum jeito de acessá-lo no mobile (achado em
+     auditoria visual: troca de tema virava recurso exclusivo de
+     desktop) - só fica mais compacto (ver `.headerActions :first-child`
+     abaixo) pra caber ao lado de "Entrar". */
+  .navigation {
     display: none;
+  }
+  .headerActions {
+    gap: var(--space-2);
+  }
+  /* "Entrar" fica sozinho como único link do header no mobile - sem
+     padding próprio, a área de toque real era só o texto (~38x19px,
+     abaixo do mínimo de ~44px recomendado - achado em auditoria visual).
+     `display:inline-flex` + padding vertical garante um alvo de toque
+     de verdade sem mudar a aparência do link. */
+  .loginLink {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.85rem 0;
   }
   .hero {
     min-height: auto;

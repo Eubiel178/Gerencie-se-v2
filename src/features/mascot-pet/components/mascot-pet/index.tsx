@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 
 import { DEFAULT_MASCOT_CHARACTER_ID, MASCOT_CHARACTERS } from "@/features/mascot-pet/domain/characters";
+import { isQuietModeRoute } from "@/features/mascot-pet/engine/quiet-mode-routes";
 import { MascotRuntime } from "@/features/mascot-pet/engine/runtime";
 
 import styles from "./mascot-pet.module.css";
@@ -54,13 +55,14 @@ export function MascotPet({ characterId }: MascotPetProps) {
     // certa pro id atual.
   }, [character]);
 
-  // Modo Foco: presença reduzida enquanto a pessoa está tentando se
-  // concentrar - "no conflito entre personalidade e concentração,
-  // concentração vence" (pedido explícito). Efeito separado do de
-  // montagem: só precisa reagir a MUDANÇA de rota, nunca remonta o
-  // runtime inteiro por isso.
+  // Modo Foco (e outras rotas densas — ver `QUIET_MODE_ROUTE_PREFIXES` em
+  // `engine/quiet-mode-routes.ts` pro motivo de cada uma): presença
+  // reduzida enquanto a pessoa está tentando se concentrar - "no conflito
+  // entre personalidade e concentração, concentração vence" (pedido
+  // explícito). Efeito separado do de montagem: só precisa reagir a
+  // MUDANÇA de rota, nunca remonta o runtime inteiro por isso.
   useEffect(() => {
-    runtimeRef.current?.setQuietMode(pathname.startsWith("/home/focus"));
+    runtimeRef.current?.setQuietMode(isQuietModeRoute(pathname));
   }, [pathname]);
 
   if (!character) return null;

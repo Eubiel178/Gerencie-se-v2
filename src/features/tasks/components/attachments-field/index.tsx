@@ -92,7 +92,7 @@ export function AttachmentsField({ taskId }: AttachmentsFieldProps) {
     } catch {
       setPending((current) =>
         current.map((item) =>
-          item.id === entry.id ? { ...item, status: "error", error: "Falha de conexão." } : item
+          item.id === entry.id ? { ...item, status: "error", error: "Falha de conexão. Tente novamente." } : item
         )
       );
     }
@@ -133,7 +133,7 @@ export function AttachmentsField({ taskId }: AttachmentsFieldProps) {
 
       setAttachments((current) => (current ?? []).filter((item) => item.id !== id));
     } catch {
-      setDeleteError("Falha de conexão.");
+      setDeleteError("Falha de conexão. Tente novamente.");
     } finally {
       setDeletingId(null);
     }

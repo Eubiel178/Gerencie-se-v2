@@ -1,0 +1,24 @@
+.box {
+  display: grid;
+  place-items: center;
+  min-height: 14rem;
+  padding: var(--space-6);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  background: var(--color-surface);
+}
+
+/* Mesmo estilo de texto pra dentro da caixa (".box") e pra variante
+   "inline" solta - a caixa centraliza via `.box` (grid + text-align), não
+   precisa de uma cópia própria da regra de texto. */
+.message {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--color-info);
+  font-size: var(--font-size-md);
+}
+.message[data-tone="muted"] {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}

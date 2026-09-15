@@ -1,3 +1,4 @@
+import { EmptyState } from "@/components";
 import { IFocusSession } from "@/features/focus/domain";
 
 import styles from "./history.module.css";
@@ -8,7 +9,7 @@ interface HistoryProps {
 
 export function History({ sessions }: HistoryProps) {
   if (sessions.length === 0) {
-    return <p className={styles.emptyMessage}>Nenhuma sessão de foco ainda — a primeira aparece aqui.</p>;
+    return <EmptyState>Nenhuma sessão de foco ainda — a primeira aparece aqui.</EmptyState>;
   }
 
   return (

@@ -33,16 +33,6 @@
   margin: 0;
   list-style: none;
 }
-.empty {
-  display: grid;
-  place-items: center;
-  min-height: 14rem;
-  padding: var(--space-6);
-  border: 1px dashed var(--color-border);
-  border-radius: var(--radius-lg);
-  text-align: center;
-  background: var(--color-surface);
-}
 .card {
   display: flex;
   flex-direction: column;
@@ -203,12 +193,6 @@
 .smallButton {
   padding: 0.45rem var(--space-3);
   font-size: var(--font-size-sm);
-}
-.emptyState {
-  margin: 0;
-  font-family: var(--font-sans);
-  color: var(--color-info);
-  font-size: var(--font-size-md);
 }
 @media (max-width: 640px) {
   .toolbar {

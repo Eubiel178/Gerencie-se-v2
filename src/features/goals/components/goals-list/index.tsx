@@ -1,3 +1,4 @@
+import { EmptyState } from "@/components";
 import { IGoal } from "@/features/goals/domain";
 import { LoadAcceptedConnections } from "@/features/connections/domain";
 import { Card } from "./card";
@@ -12,11 +13,7 @@ interface GoalsListProps {
 export function GoalsList({ goalsList, connections }: GoalsListProps) {
   if (goalsList.length === 0) {
     return (
-      <div className={styles.empty}>
-        <p className={styles.emptyState}>
-          Você ainda não tem objetivos. Crie o primeiro e divida em etapas pequenas.
-        </p>
-      </div>
+      <EmptyState variant="box">Você ainda não tem objetivos. Crie o primeiro e divida em etapas pequenas.</EmptyState>
     );
   }
 

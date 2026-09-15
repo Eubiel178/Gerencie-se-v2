@@ -97,10 +97,19 @@ export function buildNextAction(params: {
     (a, b) => PRIORITY_RANK[b.priority] - PRIORITY_RANK[a.priority]
   )[0];
 
-  if (topPriorityTask && PRIORITY_RANK[topPriorityTask.priority] >= PRIORITY_RANK.alta) {
+  // Antes só entrava aqui com prioridade alta/crítica - uma tarefa pendente
+  // média/baixa e sem horário (o caso mais comum: "despejo mental" via
+  // captura rápida) nunca batia em nenhum ramo acima e caía direto em
+  // "Tudo em dia" mesmo com tarefas de verdade esperando (achado em
+  // auditoria visual: banner "Nenhuma pendência" ao lado de uma lista com
+  // 3 tarefas). Qualquer tarefa pendente agora conta como próxima ação -
+  // só o rótulo muda conforme a prioridade real.
+  if (topPriorityTask) {
+    const isHighPriority = PRIORITY_RANK[topPriorityTask.priority] >= PRIORITY_RANK.alta;
+
     return {
       kind: "priority",
-      label: "Prioridade alta",
+      label: isHighPriority ? "Prioridade alta" : "Tarefa pendente",
       title: topPriorityTask.title,
       href: "/home/tasks",
     };

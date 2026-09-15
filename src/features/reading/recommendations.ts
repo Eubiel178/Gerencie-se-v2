@@ -29,7 +29,7 @@ const MOCK_RECOMMENDATIONS: IBookRecommendation[] = [
   {
     title: "Deep Work",
     author: "Cal Newport",
-    reason: "Sobre foco profundo — conecta direto com o Focus Timer do app.",
+    reason: "Sobre foco profundo — conecta direto com o Foco do app.",
   },
 ];
 

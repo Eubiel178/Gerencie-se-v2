@@ -13,6 +13,16 @@ export async function startFocusSessionAction(
 ): Promise<ActionResult & { session?: domain.StartFocusSession.Result }> {
   try {
     const session = await getFocusFetcher().start(data);
+
+    // `start` pode ter finalizado sozinho uma sessão órfã vencida (ver
+    // comentário em `LocalFocusSession.start`) - essa conclusão nunca passa
+    // por `completeFocusSessionAction` acima, então o crédito de XP fica
+    // por conta daqui (achado numa revisão de código: o XP gravado na
+    // sessão nunca chegava a somar no mascote).
+    if (session.finalizedExpiredSessionXp && session.finalizedExpiredSessionXp > 0) {
+      await getMascotFetcher().addXp(session.finalizedExpiredSessionXp);
+    }
+
     revalidatePath("/home/focus");
 
     return { error: null, session };

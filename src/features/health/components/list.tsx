@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { Icon } from "@/components/icon";
 
-import { Button, ConfirmIconButton } from "@/components";
+import { Button, ConfirmIconButton, EmptyState } from "@/components";
 
 import {
   deleteHealthCheckupAction,
@@ -82,11 +82,7 @@ export function List({ checkups }: { checkups: IHealthCheckup[] }) {
   }
 
   if (checkups.length === 0) {
-    return (
-      <p className={styles.emptyMessage}>
-        Nenhum cuidado preventivo cadastrado ainda.
-      </p>
-    );
+    return <EmptyState>Nenhum cuidado preventivo cadastrado ainda.</EmptyState>;
   }
 
   const groups = groupByCategory(checkups);

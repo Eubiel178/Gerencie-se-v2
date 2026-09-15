@@ -7,29 +7,11 @@ import { useRouter } from "next/navigation";
 import { Button, Input } from "@/components";
 
 import { createRunningSessionAction } from "@/features/running/actions";
+import { calculatePaceMinPerKm, haversineMeters } from "@/features/running/domain";
 
 import styles from "../running.module.css";
 
 type Tab = "manual" | "gps";
-
-// Distância entre duas coordenadas (fórmula de Haversine) — padrão pra
-// medir distância sobre a superfície da Terra a partir de lat/long.
-function haversineMeters(
-  a: { lat: number; lng: number },
-  b: { lat: number; lng: number }
-): number {
-  const EARTH_RADIUS_M = 6371000;
-  const toRad = (deg: number) => (deg * Math.PI) / 180;
-
-  const dLat = toRad(b.lat - a.lat);
-  const dLng = toRad(b.lng - a.lng);
-
-  const h =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng / 2) ** 2;
-
-  return EARTH_RADIUS_M * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
-}
 
 export function RunningTracker() {
   const router = useRouter();
@@ -140,7 +122,7 @@ function ManualEntry({ onSaved }: { onSaved: () => void }) {
 
       {error && <p className={styles.inlineMessage}>{error}</p>}
 
-      <Button.Root loading={isSubmitting}>Salvar Corrida</Button.Root>
+      <Button.Root loading={isSubmitting}>Salvar corrida</Button.Root>
     </form>
   );
 }
@@ -254,7 +236,7 @@ function LiveTracker({ onSaved }: { onSaved: () => void }) {
   }
 
   const distanceKm = distanceMeters / 1000;
-  const paceMinPerKm = distanceKm > 0 ? elapsedSeconds / 60 / distanceKm : 0;
+  const paceMinPerKm = calculatePaceMinPerKm(distanceMeters, elapsedSeconds);
 
   return (
     <div className={styles.panel}>
@@ -278,10 +260,10 @@ function LiveTracker({ onSaved }: { onSaved: () => void }) {
       <div className={styles.liveControls}>
         {isTracking ? (
           <Button.Root className={styles.finishButton} loading={isSaving} onClick={handleFinish}>
-            Finalizar Corrida
+            Finalizar corrida
           </Button.Root>
         ) : (
-          <Button.Root onClick={handleStart}>Iniciar Corrida com GPS</Button.Root>
+          <Button.Root onClick={handleStart}>Iniciar corrida com GPS</Button.Root>
         )}
       </div>
     </div>

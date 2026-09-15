@@ -97,12 +97,6 @@
   font-family: var(--font-sans);
   color: var(--color-text);
 }
-.emptyState {
-  margin: 0;
-  font-family: var(--font-sans);
-  color: var(--color-info);
-  font-size: var(--font-size-md);
-}
 .settingGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
@@ -115,6 +109,15 @@
   border-radius: var(--radius-lg);
   background: var(--color-surface);
   box-shadow: 0 0.4rem 1rem var(--color-shadow);
+}
+/* Painel único (sem `.settingGrid` ao lado) cujo conteúdo é curto -
+   ex.: Aparência, só um parágrafo + 3 botões de tema. Sem isso, um
+   `<section>` normal estica pra 100% da coluna de conteúdo (~1045px em
+   desktop) e sobra uma faixa vazia enorme à direita/abaixo dos 3 botões
+   (achado de auditoria visual). Largura próxima de uma coluna de
+   `.settingGrid` em telas largas, sem forçar isso em telas estreitas. */
+.settingPanelNarrow {
+  max-width: 28rem;
 }
 .settingPanel h2,
 .settingPanel h3 {

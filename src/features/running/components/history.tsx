@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { Button, ConfirmIconButton } from "@/components";
+import { Button, ConfirmIconButton, EmptyState } from "@/components";
 
 import { deleteRunningSessionAction } from "@/features/running/actions";
 import { IRunningSession } from "@/features/running/domain";
@@ -31,7 +31,7 @@ export function History({ sessions }: HistoryProps) {
   }
 
   if (sessions.length === 0) {
-    return <p className={styles.emptyMessage}>Nenhuma corrida registrada ainda.</p>;
+    return <EmptyState>Nenhuma corrida registrada ainda.</EmptyState>;
   }
 
   return (

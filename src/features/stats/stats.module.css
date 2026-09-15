@@ -78,3 +78,51 @@
   background: var(--color-highlight);
   min-height: 2px;
 }
+
+.taskTimeList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.taskTimeRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(4rem, 10rem) auto;
+  align-items: center;
+  gap: var(--space-3);
+}
+.taskTimeTitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+}
+.taskTimeBarTrack {
+  height: 0.5rem;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-elevated);
+  overflow: hidden;
+}
+.taskTimeBarFill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--color-highlight);
+}
+.taskTimeMinutes {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+@media (max-width: 520px) {
+  .taskTimeRow {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .taskTimeBarTrack {
+    display: none;
+  }
+}

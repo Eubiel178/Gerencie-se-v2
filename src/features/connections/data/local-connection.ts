@@ -8,6 +8,7 @@ import { db } from "@/db/client";
 import { connections, users } from "@/db/schema";
 import { requireCurrentUser } from "@/lib/require-user-id";
 import { sendEmail } from "@/lib/email";
+import { normalizeEmail } from "@/utils/normalize-email";
 import { inviteEmailHtml } from "../email-templates";
 
 /**
@@ -29,9 +30,9 @@ export class LocalConnection
 {
   async invite(params: domain.CreateConnection.Params): Promise<{ id: string; error: string | null }> {
     const me = await requireCurrentUser();
-    const email = params.email.trim().toLowerCase();
+    const email = normalizeEmail(params.email);
 
-    if (email === me.email.toLowerCase()) {
+    if (email === normalizeEmail(me.email)) {
       return { id: "", error: "Você não pode se convidar." };
     }
 

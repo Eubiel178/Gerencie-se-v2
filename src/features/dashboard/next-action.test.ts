@@ -57,3 +57,28 @@ test("buildNextAction: sem tarefa comecada, cai pra atrasada normalmente", () =>
 
   assert.equal(action.kind, "overdue");
 });
+
+test("buildNextAction: tarefa pendente prioridade media/sem horario ainda conta como próxima ação (achado: caía direto em 'Tudo em dia')", () => {
+  const tasks = [task({ id: "solta", title: "Despejo mental", priority: "media" })];
+
+  const action = buildNextAction({ tasks, routine: [], habits: [] });
+
+  assert.equal(action.kind, "priority");
+  assert.equal(action.label, "Tarefa pendente");
+  assert.equal(action.title, "Despejo mental");
+});
+
+test("buildNextAction: prioridade alta/critica continua com o rótulo 'Prioridade alta'", () => {
+  const tasks = [task({ id: "alta", title: "Urgente", priority: "critica" })];
+
+  const action = buildNextAction({ tasks, routine: [], habits: [] });
+
+  assert.equal(action.kind, "priority");
+  assert.equal(action.label, "Prioridade alta");
+});
+
+test("buildNextAction: sem nenhuma tarefa/hábito/rotina pendente, 'Tudo em dia' de verdade", () => {
+  const action = buildNextAction({ tasks: [], routine: [], habits: [] });
+
+  assert.equal(action.kind, "none");
+});

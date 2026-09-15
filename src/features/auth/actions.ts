@@ -22,6 +22,7 @@ import { validationSchema as loginSchema } from "@/validation/login-schema";
 import { validationSchema as registerSchema } from "@/validation/register-schema";
 import { validationSchema as forgotPasswordSchema } from "@/validation/forgot-password-schema";
 import { validationSchema as resetPasswordSchema } from "@/validation/reset-password-schema";
+import { normalizeEmail } from "@/utils/normalize-email";
 
 import type { ActionResult } from "@/types/action-result";
 
@@ -79,11 +80,7 @@ export async function registerAction(
   }
 
   const { name, password } = parsed.data;
-  // Mesma normalização de `local-connection.ts` (convite) - sem isso,
-  // cadastrar com "User@X.com" e depois tentar entrar/recuperar senha
-  // com "user@x.com" (ou vice-versa) falha silenciosamente pra uma
-  // conta que existe de verdade (achado da auditoria pré-deploy).
-  const email = parsed.data.email.trim().toLowerCase();
+  const email = normalizeEmail(parsed.data.email);
 
   const [existingUser] = await db
     .select({ id: users.id })
@@ -124,12 +121,31 @@ export type RequestPasswordResetState = {
   sent: boolean;
 };
 
-/** Decisão do usuário (confirmada explicitamente após alerta de trade-off
- * de segurança): quando o e-mail não tem conta, a resposta diz isso na
- * hora em vez da mensagem genérica de "se existir, enviamos". Isso é uma
- * brecha de enumeração de contas por design (permite descobrir quais
- * e-mails estão cadastrados) — aceita conscientemente em troca de um
- * feedback mais direto pro usuário legítimo que errou o e-mail. */
+// Mensagem genérica de falha de envio: nunca diz se o motivo foi "conta não
+// encontrada" ou "SMTP falhou de verdade" — só que algo deu errado agora.
+const GENERIC_SEND_ERROR =
+  "Não conseguimos concluir o pedido agora. Tente novamente em instantes.";
+
+// Sem conta com esse e-mail, não há nada de verdade pra enviar — mas
+// responder na hora, enquanto o caminho de conta existente espera um envio
+// real por SMTP (ver `email.ts`, mais lento que uma API de e-mail
+// transacional dedicada), reabre por timing a mesma enumeração que a
+// mensagem genérica abaixo tenta fechar (achado numa revisão de código
+// adversarial). Não elimina o canal por completo (SMTP real tem variância
+// própria), mas fecha o sinal óbvio "resposta instantânea vs. com espera de
+// rede".
+const SIMULATED_SEND_DELAY_MS = 800;
+
+/** Decisão revisada (auditoria de 2026-09): a resposta NUNCA revela se o
+ * e-mail tem conta cadastrada — nem na mensagem (sempre "enviamos, se
+ * existir"), nem no fato de reportar erro só quando a conta existe, nem no
+ * tempo de resposta (`SIMULATED_SEND_DELAY_MS` acima). Quando o e-mail não
+ * está cadastrado, simula a espera de um envio real e retorna sucesso
+ * genérico, sem tentar enviar nada de verdade. Quando existe, esperamos o
+ * envio de verdade (ao contrário do fluxo antigo, que nunca aguardava o
+ * SMTP) para poder avisar o usuário legítimo se o envio falhar — sem isso,
+ * uma falha de SMTP silenciosa deixava a pessoa esperando um e-mail que
+ * nunca chegaria. */
 export async function requestPasswordResetAction(
   data: unknown
 ): Promise<RequestPasswordResetState> {
@@ -139,11 +155,7 @@ export async function requestPasswordResetAction(
     return { error: "Informe um e-mail válido.", sent: false };
   }
 
-  // Mesma normalização de `registerAction`/login (`auth.ts`) - sem isso,
-  // pedir redefinição com um e-mail em maiúsculas diferente do salvo
-  // dizia "não existe conta" pra uma conta que existe de verdade
-  // (achado da auditoria pré-deploy).
-  const email = parsed.data.email.trim().toLowerCase();
+  const email = normalizeEmail(parsed.data.email);
 
   const [user] = await db
     .select({ id: users.id, name: users.name, passwordHash: users.passwordHash })
@@ -152,35 +164,31 @@ export async function requestPasswordResetAction(
     .limit(1);
 
   if (!user) {
-    return { error: "Não existe conta cadastrada com este e-mail.", sent: false };
+    await new Promise((resolve) => setTimeout(resolve, SIMULATED_SEND_DELAY_MS));
+    return { error: null, sent: true };
   }
 
-  // Nunca espera o SMTP terminar antes de responder — o link já foi
-  // gerado e salvo, então travar aqui só deixaria a tela parada à toa (o
-  // Gmail demora bem mais que uma API de e-mail transacional dedicada,
-  // ver `src/lib/email.ts`); se o envio falhar de verdade, só fica
-  // registrado no log do servidor.
-  if (user.passwordHash) {
-    const token = await createPasswordResetToken(user.id);
-    const resetUrl = `${appUrl()}/reset-password?token=${token}`;
+  const result = user.passwordHash
+    ? await (async () => {
+        const token = await createPasswordResetToken(user.id);
+        const resetUrl = `${appUrl()}/reset-password?token=${token}`;
 
-    sendEmail({
-      to: email,
-      subject: "Redefinir sua senha — Gerencie-se",
-      html: renderPasswordResetEmail({ name: user.name, resetUrl }),
-    }).then((result) => {
-      if (result.error) console.error("[auth] falha ao enviar e-mail de redefinição de senha:", result.error);
-    });
-  } else {
-    // Conta existe, mas foi criada via Google — não há senha pra
-    // redefinir.
-    sendEmail({
-      to: email,
-      subject: "Redefinir sua senha — Gerencie-se",
-      html: renderGoogleOnlyAccountEmail({ name: user.name }),
-    }).then((result) => {
-      if (result.error) console.error("[auth] falha ao enviar e-mail de aviso de conta Google:", result.error);
-    });
+        return sendEmail({
+          to: email,
+          subject: "Redefinir sua senha — Gerencie-se",
+          html: renderPasswordResetEmail({ name: user.name, resetUrl }),
+        });
+      })()
+    : // Conta existe, mas foi criada via Google — não há senha pra redefinir.
+      await sendEmail({
+        to: email,
+        subject: "Redefinir sua senha — Gerencie-se",
+        html: renderGoogleOnlyAccountEmail({ name: user.name }),
+      });
+
+  if (result.error) {
+    console.error("[auth] falha ao enviar e-mail de redefinição de senha:", result.error);
+    return { error: GENERIC_SEND_ERROR, sent: false };
   }
 
   return { error: null, sent: true };

@@ -15,5 +15,12 @@ export namespace StartFocusSession {
   // precisa saber a que tarefa a sessão RESULTANTE está associada - pode
   // não ser a mesma que foi pedida em `Params`, se já havia uma sessão
   // rodando pra outra tarefa (ou nenhuma).
-  export type Result = Pick<IFocusSession, "id" | "startedAt" | "plannedDurationSeconds" | "taskId">;
+  export type Result = Pick<IFocusSession, "id" | "startedAt" | "plannedDurationSeconds" | "taskId"> & {
+    // Preenchido só quando `start` encontrou e finalizou sozinho uma sessão
+    // órfã vencida (ver comentário em `LocalFocusSession.start`) - quem
+    // chama precisa saber pra creditar o XP dela no mascote, já que essa
+    // conclusão nunca passa por `CompleteFocusSession` (que normalmente é
+    // quem credita). `undefined`/`0` = não havia nada pra finalizar.
+    finalizedExpiredSessionXp?: number;
+  };
 }

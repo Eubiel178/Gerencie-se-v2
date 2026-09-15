@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useSyncExternalStore } from "react";
+import { usePathname } from "next/navigation";
 
 import { Button } from "@/components";
 import { Icon } from "@/components/icon";
@@ -61,11 +62,38 @@ function getDismissedServerSnapshot(): string | null {
   return null;
 }
 
+// Mesmo breakpoint mobile documentado em `tokens.css`. Abrir o balão
+// SOZINHO numa tela pequena não tem como respeitar o conteúdo por trás -
+// diferente do desktop, onde sempre sobra espaço, no celular o balão
+// (mesmo com o teto de altura de `.bubble`) cobria campos e botões de
+// verdade (ex.: "Registrar" no Ciclo, "Concluir agora"/"Cancelar" no
+// Foco com sessão ativa) - achado em auditoria visual mobile. O aviso de
+// mensagem nova continua existindo (`pingDot`) e o avatar sempre responde
+// ao toque - só a abertura AUTOMÁTICA fica reservada pro desktop.
+const MOBILE_QUERY = "(max-width: 640px)";
+
+function subscribeToMobileQuery(callback: () => void) {
+  const query = window.matchMedia(MOBILE_QUERY);
+  query.addEventListener("change", callback);
+  return () => query.removeEventListener("change", callback);
+}
+
+function getIsMobileSnapshot(): boolean {
+  return window.matchMedia(MOBILE_QUERY).matches;
+}
+
+function getIsMobileServerSnapshot(): boolean {
+  return false;
+}
+
 /**
  * Presença discreta do JARVIS: um avatar fixo no canto, que abre um balão
  * de fala quando há uma mensagem contextual. Nunca interrompe sozinho -
  * o balão só some quando o usuário clica em fechar, e com presença
- * reduzida o balão nem abre automaticamente (fica só o avatar).
+ * reduzida OU numa tela pequena (`isMobile`) o balão nem abre
+ * automaticamente (fica só o avatar com o `pingDot` avisando que tem
+ * mensagem nova) - no celular não sobra espaço garantido pra abrir por
+ * cima de conteúdo sem cobrir algo de verdade.
  *
  * `initialMessage` vem de nova busca no servidor a cada
  * `router.refresh()` (chamado por praticamente toda ação do app) —
@@ -80,6 +108,7 @@ export function Widget({
   reducedPresence,
   mascot,
 }: WidgetProps) {
+  const pathname = usePathname();
   const [message, setMessage] = useState(initialMessage);
   const [manuallyToggled, setManuallyToggled] = useState<boolean | null>(null);
   const { isSpeaking, speak: handleSpeak } = useSpeak();
@@ -89,9 +118,14 @@ export function Widget({
     getDismissedSnapshot,
     getDismissedServerSnapshot,
   );
+  const isMobile = useSyncExternalStore(
+    subscribeToMobileQuery,
+    getIsMobileSnapshot,
+    getIsMobileServerSnapshot,
+  );
 
   const autoOpen =
-    !!message && message.text !== dismissedText && !reducedPresence;
+    !!message && message.text !== dismissedText && !reducedPresence && !isMobile;
   const isOpen = manuallyToggled ?? autoOpen;
   const mood = moodFor(message);
   const displayText = message?.text ?? FALLBACK_TEXT;
@@ -118,6 +152,14 @@ export function Widget({
     setMessage(null);
     setManuallyToggled(null);
   }
+
+  // O Foco já tem seu próprio balão do mesmo mascote, contextualizado pro
+  // que está acontecendo ali (`features/focus/components/mascot`) - os
+  // dois juntos mostravam falas quase idênticas ao mesmo tempo, competindo
+  // por atenção sem agregar nada (achado em auditoria visual). Mesmo
+  // padrão de `FocusMiniWidget`, que já se esconde nessa rota pelo mesmo
+  // motivo (o painel de Foco já mostra tudo que ele mostraria).
+  if (pathname?.startsWith("/home/focus")) return null;
 
   return (
     <div className={styles.wrapper}>

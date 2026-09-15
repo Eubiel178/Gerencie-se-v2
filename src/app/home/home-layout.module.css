@@ -20,6 +20,14 @@
   border-right: 1px solid var(--color-border);
   background: var(--color-surface);
   overflow-y: auto;
+  /* Mesmo tratamento do scroll da página (`body`, ver global-style.css):
+     a barra nativa do navegador destoava do resto da interface (achado
+     relatado) - o scroll continua funcionando normalmente (roda do
+     mouse, teclado, arrastar), só a barra visual some. */
+  scrollbar-width: none;
+}
+.sidebar::-webkit-scrollbar {
+  display: none;
 }
 .mobileHeader,
 .mobileNavigationOverlay {
@@ -292,6 +300,10 @@
     overflow-y: auto;
     background: var(--color-surface);
     box-shadow: var(--shadow-lg);
+    scrollbar-width: none;
+  }
+  .mobileNavigationPanel::-webkit-scrollbar {
+    display: none;
   }
   .mobileNavigationHeader {
     display: flex;
