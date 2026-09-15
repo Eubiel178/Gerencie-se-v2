@@ -65,6 +65,13 @@ export function buildGuidedTourSteps(mascotName: string): GuidedTourStep[] {
       body: "Escolha um tempo e comece — o cronômetro roda mesmo se você sair da tela, e cada sessão concluída vira XP pro seu mascote.",
     },
     {
+      id: "notifications",
+      path: "/home/settings?section=notificacoes",
+      target: '[data-tour="notifications-settings"]',
+      title: "Lembretes e notificações",
+      body: "Aqui você liga notificações no navegador, no celular (push) ou por e-mail para não perder o horário de uma tarefa — e também ativa o resumo semanal, se quiser.",
+    },
+    {
       id: "done",
       target: null,
       title: "Pronto!",

@@ -176,7 +176,7 @@ export async function Settings({ searchParams }: SettingsProps) {
       icon: "FaBell",
       content: (
         <div className={styles.settingGrid}>
-          <section className={styles.settingPanel}>
+          <section className={styles.settingPanel} data-tour="notifications-settings">
             <h3>Lembretes</h3>
 
             <div className={styles.stack}>

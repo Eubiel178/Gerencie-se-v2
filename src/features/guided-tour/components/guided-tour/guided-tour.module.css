@@ -40,6 +40,12 @@
   background: var(--color-surface);
   box-shadow: 0 1.5rem 3rem var(--color-shadow);
   color: var(--color-text);
+  /* Rede de segurança: a posição em `index.tsx` já é calculada pra caber
+     na tela, mas isto garante que o tooltip NUNCA fique impossível de ler
+     (vira scroll interno em vez de conteúdo cortado/invisível) mesmo numa
+     tela mais baixa que o previsto ou com fonte aumentada (zoom/acessibilidade). */
+  max-height: calc(100vh - (var(--space-4) * 2));
+  overflow-y: auto;
 }
 
 .step {

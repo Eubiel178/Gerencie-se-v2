@@ -15,6 +15,12 @@ const SPOTLIGHT_PADDING = 8;
 const TOOLTIP_WIDTH = 320;
 const VIEWPORT_MARGIN = 16;
 const PLACEMENT_GAP = 14;
+// Estimativa conservadora da altura do tooltip (maior texto entre os passos
+// + título + contador + botões + padding), usada só pra CLAMPAR a posição
+// vertical dentro da tela — nunca a altura real de renderização (ver
+// `.tooltip` em guided-tour.module.css, que tem `max-height`/`overflow-y`
+// como rede de segurança caso esta estimativa seja curta demais).
+const TOOLTIP_MAX_HEIGHT_ESTIMATE = 280;
 
 interface Rect {
   top: number;
@@ -45,14 +51,27 @@ function tooltipPositionFor(rect: Rect | null): TooltipPosition {
     window.innerWidth - TOOLTIP_WIDTH - VIEWPORT_MARGIN
   );
 
+  // Limite superior de `top`/`bottom` pra garantir que o tooltip inteiro
+  // caiba na tela mesmo com a estimativa de altura acima — sem isto, um
+  // alvo alto (ex.: a `<nav>` inteira da sidebar, no passo "nav") empurrava
+  // `top` pra muito além do rodapé em notebooks de tela mais baixa, cortando
+  // o tooltip (achado relatado: "a tela corta a bolha, o texto some").
+  const maxTop = window.innerHeight - TOOLTIP_MAX_HEIGHT_ESTIMATE - VIEWPORT_MARGIN;
+
   // Sem medir a altura real do tooltip (ainda não renderizou) - decide o
   // lado pela posição vertical do alvo: mais na metade de baixo da tela,
   // o tooltip vai por CIMA (ancorado por `bottom`, que não depende de
   // saber a altura); mais em cima, vai por BAIXO (`top`).
   if (rect.top > window.innerHeight / 2) {
-    return { bottom: window.innerHeight - rect.top + PLACEMENT_GAP, left };
+    const bottom = window.innerHeight - rect.top + PLACEMENT_GAP;
+    // Equivalente ao clamp de `top` acima, só que medido a partir do
+    // rodapé: um `bottom` grande demais empurraria o topo do tooltip pra
+    // cima da tela (mesmo bug, lado oposto).
+    const maxBottom = window.innerHeight - TOOLTIP_MAX_HEIGHT_ESTIMATE - VIEWPORT_MARGIN;
+    return { bottom: Math.min(Math.max(bottom, VIEWPORT_MARGIN), maxBottom), left };
   }
-  return { top: rect.top + rect.height + PLACEMENT_GAP, left };
+  const top = rect.top + rect.height + PLACEMENT_GAP;
+  return { top: Math.min(Math.max(top, VIEWPORT_MARGIN), Math.max(maxTop, VIEWPORT_MARGIN)), left };
 }
 
 interface GuidedTourProps {

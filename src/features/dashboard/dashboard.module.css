@@ -23,7 +23,20 @@
   gap: var(--space-5);
 }
 
-@media (max-width: 768px) {
+/*
+ * 1016px = 768 (largura de CONTEÚDO que precisamos pra 2 colunas
+ * confortáveis) + 248 (largura da sidebar, `.sidebar` em
+ * home-layout.module.css) — não é a largura da JANELA que importa aqui,
+ * é quanto sobra depois da sidebar. Sem somar os 248px, existia uma
+ * faixa real (~721px–1016px de janela) onde a sidebar já estava visível
+ * (só some abaixo de 720px, ver home-layout.module.css) mas o grid ainda
+ * tentava caber 2 colunas no que sobrava (bem menos que 768px de
+ * conteúdo de verdade) — resultado: cards espremidos/cortados na borda
+ * direita (achado com captura de tela num notebook real). Mesmo cálculo
+ * já usado em `mascot-pet.module.css` (968px = 720+248) para o mesmo
+ * motivo.
+ */
+@media (max-width: 1016px) {
   .grid {
     grid-template-columns: 1fr;
   }
