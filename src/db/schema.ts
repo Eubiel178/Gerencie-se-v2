@@ -114,6 +114,33 @@ export const passwordResetTokens = pgTable("password_reset_token", {
 });
 
 /**
+ * Código de 6 dígitos que confirma a posse do e-mail de uma conta criada
+ * por e-mail/senha (ver `registerAction`/`verifyEmailAction`). Uma linha
+ * por usuário (PK = `userId`, não um token aleatório): o código só
+ * precisa ser único NO CONTEXTO da própria conta (comparado sempre junto
+ * com o `userId` da sessão já autenticada, nunca localizado pelo código
+ * sozinho), diferente do `passwordResetTokens` acima, cujo token PRECISA
+ * ser imprevisível globalmente (é ele quem identifica a conta, embutido
+ * num link, sem sessão nenhuma por trás). Contas via Google nunca passam
+ * por aqui — o provedor já confirma a posse do e-mail (ver `profile()`
+ * em `auth.config.ts`).
+ */
+export const emailVerificationCodes = pgTable("email_verification_code", {
+  userId: text("user_id")
+    .primaryKey()
+    .references(() => users.id, { onDelete: "cascade" }),
+  code: text("code").notNull(),
+  expiresAt: timestamp("expires_at", { mode: "date" }).notNull(),
+  // Zerado a cada novo código gerado (reenvio); incrementado a cada
+  // tentativa errada. Nunca trava a conta (mesma filosofia de
+  // `loginAttempts` abaixo — um contador de bloqueio pode trancar o
+  // próprio dono fora por engano) — só exige pedir um código novo depois
+  // de `MAX_VERIFICATION_ATTEMPTS` (ver `email-verification.ts`), o que
+  // já é uma ação que a própria pessoa consegue fazer sozinha.
+  attempts: integer("attempts").notNull().default(0),
+});
+
+/**
  * Rastreia tentativas de login por senha malsucedidas, só para decidir
  * quando avisar o dono da conta por e-mail — nunca para bloquear login
  * (decisão consciente: um contador com bloqueio pode trancar o próprio

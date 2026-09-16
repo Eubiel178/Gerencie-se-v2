@@ -1,5 +1,5 @@
 import type { NextAuthConfig } from "next-auth";
-import Google from "next-auth/providers/google";
+import Google, { type GoogleProfile } from "next-auth/providers/google";
 
 /**
  * Configuração "edge-safe" do Auth.js: só o que roda em qualquer runtime,
@@ -40,6 +40,23 @@ export default {
         params: {
           scope: "openid email profile",
         },
+      },
+      // Por padrão o provedor Google do Auth.js NÃO mapeia
+      // `profile.email_verified` pra `emailVerified` do adapter — precisa
+      // deste `profile()` explícito. Sem isso, uma conta criada via
+      // Google ficaria com `emailVerified: null`, igual a uma conta local
+      // recém-cadastrada ainda não confirmada, e cairia sem necessidade no
+      // gate de `/verify-email` (ver `email-verification.ts`) — mesmo o
+      // Google já tendo confirmado a posse do e-mail durante o próprio
+      // login (é o provedor quem autentica).
+      profile(profile: GoogleProfile) {
+        return {
+          id: profile.sub,
+          name: profile.name,
+          email: profile.email,
+          image: profile.picture,
+          emailVerified: profile.email_verified ? new Date() : null,
+        };
       },
     }),
   ],

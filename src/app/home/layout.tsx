@@ -1,4 +1,7 @@
+import { redirect } from "next/navigation";
+
 import { auth } from "@/lib/auth";
+import { isEmailVerified } from "@/lib/email-verification";
 
 import { Header } from "@/components";
 import { Assistant } from "@/features/assistant";
@@ -20,8 +23,21 @@ import styles from "./home-layout.module.css";
 export const dynamic = "force-dynamic";
 
 const HomeLayout = async ({ children }: { children: React.ReactNode }) => {
-  const [session, gender, mascot, showGuidedTour, activeFocusSession] = await Promise.all([
-    auth(),
+  const session = await auth();
+
+  // Gate: conta local (e-mail/senha) recém-criada, ainda sem confirmar o
+  // código de 6 dígitos (ver `registerAction`/`verifyEmailAction`) nunca
+  // passa daqui. Contas Google já chegam verificadas (`profile()` em
+  // `auth.config.ts`), e toda conta que já existia antes desta feature
+  // foi "adotada" como verificada numa migração de dados (ver
+  // `drizzle/0028_...`) — só cadastros locais NOVOS ficam presos aqui.
+  // Checado antes de disparar as outras buscas abaixo (mascote, tour,
+  // foco): quem vai ser redirecionado nem precisa delas.
+  if (session?.user?.id && !(await isEmailVerified(session.user.id))) {
+    redirect("/verify-email");
+  }
+
+  const [gender, mascot, showGuidedTour, activeFocusSession] = await Promise.all([
     getGender(),
     getMascotFetcher().getMascot(),
     shouldShowGuidedTour(),

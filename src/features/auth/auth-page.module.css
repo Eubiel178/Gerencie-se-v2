@@ -14,6 +14,10 @@
 .link{color:var(--color-highlight);font-family:var(--font-sans);text-decoration:none}
 .link:hover{text-decoration:underline}
 .link:focus-visible{outline:2px solid var(--color-highlight);outline-offset:2px;border-radius:var(--radius-sm)}
+/* `.link` num `<button>` (uma AÇÃO, não navegação - ex.: "sair e
+   cadastrar de novo" na tela de verificação de e-mail) precisa do
+   reset que um `<a>` já não tem por padrão. */
+button.link{background:none;border:none;padding:0;font-size:inherit;cursor:pointer}
 .rememberRow{flex-direction:row;justify-content:space-between;align-items:center}
 .googleButton{background:var(--color-surface-elevated);border-color:var(--color-border);color:var(--color-text);box-shadow:0 1px 2px var(--color-shadow)}
 .googleButtonContent{display:flex;align-items:center;gap:var(--space-2);background:transparent}

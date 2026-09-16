@@ -717,3 +717,150 @@ Arquivos tocados: `hydration`, `running`, `health`, `reading`,
 com screenshot lado a lado das 7 telas — cabeçalho visualmente idêntico
 em todas agora. Validado com typecheck + lint + 186 testes + build de
 produção.
+
+## Lentidão relatada na navegação (2026-09)
+
+Usuário relatou "pouco de lentidão na navegação", depois especificou:
+"na tela de configuração quando clico em algo demora pra acontecer, ou
+quando clico em voltar". Investigado e corrigido — 3 achados reais,
+todos em Configurações (não um problema genérico de toda a navegação).
+
+### Causa raiz: `Settings` lia `searchParams` sem precisar
+
+`src/app/home/settings/page.tsx` declarava `searchParams` como prop e
+repassava pro Server Component `Settings`, que usava só 2 dos parâmetros
+(`google_calendar_connected`/`google_calendar_error`, pro banner de
+retorno do OAuth do Google Agenda) — nunca o `?section=` (esse já era
+lido inteiramente no cliente, por `SettingsSections`, de propósito,
+conforme o comentário original do arquivo). Só de **declarar**
+`searchParams` como prop, o Next.js já trata a rota inteira como
+dependente da query string: cada clique numa categoria (que só muda
+`?section=`) ou em "Voltar" fazia o Next.js reexecutar o Server
+Component `Settings` no servidor — que faz ~10 consultas em paralelo
+(`Promise.all`) e, se o Google Agenda estiver conectado, também uma
+chamada de verdade à API do Google Calendar (`listUserCalendars`).
+
+Corrigido: `google_calendar_connected`/`google_calendar_error` passaram
+a ser lidos no CLIENTE, num novo componente
+`CalendarStatusBannerFromUrl` (`useSearchParams()`), e o cálculo do
+`defaultSectionId` (pra abrir direto em "Integrações" ao voltar do
+OAuth) migrou pra dentro do próprio `SettingsSections`. `Settings` não
+recebe mais `searchParams` — nem o `page.tsx` da rota. Medido com
+Playwright, antes/depois: a requisição de rede que cada clique dispara
+(o Next.js ainda busca um payload RSC pra refletir a URL nova, isso é
+normal) caiu pra **~15-24ms de resposta**, claramente não mais
+reexecutando as ~10 consultas + a chamada externa ao Google.
+
+### Achado relacionado: checkbox de e-mail "não marcava"
+
+Usuário relatou separadamente: "quando clica para receber notificação
+por e-mail, dá um bugzinho, não marca certo". Causa: `EmailReminderToggle`
+não tinha nenhum estado local — o `checked` do `<input>` vinha só da
+prop `enabled` (valor do servidor) e só atualizava depois de
+`router.refresh()` completar. Antes da correção acima, esse
+`router.refresh()` reexecutava a MESMA cadeia pesada de `Settings`, então
+o checkbox ficava visualmente parado no valor antigo por um tempo
+perceptível — parecia não responder ao clique. Corrigido com estado
+otimista local (mesmo padrão já usado em `PushToggle`, o componente
+irmão): o checkbox reflete o clique na hora, e só desfaz se a Server
+Action realmente falhar. Verificado com Playwright: o `checked` muda
+`true`/`false` no mesmo tick do clique, sem esperar nenhum round-trip.
+
+### Achado à parte: "Ver tutorial novamente" visível no mobile sem funcionar
+
+Usuário relatou: "o botão de ver tutorial no mobile ainda existe". O
+motor do tour (`GuidedTour`) sempre se recusou a rodar abaixo de 720px
+de largura (a navegação vira um menu escondido, sem os alvos que o
+tour aponta) — mas o botão "Ver tutorial novamente", em Configurações →
+Conta, não tinha essa mesma checagem: no mobile, clicar nele marcava a
+preferência no banco e navegava pro Dashboard, mas nenhum passo do tour
+aparecia (promessa quebrada). Corrigido: o breakpoint
+(`GUIDED_TOUR_MOBILE_BREAKPOINT_PX = 720`) virou uma constante
+compartilhada exportada de `guided-tour/domain/steps.ts`, e
+`ReplayTourButton` agora usa o mesmo `useSyncExternalStore` +
+`matchMedia` já estabelecido no projeto (`AssistantWidget`) pra se
+esconder inteiramente abaixo desse breakpoint. Verificado com
+Playwright em viewport mobile (390px): 0 ocorrências do botão.
+
+### Bônus: erro de console no service worker
+
+Durante a investigação, o usuário também colou um erro real de console:
+`sw.js:59 Uncaught (in promise) TypeError: Failed to execute 'clone' on
+'Response': Response body is already used`. Corrigido em
+`public/sw.js`: o `cache.put()` (parte da estratégia cache-first de
+assets estáticos) não estava dentro de `event.waitUntil()`, então o
+navegador podia encerrar o service worker antes dessa gravação
+assíncrona terminar, cortando o corpo da resposta no meio; também não
+tinha `.catch()`, então qualquer falha ali virava um erro não tratado no
+console. Corrigido clonando a resposta o quanto antes, envolvendo a
+gravação em `event.waitUntil()`, e adicionando `.catch(() => {})` — uma
+falha ao cachear um asset nunca deveria aparecer como erro pro usuário,
+é só um bônus de performance.
+
+Validado com typecheck + lint + 186 testes + build de produção, e
+verificação ao vivo (Playwright) de cada um dos 4 itens acima contra o
+comportamento real no navegador.
+
+## Verificação de e-mail no cadastro (2026-09)
+
+Usuário pediu: no cadastro, ter verificação por código enviado ao
+e-mail. Implementado reaproveitando a infraestrutura de e-mail já
+existente (a mesma usada pela recuperação de senha).
+
+### Como funciona
+
+- `registerAction` cria a conta normalmente, gera um código de 6
+  dígitos (`createEmailVerificationCode`), manda por e-mail
+  (`renderVerificationCodeEmail`) e segue com o login automático de
+  sempre — o envio é *best-effort*: se falhar, a conta não se perde
+  (a tela de verificação tem "Reenviar código").
+- `src/app/home/layout.tsx` ganhou um gate: sessão autenticada mas
+  `email_verified` nulo → `redirect("/verify-email")`, verificado
+  ANTES de disparar as outras buscas da página (mascote, tour, foco) —
+  quem vai ser redirecionado nem precisa delas.
+- Nova tela `/verify-email` (mesmo layout visual de login/cadastro):
+  campo de código, "Confirmar", "Reenviar código" (com cooldown de 30s
+  só de UX, evita clique duplo) e "Sair e cadastrar de novo" (escape
+  hatch pra quem errou o e-mail no cadastro e não tem como receber
+  nada ali).
+- Código: 6 dígitos, `node:crypto.randomInt` (não `Math.random`),
+  expira em 15 minutos, no máximo 8 tentativas erradas antes de exigir
+  reenvio (nunca bloqueia a conta pra sempre — mesma filosofia de
+  `loginAttempts`, um contador de bloqueio pode trancar o próprio dono
+  fora por engano). Uma linha por usuário em `email_verification_code`
+  (upsert a cada reenvio, zera tentativas).
+
+### Duas armadilhas reais que evitei
+
+1. **Login via Google não marca `emailVerified` sozinho** — testei e
+   confirmei: o provedor Google do Auth.js não mapeia
+   `profile.email_verified` pro `emailVerified` do adapter por padrão.
+   Sem tratar isso, toda conta Google (login já confirmado pelo
+   próprio Google) cairia no MESMO gate que uma conta local não
+   confirmada. Corrigido com um `profile()` customizado em
+   `auth.config.ts` que já cria o usuário com `emailVerified` setado
+   quando `profile.email_verified` for `true`.
+2. **Contas que já existiam antes desta feature ficariam trancadas** —
+   ninguém, nem quem já usa o app há tempos, tinha `emailVerified`
+   preenchido até agora (a coluna existe desde o início, do Auth.js,
+   mas nunca tinha sido usada). Sem tratar isso, o deploy desta
+   feature trancaria QUALQUER conta existente atrás do gate na
+   primeira visita. Corrigido com uma migração de DADOS (não schema) —
+   `drizzle/0028_backfill_existing_users_as_email_verified.sql` —
+   `UPDATE "user" SET email_verified = now() WHERE email_verified IS
+   NULL`, rodada uma vez, "adotando" toda conta pré-existente como
+   verificada. **Importante para o deploy**: as migrações 0027
+   (tabela nova) e 0028 (backfill) precisam ser aplicadas (`npm run
+   db:migrate`) ANTES de qualquer usuário existente acessar o app com
+   este código em produção — já aplicadas aqui só no banco de DEV
+   LOCAL.
+
+### Verificado de ponta a ponta
+
+Teste real (registro → banco → confirmação), não só leitura de código:
+cadastro gera o código certo no banco; código errado é rejeitado E
+incrementa `attempts`; código certo marca `email_verified` e redireciona
+pra `/home`; revisitar `/verify-email` já verificado redireciona sozinho
+de volta; nenhuma conta ficou com `email_verified` nulo depois do
+backfill. Validado com typecheck + lint + 186 testes + build de
+produção.

@@ -10,6 +10,7 @@ import { users } from "@/db/schema";
 import { signIn } from "@/lib/auth";
 import { appUrl } from "@/lib/app-url";
 import { sendEmail } from "@/lib/email";
+import { requireUserId } from "@/lib/require-user-id";
 import {
   createPasswordResetToken,
   consumePasswordResetToken,
@@ -18,10 +19,16 @@ import {
   renderPasswordResetEmail,
   renderGoogleOnlyAccountEmail,
 } from "@/lib/password-reset-email";
+import {
+  createEmailVerificationCode,
+  verifyEmailVerificationCode,
+} from "@/lib/email-verification";
+import { renderVerificationCodeEmail } from "@/lib/email-verification-email";
 import { validationSchema as loginSchema } from "@/validation/login-schema";
 import { validationSchema as registerSchema } from "@/validation/register-schema";
 import { validationSchema as forgotPasswordSchema } from "@/validation/forgot-password-schema";
 import { validationSchema as resetPasswordSchema } from "@/validation/reset-password-schema";
+import { validationSchema as verifyEmailSchema } from "@/validation/verify-email-schema";
 import { normalizeEmail } from "@/utils/normalize-email";
 
 import type { ActionResult } from "@/types/action-result";
@@ -97,12 +104,35 @@ export async function registerAction(
 
   const passwordHash = await bcrypt.hash(password, 12);
 
+  let userId: string;
+
   try {
-    await db.insert(users).values({ name, email, passwordHash });
+    const [created] = await db
+      .insert(users)
+      .values({ name, email, passwordHash })
+      .returning({ id: users.id });
+    userId = created.id;
   } catch {
     return {
       error: "Não foi possível criar sua conta agora. Tente novamente.",
     };
+  }
+
+  // Best-effort: uma falha aqui nunca deve perder o cadastro que acabou
+  // de ser criado — a tela de verificação (`/verify-email`) tem um botão
+  // "Reenviar código" pra quem não recebeu nada.
+  try {
+    const code = await createEmailVerificationCode(userId);
+    const result = await sendEmail({
+      to: email,
+      subject: "Confirme seu e-mail — Gerencie-se",
+      html: renderVerificationCodeEmail({ name, code }),
+    });
+    if (result.error) {
+      console.error("[auth] falha ao enviar código de verificação:", result.error);
+    }
+  } catch (error) {
+    console.error("[auth] falha ao gerar/enviar código de verificação:", error);
   }
 
   try {
@@ -114,6 +144,69 @@ export async function registerAction(
   }
 
   redirect("/home");
+}
+
+export type VerifyEmailState = {
+  error: string | null;
+};
+
+const VERIFY_EMAIL_GENERIC_ERROR = "Código inválido. Verifique e tente novamente.";
+
+export async function verifyEmailAction(data: unknown): Promise<VerifyEmailState> {
+  const parsed = verifyEmailSchema.safeParse(data);
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Dados inválidos." };
+  }
+
+  const userId = await requireUserId();
+  const result = await verifyEmailVerificationCode(userId, parsed.data.code);
+
+  if (!result.ok) {
+    if (result.reason === "too-many-attempts") {
+      return { error: "Muitas tentativas erradas. Peça um código novo." };
+    }
+    // "no-pending-code" (já verificado, ou nunca chegou a gerar um) e
+    // "expired" também caem na mesma mensagem genérica de "wrong-code" —
+    // sem diferença visível de motivo, pra não dar nenhuma pista extra a
+    // quem estiver tentando adivinhar o código de outra pessoa.
+    return { error: VERIFY_EMAIL_GENERIC_ERROR };
+  }
+
+  redirect("/home");
+}
+
+export type ResendVerificationCodeState = {
+  error: string | null;
+  sent: boolean;
+};
+
+export async function resendVerificationCodeAction(): Promise<ResendVerificationCodeState> {
+  const userId = await requireUserId();
+
+  const [user] = await db
+    .select({ name: users.name, email: users.email })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+
+  if (!user?.email) {
+    return { error: GENERIC_SEND_ERROR, sent: false };
+  }
+
+  const code = await createEmailVerificationCode(userId);
+  const result = await sendEmail({
+    to: user.email,
+    subject: "Confirme seu e-mail — Gerencie-se",
+    html: renderVerificationCodeEmail({ name: user.name, code }),
+  });
+
+  if (result.error) {
+    console.error("[auth] falha ao reenviar código de verificação:", result.error);
+    return { error: GENERIC_SEND_ERROR, sent: false };
+  }
+
+  return { error: null, sent: true };
 }
 
 export type RequestPasswordResetState = {

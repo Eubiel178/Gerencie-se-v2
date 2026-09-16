@@ -11,7 +11,12 @@ const { auth } = NextAuth(authConfig);
 
 export default auth((req) => {
   const isLoggedIn = !!req.auth;
-  const isOnProtectedArea = req.nextUrl.pathname.startsWith("/home");
+  // `/verify-email` exige estar logado (precisa saber PRA QUEM verificar
+  // o código - ver `requireUserId()` em `VerifyEmail`), mas nunca deveria
+  // aparecer em `isOnAuthPage` abaixo: lá embaixo, "logado" bounces pra
+  // /home - aqui é o oposto, só chega logado mesmo.
+  const isOnProtectedArea =
+    req.nextUrl.pathname.startsWith("/home") || req.nextUrl.pathname.startsWith("/verify-email");
   const isOnAuthPage =
     req.nextUrl.pathname.startsWith("/login") ||
     req.nextUrl.pathname.startsWith("/register");
@@ -31,5 +36,5 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ["/home/:path*", "/login", "/register"],
+  matcher: ["/home/:path*", "/login", "/register", "/verify-email"],
 };
