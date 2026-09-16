@@ -864,3 +864,87 @@ pra `/home`; revisitar `/verify-email` já verificado redireciona sozinho
 de volta; nenhuma conta ficou com `email_verified` nulo depois do
 backfill. Validado com typecheck + lint + 186 testes + build de
 produção.
+
+## Bug real reportado em produção: conta presa entre Google e senha (2026-09)
+
+Relato de uma usuária real (via WhatsApp, repassado pelo Gabriel): tinha
+uma conta com e-mail/senha; tentou entrar com "Continuar com Google"
+(mesmo e-mail) e recebeu "Já existe uma conta com este e-mail cadastrada
+de outra forma"; tentou "Esqueci minha senha" e — na época em que a
+conta ainda não tinha senha nenhuma — recebeu o e-mail de "sua conta é
+só Google, não tem senha pra redefinir". Presa nos dois caminhos ao
+mesmo tempo.
+
+### Investigação (dados reais, `drizzle-kit studio` contra produção)
+
+- Linha da usuária em `user`: `password_hash` preenchido (tinha senha —
+  ver seção seguinte sobre como isso é possível mesmo a conta tendo
+  nascido só-Google), `image` null (nunca teve conta Google vinculada
+  de verdade).
+- Tabela `account`: nenhuma linha para o `user_id` dela — comparado com
+  a linha do Gabriel, que tem uma linha `provider = google` completa.
+  Confirma: ela nunca teve o vínculo Google criado.
+- Causa raiz: comportamento PADRÃO do Auth.js — por segurança, ele se
+  recusa a vincular automaticamente uma conta OAuth a um usuário já
+  existente com o mesmo e-mail (evita que um provedor que não verifique
+  e-mail de verdade sequestre uma conta só citando o endereço certo).
+  Universal pra qualquer app usando a lib assim, não é algo pontual
+  desse projeto.
+- **Achado à parte, também corrigido**: a mensagem de erro prometia
+  "use uma opção de vincular sua conta Google nas configurações depois
+  de entrar" — essa opção nunca existiu em lugar nenhum do app
+  (conferido em `AccountPanel` e no resto de Configurações). Mensagem
+  enganosa, deixando a pessoa sem saída real.
+
+### Como a conta acabou com senha mesmo tendo nascido só-Google
+
+`requestPasswordResetAction` só cria um token de redefinição REAL quando
+`user.passwordHash` já é verdadeiro — se for nulo (conta só-Google), o
+código manda o e-mail "sua conta não tem senha" e explicitamente NÃO
+gera token nenhum. Isso significa que a senha atual dela só pôde ter
+vindo de uma tentativa de reset numa janela em que a conta JÁ tinha
+alguma senha (ainda que temporária/de outra origem) — não da tentativa
+inicial, que confirmadamente caiu no ramo "sem senha". Não foi possível
+reconstruir com certeza absoluta o passo exato que preencheu
+`password_hash` entre as duas mensagens que ela recebeu (não é crítico
+pra a correção abaixo, que resolve o problema independente de como a
+senha chegou lá).
+
+### Correção (resolve e não deixa repetir, sem exigir senha)
+
+`allowDangerousEmailAccountLinking: true` no provider Google
+(`auth.config.ts`) — Auth.js, ao ver um e-mail já cadastrado sem conta
+Google vinculada, passa a vincular automaticamente em vez de bloquear.
+Confirmado lendo o código-fonte da lib
+(`@auth/core/lib/actions/callback/handle-login.js`): com a flag, ele
+localiza o usuário pelo e-mail e chama `linkAccount(...)` de verdade —
+não é um login "fingido", a vinculação fica permanente no banco a
+partir do primeiro login bem-sucedido.
+
+Por que é seguro habilitar isso especificamente aqui (o nome "dangerous"
+existe por um motivo — não é pra ligar sem pensar): o risco que essa
+trava evita é um provedor OAuth que NÃO garanta posse real do e-mail. O
+Google garante (`email_verified` na própria resposta, já mapeado pra
+`emailVerified` do usuário — ver `profile()` no mesmo arquivo). E do
+outro lado, uma conta local só existe hoje depois de provar posse do
+e-mail via o código de 6 dígitos (seção acima) — as duas pontas já
+verificam o mesmo e-mail de forma confiável antes desta mudança, então
+vincular automaticamente não abre um jeito novo de sequestrar conta, só
+para de travar quem é legítimo.
+
+Mensagem de erro (`auth-error-messages.ts`, caso `OAuthAccountNotLinked`)
+reescrita: não promete mais uma tela de "vincular conta" que não existe
+— com a correção acima, esse erro nem deveria mais aparecer pro caso
+comum (só sobra pra falhas de verdade no meio do processo).
+
+### O que a usuária precisa fazer AGORA (antes do deploy) vs. DEPOIS
+
+- Antes do deploy chegar em produção: único caminho é "Esqueci minha
+  senha" (já funciona pra ela agora, tem senha cadastrada) → definir
+  senha nova → entrar por e-mail/senha.
+- Depois do deploy: pode simplesmente clicar "Continuar com Google" —
+  vincula sozinho, nunca mais precisa de senha nenhuma.
+
+Validado com typecheck + lint + 186 testes + build de produção, e
+confirmação do mecanismo de vinculação lendo o código-fonte real da
+biblioteca (não só a documentação).

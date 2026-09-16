@@ -9,7 +9,15 @@ export function authErrorMessage(code: string | null): string | null {
 
   switch (code) {
     case "OAuthAccountNotLinked":
-      return "Já existe uma conta com este e-mail cadastrada de outra forma. Entre com e-mail e senha, ou use uma opção de vincular sua conta Google nas configurações depois de entrar.";
+      // Com `allowDangerousEmailAccountLinking` (ver `auth.config.ts`),
+      // esse erro não dispara mais pro caso comum (e-mail já cadastrado
+      // por senha, tentando entrar com Google depois) - o Auth.js já
+      // vincula sozinho nesse caso. O que sobra aqui é o resíduo de algo
+      // realmente ter dado errado no meio do processo - pedir pra tentar
+      // de novo é honesto; prometer uma tela de "vincular conta" que não
+      // existe não era (achado real: usuária ficou presa acreditando
+      // nessa opção).
+      return "Não foi possível concluir o login com Google agora. Tente novamente, ou entre com e-mail e senha.";
     case "AccessDenied":
       return "O acesso à sua conta Google foi cancelado. Você pode tentar novamente ou entrar com e-mail e senha.";
     case "OAuthCallbackError":
