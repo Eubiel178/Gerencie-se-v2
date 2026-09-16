@@ -1,3 +1,15 @@
+// Abaixo disso a navegação vira um menu por trás de um clique (a
+// sidebar com os `data-tour="nav"`/`data-tour="search"`/etc. não existe
+// no DOM - ver `Header`), então o tour não tem pra onde apontar e nunca
+// aparece (ver `computeInitialSteps` em `components/guided-tour/index.tsx`).
+// Exportado (não só um literal local) porque `ReplayTourButton`
+// precisa do MESMO valor pra decidir se mostra "Ver tutorial
+// novamente" - sem isso, o botão ficava visível no mobile prometendo
+// algo que o motor do tour se recusa a fazer (achado relatado: "o
+// botão de ver tutorial no mobile ainda existe" - clicar nele marcava
+// no banco e navegava, mas nada aparecia na tela).
+export const GUIDED_TOUR_MOBILE_BREAKPOINT_PX = 720;
+
 export interface GuidedTourStep {
   id: string;
   /** Rota que este passo precisa - `undefined` = mesma rota do passo

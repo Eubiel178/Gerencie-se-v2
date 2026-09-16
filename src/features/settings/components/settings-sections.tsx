@@ -16,13 +16,6 @@ export interface SettingsSection {
 
 interface SettingsSectionsProps {
   sections: SettingsSection[];
-  /** Categoria pra abrir direto (sem passar pela lista) quando não há
-   * `?section=` na URL — usado só pelo retorno do OAuth do Google Agenda
-   * (`?google_calendar_connected=...`/`?google_calendar_error=...`), que
-   * sempre é sobre a categoria "Integrações". Sem isso, o usuário
-   * voltaria do Google pra lista de categorias em vez de ver o resultado
-   * da conexão que acabou de tentar. */
-  defaultSectionId?: string;
 }
 
 /**
@@ -35,11 +28,37 @@ interface SettingsSectionsProps {
  * perder o lugar. Cada categoria já vem com o conteúdo TODO renderizado
  * (Server Component, buscado de uma vez só em `Settings`) - aqui só
  * decide qual mostrar, nunca busca dado de novo.
+ *
+ * Todo o estado de navegação (`?section=`, e o caso especial do retorno
+ * do OAuth do Google Agenda) é lido AQUI, num Client Component via
+ * `useSearchParams()` - de propósito, nunca como prop vinda de um
+ * Server Component que leia `searchParams`. Um Server Component que
+ * declara `searchParams` faz o Next.js tratar a rota inteira como
+ * dependente da query string: TROCAR só o `?section=` (clicar numa
+ * categoria, ou "Voltar") reexecutava o `Settings` inteiro no servidor -
+ * as ~10 consultas em paralelo em `features/settings/index.tsx`
+ * (incluindo, se a agenda estiver conectada, uma chamada de verdade à
+ * API do Google Calendar) rodavam de novo a cada clique, mesmo a troca
+ * de categoria sendo, na intenção original, 100% do lado do cliente
+ * (achado relatado: "quando clico em algo demora pra acontecer, ou
+ * quando clico em voltar"). Sem nenhum componente no caminho lendo
+ * `searchParams` do lado do servidor, o Next.js não tem motivo pra
+ * invalidar o cache da rota só porque a query string mudou - clicar
+ * numa categoria vira troca de estado puramente no cliente.
  */
-export function SettingsSections({ sections, defaultSectionId }: SettingsSectionsProps) {
+export function SettingsSections({ sections }: SettingsSectionsProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const requestedId = searchParams.get("section") ?? defaultSectionId ?? null;
+
+  // Retorno do OAuth do Google Agenda: chega com
+  // `?google_calendar_connected=...`/`?google_calendar_error=...` mas
+  // sem `?section=` - sem isto, o usuário voltaria pra lista de
+  // categorias em vez de ver direto o resultado da conexão que acabou
+  // de tentar. Lido aqui (não em `Settings`) pelo mesmo motivo do
+  // comentário acima.
+  const cameFromGoogleCalendarRedirect =
+    searchParams.get("google_calendar_connected") !== null || searchParams.get("google_calendar_error") !== null;
+  const requestedId = searchParams.get("section") ?? (cameFromGoogleCalendarRedirect ? "integracoes" : null);
   const active = sections.find((section) => section.id === requestedId) ?? null;
 
   function openSection(id: string) {

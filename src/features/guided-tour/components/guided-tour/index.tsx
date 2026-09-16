@@ -6,11 +6,11 @@ import { useRouter } from "next/navigation";
 
 import { getFocusableElements } from "@/components/modal/get-focusable-elements";
 import { dismissGuidedTourAction } from "../../actions";
-import { buildGuidedTourSteps, GuidedTourStep } from "../../domain/steps";
+import { buildGuidedTourSteps, GUIDED_TOUR_MOBILE_BREAKPOINT_PX, GuidedTourStep } from "../../domain/steps";
 
 import styles from "./guided-tour.module.css";
 
-const MOBILE_BREAKPOINT_PX = 720;
+const MOBILE_BREAKPOINT_PX = GUIDED_TOUR_MOBILE_BREAKPOINT_PX;
 const SPOTLIGHT_PADDING = 8;
 const TOOLTIP_WIDTH = 320;
 const VIEWPORT_MARGIN = 16;

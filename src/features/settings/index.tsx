@@ -23,17 +23,19 @@ import { getProfileOverview } from "@/features/profile/get-profile-overview";
 import { getGender } from "@/features/profile/get-gender";
 import { ReplayTourButton } from "@/features/guided-tour/components/replay-tour-button";
 
-import { CalendarStatusBanner } from "./components/calendar-status-banner";
+import { CalendarStatusBannerFromUrl } from "./components/calendar-status-banner-from-url";
 import { ConnectionCard } from "./components/connection-card";
 import { AccountPanel } from "./components/account-panel";
 import { SettingsSections, type SettingsSection } from "./components/settings-sections";
 import styles from "@/styles/workspace.module.css";
 
-interface SettingsProps {
-  searchParams: { [key: string]: string | string[] | undefined };
-}
-
-export async function Settings({ searchParams }: SettingsProps) {
+// Nunca recebe `searchParams` de propósito - ver comentário em
+// `SettingsSections` (o que hoje é `?google_calendar_connected=`/
+// `?google_calendar_error=`/`?section=` é lido inteiramente no cliente,
+// via `CalendarStatusBannerFromUrl`/`SettingsSections`) - assim trocar
+// de categoria não força este Server Component (~10 consultas em
+// paralelo) a rodar de novo no servidor a cada clique.
+export async function Settings() {
   const userId = await requireUserId();
 
   // Duas fontes de dado completamente separadas, de propósito: "Conta" é
@@ -65,13 +67,6 @@ export async function Settings({ searchParams }: SettingsProps) {
     getEmailTaskRemindersEnabled(),
   ]);
   const calendars = connection ? await listUserCalendars(userId) : [];
-
-  const connected = typeof searchParams.google_calendar_connected === "string"
-    ? searchParams.google_calendar_connected
-    : undefined;
-  const error = typeof searchParams.google_calendar_error === "string"
-    ? searchParams.google_calendar_error
-    : undefined;
 
   // Cada categoria é montada aqui (Server Component, com os dados já
   // buscados de uma vez só acima) e passada pronta pra `SettingsSections`
@@ -262,20 +257,13 @@ export async function Settings({ searchParams }: SettingsProps) {
     },
   ];
 
-  // Quando o usuário volta do fluxo de conexão do Google Agenda, o
-  // redirect chega com `google_calendar_connected`/`google_calendar_error`
-  // na URL mas sem `?section=` — sem isso ele cairia na lista de
-  // categorias em vez de ver direto o resultado da conexão que acabou de
-  // tentar.
-  const defaultSectionId = connected !== undefined || error !== undefined ? "integracoes" : undefined;
-
   return (
     <section className={styles.page}>
       <div><h1 className={styles.title}>Configurações</h1><p className={styles.subtitle}>Ajuste sua experiência e as integrações que usa no dia a dia.</p></div>
 
-      <CalendarStatusBanner connected={connected} error={error} />
+      <CalendarStatusBannerFromUrl />
 
-      <SettingsSections sections={sections} defaultSectionId={defaultSectionId} />
+      <SettingsSections sections={sections} />
     </section>
   );
 }

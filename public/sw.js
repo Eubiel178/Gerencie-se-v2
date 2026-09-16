@@ -56,7 +56,29 @@ self.addEventListener("fetch", (event) => {
         const network = fetch(request)
           .then((response) => {
             if (response.ok) {
-              caches.open(CACHE_NAME).then((cache) => cache.put(request, response.clone()));
+              // Clona JÁ AQUI, antes de qualquer outra coisa tocar em
+              // `response` — o corpo de um Response só pode ser lido UMA
+              // vez, então quanto mais tarde clona, maior a chance de
+              // outra parte do navegador já ter começado a consumi-lo.
+              const responseToCache = response.clone();
+
+              // `event.waitUntil` mantém o service worker vivo até este
+              // `cache.put` terminar - sem isso, o navegador podia encerrar
+              // o worker assim que `event.respondWith` resolvesse (a
+              // página já tem sua resposta), cortando essa gravação no
+              // meio e sobrando uma promise rejeitada sem `.catch()`
+              // (erro relatado no console: "Failed to execute 'clone' on
+              // 'Response': Response body is already used"). O `.catch`
+              // final garante que uma falha aqui (rede instável, cota de
+              // cache do navegador etc.) nunca vira um erro não tratado -
+              // cachear é um bônus de performance, nunca algo que deveria
+              // quebrar o carregamento do asset.
+              event.waitUntil(
+                caches
+                  .open(CACHE_NAME)
+                  .then((cache) => cache.put(request, responseToCache))
+                  .catch(() => {})
+              );
             }
             return response;
           })
