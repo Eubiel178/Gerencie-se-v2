@@ -7,7 +7,7 @@ import { Button, Modal, ModalHeader } from "@/components";
 import { resetGuidedTourAction } from "../../actions";
 import { GUIDED_TOUR_MOBILE_BREAKPOINT_PX } from "../../domain/steps";
 
-import styles from "./replay-tour-button.module.css";
+import styles from "./styles.module.css";
 
 const MOBILE_QUERY = `(max-width: ${GUIDED_TOUR_MOBILE_BREAKPOINT_PX}px)`;
 

@@ -1,6 +1,6 @@
 import { TaskFocusTime } from "./calculations";
 
-import styles from "./stats.module.css";
+import styles from "./styles.module.css";
 
 interface TopTasksByFocusTimeProps {
   tasks: TaskFocusTime[];

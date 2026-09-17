@@ -1,6 +1,6 @@
 "use client";
 
-import styles from "./chip-group.module.css";
+import styles from "./styles.module.css";
 
 export interface ChipOption {
   label: string;

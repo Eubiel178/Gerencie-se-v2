@@ -2,7 +2,7 @@ import { getRunningFetcher } from "@/features/running/data/get-running-fetcher";
 
 import { History, RunningTracker, Totals } from "./components";
 
-import styles from "./running.module.css";
+import styles from "./styles.module.css";
 
 // Reexports pra permitir `import { X } from "@/features/running"` em
 // vez de caminhos profundos.

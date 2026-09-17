@@ -2,7 +2,7 @@ import { getCycleFetcher } from "@/features/menstrual-cycle/data/get-cycle-fetch
 
 import { AddEntryForm, EstimatePanel, History } from "./components";
 
-import styles from "./cycle.module.css";
+import styles from "./styles.module.css";
 
 // Reexports pra permitir `import { X } from "@/features/menstrual-cycle"`
 // em vez de caminhos profundos.

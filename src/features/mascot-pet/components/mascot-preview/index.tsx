@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { MascotCharacter, MascotFrameRect, MascotStateName } from "@/features/mascot-pet/domain/types";
 import { MASCOT_CHARACTERS } from "@/features/mascot-pet/domain/characters";
 
-import styles from "./mascot-preview.module.css";
+import styles from "./styles.module.css";
 
 // Teto pro tamanho do palco (px) - ver comentário completo onde é usado,
 // dentro de `MascotPreviewFrames`.

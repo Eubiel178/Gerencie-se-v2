@@ -9,7 +9,7 @@ import { useFocusSession } from "@/features/focus/focus-session-context";
 import { formatClock } from "@/features/focus/format-clock";
 import { EXTEND_PRESETS_MINUTES } from "@/features/focus/extend-presets";
 
-import styles from "./focus-mini-widget.module.css";
+import styles from "./styles.module.css";
 
 /**
  * Versão compacta do timer de foco, visível em QUALQUER página de

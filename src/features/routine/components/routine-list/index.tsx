@@ -4,7 +4,7 @@ import { LoadAcceptedConnections } from "@/features/connections/domain";
 import { TaskOption } from "../modal/interfaces";
 import { RoutineListItem } from "./item";
 
-import styles from "../../routine.module.css";
+import styles from "./styles.module.css";
 
 interface RoutineListProps {
   items: IRoutineItem[];

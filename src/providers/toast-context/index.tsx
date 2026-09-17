@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useState } from "react";
 
-import styles from "./toast.module.css";
+import styles from "./styles.module.css";
 
 type ToastType = "success" | "error";
 

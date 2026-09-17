@@ -15,7 +15,7 @@ import { useFormModal } from "@/hooks/use-form-modal";
 
 import { FormData, IEditGoalProps, PRIORITY_OPTIONS } from "../interfaces";
 
-import styles from "./edit-goal.module.css";
+import styles from "./styles.module.css";
 
 const DEADLINE_SHORTCUTS = [
   { label: "+1 semana", value: () => dayjs().add(1, "week").format("YYYY-MM-DD") },

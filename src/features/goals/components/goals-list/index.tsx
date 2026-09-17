@@ -3,7 +3,7 @@ import { IGoal } from "@/features/goals/domain";
 import { LoadAcceptedConnections } from "@/features/connections/domain";
 import { Card } from "./card";
 
-import styles from "../../goals.module.css";
+import styles from "./styles.module.css";
 
 interface GoalsListProps {
   goalsList: IGoal[];

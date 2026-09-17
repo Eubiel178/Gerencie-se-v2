@@ -6,7 +6,7 @@ import { MASCOT_CHARACTERS } from "@/features/mascot-pet/domain/characters";
 import { MascotBounds } from "@/features/mascot-pet/engine/movement";
 import { MascotRuntime } from "@/features/mascot-pet/engine/runtime";
 
-import styles from "./mascot-swarm.module.css";
+import styles from "./styles.module.css";
 
 // Todos os personagens já disponíveis no sistema (ver CREDITS.txt em
 // public/mascot/pet - cada um já verificado: pixel art 2D, fundo

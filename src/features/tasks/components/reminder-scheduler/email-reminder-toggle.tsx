@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { updateEmailTaskRemindersPreferenceAction } from "@/features/tasks/actions";
 
-import styles from "./notifications-toggle.module.css";
+import styles from "./styles.module.css";
 
 interface EmailReminderToggleProps {
   enabled: boolean;

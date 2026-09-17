@@ -1,6 +1,6 @@
 import { IGoal } from "@/features/goals/domain";
 
-import styles from "./greeting.module.css";
+import styles from "./styles.module.css";
 
 interface GreetingProps {
   text: string;

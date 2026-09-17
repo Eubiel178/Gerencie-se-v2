@@ -21,7 +21,7 @@ import { GoalOption } from "../../modal/interfaces";
 
 import { emitMascotEvent } from "@/features/mascot-pet";
 
-import styles from "../../../habits.module.css";
+import styles from "./styles.module.css";
 
 interface CardProps {
   habit: IHabit;

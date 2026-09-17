@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { Icon } from "../icon";
 
-import styles from "./collapsible-section.module.css";
+import styles from "./styles.module.css";
 
 interface CollapsibleSectionProps {
   label: string;

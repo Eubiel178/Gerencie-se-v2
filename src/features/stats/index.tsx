@@ -27,7 +27,7 @@ import {
   calculateWeeklyRunningStats,
 } from "./calculations";
 
-import styles from "./stats.module.css";
+import styles from "./styles.module.css";
 
 // Reexports pra permitir `import { X } from "@/features/stats"` em vez
 // de caminhos profundos.

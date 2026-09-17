@@ -2,7 +2,7 @@ import { getHydrationFetcher } from "@/features/hydration/data/get-hydration-fet
 
 import { HydrationTracker } from "./components";
 
-import styles from "./hydration.module.css";
+import styles from "./styles.module.css";
 
 // Reexports pra permitir `import { X } from "@/features/hydration"` em
 // vez de caminhos profundos.

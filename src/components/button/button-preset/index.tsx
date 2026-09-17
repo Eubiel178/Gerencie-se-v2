@@ -3,7 +3,7 @@ import { ButtonRootProps } from "../button-root";
 import { ButtonIconProps } from "../button-icon";
 import { ButtonTextProps } from "../button-text";
 
-import styles from "../styles.module.css";
+import styles from "./styles.module.css";
 
 export interface ButtonPresetProps {
   root?: ButtonRootProps;

@@ -13,7 +13,7 @@ import { EXTEND_PRESETS_MINUTES } from "@/features/focus/extend-presets";
 import { toggleTaskCompleteAction } from "@/features/tasks/actions";
 import { Mascot } from "../mascot";
 
-import styles from "./timer.module.css";
+import styles from "./styles.module.css";
 
 const PRESETS_MINUTES = [15, 25, 50];
 

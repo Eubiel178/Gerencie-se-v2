@@ -125,7 +125,7 @@
    * listava "768px — dashboard" como um 3º valor divergente dos dois
    * acima. Não é: o dashboard nunca usa `768px` como breakpoint de
    * verdade — usa `@media (max-width: 1016px)`
-   * (`dashboard.module.css`), onde 1016 = 768 (largura de CONTEÚDO
+   * (`styles.module.css` do Dashboard), onde 1016 = 768 (largura de CONTEÚDO
    * desejada pra 2 colunas) + 248 (largura da sidebar). É um cálculo
    * diferente em natureza de 720/760 (que são largura de JANELA, sem
    * sidebar no cálculo), não a mesma medida "divergida" — misturar os

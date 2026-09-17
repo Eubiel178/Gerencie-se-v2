@@ -14,7 +14,7 @@ import {
 import { IReadingItem, ReadingStatus } from "@/features/reading/domain";
 import { getReadingProgress } from "@/features/reading/reading-progress";
 
-import styles from "../../reading.module.css";
+import styles from "../shared/styles.module.css";
 
 const STATUS_OPTIONS = [
   { label: "Quero ler", value: "want_to_read" },

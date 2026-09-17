@@ -22,7 +22,7 @@ import { AttachmentsField } from "../../attachments-field";
 import { TaskSteps } from "../../task-steps";
 import { FormData, IEditTaskProps, PRIORITY_OPTIONS } from "../interfaces";
 
-import styles from "./edit-task.module.css";
+import styles from "./styles.module.css";
 
 export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IEditTaskProps) {
   const formTags = useFormTags();

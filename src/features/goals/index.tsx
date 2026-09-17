@@ -3,7 +3,7 @@ import { getConnectionFetcher } from "@/features/connections/data/get-connection
 
 import { GoalsHeader, GoalsList } from "./components";
 
-import styles from "./goals.module.css";
+import styles from "./styles.module.css";
 
 // Reexports pra permitir `import { X } from "@/features/goals"` em vez
 // de caminhos profundos.

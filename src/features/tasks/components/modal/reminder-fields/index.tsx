@@ -7,7 +7,7 @@ import { Input } from "@/components";
 import { FormData } from "../interfaces";
 import { REMINDER_OPTIONS } from "@/validation/task-schema";
 
-import styles from "./reminder-fields.module.css";
+import styles from "./styles.module.css";
 
 const RECURRENCE_OPTIONS = [
   { label: "Não repetir", value: "none" },

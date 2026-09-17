@@ -14,7 +14,7 @@ import { useFormModal } from "@/hooks/use-form-modal";
 
 import { FormData, IAddHabitProps, NO_GOAL_VALUE } from "../interfaces";
 
-import styles from "./add-habit.module.css";
+import styles from "./styles.module.css";
 
 const FREQUENCY_OPTIONS = [
   { label: "Todo dia", value: "daily" },

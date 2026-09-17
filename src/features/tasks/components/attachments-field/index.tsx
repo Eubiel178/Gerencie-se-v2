@@ -12,7 +12,7 @@ import {
   isFileTooLarge,
 } from "@/lib/upload-limits";
 
-import styles from "./attachments-field.module.css";
+import styles from "./styles.module.css";
 
 type PendingStatus = "uploading" | "too-large" | "error";
 

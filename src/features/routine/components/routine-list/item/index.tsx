@@ -18,7 +18,7 @@ import { TaskOption } from "../../modal/interfaces";
 
 import { emitMascotEvent } from "@/features/mascot-pet";
 
-import styles from "../../../routine.module.css";
+import styles from "./styles.module.css";
 
 interface RoutineListItemProps {
   item: IRoutineItem;

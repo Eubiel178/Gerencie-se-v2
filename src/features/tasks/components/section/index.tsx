@@ -1,5 +1,5 @@
 import { ComponentProps } from "react";
-import styles from "../../home-dashboard.module.css";
+import styles from "../shared/styles.module.css";
 
 type SectionProps = ComponentProps<"section">;
 

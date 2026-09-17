@@ -13,7 +13,7 @@ import { useFormModal } from "@/hooks/use-form-modal";
 
 import { FormData, IAddRoutineItemProps, NO_TASK_VALUE } from "../interfaces";
 
-import styles from "./add-routine-item.module.css";
+import styles from "./styles.module.css";
 
 const TITLE_SUGGESTIONS = ["Acordar", "Café da manhã", "Estudar", "Exercício", "Dormir"];
 const TIME_SUGGESTIONS = ["07:00", "12:00", "18:00", "22:00"];

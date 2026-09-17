@@ -10,7 +10,7 @@ import { GoalOption } from "../modal/interfaces";
 import { filterHabits, HabitFrequencyFilter, HabitStatusFilter } from "@/features/habits/filter-habits";
 import { Card } from "./card";
 
-import styles from "../../habits.module.css";
+import styles from "./styles.module.css";
 
 const STATUS_OPTIONS = [
   { label: "Todos", value: "all" },

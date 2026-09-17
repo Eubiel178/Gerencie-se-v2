@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import styles from "./shared.module.css";
+import styles from "./styles.module.css";
 
 interface CardProps {
   title: string;

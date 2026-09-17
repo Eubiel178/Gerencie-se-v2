@@ -7,7 +7,7 @@ import { HabitConsistencyChart } from "./components/habit-consistency-chart";
 
 import { HabitsHeader, HabitsList } from "./components";
 
-import styles from "./habits.module.css";
+import styles from "./styles.module.css";
 
 // Reexports pra permitir `import { X } from "@/features/habits"` em vez
 // de caminhos profundos.

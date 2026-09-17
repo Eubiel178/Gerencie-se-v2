@@ -7,7 +7,7 @@ import { DEFAULT_MASCOT_CHARACTER_ID, MASCOT_CHARACTERS } from "@/features/masco
 import { isQuietModeRoute } from "@/features/mascot-pet/engine/quiet-mode-routes";
 import { MascotRuntime } from "@/features/mascot-pet/engine/runtime";
 
-import styles from "./mascot-pet.module.css";
+import styles from "./styles.module.css";
 
 interface MascotPetProps {
   /** Id de personagem (ver `MASCOT_CHARACTERS`) - normalmente calculado a

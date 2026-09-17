@@ -9,7 +9,7 @@ import { AddTask } from "../modal";
 import { PRIORITY_OPTIONS } from "../modal/interfaces";
 import { LoadAcceptedConnections } from "@/features/connections/domain";
 import { useTaskStore } from "@/features/tasks/task-store";
-import styles from "../../home-dashboard.module.css";
+import styles from "../shared/styles.module.css";
 
 const STATUS_OPTIONS = [
   { label: "Todas", value: "all" },

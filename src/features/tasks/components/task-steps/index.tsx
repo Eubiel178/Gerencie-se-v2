@@ -10,7 +10,7 @@ import {
 import { ITaskStep } from "@/features/tasks/domain";
 import { useStepChecklist } from "@/hooks/use-step-checklist";
 
-import styles from "./task-steps.module.css";
+import styles from "./styles.module.css";
 
 interface TaskStepsProps {
   taskId: string;

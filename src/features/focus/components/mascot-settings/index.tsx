@@ -14,7 +14,7 @@ import { updateMascotAction } from "@/features/focus/actions";
 import { IMascotState, MascotPersonality, MascotSpecies } from "@/features/focus/domain";
 import { MascotPreview, characterIdForSpecies } from "@/features/mascot-pet";
 
-import styles from "./mascot-settings.module.css";
+import styles from "./styles.module.css";
 
 interface FormData {
   name: string;

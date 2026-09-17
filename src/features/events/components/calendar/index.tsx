@@ -7,7 +7,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 
 import { IEvent } from "@/features/events/domain";
 
-import styles from "./calendar.module.css";
+import styles from "./styles.module.css";
 
 export function Calendar({ eventsList }: { eventsList: IEvent[] }) {
   return (

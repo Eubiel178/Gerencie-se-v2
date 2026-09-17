@@ -19,7 +19,7 @@ import { SyncWithGoogle } from "../sync-with-google";
 import { ReminderFields } from "../reminder-fields";
 import { FormData, IAddTaskProps, PRIORITY_OPTIONS } from "../interfaces";
 
-import styles from "./add-task.module.css";
+import styles from "./styles.module.css";
 
 export function AddTask({ buttonText, isGoogleConnected, connections }: IAddTaskProps) {
   const formTags = useFormTags();

@@ -9,7 +9,7 @@ import { useToast } from "@/providers/toast-context";
 
 import { quickCaptureTaskAction } from "@/features/tasks/actions";
 
-import styles from "./quick-capture.module.css";
+import styles from "./styles.module.css";
 
 /**
  * "Despejo mental" — botão sempre visível na sidebar que abre um modal

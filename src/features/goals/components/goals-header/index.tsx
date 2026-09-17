@@ -1,7 +1,7 @@
 import { AddGoal } from "../modal";
 import { LoadAcceptedConnections } from "@/features/connections/domain";
 
-import styles from "../../goals.module.css";
+import styles from "./styles.module.css";
 
 interface GoalsHeaderProps {
   connections: LoadAcceptedConnections.Model;

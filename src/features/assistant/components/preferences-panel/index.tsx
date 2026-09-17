@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { updateAssistantPreferencesAction } from "@/features/assistant/actions";
 import { IAssistantPreferences } from "@/features/assistant/domain";
 
-import styles from "./preferences-panel.module.css";
+import styles from "./styles.module.css";
 
 interface PreferencesPanelProps {
   preferences: IAssistantPreferences;

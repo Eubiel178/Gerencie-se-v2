@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 import { Icon } from "@/components/icon";
 import { AchievementView } from "@/features/achievements/get-achievements-status";
 
-import styles from "./achievements-grid.module.css";
+import styles from "./styles.module.css";
 
 export function AchievementsGrid({ achievements }: { achievements: AchievementView[] }) {
   return (

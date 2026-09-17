@@ -12,7 +12,7 @@ import { useToast } from "@/providers/toast-context";
 import { changePasswordAction } from "@/features/profile/actions";
 import { changePasswordSchema } from "@/validation/change-password-schema";
 
-import styles from "./change-password-form.module.css";
+import styles from "./styles.module.css";
 
 type FormData = z.infer<typeof changePasswordSchema>;
 

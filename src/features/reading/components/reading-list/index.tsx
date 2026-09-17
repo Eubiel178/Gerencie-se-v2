@@ -9,7 +9,7 @@ import { filterReadingItems } from "@/features/reading/filter-reading-items";
 import { AddForm } from "./add-form";
 import { Item } from "./item";
 
-import styles from "../../reading.module.css";
+import styles from "../shared/styles.module.css";
 
 type ReadingTab = ReadingStatus | "all";
 

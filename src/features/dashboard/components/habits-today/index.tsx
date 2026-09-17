@@ -9,7 +9,7 @@ import { Card } from "@/features/dashboard/components/shared";
 import { toggleHabitLogAction } from "@/features/habits/actions";
 import { IHabit } from "@/features/habits/domain";
 
-import styles from "./habits-today.module.css";
+import styles from "./styles.module.css";
 
 interface HabitsTodayProps {
   habits: IHabit[];

@@ -2,7 +2,7 @@ import { getHealthFetcher } from "@/features/health/data/get-health-fetcher";
 
 import { AddForm, List } from "./components";
 
-import styles from "./health.module.css";
+import styles from "./styles.module.css";
 
 // Reexports pra permitir `import { X } from "@/features/health"` em vez
 // de caminhos profundos.

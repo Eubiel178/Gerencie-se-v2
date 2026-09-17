@@ -1,4 +1,4 @@
-import styles from "./empty-state.module.css";
+import styles from "./styles.module.css";
 
 export interface EmptyStateProps {
   /**

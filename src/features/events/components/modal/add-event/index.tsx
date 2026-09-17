@@ -15,7 +15,7 @@ import { useFormModal } from "@/hooks/use-form-modal";
 
 import { FormData, IModalProps } from "./interfaces";
 
-import styles from "./add-event.module.css";
+import styles from "./styles.module.css";
 
 const EVENT_COLORS = [
   "#3788d8",

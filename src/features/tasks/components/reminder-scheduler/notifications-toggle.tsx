@@ -4,7 +4,7 @@ import { useState, useSyncExternalStore } from "react";
 
 import { Button } from "@/components";
 
-import styles from "./notifications-toggle.module.css";
+import styles from "./styles.module.css";
 
 type PermissionState = NotificationPermission | "unsupported";
 

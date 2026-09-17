@@ -2,7 +2,7 @@ import { Card } from "@/features/dashboard/components/shared";
 
 import { IMascotState, SPECIES_EMOJI } from "@/features/focus/domain";
 
-import styles from "./mascot-card.module.css";
+import styles from "./styles.module.css";
 
 export function MascotCard({ mascot }: { mascot: IMascotState }) {
   const percent = Math.round((mascot.xpIntoCurrentLevel / mascot.xpForNextLevel) * 100);

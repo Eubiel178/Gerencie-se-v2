@@ -6,7 +6,7 @@ import { EmptyState } from "@/components";
 import { IFocusSession } from "@/features/focus/domain";
 import { formatFocusSessionStartedAt } from "@/features/focus/format-focus-session-started-at";
 
-import styles from "./history.module.css";
+import styles from "./styles.module.css";
 
 function subscribeToTimeZone(): () => void {
   // Não há evento confiável para mudança de fuso no navegador. A leitura é

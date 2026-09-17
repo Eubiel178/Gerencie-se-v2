@@ -2,7 +2,7 @@
 
 import { Button } from "@/components";
 
-import styles from "./stats.module.css";
+import styles from "./styles.module.css";
 
 export interface WeekRange {
   start: string;

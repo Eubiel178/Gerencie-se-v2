@@ -7,7 +7,7 @@ import { Button } from "@/components";
 import { buildHabitHeatmap } from "@/features/habits/build-habit-heatmap";
 import { buildHabitConsistencyTrend, ConsistencyWeekPoint } from "@/features/habits/build-habit-consistency-trend";
 
-import styles from "./habit-consistency-chart.module.css";
+import styles from "./styles.module.css";
 
 // `buildHabitHeatmap` sempre começa a semana no domingo (ver comentário
 // lá) - mesma ordem aqui, usada só na versão em tabela (o gráfico em

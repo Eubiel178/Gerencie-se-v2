@@ -2,7 +2,7 @@ import { AddHabit } from "../modal";
 import { LoadAcceptedConnections } from "@/features/connections/domain";
 import { GoalOption } from "../modal/interfaces";
 
-import styles from "../../habits.module.css";
+import styles from "./styles.module.css";
 
 interface HabitsHeaderProps {
   connections: LoadAcceptedConnections.Model;

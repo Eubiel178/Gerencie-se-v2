@@ -3,7 +3,7 @@ import { Card } from "@/features/dashboard/components/shared";
 
 import { IGoal } from "@/features/goals/domain";
 
-import styles from "./goals-progress.module.css";
+import styles from "./styles.module.css";
 
 export function GoalsProgress({ goals }: { goals: IGoal[] }) {
   return (

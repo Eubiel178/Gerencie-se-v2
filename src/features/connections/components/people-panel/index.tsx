@@ -12,7 +12,7 @@ import {
 } from "@/features/connections/actions";
 import { IConnection } from "@/features/connections/domain";
 
-import styles from "./people-panel.module.css";
+import styles from "./styles.module.css";
 
 const STATUS_LABEL: Record<IConnection["status"], string> = {
   pending: "Pendente",

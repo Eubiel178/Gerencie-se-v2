@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { INextAction } from "@/features/dashboard/next-action";
 
-import styles from "./next-action.module.css";
+import styles from "./styles.module.css";
 
 const KIND_LABEL: Record<INextAction["kind"], string> = {
   resumed: "Continuar de onde parou",

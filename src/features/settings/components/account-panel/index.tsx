@@ -13,7 +13,7 @@ import { ProfileOverview } from "@/features/profile/get-profile-overview";
 import { Gender } from "@/features/profile/get-gender";
 import { useToast } from "@/providers/toast-context";
 
-import styles from "./account-panel.module.css";
+import styles from "./styles.module.css";
 
 interface FormData {
   name: string;

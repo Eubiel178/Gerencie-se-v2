@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Button, Modal, ModalHeader } from "@/components";
 import { Icon, IconName } from "@/components/icon";
 
-import styles from "./confirm-icon-button.module.css";
+import styles from "./styles.module.css";
 
 export interface ConfirmIconButtonProps {
   /** Ícone do botão em repouso (ex.: "FaTrash"). */

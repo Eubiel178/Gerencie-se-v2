@@ -4,7 +4,7 @@ import { getConnectionFetcher } from "@/features/connections/data/get-connection
 
 import { RoutineHeader, RoutineList } from "./components";
 
-import styles from "./routine.module.css";
+import styles from "./styles.module.css";
 
 // Reexports pra permitir `import { X } from "@/features/routine"` em
 // vez de caminhos profundos.

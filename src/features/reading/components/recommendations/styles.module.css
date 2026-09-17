@@ -1,0 +1,37 @@
+.recommendations {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.recommendationsTitle {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--font-size-md);
+}
+
+.mockTag {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  font-style: italic;
+}
+
+.recCard {
+  padding: var(--space-3);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.recTitle {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.recReason {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}

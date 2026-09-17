@@ -2,7 +2,7 @@ import { Card } from "@/features/dashboard/components/shared";
 
 import { IHydrationSummary, calculateHydrationGoalPercent } from "@/features/hydration/domain";
 
-import styles from "./hydration-mini.module.css";
+import styles from "./styles.module.css";
 
 export function HydrationMini({ today }: { today: IHydrationSummary }) {
   const percent = calculateHydrationGoalPercent(today);

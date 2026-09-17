@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import { Button } from "@/components";
 
-import styles from "./notifications-toggle.module.css";
+import styles from "./styles.module.css";
 
 type Status =
   | "checking"

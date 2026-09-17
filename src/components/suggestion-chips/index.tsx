@@ -1,6 +1,6 @@
 "use client";
 
-import styles from "./suggestion-chips.module.css";
+import styles from "./styles.module.css";
 
 interface SuggestionChipsProps {
   label: string;

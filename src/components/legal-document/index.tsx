@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import styles from "./legal-document.module.css";
+import styles from "./styles.module.css";
 
 interface LegalDocumentProps {
   title: string;

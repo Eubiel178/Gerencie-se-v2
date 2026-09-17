@@ -6,7 +6,7 @@ import { useSpeak } from "@/lib/speak-text";
 import { MascotPreview, characterIdForSpecies } from "@/features/mascot-pet";
 import { MascotStateName } from "@/features/mascot-pet/domain/types";
 
-import styles from "./mascot.module.css";
+import styles from "./styles.module.css";
 
 const MOOD_TO_PREVIEW_STATE: Record<MascotEvent, MascotStateName> = {
   idle: "idle",

@@ -25,7 +25,7 @@ import {
 import { buildNextAction } from "./next-action";
 import { greetingForHour } from "./greeting";
 
-import styles from "./dashboard.module.css";
+import styles from "./styles.module.css";
 
 // Reexports pra permitir `import { X } from "@/features/dashboard"` em
 // vez de caminhos profundos.
@@ -92,7 +92,7 @@ export async function Dashboard() {
           logo abaixo), senão quem navega por heading no leitor de tela
           encontra um H2 antes de qualquer H1 existir (ordem de leitura
           quebrada - achado numa auditoria de acessibilidade). O grid
-          (`dashboard.module.css`) não tem `order`/`grid-row` próprios -
+          (`styles.module.css`) não tem `order`/`grid-row` próprios -
           a ordem visual segue exatamente esta ordem do JSX. */}
       <div className={styles.hero}>
         <Greeting

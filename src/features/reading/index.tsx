@@ -2,7 +2,7 @@ import { getReadingFetcher } from "@/features/reading/data/get-reading-fetcher";
 
 import { ReadingList } from "./components";
 
-import styles from "./reading.module.css";
+import styles from "./components/shared/styles.module.css";
 
 // Reexports pra permitir `import { X } from "@/features/reading"` em
 // vez de caminhos profundos.

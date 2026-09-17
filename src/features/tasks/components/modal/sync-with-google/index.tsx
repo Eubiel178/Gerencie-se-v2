@@ -7,7 +7,7 @@ import { Button, Input } from "@/components";
 
 import { FormData } from "../interfaces";
 
-import styles from "./sync-with-google.module.css";
+import styles from "./styles.module.css";
 
 interface SyncWithGoogleProps {
   register: UseFormRegister<FormData>;

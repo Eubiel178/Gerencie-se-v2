@@ -7,7 +7,7 @@ import { sortTasksByPriority } from "@/features/tasks/sort-tasks";
 
 import { History, Timer } from "./components";
 
-import styles from "./focus.module.css";
+import styles from "./styles.module.css";
 
 // Reexports pra permitir `import { X } from "@/features/focus"` em vez
 // de caminhos profundos.

@@ -2,7 +2,7 @@ import { AddRoutineItem } from "../modal";
 import { TaskOption } from "../modal/interfaces";
 import { LoadAcceptedConnections } from "@/features/connections/domain";
 
-import styles from "../../routine.module.css";
+import styles from "./styles.module.css";
 
 interface RoutineHeaderProps {
   taskOptions: TaskOption[];

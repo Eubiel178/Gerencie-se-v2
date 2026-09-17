@@ -12,7 +12,7 @@ import { Card } from "./card";
 
 import { ITask } from "@/features/tasks/domain";
 import { LoadAcceptedConnections } from "@/features/connections/domain";
-import styles from "../../home-dashboard.module.css";
+import styles from "../shared/styles.module.css";
 import { useTaskStore } from "@/features/tasks/task-store";
 import { filterTasks } from "@/features/tasks/filter-tasks";
 import { sortTasksByPriority } from "@/features/tasks/sort-tasks";

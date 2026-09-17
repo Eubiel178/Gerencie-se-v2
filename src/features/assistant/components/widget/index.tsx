@@ -10,7 +10,7 @@ import { IAssistantMessage } from "@/features/assistant/domain";
 import { IMascotState } from "@/features/focus/domain";
 import { useSpeak } from "@/lib/speak-text";
 
-import styles from "./widget.module.css";
+import styles from "./styles.module.css";
 
 type Mood = "idle" | "speaking" | "warning" | "celebrating";
 

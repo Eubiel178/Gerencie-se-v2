@@ -9,7 +9,7 @@ import { useMobileNavStore } from "@/components/header/mobile-nav-store";
 import { dismissGuidedTourAction } from "../../actions";
 import { buildGuidedTourSteps, GUIDED_TOUR_MOBILE_BREAKPOINT_PX, GuidedTourStep } from "../../domain/steps";
 
-import styles from "./guided-tour.module.css";
+import styles from "./styles.module.css";
 
 const MOBILE_BREAKPOINT_PX = GUIDED_TOUR_MOBILE_BREAKPOINT_PX;
 // Os únicos 2 alvos que só existem DENTRO do painel de navegação mobile
@@ -24,7 +24,7 @@ const PLACEMENT_GAP = 14;
 // Estimativa conservadora da altura do tooltip (maior texto entre os passos
 // + título + contador + botões + padding), usada só pra CLAMPAR a posição
 // vertical dentro da tela — nunca a altura real de renderização (ver
-// `.tooltip` em guided-tour.module.css, que tem `max-height`/`overflow-y`
+// `.tooltip` em styles.module.css, que tem `max-height`/`overflow-y`
 // como rede de segurança caso esta estimativa seja curta demais).
 const TOOLTIP_MAX_HEIGHT_ESTIMATE = 280;
 

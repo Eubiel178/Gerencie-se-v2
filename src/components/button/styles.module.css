@@ -112,10 +112,6 @@
   pointer-events: none;
 }
 
-:where(.iconButton) {
-  padding: var(--space-2);
-  font-size: var(--font-size-xl);
-}
 
 .content {
   visibility: hidden;

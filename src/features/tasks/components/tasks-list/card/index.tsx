@@ -21,7 +21,7 @@ import { PRIORITY_LABELS } from "../../modal/interfaces";
 import { ITask } from "@/features/tasks/domain";
 import { LoadAcceptedConnections } from "@/features/connections/domain";
 
-import styles from "../../../home-dashboard.module.css";
+import styles from "../../shared/styles.module.css";
 import { useTaskStore } from "@/features/tasks/task-store";
 import { emitMascotEvent } from "@/features/mascot-pet";
 

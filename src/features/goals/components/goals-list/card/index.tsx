@@ -22,7 +22,7 @@ import { LoadAcceptedConnections } from "@/features/connections/domain";
 import { emitMascotEvent } from "@/features/mascot-pet";
 import { useStepChecklist } from "@/hooks/use-step-checklist";
 
-import styles from "../../../goals.module.css";
+import styles from "./styles.module.css";
 
 interface CardProps {
   goal: IGoal;

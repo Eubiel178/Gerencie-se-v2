@@ -6,7 +6,7 @@ import { Badge, Card } from "@/features/dashboard/components/shared";
 import { ITask } from "@/features/tasks/domain";
 import { PRIORITY_LABELS } from "@/lib/priority";
 
-import styles from "./tasks-summary.module.css";
+import styles from "./styles.module.css";
 
 const PRIORITY_TONE: Record<ITask["priority"], "danger" | "warning" | "info" | "neutral"> = {
   critica: "danger",

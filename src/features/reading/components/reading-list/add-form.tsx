@@ -8,7 +8,7 @@ import { Button, CollapsibleSection, Input } from "@/components";
 import { createReadingItemAction } from "@/features/reading/actions";
 import type { IReadingItem } from "@/features/reading/domain";
 
-import styles from "../../reading.module.css";
+import styles from "../shared/styles.module.css";
 
 interface AddFormProps {
   onCreated: (item: IReadingItem) => void;

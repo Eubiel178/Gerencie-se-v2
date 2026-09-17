@@ -8,7 +8,7 @@ import { getFocusableElements } from "@/components/modal/get-focusable-elements"
 import { searchEverythingAction, SearchResult } from "@/features/search/actions";
 import { usePaletteStore } from "@/features/search/palette-store";
 
-import styles from "./command-palette.module.css";
+import styles from "./styles.module.css";
 
 const DEBOUNCE_MS = 200;
 
