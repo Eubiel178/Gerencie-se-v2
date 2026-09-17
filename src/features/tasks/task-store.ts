@@ -22,6 +22,7 @@ interface TaskStore {
   setStatusFilter: (status: TaskStatusFilter) => void;
   priorityFilter: TaskPriority | "all";
   setPriorityFilter: (priority: TaskPriority | "all") => void;
+  resetFilters: () => void;
 
   // Modo de baixa energia (Modo Assistido): esconde tarefas de
   // prioridade alta/crítica — pra dias de pouca energia, mostra só o
@@ -50,6 +51,7 @@ export const useTaskStore = create<TaskStore>((set) => ({
   setStatusFilter: (statusFilter) => set({ statusFilter }),
   priorityFilter: "all",
   setPriorityFilter: (priorityFilter) => set({ priorityFilter }),
+  resetFilters: () => set({ searchQuery: "", statusFilter: "all", priorityFilter: "all", lowEnergyMode: false }),
 
   lowEnergyMode: false,
   setLowEnergyMode: (lowEnergyMode) => set({ lowEnergyMode }),

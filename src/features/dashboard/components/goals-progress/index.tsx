@@ -9,7 +9,7 @@ export function GoalsProgress({ goals }: { goals: IGoal[] }) {
   return (
     <Card title="Progresso das metas" href="/home/goals" linkLabel="Ver todas">
       {goals.length === 0 ? (
-        <EmptyState tone="muted">Nenhum objetivo cadastrado ainda.</EmptyState>
+        <EmptyState tone="muted">Defina um objetivo para acompanhar o progresso por aqui.</EmptyState>
       ) : (
         <ul className={styles.list}>
           {goals.map((goal) => (

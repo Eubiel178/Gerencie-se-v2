@@ -60,7 +60,12 @@ export function Auth() {
 
   return (
     <section className={styles.formCard}>
-      <h1>Cadastre-se</h1>
+      <div>
+        <h1>Comece com clareza.</h1>
+        <p className={styles.formIntro}>
+          Crie sua conta para transformar o que importa hoje em um próximo passo possível.
+        </p>
+      </div>
 
       <Form.Root onSubmit={handleSubmit(handleOnSubmit)}>
         <Form.Wrapper>
@@ -114,7 +119,7 @@ export function Auth() {
 
         {formError && <Alert variant="error">{formError}</Alert>}
 
-        <Button.Root loading={isSubmitting}>Cadastrar</Button.Root>
+        <Button.Root loading={isSubmitting}>Criar conta grátis</Button.Root>
       </Form.Root>
 
       <Button.Root

@@ -92,11 +92,16 @@ export function PushToggle() {
         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) as BufferSource,
       });
 
-      await fetch("/api/push/subscribe", {
+      const response = await fetch("/api/push/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(subscription.toJSON()),
       });
+
+      if (!response.ok) {
+        await subscription.unsubscribe();
+        throw new Error("Não foi possível salvar a inscrição de notificações.");
+      }
 
       setStatus("subscribed");
     } catch {
@@ -114,11 +119,14 @@ export function PushToggle() {
       const subscription = await registration.pushManager.getSubscription();
 
       if (subscription) {
-        await fetch("/api/push/subscribe", {
+        const response = await fetch("/api/push/subscribe", {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ endpoint: subscription.endpoint }),
         });
+        if (!response.ok) {
+          throw new Error("Não foi possível desativar as notificações.");
+        }
         await subscription.unsubscribe();
       }
 

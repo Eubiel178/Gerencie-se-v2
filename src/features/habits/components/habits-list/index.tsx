@@ -43,6 +43,12 @@ export function HabitsList({ habitsList, connections, goalOptions }: HabitsListP
   const goalTitleById = new Map(goalOptions.map((goal) => [goal.id, goal.title]));
   const filteredHabits = filterHabits(habitsList, { searchQuery, frequencyFilter, statusFilter });
 
+  function clearFilters() {
+    setSearchQuery("");
+    setFrequencyFilter("all");
+    setStatusFilter("all");
+  }
+
   return (
     <div className={styles.listWithFilters}>
       <div className={styles.searchRow}>
@@ -82,7 +88,12 @@ export function HabitsList({ habitsList, connections, goalOptions }: HabitsListP
       </div>
 
       {filteredHabits.length === 0 ? (
-        <EmptyState variant="box">Nenhum hábito encontrado com esses filtros.</EmptyState>
+        <EmptyState
+          variant="box"
+          action={{ label: "Limpar filtros", onClick: clearFilters }}
+        >
+          Nenhum hábito aparece com os filtros atuais. Limpe os filtros para ver todos os seus hábitos.
+        </EmptyState>
       ) : (
         <ul className={styles.grid}>
           {filteredHabits.map((habit) => (

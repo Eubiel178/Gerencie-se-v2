@@ -27,7 +27,7 @@ export function History({ entries }: { entries: ICycleEntry[] }) {
   }
 
   if (entries.length === 0) {
-    return <EmptyState>Nenhum registro ainda.</EmptyState>;
+    return <EmptyState>Seu histórico vai aparecer aqui depois do primeiro registro.</EmptyState>;
   }
 
   return (

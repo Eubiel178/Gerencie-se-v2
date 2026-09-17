@@ -49,7 +49,7 @@ export function Auth() {
       <section className={styles.formCard}>
         <h1>Verifique seu e-mail</h1>
 
-        <p>{RESET_REQUEST_SENT_MESSAGE}</p>
+        <p className={styles.formIntro}>{RESET_REQUEST_SENT_MESSAGE}</p>
 
         <div className={styles.authSwitch}>
           <Link className={styles.link} href="/login">
@@ -64,7 +64,9 @@ export function Auth() {
     <section className={styles.formCard}>
       <h1>Esqueceu sua senha?</h1>
 
-      <p>Informe seu e-mail de cadastro e enviaremos um link para redefinir sua senha.</p>
+      <p className={styles.formIntro}>
+        Informe seu e-mail de cadastro e enviaremos um link para redefinir sua senha.
+      </p>
 
       <Form.Root onSubmit={handleSubmit(handleOnSubmit)}>
         <Form.Wrapper>

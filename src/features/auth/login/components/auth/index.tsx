@@ -75,7 +75,12 @@ export function Auth() {
 
   return (
     <section className={styles.formCard}>
-      <h1>Entrar</h1>
+      <div>
+        <h1>Acesse sua conta.</h1>
+        <p className={styles.formIntro}>
+          Entre para organizar o que importa agora. Se esta é sua primeira vez, crie uma conta grátis.
+        </p>
+      </div>
 
       <Form.Root onSubmit={handleSubmit(handleOnSubmit)}>
         <Form.Wrapper>

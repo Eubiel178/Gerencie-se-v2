@@ -33,7 +33,7 @@ export function History({ sessions, timeZone }: HistoryProps) {
   const displayTimeZone = useSyncExternalStore(subscribeToTimeZone, getBrowserTimeZone, () => timeZone);
 
   if (sessions.length === 0) {
-    return <EmptyState>Nenhuma sessão de foco ainda — a primeira aparece aqui.</EmptyState>;
+    return <EmptyState>Seu histórico de foco vai aparecer aqui quando você concluir a primeira sessão.</EmptyState>;
   }
 
   return (

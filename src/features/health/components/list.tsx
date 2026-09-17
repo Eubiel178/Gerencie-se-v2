@@ -82,7 +82,7 @@ export function List({ checkups }: { checkups: IHealthCheckup[] }) {
   }
 
   if (checkups.length === 0) {
-    return <EmptyState>Nenhum cuidado preventivo cadastrado ainda.</EmptyState>;
+    return <EmptyState>Adicione um cuidado preventivo para acompanhar quando ele precisa da sua atenção.</EmptyState>;
   }
 
   const groups = groupByCategory(checkups);

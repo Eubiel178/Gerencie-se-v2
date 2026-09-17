@@ -19,7 +19,7 @@ export function TasksSummary({ tasks }: { tasks: ITask[] }) {
   return (
     <Card title="Tarefas pendentes" href="/home/tasks" linkLabel="Ver todas">
       {tasks.length === 0 ? (
-        <EmptyState tone="muted">Nenhuma tarefa pendente. 🎉</EmptyState>
+        <EmptyState tone="muted">Tudo em dia: não há tarefas pendentes agora. 🎉</EmptyState>
       ) : (
         <ul className={styles.list}>
           {tasks.map((task) => (

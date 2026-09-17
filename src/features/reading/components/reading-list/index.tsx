@@ -27,12 +27,17 @@ export function ReadingList({ items }: ReadingListProps) {
 
   const filteredItems = filterReadingItems(items, { searchQuery, statusFilter });
 
+  function clearFilters() {
+    setSearchQuery("");
+    setStatusFilter("all");
+  }
+
   return (
     <div>
       <AddForm />
 
       {items.length === 0 ? (
-        <EmptyState>Sua lista de leitura está vazia.</EmptyState>
+        <EmptyState>Ainda não há nada na sua lista. Adicione um livro, artigo ou outro item que quer acompanhar.</EmptyState>
       ) : (
         <>
           <div className={styles.searchRow}>
@@ -61,7 +66,12 @@ export function ReadingList({ items }: ReadingListProps) {
           </div>
 
           {filteredItems.length === 0 ? (
-            <EmptyState>Nenhum item encontrado com esses filtros.</EmptyState>
+            <EmptyState
+              variant="box"
+              action={{ label: "Limpar filtros", onClick: clearFilters }}
+            >
+              Nenhum item aparece com a busca e os filtros atuais.
+            </EmptyState>
           ) : (
             <ul className={styles.list}>
               {filteredItems.map((item) => (

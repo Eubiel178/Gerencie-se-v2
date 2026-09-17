@@ -18,6 +18,12 @@ export interface EmptyStateProps {
    * chamaria atenção demais num card pequeno lado a lado com outros. */
   tone?: "default" | "muted";
   className?: string;
+  /** Ação opcional para recuperar uma lista filtrada, sem obrigar a pessoa
+   * a procurar quais controles precisam ser alterados. */
+  action?: {
+    label: string;
+    onClick: () => void;
+  };
   children: React.ReactNode;
 }
 
@@ -31,13 +37,24 @@ export interface EmptyStateProps {
  * principal vs. widget secundário vs. card compacto) são legitimamente
  * diferentes.
  */
-export function EmptyState({ variant = "inline", tone = "default", className, children }: EmptyStateProps) {
+export function EmptyState({
+  variant = "inline",
+  tone = "default",
+  className,
+  action,
+  children,
+}: EmptyStateProps) {
   if (variant === "box") {
     return (
       <div className={`${styles.box} ${className ?? ""}`}>
         <p className={styles.message} data-tone={tone}>
           {children}
         </p>
+        {action && (
+          <button type="button" className={styles.action} onClick={action.onClick}>
+            {action.label}
+          </button>
+        )}
       </div>
     );
   }

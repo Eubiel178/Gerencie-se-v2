@@ -94,9 +94,12 @@ export function Auth({ email, deliveryFailed }: AuthProps) {
 
   return (
     <section className={styles.formCard}>
-      <h1>Confirme seu e-mail</h1>
+      <div>
+        <h1>Confirme seu e-mail</h1>
+        <p className={styles.formIntro}>Falta só uma etapa para abrir seu painel.</p>
+      </div>
 
-      <p>
+      <p className={styles.formIntro}>
         {email
           ? `Enviamos um código de 6 dígitos para ${email}. Digite abaixo para concluir seu cadastro.`
           : "Enviamos um código de 6 dígitos para o e-mail do seu cadastro. Digite abaixo para continuar."}
