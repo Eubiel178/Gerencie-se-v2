@@ -348,6 +348,7 @@ export function Item({
               <label className={styles.pageUpdateLabel}>
                 Progresso
                 <input
+                  className={styles.progressSlider}
                   type="range"
                   min={0}
                   max={100}
