@@ -46,7 +46,7 @@ export default function LandingPage() {
             Entrar
           </Link>
           <Link className={styles.headerCta} href="/register">
-            Começar grátis
+            Começar grátis <Icon name="FiArrowRight" aria-hidden="true" />
           </Link>
         </div>
       </header>
