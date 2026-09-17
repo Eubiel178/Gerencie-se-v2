@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { Button } from "@/components";
+import { Alert, Button } from "@/components";
 import { updateWeeklySummaryPreferenceAction, sendTestWeeklySummaryAction } from "../actions";
 
 import styles from "./weekly-summary-panel.module.css";
@@ -18,14 +18,25 @@ export function WeeklySummaryPanel({ enabled, email }: WeeklySummaryPanelProps) 
   const [isSaving, setIsSaving] = useState(false);
   const [isSendingTest, setIsSendingTest] = useState(false);
   const [testResult, setTestResult] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   async function handleToggle(checked: boolean) {
+    if (isSaving) return;
+
     setIsSaving(true);
+    setActionError(null);
 
-    const result = await updateWeeklySummaryPreferenceAction(checked);
-    if (!result.error) router.refresh();
+    try {
+      const result = await updateWeeklySummaryPreferenceAction(checked);
+      if (result.error) {
+        setActionError(result.error);
+        return;
+      }
 
-    setIsSaving(false);
+      router.refresh();
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   async function handleSendTest() {
@@ -50,6 +61,8 @@ export function WeeklySummaryPanel({ enabled, email }: WeeklySummaryPanelProps) 
         />
         <span>Receber resumo semanal por e-mail</span>
       </label>
+
+      {actionError && <Alert variant="error">{actionError}</Alert>}
 
       <p className={styles.note}>
         Um e-mail por semana com tarefas concluídas, sequência de hábitos,

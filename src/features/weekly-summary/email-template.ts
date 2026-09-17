@@ -1,4 +1,5 @@
 import { WeeklySummary } from "./types";
+import { renderSpamFolderHint } from "@/lib/email-template-hints";
 
 // E-mail = HTML "old school": sem CSS externo, sem flexbox/grid (suporte
 // inconsistente entre clientes) — tabela + estilo inline, mesma técnica
@@ -19,7 +20,18 @@ function statRow(label: string, value: string): string {
 }
 
 export function renderWeeklySummaryEmail(summary: WeeklySummary): string {
-  const greetingName = summary.name ? summary.name.split(" ")[0] : "";
+  const greetingName = summary.name?.trim().split(/\s+/)[0] ?? "";
+  const today = new Date();
+  const sunday = new Date(today);
+  sunday.setDate(today.getDate() - today.getDay());
+  const dayFormatter = new Intl.DateTimeFormat("pt-BR", { day: "numeric" });
+  const monthFormatter = new Intl.DateTimeFormat("pt-BR", { month: "short" });
+  const startMonth = monthFormatter.format(sunday);
+  const endMonth = monthFormatter.format(today);
+  const period = startMonth === endMonth
+    ? `De ${dayFormatter.format(sunday)} a ${dayFormatter.format(today)} de ${endMonth}`
+    : `De ${dayFormatter.format(sunday)} de ${startMonth} a ${dayFormatter.format(today)} de ${endMonth}`;
+  const insight = buildWeeklyInsight(summary);
 
   return `
 <!DOCTYPE html>
@@ -33,6 +45,7 @@ export function renderWeeklySummaryEmail(summary: WeeklySummary): string {
               <td style="padding:28px 28px 4px;">
                 <p style="margin:0;font-size:13px;letter-spacing:0.04em;text-transform:uppercase;color:${MUTED};">Gerencie-se</p>
                 <h1 style="margin:8px 0 0;font-size:22px;color:${TEXT};">Seu resumo da semana${greetingName ? `, ${greetingName}` : ""}</h1>
+                <p style="margin:8px 0 0;font-size:14px;line-height:1.45;color:${MUTED};">${period} · ${insight}</p>
               </td>
             </tr>
             <tr>
@@ -42,8 +55,9 @@ export function renderWeeklySummaryEmail(summary: WeeklySummary): string {
                   ${statRow("Tarefas pendentes", String(summary.tasksPending))}
                   ${statRow("Tarefas atrasadas", String(summary.tasksOverdue))}
                   ${statRow("Horas de foco", `${summary.focusHours}h`)}
+                  ${statRow("Hábitos registrados", `${summary.habitCompletionsThisWeek} em ${summary.activeHabits}`)}
                   ${statRow("Melhor sequência de hábito", `${summary.bestHabitStreak} dia(s)`)}
-                  ${statRow("Progresso médio das metas", `${summary.avgGoalProgress}%`)}
+                  ${statRow("Progresso médio das metas", `${summary.avgGoalProgress}% em ${summary.activeGoals}`)}
                   ${statRow("Corrida", `${summary.runningKm} km`)}
                 </table>
               </td>
@@ -53,7 +67,7 @@ export function renderWeeklySummaryEmail(summary: WeeklySummary): string {
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f1f3f6;border-radius:10px;">
                   <tr>
                     <td style="padding:16px 20px;">
-                      <p style="margin:0;font-size:13px;color:${MUTED};">${summary.mascotName} · nível ${summary.mascotLevel}</p>
+                      <p style="margin:0;font-size:13px;color:${MUTED};">Seu mascote: ${summary.mascotName} · nível ${summary.mascotLevel}</p>
                       <div style="margin-top:8px;height:8px;border-radius:999px;background:${BORDER};overflow:hidden;">
                         <div style="height:8px;width:${Math.round((summary.mascotXpIntoLevel / summary.mascotXpForNextLevel) * 100)}%;background:${HIGHLIGHT};"></div>
                       </div>
@@ -68,6 +82,7 @@ export function renderWeeklySummaryEmail(summary: WeeklySummary): string {
                 <p style="margin:0;font-size:12px;color:${MUTED};">
                   Você recebeu este e-mail porque ativou o resumo semanal em Configurações. Pode desativar a qualquer momento por lá.
                 </p>
+                ${renderSpamFolderHint(MUTED)}
               </td>
             </tr>
           </table>
@@ -76,4 +91,13 @@ export function renderWeeklySummaryEmail(summary: WeeklySummary): string {
     </table>
   </body>
 </html>`;
+}
+
+function buildWeeklyInsight(summary: WeeklySummary): string {
+  if (summary.tasksCompleted > 0) {
+    return `${summary.tasksCompleted} ${summary.tasksCompleted === 1 ? "tarefa concluída" : "tarefas concluídas"} nesta semana.`;
+  }
+  if (summary.habitCompletionsThisWeek > 0) return "Você manteve alguns hábitos em movimento.";
+  if (summary.focusHours > 0) return "Você reservou tempo para se concentrar.";
+  return "Ainda dá tempo de registrar uma pequena vitória.";
 }

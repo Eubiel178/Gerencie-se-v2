@@ -92,11 +92,16 @@ export function PushToggle() {
         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) as BufferSource,
       });
 
-      await fetch("/api/push/subscribe", {
+      const response = await fetch("/api/push/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(subscription.toJSON()),
       });
+
+      if (!response.ok) {
+        await subscription.unsubscribe();
+        throw new Error("Não foi possível salvar a inscrição de notificações.");
+      }
 
       setStatus("subscribed");
     } catch {
@@ -114,11 +119,14 @@ export function PushToggle() {
       const subscription = await registration.pushManager.getSubscription();
 
       if (subscription) {
-        await fetch("/api/push/subscribe", {
+        const response = await fetch("/api/push/subscribe", {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ endpoint: subscription.endpoint }),
         });
+        if (!response.ok) {
+          throw new Error("Não foi possível desativar as notificações.");
+        }
         await subscription.unsubscribe();
       }
 
@@ -136,8 +144,8 @@ export function PushToggle() {
     return (
       <p className={styles.mutedText}>
         {status === "not-configured"
-          ? "Notificação push não configurada neste servidor."
-          : "Seu navegador não aceita notificações push."}
+          ? "Os lembretes neste aparelho ainda não estão disponíveis."
+          : "Este navegador não aceita lembretes mesmo com o app fechado."}
       </p>
     );
   }
@@ -156,7 +164,7 @@ export function PushToggle() {
     return (
       <div className={styles.container}>
         <p className={styles.enabledMessage}>
-          Notificações push ativadas neste aparelho.
+          Lembretes ativados neste aparelho, mesmo quando o app estiver fechado.
         </p>
 
         <div className={styles.buttonRow}>
@@ -177,7 +185,7 @@ export function PushToggle() {
   return (
     <div className={styles.container}>
       <p className={styles.mutedText}>
-        Receba um aviso mesmo com o app fechado. É só pra este aparelho —
+        Receba lembretes mesmo com o app fechado. É só pra este aparelho —
         repita em qualquer outro que você use.
       </p>
 

@@ -45,30 +45,33 @@ export default function LandingPage() {
           <Link className={styles.loginLink} href="/login">
             Entrar
           </Link>
+          <Link className={styles.headerCta} href="/register">
+            Começar grátis <Icon name="FiArrowRight" aria-hidden="true" />
+          </Link>
         </div>
       </header>
       <section className={styles.hero}>
         <div className={styles.heroCopy}>
           <p className={styles.eyebrow}>
-            <span /> Seu dia, no seu ritmo
+            <span /> Clareza para o seu próximo passo
           </p>
           <h1>
-            Faça espaço para o que <em>importa.</em>
+            Pare de carregar tudo na <em>cabeça.</em>
           </h1>
           <p className={styles.intro}>
-            Organize tarefas, construa hábitos e encontre foco sem transformar a
-            sua rotina em mais uma cobrança.
+            O Gerencie-se reúne suas tarefas, hábitos e blocos de foco em um lugar
+            simples para você saber o que fazer agora — sem virar refém de listas.
           </p>
           <div className={styles.heroActions}>
             <Link className={styles.primaryAction} href="/register">
-              Começar agora <Icon name="FiArrowRight" aria-hidden="true" />
+              Começar grátis <Icon name="FiArrowRight" aria-hidden="true" />
             </Link>
             <a className={styles.secondaryAction} href="#como-funciona">
               Conhecer a plataforma
             </a>
           </div>
           <p className={styles.note}>
-            Planejamento simples. Progresso que você consegue sentir.
+            Gratuito para começar. Sem cartão de crédito.
           </p>
         </div>
         <div
@@ -103,9 +106,9 @@ export default function LandingPage() {
               </div>
               <strong>24:18</strong>
               <p>Projeto pessoal</p>
-              <button type="button" aria-label="Pausar sessão de foco">
+              <span className={styles.previewControl} aria-hidden="true">
                 Ⅱ
-              </button>
+              </span>
             </article>
           </div>
           <article className={`${styles.previewCard} ${styles.taskCard}`}>
@@ -137,7 +140,7 @@ export default function LandingPage() {
         </div>
       </section>
       <section className={styles.proof} aria-label="Benefícios do Gerencie-se">
-        <p>Menos pressão, mais direção.</p>
+        <p>Quando o seu dia pede direção, não mais uma ferramenta complicada.</p>
         <div>
           <span>Planeje</span>
           <i /> <span>Foque</span>
@@ -147,9 +150,9 @@ export default function LandingPage() {
       <section className={styles.features} id="recursos">
         <div className={styles.sectionIntro}>
           <p className={styles.eyebrow}>
-            <span /> Sem enrolação
+            <span /> Menos atrito, mais avanço
           </p>
-          <h2>Produtividade não precisa ser complicada.</h2>
+          <h2>Um sistema que trabalha com a sua rotina.</h2>
         </div>
         <div className={styles.featureGrid}>
           {highlights.map(({ icon, title, text }) => (
@@ -180,13 +183,13 @@ export default function LandingPage() {
       <section className={styles.steps} id="como-funciona">
         <div className={styles.stepsCopy}>
           <p className={styles.eyebrow}>Uma rotina possível</p>
-          <h2>Comece pequeno. Continue com leveza.</h2>
+          <h2>Comece em poucos passos. Use no seu ritmo.</h2>
           <p>
-            O Gerencie-se transforma objetivos distantes em próximos passos que
-            cabem no seu dia.
+            Você não precisa organizar a vida inteira hoje. Comece pelo que importa
+            agora e deixe o sistema acompanhar o restante.
           </p>
           <Link className={styles.textLink} href="/register">
-            Criar minha conta <Icon name="FiArrowRight" aria-hidden="true" />
+            Criar conta grátis <Icon name="FiArrowRight" aria-hidden="true" />
           </Link>
         </div>
         <ol className={styles.stepList}>
@@ -220,9 +223,9 @@ export default function LandingPage() {
           aria-hidden="true"
         />
         <p className={styles.eyebrow}>Seu próximo capítulo</p>
-        <h2>Um dia mais intencional começa agora.</h2>
+        <h2>Seu próximo passo claro começa agora.</h2>
         <Link className={styles.primaryAction} href="/register">
-          Criar conta grátis <Icon name="FiArrowRight" aria-hidden="true" />
+          Começar grátis <Icon name="FiArrowRight" aria-hidden="true" />
         </Link>
       </section>
       <footer className={styles.footer}>

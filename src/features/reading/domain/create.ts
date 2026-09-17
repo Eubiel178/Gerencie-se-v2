@@ -5,5 +5,8 @@ export type CreateReadingItem = {
 };
 
 export namespace CreateReadingItem {
-  export type Params = Pick<IReadingItem, "title" | "author">;
+  export type Params = Pick<
+    IReadingItem,
+    "title" | "author" | "totalPages" | "currentPage" | "dailyReadingGoal"
+  >;
 }

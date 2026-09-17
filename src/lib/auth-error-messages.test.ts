@@ -4,7 +4,7 @@ import test from "node:test";
 import { authErrorMessage } from "./auth-error-messages";
 
 test("traduz códigos conhecidos de login Google", () => {
-  assert.match(authErrorMessage("AccessDenied") ?? "", /login com Google/i);
+  assert.match(authErrorMessage("AccessDenied") ?? "", /acesso à sua conta Google foi cancelado/i);
   assert.match(authErrorMessage("Configuration") ?? "", /configurado/i);
 });
 

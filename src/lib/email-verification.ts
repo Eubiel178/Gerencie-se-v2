@@ -6,6 +6,9 @@ import { and, eq } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import { emailVerificationCodes, users } from "@/db/schema";
+import {
+  getVerificationResendRetryAfterSeconds,
+} from "@/lib/email-verification-send-limit";
 
 // 15 minutos — curto o bastante pra não sobreviver muito além de quando a
 // pessoa efetivamente abre o e-mail (janela normal de "acabei de me
@@ -13,7 +16,6 @@ import { emailVerificationCodes, users } from "@/db/schema";
 // pouco mais lento pra chegar. Pedir um código novo (reenviar) é sempre
 // uma opção disponível, então não há motivo pra uma janela mais longa.
 const CODE_TTL_MINUTES = 15;
-
 // 6 dígitos = 1.000.000 de combinações. Sozinho isso seria fraco contra
 // força bruta rápida o bastante — é o limite de tentativas abaixo que
 // realmente protege (mesmo raciocínio de um PIN bancário: poucas
@@ -43,7 +45,31 @@ export interface CreatedEmailVerificationCode {
     code: string;
     expiresAt: Date;
     attempts: number;
+    lastSentAt: Date;
   } | null;
+}
+
+export type EmailVerificationSendAvailability =
+  | { available: true }
+  | { available: false; retryAfterSeconds: number };
+
+/** O limite vive no servidor para que reenvio/reinício não possa ser
+ * contornado chamando a action fora da interface. */
+export async function getEmailVerificationSendAvailability(
+  userId: string
+): Promise<EmailVerificationSendAvailability> {
+  const [row] = await db
+    .select({ lastSentAt: emailVerificationCodes.lastSentAt })
+    .from(emailVerificationCodes)
+    .where(eq(emailVerificationCodes.userId, userId))
+    .limit(1);
+
+  if (!row) return { available: true };
+
+  const retryAfterSeconds = getVerificationResendRetryAfterSeconds(row.lastSentAt);
+  if (retryAfterSeconds === null) return { available: true };
+
+  return { available: false, retryAfterSeconds };
 }
 
 export async function createEmailVerificationCode(userId: string): Promise<CreatedEmailVerificationCode> {
@@ -55,6 +81,7 @@ export async function createEmailVerificationCode(userId: string): Promise<Creat
       code: emailVerificationCodes.code,
       expiresAt: emailVerificationCodes.expiresAt,
       attempts: emailVerificationCodes.attempts,
+      lastSentAt: emailVerificationCodes.lastSentAt,
     })
     .from(emailVerificationCodes)
     .where(eq(emailVerificationCodes.userId, userId))
@@ -62,10 +89,10 @@ export async function createEmailVerificationCode(userId: string): Promise<Creat
 
   await db
     .insert(emailVerificationCodes)
-    .values({ userId, code, expiresAt, attempts: 0 })
+    .values({ userId, code, expiresAt, attempts: 0, lastSentAt: new Date() })
     .onConflictDoUpdate({
       target: emailVerificationCodes.userId,
-      set: { code, expiresAt, attempts: 0 },
+      set: { code, expiresAt, attempts: 0, lastSentAt: new Date() },
     });
 
   return { code, previous: previous ?? null };

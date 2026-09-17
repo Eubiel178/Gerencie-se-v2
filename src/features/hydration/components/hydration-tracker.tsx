@@ -29,6 +29,7 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
   const [customAmount, setCustomAmount] = useState("");
   const [pendingLogControl, setPendingLogControl] = useState<string | null>(null);
   const [isEditingGoal, setIsEditingGoal] = useState(false);
+  const [isSavingGoal, setIsSavingGoal] = useState(false);
   const [goalInput, setGoalInput] = useState(String(today.goalMl));
   const [actionError, setActionError] = useState<string | null>(null);
   const [deletingLogId, setDeletingLogId] = useState<string | null>(null);
@@ -87,6 +88,8 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
 
   async function handleSaveGoal(event: React.FormEvent) {
     event.preventDefault();
+    if (isSavingGoal) return;
+
     const goalMl = Number(goalInput);
 
     if (!Number.isFinite(goalMl) || goalMl <= 0) {
@@ -95,14 +98,20 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
     }
 
     setActionError(null);
-    const result = await updateHydrationGoalAction(goalMl);
-    if (result.error) {
-      setActionError(result.error);
-      return;
-    }
+    setIsSavingGoal(true);
 
-    setIsEditingGoal(false);
-    router.refresh();
+    try {
+      const result = await updateHydrationGoalAction(goalMl);
+      if (result.error) {
+        setActionError(result.error);
+        return;
+      }
+
+      setIsEditingGoal(false);
+      router.refresh();
+    } finally {
+      setIsSavingGoal(false);
+    }
   }
 
   const percent = calculateHydrationGoalPercent(today);
@@ -123,11 +132,14 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
             value={goalInput}
             onChange={(event) => setGoalInput(event.target.value)}
           />
-          <Button.Root type="submit" className={styles.smallButton}>Salvar</Button.Root>
+          <Button.Root type="submit" className={styles.smallButton} loading={isSavingGoal}>
+            Salvar
+          </Button.Root>
           <Button.Root
             type="button"
             variant="secondary"
             className={styles.smallButton}
+            disabled={isSavingGoal}
             onClick={() => setIsEditingGoal(false)}
           >
             Cancelar
@@ -142,7 +154,9 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
             setIsEditingGoal(true);
           }}
         >
-          Meta: {today.goalMl} ml (editar)
+          <span className={styles.goalLabel}>Meta diária</span>
+          <strong>{today.goalMl} ml</strong>
+          <span className={styles.goalAction}>Editar</span>
         </button>
       )}
 

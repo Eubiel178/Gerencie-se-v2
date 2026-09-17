@@ -1,6 +1,6 @@
 import { getReadingFetcher } from "@/features/reading/data/get-reading-fetcher";
 
-import { ReadingList, Recommendations } from "./components";
+import { ReadingList } from "./components";
 
 import styles from "./reading.module.css";
 
@@ -9,6 +9,7 @@ import styles from "./reading.module.css";
 export * from "./domain";
 export * from "./actions";
 export * from "./filter-reading-items";
+export * from "./reading-progress";
 export * from "./recommendations";
 export { getReadingFetcher } from "./data/get-reading-fetcher";
 
@@ -20,12 +21,11 @@ export async function Reading() {
       <header className={styles.toolbar}>
         <div>
           <h1 className={styles.heading}>Leitura</h1>
-          <p className={styles.subheading}>Sua lista de livros e o progresso de cada um.</p>
+          <p className={styles.subheading}>Guarde o que quer ler e registre seu avanço sem perder o fio.</p>
         </div>
       </header>
 
       <ReadingList items={items} />
-      <Recommendations />
     </section>
   );
 }

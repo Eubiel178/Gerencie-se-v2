@@ -99,6 +99,10 @@ export async function getWeeklySummaryForUser(userId: string): Promise<WeeklySum
   }
 
   const habitStreaks = habitIds.map((id) => calculateHabitStats(datesByHabit.get(id) ?? new Set()).currentStreak);
+  const habitCompletionsThisWeek = habitIds.reduce(
+    (total, id) => total + calculateHabitStats(datesByHabit.get(id) ?? new Set()).completionsThisWeek,
+    0
+  );
 
   const taskStats = calculateTaskStats(
     taskRows.map((task) => ({ ...task, scheduledAt: task.scheduledAt ?? undefined })),
@@ -121,7 +125,10 @@ export async function getWeeklySummaryForUser(userId: string): Promise<WeeklySum
     tasksOverdue: taskStats.overdueCount,
     focusHours: calculateWeeklyFocusHours(focusRows, now),
     bestHabitStreak: calculateBestHabitStreak(habitStreaks.map((streak) => ({ currentStreak: streak }))),
+    habitCompletionsThisWeek,
+    activeHabits: habitIds.length,
     avgGoalProgress: calculateAverageGoalProgress(goalsWithProgress),
+    activeGoals: goalRows.length,
     runningKm: weeklyRunning.distanceKm,
     mascotName: mascotRow?.name ?? "Chunchumaru",
     mascotLevel: mascotLevelInfo.level,

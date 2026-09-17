@@ -28,7 +28,9 @@ export function EventList({ eventsList }: { eventsList: IEvent[] }) {
           ))}
         </ul>
       ) : (
-        <EmptyState>Nenhum evento adicionado</EmptyState>
+        <EmptyState>
+          Nenhum compromisso por aqui ainda. Adicione um evento para reservar esse tempo no seu dia.
+        </EmptyState>
       )}
     </>
   );

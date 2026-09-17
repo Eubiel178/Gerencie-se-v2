@@ -31,7 +31,7 @@ export function History({ sessions }: HistoryProps) {
   }
 
   if (sessions.length === 0) {
-    return <EmptyState>Nenhuma corrida registrada ainda.</EmptyState>;
+    return <EmptyState>Seu histórico de corridas vai aparecer aqui depois do primeiro registro.</EmptyState>;
   }
 
   return (

@@ -7,13 +7,10 @@ const BORDER = "#d7dce4";
 const HIGHLIGHT = "#2d6cdf";
 
 export interface VerificationCodeEmailParams {
-  name: string | null;
   code: string;
 }
 
-export function renderVerificationCodeEmail({ name, code }: VerificationCodeEmailParams): string {
-  const greetingName = name ? name.split(" ")[0] : "";
-
+export function renderVerificationCodeEmail({ code }: VerificationCodeEmailParams): string {
   return `
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -25,7 +22,7 @@ export function renderVerificationCodeEmail({ name, code }: VerificationCodeEmai
             <tr>
               <td style="padding:28px 28px 4px;">
                 <p style="margin:0;font-size:13px;letter-spacing:0.04em;text-transform:uppercase;color:${MUTED};">Gerencie-se</p>
-                <h1 style="margin:8px 0 0;font-size:22px;color:${TEXT};">Confirme seu e-mail${greetingName ? `, ${greetingName}` : ""}</h1>
+                <h1 style="margin:8px 0 0;font-size:22px;color:${TEXT};">Confirme seu e-mail</h1>
               </td>
             </tr>
             <tr>
@@ -48,6 +45,7 @@ export function renderVerificationCodeEmail({ name, code }: VerificationCodeEmai
                 <p style="margin:0;font-size:12px;color:${MUTED};">
                   Se você não pediu esse cadastro, pode ignorar este e-mail com segurança.
                 </p>
+                ${renderSpamFolderHint(MUTED)}
               </td>
             </tr>
           </table>
@@ -57,3 +55,4 @@ export function renderVerificationCodeEmail({ name, code }: VerificationCodeEmai
   </body>
 </html>`;
 }
+import { renderSpamFolderHint } from "@/lib/email-template-hints";

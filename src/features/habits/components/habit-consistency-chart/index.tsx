@@ -141,6 +141,13 @@ export function HabitConsistencyChart({
         </div>
       </div>
 
+      {lastPoint && (
+        <p className={styles.summary}>
+          <strong>Esta semana: {lastPoint.percent}% concluído.</strong>{" "}
+          O cálculo considera apenas os dias que já aconteceram.
+        </p>
+      )}
+
       {showTable ? (
         <div className={styles.tableScroll}>
           <table className={styles.table}>

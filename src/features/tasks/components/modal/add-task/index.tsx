@@ -138,6 +138,7 @@ export function AddTask({ buttonText, isGoogleConnected, connections }: IAddTask
               <CollapsibleSection label="Mais opções">
                 <ReminderFields
                   register={register}
+                  setValue={setValue}
                   scheduledAtError={errors.scheduledAt?.message}
                   hasScheduledAt={!!scheduledAt}
                 />

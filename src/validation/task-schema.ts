@@ -15,6 +15,19 @@ const DESCRIPTION_MAX_LENGTH = 280;
 const DESCRIPTION_TOO_LONG_MESSAGE = `A descrição deve ter no máximo ${DESCRIPTION_MAX_LENGTH} caracteres`;
 const SYNC_REQUIRES_SCHEDULED_AT_MESSAGE = "Informe data e hora para sincronizar com o Google Agenda";
 const TASK_TAGS = ["studie", "work", "exercise", "other"] as const;
+const REMINDER_OFFSET_VALUES = [30, 60, 180, 1440, 10080] as const;
+
+export const REMINDER_OPTIONS = [
+  { label: "30 minutos antes", value: 30 },
+  { label: "1 hora antes", value: 60 },
+  { label: "3 horas antes", value: 180 },
+  { label: "1 dia antes", value: 1440 },
+  { label: "1 semana antes", value: 10080 },
+] as const;
+
+function isAllowedReminderOffset(value: number): boolean {
+  return REMINDER_OFFSET_VALUES.includes(value as (typeof REMINDER_OFFSET_VALUES)[number]);
+}
 
 export const validationSchema = z
   .object({
@@ -29,12 +42,9 @@ export const validationSchema = z
     description: z.string().max(DESCRIPTION_MAX_LENGTH, DESCRIPTION_TOO_LONG_MESSAGE),
     priority: z.enum(["baixa", "media", "alta", "critica"]),
     scheduledAt: z.string().optional(),
-    // Minutos de antecedência marcados (1 dia antes = 1440, 5 min antes =
-    // 5, na hora = 0). Só faz sentido junto de `scheduledAt`, mas não é
-    // obrigatório mesmo com data marcada — usuário pode não querer
-    // lembrete nenhum. `z.coerce.number()` porque cada checkbox chega como
-    // string (atributo `value` do HTML) — ver `ReminderFields`.
-    reminderOffsetsMinutes: z.array(z.coerce.number()).optional(),
+    // Cada checkbox chega como string do HTML, então o valor é convertido
+    // antes de validar contra as antecedências suportadas.
+    reminderOffsetsMinutes: z.array(z.coerce.number().refine(isAllowedReminderOffset)).optional(),
     recurrence: z.enum(["none", "daily", "weekly"]),
     // "" no formulário = não compartilhada. Convertido para `undefined`
     // antes de chegar na Server Action (ver componente de formulário).
@@ -44,19 +54,14 @@ export const validationSchema = z
     // `scheduledAt` só nesse caso (ver `.refine` abaixo).
     syncEnabled: z.boolean(),
   })
-  .refine(
-    (data) => {
-      if (data.syncEnabled) {
-        return !!data.scheduledAt;
-      }
-
-      return true;
-    },
-    {
-      message: SYNC_REQUIRES_SCHEDULED_AT_MESSAGE,
-      path: ["scheduledAt"],
-    }
-  );
+  .refine((data) => !data.syncEnabled || !!data.scheduledAt, {
+    message: SYNC_REQUIRES_SCHEDULED_AT_MESSAGE,
+    path: ["scheduledAt"],
+  })
+  .refine((data) => !data.reminderOffsetsMinutes?.length || !!data.scheduledAt, {
+    message: "Defina quando concluir a tarefa antes de criar um lembrete.",
+    path: ["scheduledAt"],
+  });
 
 // Revalidação no servidor da Server Action (ver `src/features/tasks/actions.ts`)
 // — a tarefa é o único recurso que ainda não tinha isso: o formulário já
@@ -71,21 +76,26 @@ const taskFieldsShape = {
   description: z.string().max(DESCRIPTION_MAX_LENGTH, DESCRIPTION_TOO_LONG_MESSAGE),
   priority: z.enum(["baixa", "media", "alta", "critica"]),
   scheduledAt: z.string().optional().nullable(),
-  reminderOffsetsMinutes: z.array(z.number()).optional().nullable(),
+  reminderOffsetsMinutes: z.array(z.number().refine(isAllowedReminderOffset)).optional().nullable(),
   recurrence: z.enum(["none", "daily", "weekly"]),
   sharedWithUserId: z.string().optional().nullable(),
   syncEnabled: z.boolean(),
 };
 
-function withSyncRequiresScheduledAt<Shape extends z.ZodRawShape>(schema: z.ZodObject<Shape>) {
-  return schema.refine((data) => (data.syncEnabled ? !!data.scheduledAt : true), {
-    message: SYNC_REQUIRES_SCHEDULED_AT_MESSAGE,
-    path: ["scheduledAt"],
-  });
+function withScheduledAtDependencies<Shape extends z.ZodRawShape>(schema: z.ZodObject<Shape>) {
+  return schema
+    .refine((data) => !data.syncEnabled || !!data.scheduledAt, {
+      message: SYNC_REQUIRES_SCHEDULED_AT_MESSAGE,
+      path: ["scheduledAt"],
+    })
+    .refine((data) => !data.reminderOffsetsMinutes?.length || !!data.scheduledAt, {
+      message: "Defina quando concluir a tarefa antes de criar um lembrete.",
+      path: ["scheduledAt"],
+    });
 }
 
-export const createTaskSchema = withSyncRequiresScheduledAt(z.object(taskFieldsShape));
+export const createTaskSchema = withScheduledAtDependencies(z.object(taskFieldsShape));
 
-export const updateTaskSchema = withSyncRequiresScheduledAt(
+export const updateTaskSchema = withScheduledAtDependencies(
   z.object({ id: z.string().min(1), ...taskFieldsShape })
 );

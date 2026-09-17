@@ -48,6 +48,35 @@
   font-weight: 600;
   text-decoration: none;
 }
+.headerCta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.5rem;
+  padding: 0 var(--space-4);
+  gap: var(--space-2);
+  border: 1px solid color-mix(in srgb, var(--color-highlight) 78%, var(--color-text));
+  border-radius: var(--radius-md);
+  color: var(--color-on-info);
+  background: var(--color-highlight);
+  font-size: var(--font-size-xs);
+  font-weight: 800;
+  text-decoration: none;
+  text-decoration-line: none;
+  white-space: nowrap;
+  transition: filter var(--duration-fast) var(--easing-standard), transform var(--duration-fast) var(--easing-standard);
+}
+.headerCta:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+.headerCta:focus-visible {
+  outline: 2px solid var(--color-highlight);
+  outline-offset: 3px;
+}
+.headerCta svg {
+  font-size: 0.9rem;
+}
 .navigation a:hover,
 .loginLink:hover {
   color: var(--color-highlight);
@@ -254,7 +283,7 @@
   font-size: 1.85rem;
   letter-spacing: -0.07em;
 }
-.focusCard button {
+.previewControl {
   position: absolute;
   right: var(--space-4);
   bottom: var(--space-4);
@@ -264,7 +293,8 @@
   border-radius: var(--radius-full);
   color: var(--color-on-info);
   background: var(--color-highlight);
-  cursor: pointer;
+  display: grid;
+  place-items: center;
 }
 .taskCard {
   margin-top: var(--space-3);
@@ -553,6 +583,9 @@
   }
   .headerActions {
     gap: var(--space-2);
+  }
+  .headerCta {
+    display: none;
   }
   /* "Entrar" fica sozinho como único link do header no mobile - sem
      padding próprio, a área de toque real era só o texto (~38x19px,

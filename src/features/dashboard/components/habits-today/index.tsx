@@ -35,7 +35,7 @@ export function HabitsToday({ habits, today }: HabitsTodayProps) {
   return (
     <Card title="Hábitos de hoje" href="/home/habits" linkLabel="Ver todos">
       {active.length === 0 ? (
-        <EmptyState tone="muted">Nenhum hábito cadastrado ainda.</EmptyState>
+        <EmptyState tone="muted">Adicione um hábito para acompanhar sua consistência aqui.</EmptyState>
       ) : (
         <ul className={styles.list}>
           {active.map((habit) => (

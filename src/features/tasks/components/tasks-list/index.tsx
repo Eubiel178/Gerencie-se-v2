@@ -2,6 +2,8 @@
 
 import { useEffect } from "react";
 
+import { usePathname, useRouter } from "next/navigation";
+
 import { useFormTags } from "@/features/tasks/hooks/use-form-tags";
 import { useParamsUrl } from "@/hooks/use-params-url";
 
@@ -30,6 +32,9 @@ export function TasksList({ tasksList, isGoogleConnected, connections }: TasksLi
   const statusFilter = useTaskStore((state) => state.statusFilter);
   const priorityFilter = useTaskStore((state) => state.priorityFilter);
   const lowEnergyMode = useTaskStore((state) => state.lowEnergyMode);
+  const resetFilters = useTaskStore((state) => state.resetFilters);
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     setTasks(tasksList);
@@ -46,6 +51,17 @@ export function TasksList({ tasksList, isGoogleConnected, connections }: TasksLi
     (a, b) => Number(a.completed) - Number(b.completed)
   );
   const thereAreTasks = tasksSorted.length > 0;
+  const isFiltered =
+    tag !== "all" ||
+    searchQuery.length > 0 ||
+    statusFilter !== "all" ||
+    priorityFilter !== "all" ||
+    lowEnergyMode;
+
+  function clearFilters() {
+    resetFilters();
+    router.replace(pathname);
+  }
 
   return (
     <>
@@ -62,7 +78,14 @@ export function TasksList({ tasksList, isGoogleConnected, connections }: TasksLi
           ))}
         </ul>
       ) : (
-        <EmptyState variant="box">Nenhuma tarefa adicionada</EmptyState>
+        <EmptyState
+          variant="box"
+          action={tasksList.length > 0 && isFiltered ? { label: "Limpar filtros", onClick: clearFilters } : undefined}
+        >
+          {tasksList.length === 0
+            ? "Sua lista está livre. Adicione a primeira tarefa que merece atenção."
+            : "Nenhuma tarefa aparece com os filtros atuais. Limpe os filtros para ver todas as tarefas."}
+        </EmptyState>
       )}
     </>
   );

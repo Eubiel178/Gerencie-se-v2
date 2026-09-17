@@ -17,7 +17,7 @@ const authErrorMessages: Record<AuthErrorCode, string> = {
   OAuthAccountNotLinked:
     "Não foi possível concluir o login com Google agora. Tente novamente, ou entre com e-mail e senha.",
   AccessDenied:
-    "Não foi possível concluir o login com Google. Tente novamente ou entre com e-mail e senha.",
+    "O acesso à sua conta Google foi cancelado. Você pode tentar novamente ou entrar com e-mail e senha.",
   OAuthCallbackError:
     "Não foi possível concluir o login com Google agora. Tente novamente em instantes.",
   OAuthSignin:

@@ -1,4 +1,5 @@
 import { appUrl } from "@/lib/app-url";
+import { renderSpamFolderHint } from "@/lib/email-template-hints";
 
 // Realinhado ao mesmo sistema visual dos outros e-mails transacionais
 // (ver `src/lib/password-reset-email.ts`, `src/lib/login-alert-email.ts`,
@@ -56,6 +57,7 @@ export function inviteEmailHtml(params: { inviterName: string; hasAccount: boole
                 <p style="margin:0;font-size:12px;color:${MUTED};">
                   Se você não esperava este e-mail, pode ignorá-lo com segurança.
                 </p>
+                ${renderSpamFolderHint(MUTED)}
               </td>
             </tr>
           </table>

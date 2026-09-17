@@ -56,7 +56,12 @@ export function Auth() {
 
   return (
     <section className={styles.formCard}>
-      <h1>Redefinir senha</h1>
+      <div>
+        <h1>Redefinir senha</h1>
+        <p className={styles.formIntro}>
+          Escolha uma nova senha para voltar ao seu painel com segurança.
+        </p>
+      </div>
 
       {!token && (
         <Alert variant="error">

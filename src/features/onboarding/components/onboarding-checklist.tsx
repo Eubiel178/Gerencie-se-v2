@@ -34,16 +34,16 @@ export function OnboardingChecklist({ items }: OnboardingChecklistProps) {
     <div className={styles.card}>
       <div className={styles.header}>
         <div>
-          <h2 className={styles.title}>Primeiros passos</h2>
+          <h2 className={styles.title}>Comece pelo essencial</h2>
           <p className={styles.subtitle}>
-            {doneCount} de {items.length} concluídos — vá no seu ritmo, dá pra continuar depois.
+            {doneCount} de {items.length} concluídos — escolha o próximo passo que faz sentido agora.
           </p>
         </div>
 
         <button
           type="button"
           className={styles.dismiss}
-          aria-label="Pular primeiros passos"
+          aria-label="Ocultar checklist de primeiros passos"
           disabled={isDismissing}
           onClick={handleDismiss}
         >

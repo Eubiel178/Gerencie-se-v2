@@ -81,7 +81,7 @@ export function buildGuidedTourSteps(mascotName: string): GuidedTourStep[] {
       path: "/home/settings?section=notificacoes",
       target: '[data-tour="notifications-settings"]',
       title: "Lembretes e notificações",
-      body: "Aqui você liga notificações no navegador, no celular (push) ou por e-mail para não perder o horário de uma tarefa — e também ativa o resumo semanal, se quiser.",
+      body: "Aqui você escolhe receber lembretes neste navegador ou por e-mail para não perder o horário de uma tarefa — e também ativa o resumo semanal, se quiser.",
     },
     {
       id: "done",

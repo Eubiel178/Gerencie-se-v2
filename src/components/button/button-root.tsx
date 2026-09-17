@@ -1,3 +1,5 @@
+import { forwardRef } from "react";
+
 import styles from "./styles.module.css";
 
 export type ButtonVariant = "primary" | "secondary" | "ghost";
@@ -21,7 +23,7 @@ export interface ButtonRootProps extends React.ComponentProps<"button"> {
   tone?: ButtonTone;
 }
 
-export function ButtonRoot({
+export const ButtonRoot = forwardRef<HTMLButtonElement, ButtonRootProps>(function ButtonRoot({
   loading = false,
   variant = "primary",
   tone,
@@ -29,7 +31,7 @@ export function ButtonRoot({
   disabled,
   className,
   ...rest
-}: ButtonRootProps) {
+}, ref) {
   let classNames = `${styles.button} ${VARIANT_CLASS[variant]}`;
 
   if (tone) {
@@ -42,6 +44,7 @@ export function ButtonRoot({
 
   return (
     <button
+      ref={ref}
       className={classNames}
       disabled={loading || disabled}
       aria-busy={loading || undefined}
@@ -57,4 +60,4 @@ export function ButtonRoot({
       )}
     </button>
   );
-}
+});

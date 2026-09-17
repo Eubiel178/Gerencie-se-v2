@@ -2,6 +2,8 @@ import "server-only";
 
 import nodemailer from "nodemailer";
 
+import { wasSmtpDeliveryAccepted } from "@/lib/smtp-delivery";
+
 /**
  * Envio de e-mail transacional (convites, redefinição de senha, alerta
  * de login, resumo semanal) via SMTP do Gmail, usando uma conta comum
@@ -47,12 +49,22 @@ export async function sendEmail(
   }
 
   try {
-    await transporter.sendMail({
+    const delivery = await transporter.sendMail({
       from: `Gerencie-se <${gmailUser}>`,
       to: params.to,
       subject: params.subject,
       html: params.html,
     });
+
+    // `sendMail` pode resolver mesmo quando o servidor SMTP rejeita o
+    // destinatário (a informação vem em `rejected`). Tratar qualquer
+    // resolução como sucesso fazia o cadastro afirmar que enviou um código
+    // que nunca sairia do servidor. "Aceito pelo SMTP" ainda não promete
+    // entrega na caixa de entrada, mas é a confirmação confiável que este
+    // transporte consegue oferecer.
+    if (!wasSmtpDeliveryAccepted(delivery)) {
+      return { error: "O servidor de e-mail não aceitou o destinatário." };
+    }
 
     return { error: null };
   } catch {

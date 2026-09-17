@@ -7,5 +7,8 @@ export interface IReadingItem {
   author?: string | null;
   status: ReadingStatus;
   progressPercent: number;
+  totalPages?: number | null;
+  currentPage?: number | null;
+  dailyReadingGoal?: number | null;
   addedAt: Date;
 }

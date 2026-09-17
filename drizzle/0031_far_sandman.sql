@@ -1,0 +1,1 @@
+ALTER TABLE "email_verification_code" ADD COLUMN "last_sent_at" timestamp DEFAULT now() NOT NULL;

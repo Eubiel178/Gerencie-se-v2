@@ -40,8 +40,8 @@ export async function Habits() {
         <div className={styles.heatmapSection}>
           <h2 className={styles.heatmapTitle}>Consistência</h2>
           <p className={styles.subheading}>
-            Cada ponto é uma semana. Quanto mais alto, maior a % de hábitos que você concluiu
-            naquela semana, em média.
+            A linha compara a média de hábitos concluídos em cada semana. Use-a para perceber
+            se o seu ritmo está subindo, caindo ou se mantendo.
           </p>
           <HabitConsistencyChart
             completionDates={completionDates}
