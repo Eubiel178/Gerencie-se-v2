@@ -439,6 +439,25 @@ export function Item({
                       />
                     </Input.Wrapper>
                   </Input.Root>
+                  {item.totalPages == null && (
+                    <Input.Root>
+                      <Input.Label htmlFor={`reading-current-${item.id}`}>
+                        Página atual
+                      </Input.Label>
+                      <Input.Wrapper>
+                        <Input.Field
+                          id={`reading-current-${item.id}`}
+                          type="number"
+                          min={0}
+                          inputMode="numeric"
+                          value={editCurrentPage}
+                          onChange={(event) =>
+                            setEditCurrentPage(event.target.value)
+                          }
+                        />
+                      </Input.Wrapper>
+                    </Input.Root>
+                  )}
                   <Input.Root>
                     <Input.Label htmlFor={`reading-goal-${item.id}`}>
                       Meta diária
