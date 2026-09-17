@@ -6,6 +6,7 @@ import { validationSchema } from "@/validation/goal-schema";
 
 import { Alert, Form, Input, Modal, ModalHeader, Button, ChipGroup, SuggestionChips, CollapsibleSection } from "@/components";
 import { Icon } from "@/components/icon";
+import modalStyles from "@/components/modal/styles.module.css";
 
 import { createGoalAction } from "@/features/goals/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
@@ -60,7 +61,7 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
       </Button.Root>
 
       {isOpen && (
-        <Modal onClose={closeModal}>
+        <Modal onClose={closeModal} className={modalStyles.wide}>
           <ModalHeader title="Novo Objetivo" onClose={closeModal} />
 
           <Form.Root onSubmit={handleFormSubmit}>

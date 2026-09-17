@@ -16,10 +16,14 @@ interface StartParams {
   taskId?: string | null;
 }
 
+export type FocusPendingAction = "start" | "complete" | "cancel" | `extend:${number}` | null;
+
 interface FocusSessionContextValue {
   session: IFocusSession | null;
   remaining: number;
   isBusy: boolean;
+  /** A ação em andamento, para que só o controle acionado mostre spinner. */
+  pendingAction: FocusPendingAction;
   // Só preenchido logo depois de uma conclusão bem-sucedida (automática
   // OU manual) - quem precisa reagir a isso (ex.: `Timer` oferecendo
   // marcar a tarefa associada como concluída) lê e depois chama
@@ -72,6 +76,7 @@ export function FocusSessionProvider({ initialSession, userId, children }: Focus
   // do lado do cliente, sem nunca rodar durante a própria hidratação.
   const [remaining, setRemaining] = useState(() => initialSession?.plannedDurationSeconds ?? 0);
   const [isBusy, setIsBusy] = useState(false);
+  const [pendingAction, setPendingAction] = useState<FocusPendingAction>(null);
   const [lastCompletion, setLastCompletion] = useState<{ xpEarned: number; taskId: string | null } | null>(null);
 
   // Evita completar a mesma sessão duas vezes se o relógio (chegou a
@@ -108,6 +113,7 @@ export function FocusSessionProvider({ initialSession, userId, children }: Focus
 
     isCompletingRef.current = true;
     setIsBusy(true);
+    setPendingAction("complete");
 
     try {
       const result = await completeFocusSessionAction({ id: session.id });
@@ -139,6 +145,7 @@ export function FocusSessionProvider({ initialSession, userId, children }: Focus
       return { error: null, xpEarned: result.xpEarned };
     } finally {
       setIsBusy(false);
+      setPendingAction(null);
       isCompletingRef.current = false;
     }
   }, [session, router]);
@@ -157,6 +164,7 @@ export function FocusSessionProvider({ initialSession, userId, children }: Focus
   const start = useCallback(
     async (params: StartParams): Promise<{ error: string | null }> => {
       setIsBusy(true);
+      setPendingAction("start");
 
       try {
         const result = await startFocusSessionAction(params);
@@ -186,6 +194,7 @@ export function FocusSessionProvider({ initialSession, userId, children }: Focus
         return { error: result.error };
       } finally {
         setIsBusy(false);
+        setPendingAction(null);
       }
     },
     [userId, router]
@@ -195,6 +204,7 @@ export function FocusSessionProvider({ initialSession, userId, children }: Focus
     if (!session) return { error: null };
 
     setIsBusy(true);
+    setPendingAction("cancel");
 
     try {
       const result = await cancelFocusSessionAction({ id: session.id });
@@ -207,6 +217,7 @@ export function FocusSessionProvider({ initialSession, userId, children }: Focus
       return { error: result.error };
     } finally {
       setIsBusy(false);
+      setPendingAction(null);
     }
   }, [session, router]);
 
@@ -215,6 +226,7 @@ export function FocusSessionProvider({ initialSession, userId, children }: Focus
       if (!session) return { error: null };
 
       setIsBusy(true);
+      setPendingAction(`extend:${additionalSeconds}`);
 
       try {
         const result = await extendFocusSessionAction({ id: session.id, additionalSeconds });
@@ -230,6 +242,7 @@ export function FocusSessionProvider({ initialSession, userId, children }: Focus
         return { error: null };
       } finally {
         setIsBusy(false);
+        setPendingAction(null);
       }
     },
     [session]
@@ -239,7 +252,18 @@ export function FocusSessionProvider({ initialSession, userId, children }: Focus
 
   return (
     <FocusSessionContext.Provider
-      value={{ session, remaining, isBusy, lastCompletion, start, complete, cancel, extend, clearLastCompletion }}
+      value={{
+        session,
+        remaining,
+        isBusy,
+        pendingAction,
+        lastCompletion,
+        start,
+        complete,
+        cancel,
+        extend,
+        clearLastCompletion,
+      }}
     >
       {children}
     </FocusSessionContext.Provider>

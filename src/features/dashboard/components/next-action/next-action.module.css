@@ -30,6 +30,30 @@
   color: var(--color-text);
 }
 
+/* A cor do card "Prioridade" era sempre a mesma (--color-highlight, azul)
+   não importa a prioridade real da tarefa — a mesma cor pra "Alta" e pra
+   uma tarefa comum sem prioridade alta o bastante pra entrar aqui
+   (achado relatado: "podia ter a cor ligada com a prioridade"). Mesma
+   paleta já usada na borda esquerda do card de tarefa
+   (`home-dashboard.module.css`) — agora as duas telas falam a mesma
+   linguagem de cor pra prioridade, em vez de cada uma ter a sua. */
+.card[data-kind="priority"][data-priority="critica"] {
+  background: var(--color-danger);
+  color: var(--color-on-danger);
+}
+.card[data-kind="priority"][data-priority="alta"] {
+  background: var(--color-priority-high);
+  color: var(--color-on-priority-high);
+}
+.card[data-kind="priority"][data-priority="media"] {
+  background: var(--color-warning);
+  color: var(--color-on-warning);
+}
+.card[data-kind="priority"][data-priority="baixa"] {
+  background: var(--color-success);
+  color: var(--color-on-success);
+}
+
 .eyebrow {
   font-size: var(--font-size-xs);
   font-weight: 600;

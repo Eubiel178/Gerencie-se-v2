@@ -9,6 +9,7 @@ import { Icon, IconName } from "@/components/icon";
 
 import { Button } from "@/components";
 import { getFocusableElements } from "@/components/modal/get-focusable-elements";
+import { useMobileNavStore } from "@/components/header/mobile-nav-store";
 import { Gender } from "@/features/profile/get-gender";
 import { usePaletteStore } from "@/features/search/palette-store";
 import { QuickCapture } from "@/features/tasks/components/quick-capture";
@@ -102,7 +103,12 @@ export const Header = ({ user }: HeaderProps) => {
   const openPalette = usePaletteStore((state) => state.open);
   const [isConfirmingSignOut, setIsConfirmingSignOut] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
-  const [isMobileNavigationOpen, setIsMobileNavigationOpen] = useState(false);
+  // Estado compartilhado (não local) - ver comentário em
+  // `mobile-nav-store.ts`: o Guided Tour precisa abrir este painel de
+  // fora, pra apontar pro item de navegação que só existe dentro dele.
+  const isMobileNavigationOpen = useMobileNavStore((state) => state.isOpen);
+  const openMobileNavigation = useMobileNavStore((state) => state.open);
+  const closeMobileNavigation = useMobileNavStore((state) => state.close);
   const mobileNavigationRef = useRef<HTMLDivElement>(null);
   const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -158,7 +164,7 @@ export const Header = ({ user }: HeaderProps) => {
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
-        setIsMobileNavigationOpen(false);
+        closeMobileNavigation();
         return;
       }
 
@@ -189,7 +195,7 @@ export const Header = ({ user }: HeaderProps) => {
       document.body.style.overflow = previousBodyOverflow;
       menuButton?.focus();
     };
-  }, [isMobileNavigationOpen]);
+  }, [closeMobileNavigation, isMobileNavigationOpen]);
 
   function renderNavigation(closeOnNavigate = false) {
     return (
@@ -218,7 +224,7 @@ export const Header = ({ user }: HeaderProps) => {
                       <Link
                         href={href}
                         data-active={pathname === href}
-                        onClick={closeOnNavigate ? () => setIsMobileNavigationOpen(false) : undefined}
+                        onClick={closeOnNavigate ? closeMobileNavigation : undefined}
                       >
                         <Icon name={icon} aria-hidden="true" />
                         {label}
@@ -244,7 +250,7 @@ export const Header = ({ user }: HeaderProps) => {
           ref={mobileMenuButtonRef}
           aria-expanded={isMobileNavigationOpen}
           aria-controls="mobile-navigation"
-          onClick={() => setIsMobileNavigationOpen(true)}
+          onClick={openMobileNavigation}
         >
           <Icon name="MdMenu" aria-hidden="true" />
           Menu
@@ -256,7 +262,7 @@ export const Header = ({ user }: HeaderProps) => {
           className={styles.mobileNavigationOverlay}
           role="presentation"
           onClick={(event) => {
-            if (event.target === event.currentTarget) setIsMobileNavigationOpen(false);
+            if (event.target === event.currentTarget) closeMobileNavigation();
           }}
         >
           <div
@@ -273,14 +279,18 @@ export const Header = ({ user }: HeaderProps) => {
               <button
                 type="button"
                 className={styles.mobileMenuButton}
-                onClick={() => setIsMobileNavigationOpen(false)}
+                onClick={closeMobileNavigation}
               >
                 <Icon name="MdClose" aria-hidden="true" />
                 Fechar
               </button>
             </div>
 
-            <button type="button" className={styles.searchTrigger} onClick={openPalette}>
+            {/* `data-tour="search"` faltava aqui — o passo "Busca e
+                captura rápida" do Guided Tour só conseguia apontar pro
+                botão equivalente da sidebar de desktop, nunca pra este
+                (o único que existe de verdade no mobile). */}
+            <button type="button" className={styles.searchTrigger} data-tour="search" onClick={openPalette}>
               <Icon name="FaSearch" aria-hidden="true" />
               Buscar
             </button>

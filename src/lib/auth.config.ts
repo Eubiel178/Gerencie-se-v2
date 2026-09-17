@@ -85,6 +85,16 @@ export default {
     }),
   ],
   callbacks: {
+    // `allowDangerousEmailAccountLinking` só é seguro aqui se o perfil
+    // OAuth tiver confirmado posse do e-mail. O Auth.js chama `signIn`
+    // antes de executar `linkAccount`, então rejeitar este caso impede
+    // tanto a criação quanto a vinculação automática para um perfil cujo
+    // e-mail não foi verificado pelo Google.
+    async signIn({ account, profile }) {
+      if (account?.provider !== "google") return true;
+
+      return profile?.email_verified === true;
+    },
     async jwt({ token, user }) {
       if (user?.id) {
         token.sub = user.id;

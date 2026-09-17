@@ -11,6 +11,10 @@ export interface INextAction {
   label: string;
   title: string;
   href: string;
+  /** Só preenchido quando a ação vem de uma tarefa (todas menos "routine",
+   * "habit" e "none") — usado pra colorir o card conforme a prioridade
+   * real, em vez de uma cor fixa igual pra qualquer "kind: priority". */
+  priority?: ITask["priority"];
 }
 
 const PRIORITY_RANK: Record<ITask["priority"], number> = {
@@ -50,6 +54,7 @@ export function buildNextAction(params: {
       label: "Continuar de onde parou",
       title: resumedTask.title,
       href: "/home/tasks",
+      priority: resumedTask.priority,
     };
   }
 
@@ -63,6 +68,7 @@ export function buildNextAction(params: {
       label: dayjs(overdue.scheduledAt).format("DD/MM HH:mm"),
       title: overdue.title,
       href: "/home/tasks",
+      priority: overdue.priority,
     };
   }
 
@@ -76,6 +82,7 @@ export function buildNextAction(params: {
       label: dayjs(nextScheduled.scheduledAt).format("HH:mm"),
       title: nextScheduled.title,
       href: "/home/tasks",
+      priority: nextScheduled.priority,
     };
   }
 
@@ -105,13 +112,24 @@ export function buildNextAction(params: {
   // 3 tarefas). Qualquer tarefa pendente agora conta como próxima ação -
   // só o rótulo muda conforme a prioridade real.
   if (topPriorityTask) {
-    const isHighPriority = PRIORITY_RANK[topPriorityTask.priority] >= PRIORITY_RANK.alta;
+    // Antes, qualquer tarefa que caísse aqui (inclusive "crítica") sempre
+    // mostrava o rótulo fixo "Prioridade alta" — o texto nunca refletia
+    // o nível real, e por tabela o card também tinha sempre a MESMA cor
+    // (ver `next-action/index.tsx`/`.module.css`), não importa a
+    // prioridade de verdade (achado relatado: cor/rótulo sempre iguais).
+    const label =
+      topPriorityTask.priority === "critica"
+        ? "Prioridade crítica"
+        : topPriorityTask.priority === "alta"
+          ? "Prioridade alta"
+          : "Tarefa pendente";
 
     return {
       kind: "priority",
-      label: isHighPriority ? "Prioridade alta" : "Tarefa pendente",
+      label,
       title: topPriorityTask.title,
       href: "/home/tasks",
+      priority: topPriorityTask.priority,
     };
   }
 

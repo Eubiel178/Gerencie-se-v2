@@ -25,14 +25,16 @@ const RESEND_COOLDOWN_SECONDS = 30;
 
 interface AuthProps {
   email: string | null;
+  deliveryFailed: boolean;
 }
 
-export function Auth({ email }: AuthProps) {
+export function Auth({ email, deliveryFailed }: AuthProps) {
   const { showToast } = useToast();
 
   const [formError, setFormError] = useState<string | null>(null);
   const [isResending, setIsResending] = useState(false);
   const [cooldown, setCooldown] = useState(0);
+  const [showDeliveryFailed, setShowDeliveryFailed] = useState(deliveryFailed);
 
   const {
     handleSubmit,
@@ -72,6 +74,7 @@ export function Auth({ email }: AuthProps) {
     }
 
     showToast("Código reenviado.");
+    setShowDeliveryFailed(false);
     setCooldown(RESEND_COOLDOWN_SECONDS);
 
     const interval = setInterval(() => {
@@ -98,6 +101,12 @@ export function Auth({ email }: AuthProps) {
           ? `Enviamos um código de 6 dígitos para ${email}. Digite abaixo para concluir seu cadastro.`
           : "Enviamos um código de 6 dígitos para o e-mail do seu cadastro. Digite abaixo para continuar."}
       </p>
+
+      {showDeliveryFailed && (
+        <Alert variant="warning">
+          Não conseguimos enviar o primeiro código. Use “Reenviar código” para tentar novamente.
+        </Alert>
+      )}
 
       <Form.Root onSubmit={handleSubmit(handleOnSubmit)}>
         <Form.Wrapper>

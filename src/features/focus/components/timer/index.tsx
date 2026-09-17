@@ -51,7 +51,7 @@ interface TimerProps {
  */
 export function Timer({ mascot, task, pendingTasks }: TimerProps) {
   const router = useRouter();
-  const { session, remaining, isBusy, lastCompletion, start, complete, cancel, extend, clearLastCompletion } =
+  const { session, remaining, isBusy, pendingAction, lastCompletion, start, complete, cancel, extend, clearLastCompletion } =
     useFocusSession();
 
   const [plannedMinutes, setPlannedMinutes] = useState(25);
@@ -249,6 +249,7 @@ export function Timer({ mascot, task, pendingTasks }: TimerProps) {
                 type="button"
                 variant="secondary"
                 disabled={isBusy}
+                loading={pendingAction === `extend:${minutes * 60}`}
                 onClick={() => handleExtend(minutes)}
               >
                 +{minutes} min
@@ -257,13 +258,14 @@ export function Timer({ mascot, task, pendingTasks }: TimerProps) {
           </div>
 
           <div className={styles.controls}>
-            <Button.Root variant="secondary" loading={isBusy} onClick={handleComplete}>
+            <Button.Root variant="secondary" disabled={isBusy} loading={pendingAction === "complete"} onClick={handleComplete}>
               Concluir agora
             </Button.Root>
             <Button.Root
               variant="secondary"
               tone="danger"
-              loading={isBusy}
+              disabled={isBusy}
+              loading={pendingAction === "cancel"}
               onClick={handleCancel}
             >
               Cancelar
@@ -302,7 +304,7 @@ export function Timer({ mascot, task, pendingTasks }: TimerProps) {
             ))}
           </div>
 
-          <Button.Root data-tour="focus-start" loading={isBusy} onClick={handleStart}>
+          <Button.Root data-tour="focus-start" loading={pendingAction === "start"} onClick={handleStart}>
             Iniciar Foco ({plannedMinutes} min)
           </Button.Root>
         </>

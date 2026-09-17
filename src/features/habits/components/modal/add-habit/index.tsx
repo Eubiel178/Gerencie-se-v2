@@ -6,6 +6,7 @@ import { validationSchema } from "@/validation/habit-schema";
 
 import { Alert, Form, Input, Modal, ModalHeader, Button, ChipGroup, SuggestionChips, CollapsibleSection } from "@/components";
 import { Icon } from "@/components/icon";
+import modalStyles from "@/components/modal/styles.module.css";
 
 import { createHabitAction } from "@/features/habits/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
@@ -61,7 +62,7 @@ export function AddHabit({ buttonText, connections, goalOptions }: IAddHabitProp
       </Button.Root>
 
       {isOpen && (
-        <Modal onClose={closeModal}>
+        <Modal onClose={closeModal} className={modalStyles.medium}>
           <ModalHeader title="Novo Hábito" onClose={closeModal} />
 
           <Form.Root onSubmit={handleFormSubmit}>

@@ -21,6 +21,7 @@ import {
 } from "@/lib/password-reset-email";
 import {
   createEmailVerificationCode,
+  restorePreviousEmailVerificationCode,
   verifyEmailVerificationCode,
 } from "@/lib/email-verification";
 import { renderVerificationCodeEmail } from "@/lib/email-verification-email";
@@ -118,20 +119,24 @@ export async function registerAction(
     };
   }
 
-  // Best-effort: uma falha aqui nunca deve perder o cadastro que acabou
-  // de ser criado — a tela de verificação (`/verify-email`) tem um botão
-  // "Reenviar código" pra quem não recebeu nada.
+  // O cadastro continua existindo mesmo se o provedor de e-mail falhar,
+  // mas não dizemos falsamente que um código foi enviado. A tela de
+  // verificação recebe esse estado e oferece o reenvio de forma explícita.
+  let verificationEmailDeliveryFailed = false;
   try {
-    const code = await createEmailVerificationCode(userId);
+    const createdCode = await createEmailVerificationCode(userId);
     const result = await sendEmail({
       to: email,
       subject: "Confirme seu e-mail — Gerencie-se",
-      html: renderVerificationCodeEmail({ name, code }),
+      html: renderVerificationCodeEmail({ name, code: createdCode.code }),
     });
     if (result.error) {
+      verificationEmailDeliveryFailed = true;
+      await restorePreviousEmailVerificationCode(userId, createdCode);
       console.error("[auth] falha ao enviar código de verificação:", result.error);
     }
   } catch (error) {
+    verificationEmailDeliveryFailed = true;
     console.error("[auth] falha ao gerar/enviar código de verificação:", error);
   }
 
@@ -143,7 +148,7 @@ export async function registerAction(
     redirect("/login");
   }
 
-  redirect("/home");
+  redirect(verificationEmailDeliveryFailed ? "/verify-email?delivery=failed" : "/home");
 }
 
 export type VerifyEmailState = {
@@ -194,14 +199,15 @@ export async function resendVerificationCodeAction(): Promise<ResendVerification
     return { error: GENERIC_SEND_ERROR, sent: false };
   }
 
-  const code = await createEmailVerificationCode(userId);
+  const createdCode = await createEmailVerificationCode(userId);
   const result = await sendEmail({
     to: user.email,
     subject: "Confirme seu e-mail — Gerencie-se",
-    html: renderVerificationCodeEmail({ name: user.name, code }),
+    html: renderVerificationCodeEmail({ name: user.name, code: createdCode.code }),
   });
 
   if (result.error) {
+    await restorePreviousEmailVerificationCode(userId, createdCode);
     console.error("[auth] falha ao reenviar código de verificação:", result.error);
     return { error: GENERIC_SEND_ERROR, sent: false };
   }

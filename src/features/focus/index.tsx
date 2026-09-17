@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { getFocusFetcher, getMascotFetcher } from "@/features/focus/data/get-focus-fetcher";
+import { getCurrentUserTimezone } from "@/features/profile/get-user-timezone";
 import { getTaskFetcher } from "@/features/tasks/data/get-task-fetcher";
 import { sortTasksByPriority } from "@/features/tasks/sort-tasks";
 
@@ -28,11 +29,12 @@ export async function Focus({ taskId }: FocusProps = {}) {
   const focusFetcher = getFocusFetcher();
   const mascotFetcher = getMascotFetcher();
 
-  const [activeSession, mascot, history, allTasks] = await Promise.all([
+  const [activeSession, mascot, history, allTasks, timeZone] = await Promise.all([
     focusFetcher.getActive(),
     mascotFetcher.getMascot(),
     focusFetcher.loadHistory(),
     getTaskFetcher().loadAll(),
+    getCurrentUserTimezone(),
   ]);
 
   // Se já existe uma sessão rodando, a tarefa associada A ELA manda -
@@ -78,7 +80,7 @@ export async function Focus({ taskId }: FocusProps = {}) {
             Ver relatório completo
           </Link>
         </div>
-        <History sessions={history} />
+        <History sessions={history} timeZone={timeZone} />
       </div>
     </section>
   );

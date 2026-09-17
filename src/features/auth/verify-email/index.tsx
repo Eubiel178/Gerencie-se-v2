@@ -11,7 +11,11 @@ import { Auth } from "./components";
 import { Figure, Main } from "../components";
 import styles from "../auth-page.module.css";
 
-export async function VerifyEmail() {
+interface VerifyEmailProps {
+  deliveryFailed?: boolean;
+}
+
+export async function VerifyEmail({ deliveryFailed = false }: VerifyEmailProps) {
   const userId = await requireUserId();
 
   // Quem já verificou (ou nunca precisou, como Google) não tem nada a
@@ -31,7 +35,7 @@ export async function VerifyEmail() {
       <Figure />
 
       <Main>
-        <Auth email={user?.email ?? null} />
+        <Auth email={user?.email ?? null} deliveryFailed={deliveryFailed} />
       </Main>
     </div>
   );

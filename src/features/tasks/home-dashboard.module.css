@@ -83,7 +83,13 @@
 }
 .taskGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  /* 16rem cabia coluna demais numa tela larga (5+ cards por linha),
+     cada uma estreita a ponto do título quebrar linha bem cedo e
+     encostar no badge de prioridade ao lado (achado relatado: "muito
+     card numa linha, tudo espremido"). 19rem dá mais respiro por
+     card, trocando quantidade de colunas por card mais confortável de
+     ler. */
+  grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr));
   gap: var(--space-4);
   padding: 0;
   margin: 0;
@@ -158,7 +164,7 @@
   min-width: 0;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-2);
+  padding: var(--space-3) var(--space-2);
   color: var(--color-text);
 }
 .headerLeft {
@@ -217,17 +223,38 @@
   align-items: center;
   color: var(--color-text);
 }
+/* Mesmo tratamento visual de pill do `.tagLabel` (fundo suave da
+   própria cor + texto na cor cheia) - antes era só texto colorido
+   solto, sem fundo nem borda arredondada, destoando do resto dos
+   "selos" pequenos do card (achado relatado: "tamanhos diferentes").
+   `critica` usa a MESMA cor de `--color-danger` da borda esquerda do
+   card pra essa prioridade; `alta` foi corrigido de `--color-warning`
+   (um marrom/âmbar) pra `--color-priority-high` (o laranja de
+   verdade usado na borda esquerda pra "alta") - as duas usavam cores
+   diferentes pra sinalizar a MESMA prioridade no mesmo card. */
 .priorityBadgeError {
+  display: inline-flex;
+  align-items: center;
   margin: 0;
+  padding: 0.2rem var(--space-2);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-danger) 14%, transparent);
   font-family: var(--font-sans);
   color: var(--color-danger);
   font-size: var(--font-size-xs);
+  font-weight: 600;
 }
 .priorityBadgeWarning {
+  display: inline-flex;
+  align-items: center;
   margin: 0;
+  padding: 0.2rem var(--space-2);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-priority-high) 16%, transparent);
   font-family: var(--font-sans);
-  color: var(--color-warning);
+  color: var(--color-priority-high);
   font-size: var(--font-size-xs);
+  font-weight: 600;
 }
 .description {
   margin: 0;

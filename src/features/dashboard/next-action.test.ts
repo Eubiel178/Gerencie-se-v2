@@ -68,13 +68,24 @@ test("buildNextAction: tarefa pendente prioridade media/sem horario ainda conta 
   assert.equal(action.title, "Despejo mental");
 });
 
-test("buildNextAction: prioridade alta/critica continua com o rótulo 'Prioridade alta'", () => {
-  const tasks = [task({ id: "alta", title: "Urgente", priority: "critica" })];
+test("buildNextAction: prioridade crítica tem rótulo e cor próprios, distintos de 'alta' (achado: as duas mostravam sempre 'Prioridade alta')", () => {
+  const tasks = [task({ id: "critica", title: "Urgente", priority: "critica" })];
+
+  const action = buildNextAction({ tasks, routine: [], habits: [] });
+
+  assert.equal(action.kind, "priority");
+  assert.equal(action.label, "Prioridade crítica");
+  assert.equal(action.priority, "critica");
+});
+
+test("buildNextAction: prioridade alta tem o rótulo 'Prioridade alta' e carrega a prioridade real", () => {
+  const tasks = [task({ id: "alta", title: "Importante", priority: "alta" })];
 
   const action = buildNextAction({ tasks, routine: [], habits: [] });
 
   assert.equal(action.kind, "priority");
   assert.equal(action.label, "Prioridade alta");
+  assert.equal(action.priority, "alta");
 });
 
 test("buildNextAction: sem nenhuma tarefa/hábito/rotina pendente, 'Tudo em dia' de verdade", () => {

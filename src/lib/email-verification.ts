@@ -2,7 +2,7 @@ import "server-only";
 
 import { randomInt } from "node:crypto";
 
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import { emailVerificationCodes, users } from "@/db/schema";
@@ -37,9 +37,28 @@ function generateCode(): string {
  * também — evita que uma pessoa fique presa num contador de tentativas
  * de um código antigo que ela já não tem mais como usar).
  */
-export async function createEmailVerificationCode(userId: string): Promise<string> {
+export interface CreatedEmailVerificationCode {
+  code: string;
+  previous: {
+    code: string;
+    expiresAt: Date;
+    attempts: number;
+  } | null;
+}
+
+export async function createEmailVerificationCode(userId: string): Promise<CreatedEmailVerificationCode> {
   const code = generateCode();
   const expiresAt = new Date(Date.now() + CODE_TTL_MINUTES * 60_000);
+
+  const [previous] = await db
+    .select({
+      code: emailVerificationCodes.code,
+      expiresAt: emailVerificationCodes.expiresAt,
+      attempts: emailVerificationCodes.attempts,
+    })
+    .from(emailVerificationCodes)
+    .where(eq(emailVerificationCodes.userId, userId))
+    .limit(1);
 
   await db
     .insert(emailVerificationCodes)
@@ -49,7 +68,30 @@ export async function createEmailVerificationCode(userId: string): Promise<strin
       set: { code, expiresAt, attempts: 0 },
     });
 
-  return code;
+  return { code, previous: previous ?? null };
+}
+
+/**
+ * Desfaz a troca de código quando o SMTP rejeita o envio. Sem isso, um
+ * clique em "Reenviar" que falhasse invalidaria o único código que a pessoa
+ * já tinha recebido. A condição pelo `code` novo evita desfazer uma troca
+ * mais recente feita simultaneamente em outra aba.
+ */
+export async function restorePreviousEmailVerificationCode(
+  userId: string,
+  created: CreatedEmailVerificationCode
+): Promise<void> {
+  if (created.previous) {
+    await db
+      .update(emailVerificationCodes)
+      .set(created.previous)
+      .where(and(eq(emailVerificationCodes.userId, userId), eq(emailVerificationCodes.code, created.code)));
+    return;
+  }
+
+  await db
+    .delete(emailVerificationCodes)
+    .where(and(eq(emailVerificationCodes.userId, userId), eq(emailVerificationCodes.code, created.code)));
 }
 
 /**

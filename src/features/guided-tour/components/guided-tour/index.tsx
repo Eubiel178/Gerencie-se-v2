@@ -5,12 +5,18 @@ import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 
 import { getFocusableElements } from "@/components/modal/get-focusable-elements";
+import { useMobileNavStore } from "@/components/header/mobile-nav-store";
 import { dismissGuidedTourAction } from "../../actions";
 import { buildGuidedTourSteps, GUIDED_TOUR_MOBILE_BREAKPOINT_PX, GuidedTourStep } from "../../domain/steps";
 
 import styles from "./guided-tour.module.css";
 
 const MOBILE_BREAKPOINT_PX = GUIDED_TOUR_MOBILE_BREAKPOINT_PX;
+// Os únicos 2 alvos que só existem DENTRO do painel de navegação mobile
+// (ver `Header`) — todo resto (checklist, mascote, botões de página) já
+// fica no conteúdo normal da página, visível em qualquer largura sem
+// precisar abrir nada primeiro.
+const MOBILE_NAV_PANEL_TARGETS = new Set(['[data-tour="nav"]', '[data-tour="search"]']);
 const SPOTLIGHT_PADDING = 8;
 const TOOLTIP_WIDTH = 320;
 const VIEWPORT_MARGIN = 16;
@@ -142,25 +148,28 @@ function resolveStepIndex(steps: GuidedTourStep[], storedStepId: string | null):
 }
 
 // Monta a lista de passos, filtrando o que já dá pra saber de antemão
-// que não vai rolar: no mobile a navegação vira um menu por trás de um
-// clique (sidebar não existe no DOM - ver `Header`), então o tour
-// simplesmente não aparece ali - volta a oferecer numa próxima visita em
-// tela maior, nunca marca como "visto" por isso. Passos cujo alvo é da
-// MESMA página atual e não existe nela (ex.: usuário caiu direto numa
-// rota inesperada) também são descartados aqui. Passos que navegam pra
-// OUTRA rota (`step.path`) não dá pra checar ainda (a página nem
-// carregou) - entram otimistas, e o próprio `GuidedTour` pula em tempo
-// real se o alvo não aparecer a tempo depois de navegar. Só é chamada
-// dentro do inicializador de `useState` abaixo - este componente só
-// existe no cliente (ver `lazy.tsx`, `ssr: false`), então
+// que não vai rolar. Roda tanto em desktop quanto em mobile — os dois
+// passos que apontam pra dentro da navegação ("nav"/"search") existem
+// fisicamente só dentro do painel mobile quando ele está ABERTO (ver
+// `Header`), então essa checagem aqui embaixo (com o painel fechado,
+// estado inicial) nunca teria como achá-los ainda; entram otimistas
+// igual um passo com `step.path` de outra rota, e é o próprio
+// `resolveStep` (mais abaixo) quem abre o painel na hora de exibir
+// esses dois passos especificamente. Passos cujo alvo é da MESMA página
+// atual, não precisa do painel mobile, e mesmo assim não existe nela
+// (ex.: usuário caiu direto numa rota inesperada) são descartados aqui.
+// Só é chamada dentro do inicializador de `useState` abaixo - este
+// componente só existe no cliente (ver `lazy.tsx`, `ssr: false`), então
 // `document`/`window` sempre existem quando isto roda.
 function computeInitialSteps(active: boolean, mascotName: string): GuidedTourStep[] | null {
-  if (!active || window.innerWidth <= MOBILE_BREAKPOINT_PX) return null;
+  if (!active) return null;
 
   const allSteps = buildGuidedTourSteps(mascotName);
   const currentPath = window.location.pathname;
+  const isMobileViewport = window.innerWidth <= MOBILE_BREAKPOINT_PX;
   const available = allSteps.filter((step) => {
     if (!step.target) return true;
+    if (isMobileViewport && MOBILE_NAV_PANEL_TARGETS.has(step.target)) return true;
     if (step.path && step.path !== currentPath) return true;
     return !!document.querySelector(step.target);
   });
@@ -269,6 +278,21 @@ export function GuidedTour({ active, mascotName, userId }: GuidedTourProps) {
     let cancelled = false;
 
     async function resolveStep() {
+      // Os 2 alvos que só existem DENTRO do painel de navegação mobile
+      // (ver `MOBILE_NAV_PANEL_TARGETS`) precisam do painel aberto ANTES
+      // de esperar por eles - sem isso, `waitForTarget` sempre estouraria
+      // o timeout no mobile (o elemento nunca chega a existir sozinho).
+      // Qualquer outro passo (incluindo os sem alvo, como boas-vindas/fim)
+      // fecha o painel, caso tenha ficado aberto do passo anterior - nunca
+      // faz sentido continuar cobrindo a tela enquanto o tour aponta pra
+      // outra coisa. Checado ANTES de navegar/esperar o alvo.
+      const isMobileViewport = window.innerWidth <= MOBILE_BREAKPOINT_PX;
+      if (isMobileViewport && step!.target && MOBILE_NAV_PANEL_TARGETS.has(step!.target)) {
+        useMobileNavStore.getState().open();
+      } else {
+        useMobileNavStore.getState().close();
+      }
+
       const needsNavigation = !!step!.path && step!.path !== window.location.pathname;
       if (needsNavigation) router.push(step!.path!);
 
@@ -314,6 +338,10 @@ export function GuidedTour({ active, mascotName, userId }: GuidedTourProps) {
   async function finish() {
     setFinished(true);
     writeStoredStepId(userId, null);
+    // Se o tour terminou enquanto destacava navegação/busca no mobile,
+    // não deixe o painel lateral aberto e cobrindo a tela depois que o
+    // tooltip desaparece.
+    useMobileNavStore.getState().close();
     await dismissGuidedTourAction();
   }
 

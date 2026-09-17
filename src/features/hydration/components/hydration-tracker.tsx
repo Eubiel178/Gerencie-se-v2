@@ -27,15 +27,15 @@ interface HydrationTrackerProps {
 export function HydrationTracker({ today, week }: HydrationTrackerProps) {
   const router = useRouter();
   const [customAmount, setCustomAmount] = useState("");
-  const [isBusy, setIsBusy] = useState(false);
+  const [pendingLogControl, setPendingLogControl] = useState<string | null>(null);
   const [isEditingGoal, setIsEditingGoal] = useState(false);
   const [goalInput, setGoalInput] = useState(String(today.goalMl));
   const [actionError, setActionError] = useState<string | null>(null);
   const [deletingLogId, setDeletingLogId] = useState<string | null>(null);
 
-  async function handleLog(amountMl: number) {
+  async function handleLog(amountMl: number, control: string) {
     if (amountMl <= 0) return;
-    setIsBusy(true);
+    setPendingLogControl(control);
     setActionError(null);
 
     try {
@@ -49,7 +49,7 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
       emitMascotEvent("hydration-logged");
       router.refresh();
     } finally {
-      setIsBusy(false);
+      setPendingLogControl(null);
     }
   }
 
@@ -62,7 +62,7 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
       return;
     }
 
-    await handleLog(amountMl);
+    await handleLog(amountMl, "custom");
     setCustomAmount("");
   }
 
@@ -155,8 +155,9 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
           <Button.Root
             key={amount}
             variant="secondary"
-            loading={isBusy}
-            onClick={() => handleLog(amount)}
+            disabled={pendingLogControl !== null}
+            loading={pendingLogControl === `quick-${amount}`}
+            onClick={() => handleLog(amount, `quick-${amount}`)}
           >
             +{amount} ml
           </Button.Root>
@@ -172,7 +173,7 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
           value={customAmount}
           onChange={(event) => setCustomAmount(event.target.value)}
         />
-        <Button.Root type="submit" variant="secondary" loading={isBusy}>
+        <Button.Root type="submit" variant="secondary" disabled={pendingLogControl !== null} loading={pendingLogControl === "custom"}>
           Adicionar
         </Button.Root>
       </form>

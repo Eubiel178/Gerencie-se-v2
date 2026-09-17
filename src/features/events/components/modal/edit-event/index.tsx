@@ -7,6 +7,7 @@ import { validationSchema } from "@/validation/event-schema";
 import { Alert, Form, Modal, ModalHeader, Input, Button, SuggestionChips, CollapsibleSection } from "@/components";
 import { Icon } from "@/components/icon";
 import inputStyles from "@/components/form/input/styles.module.css";
+import modalStyles from "@/components/modal/styles.module.css";
 
 import { updateEventAction } from "@/features/events/actions";
 import { useEventStore } from "@/features/events/event-store";
@@ -93,7 +94,7 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
       />
 
       {isOpen && (
-        <Modal onClose={closeModal}>
+        <Modal onClose={closeModal} className={modalStyles.wide}>
           <ModalHeader title="Editar Evento" onClose={closeModal} />
 
           <Form.Root onSubmit={handleFormSubmit}>

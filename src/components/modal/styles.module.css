@@ -40,6 +40,36 @@
   animation: modalIn var(--duration-base) var(--easing-standard);
 }
 
+/* Duas larguras extras, além do padrão (23rem) acima — pra quem chama
+   escolher por CONTEÚDO real, não deixar todo modal do app do mesmo
+   tamanho (achado relatado: revisão de modais). `:where(.modal)` acima
+   tem especificidade zero de propósito - qualquer classe normal, como
+   estas, já vence sem precisar de `!important`.
+   - `.medium` (27rem): formulários com 2-3 campos mas com rótulos/chips
+     mais longos que apertam em 23rem (ex.: "Algumas vezes por semana"
+     em Hábitos).
+   - `.wide` (31rem): formulários mais ricos, com várias seções ou linhas
+     horizontais de opções (ex.: os 4 chips de Prioridade + anexos em
+     Tarefa, as 7 amostras de cor + campo customizado em Evento). */
+.medium {
+  width: min(27rem, 100%);
+}
+.wide {
+  width: min(31rem, 100%);
+}
+
+@media (max-width: 640px) {
+  /* No mobile todo modal já vira bottom sheet de largura cheia (ver
+     regra mobile mais abaixo) - `.medium`/`.wide` precisam ceder de
+     volta pra 100% aqui, senão a maior especificidade delas (normal,
+     não `:where()`) venceria a regra mobile do modal base e um modal
+     "wide" ficaria mais largo que a tela. */
+  .medium,
+  .wide {
+    width: 100%;
+  }
+}
+
 @keyframes overlayIn {
   from { opacity: 0; }
   to { opacity: 1; }

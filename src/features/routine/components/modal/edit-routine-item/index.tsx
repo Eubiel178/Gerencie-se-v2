@@ -4,6 +4,7 @@ import { validationSchema } from "@/validation/routine-schema";
 
 import { Alert, Form, Modal, ModalHeader, Input, Button, SuggestionChips, CollapsibleSection } from "@/components";
 import { Icon } from "@/components/icon";
+import modalStyles from "@/components/modal/styles.module.css";
 
 import { updateRoutineItemAction } from "@/features/routine/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
@@ -57,7 +58,7 @@ export function EditRoutineItem({ itemBeingEdited, taskOptions, connections }: I
       />
 
       {isOpen && (
-        <Modal onClose={closeModal}>
+        <Modal onClose={closeModal} className={modalStyles.medium}>
           <ModalHeader title="Editar Item de Rotina" onClose={closeModal} />
 
           <Form.Root onSubmit={handleFormSubmit}>

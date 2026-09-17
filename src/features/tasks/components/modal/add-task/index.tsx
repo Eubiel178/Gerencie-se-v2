@@ -7,6 +7,7 @@ import { validationSchema } from "@/validation/task-schema";
 
 import { Alert, Form, Input, Modal, ModalHeader, Button, ChipGroup, CollapsibleSection } from "@/components";
 import { Icon } from "@/components/icon";
+import modalStyles from "@/components/modal/styles.module.css";
 
 import { createTaskAction } from "@/features/tasks/actions";
 import { isVagueTaskTitle } from "@/features/tasks/is-vague-title";
@@ -61,7 +62,7 @@ export function AddTask({ buttonText, isGoogleConnected, connections }: IAddTask
       </Button.Root>
 
       {isOpen && (
-        <Modal onClose={closeModal}>
+        <Modal onClose={closeModal} className={modalStyles.wide}>
           <ModalHeader title="Nova Tarefa" onClose={closeModal} />
 
           <Form.Root onSubmit={handleFormSubmit}>

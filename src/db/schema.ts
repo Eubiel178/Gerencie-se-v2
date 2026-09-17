@@ -503,10 +503,14 @@ export const focusSessions = pgTable(
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    startedAt: timestamp("started_at", { mode: "date" })
+    // Sessões de foco representam instantes reais (início/fim), nunca um
+    // horário "solto". `withTimezone` mantém o instante estável entre o
+    // servidor, a API e o navegador; a conversão para o horário da pessoa
+    // acontece somente na apresentação (ver `format-focus-session-started-at`).
+    startedAt: timestamp("started_at", { mode: "date", withTimezone: true })
       .notNull()
       .$defaultFn(() => new Date()),
-    endedAt: timestamp("ended_at", { mode: "date" }),
+    endedAt: timestamp("ended_at", { mode: "date", withTimezone: true }),
     plannedDurationSeconds: integer("planned_duration_seconds").notNull(),
     actualDurationSeconds: integer("actual_duration_seconds"),
     status: text("status", { enum: ["running", "completed", "cancelled"] })

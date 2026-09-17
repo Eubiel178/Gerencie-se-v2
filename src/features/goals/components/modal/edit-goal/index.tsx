@@ -6,6 +6,7 @@ import { validationSchema } from "@/validation/goal-schema";
 
 import { Alert, Form, Modal, ModalHeader, Input, Button, ChipGroup, SuggestionChips, CollapsibleSection } from "@/components";
 import { Icon } from "@/components/icon";
+import modalStyles from "@/components/modal/styles.module.css";
 
 import { updateGoalAction } from "@/features/goals/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
@@ -67,7 +68,7 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
       />
 
       {isOpen && (
-        <Modal onClose={closeModal}>
+        <Modal onClose={closeModal} className={modalStyles.wide}>
           <ModalHeader title="Editar Objetivo" onClose={closeModal} />
 
           <Form.Root onSubmit={handleFormSubmit}>

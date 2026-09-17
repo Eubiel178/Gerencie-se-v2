@@ -4,6 +4,7 @@ import { validationSchema } from "@/validation/routine-schema";
 
 import { Alert, Form, Input, Modal, ModalHeader, Button, SuggestionChips, CollapsibleSection } from "@/components";
 import { Icon } from "@/components/icon";
+import modalStyles from "@/components/modal/styles.module.css";
 
 import { createRoutineItemAction } from "@/features/routine/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
@@ -58,7 +59,7 @@ export function AddRoutineItem({ buttonText, taskOptions, connections }: IAddRou
       </Button.Root>
 
       {isOpen && (
-        <Modal onClose={closeModal}>
+        <Modal onClose={closeModal} className={modalStyles.medium}>
           <ModalHeader title="Novo Item de Rotina" onClose={closeModal} />
 
           <Form.Root onSubmit={handleFormSubmit}>

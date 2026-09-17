@@ -7,6 +7,7 @@ import { validationSchema } from "@/validation/event-schema";
 import { Alert, Form, Input, Modal, ModalHeader, Button, SuggestionChips, CollapsibleSection } from "@/components";
 import { Icon } from "@/components/icon";
 import inputStyles from "@/components/form/input/styles.module.css";
+import modalStyles from "@/components/modal/styles.module.css";
 
 import { createEventAction } from "@/features/events/actions";
 import { nowForDatetimeLocal } from "@/utils";
@@ -76,7 +77,7 @@ export const AddEvent = ({ buttonText }: IModalProps) => {
       <Button.Root onClick={openModal}>{buttonText}</Button.Root>
 
       {isOpen && (
-        <Modal onClose={closeModal}>
+        <Modal onClose={closeModal} className={modalStyles.wide}>
           <ModalHeader title="Novo Evento" onClose={closeModal} />
 
           <Form.Root onSubmit={handleFormSubmit}>

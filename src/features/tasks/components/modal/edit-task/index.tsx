@@ -7,6 +7,7 @@ import { validationSchema } from "@/validation/task-schema";
 
 import { Alert, Form, Modal, ModalHeader, Input, Button, ChipGroup, CollapsibleSection } from "@/components";
 import { Icon } from "@/components/icon";
+import modalStyles from "@/components/modal/styles.module.css";
 
 import { updateTaskAction } from "@/features/tasks/actions";
 import { isVagueTaskTitle } from "@/features/tasks/is-vague-title";
@@ -69,7 +70,7 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
       />
 
       {isOpen && (
-        <Modal onClose={closeModal}>
+        <Modal onClose={closeModal} className={modalStyles.wide}>
           <ModalHeader title="Editar Tarefa" onClose={closeModal} />
 
           <Form.Root onSubmit={handleFormSubmit}>
@@ -149,11 +150,6 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
                 <TaskSteps taskId={taskBeingEdited.id} steps={taskBeingEdited.steps} />
               </Input.Root>
 
-              <Input.Root>
-                <Input.Label>Anexos</Input.Label>
-                <AttachmentsField taskId={taskBeingEdited.id} />
-              </Input.Root>
-
               <CollapsibleSection label="Mais opções">
                 <ReminderFields
                   register={register}
@@ -185,6 +181,21 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
                   isChecked={!!syncEnabled}
                   isGoogleConnected={isGoogleConnected}
                 />
+
+                {/* Movido pra dentro de "Mais opções" (era visível sempre) -
+                    anexar é uma ação opcional/secundária, não algo que
+                    toda edição de tarefa precisa (achado relatado: modal
+                    de tarefa com informação demais visível de cara). Um
+                    anexo já existente continua totalmente visível e
+                    gerenciável (`AttachmentsField` busca e lista os
+                    arquivos normalmente) - só precisa de 1 clique em
+                    "Mais opções" pra aparecer, mesmo padrão que
+                    "Compartilhar com" já usa aqui pra mostrar quem já
+                    tem acesso. */}
+                <Input.Root>
+                  <Input.Label>Anexos</Input.Label>
+                  <AttachmentsField taskId={taskBeingEdited.id} />
+                </Input.Root>
               </CollapsibleSection>
             </Form.Wrapper>
 

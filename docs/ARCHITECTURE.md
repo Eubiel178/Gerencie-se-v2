@@ -921,6 +921,11 @@ localiza o usuário pelo e-mail e chama `linkAccount(...)` de verdade —
 não é um login "fingido", a vinculação fica permanente no banco a
 partir do primeiro login bem-sucedido.
 
+Como a flag não valida `email_verified` sozinha, o callback `signIn` do
+projeto exige explicitamente esse valor antes que o Auth.js prossiga para
+`linkAccount`. Isso mantém a conveniência da vinculação automática sem
+aceitar um perfil Google que não confirmou a posse do endereço.
+
 Por que é seguro habilitar isso especificamente aqui (o nome "dangerous"
 existe por um motivo — não é pra ligar sem pensar): o risco que essa
 trava evita é um provedor OAuth que NÃO garanta posse real do e-mail. O
@@ -948,3 +953,87 @@ comum (só sobra pra falhas de verdade no meio do processo).
 Validado com typecheck + lint + 186 testes + build de produção, e
 confirmação do mecanismo de vinculação lendo o código-fonte real da
 biblioteca (não só a documentação).
+
+## Revisão dos modais do projeto (2026-09)
+
+Pedido explícito e detalhado do usuário: auditar todos os modais (16 no
+total), ajustar largura por conteúdo real (não uniformemente), mover
+informação secundária/opcional pra dentro de "Mais opções", sem
+reescrever o projeto nem mudar nada fora do escopo de modal.
+
+### Inventário e diagnóstico
+
+Auditados os 16 usos reais de `<Modal>` no projeto. Achado principal:
+**o componente já tinha a maior parte da estrutura certa** — o padrão
+"Mais opções" (`CollapsibleSection`, com animação que já respeita
+`prefers-reduced-motion`) já existia e já estava em uso nos modais de
+Tarefa, Objetivo, Hábito, Rotina e Evento, escondendo corretamente
+"Compartilhar com", sincronização com Google Agenda, lembretes e outros
+campos secundários. O problema real não era falta de hierarquia — era
+**largura**: `:where(.modal)` tinha um único valor fixo (23rem) pra
+TODO modal do app, do mais simples (confirmar exclusão) ao mais rico
+(editar tarefa, com título, prioridade, tipo, descrição, passos e
+anexos), fazendo os mais densos parecerem espremidos mesmo já bem
+organizados por dentro.
+
+Classificados em 3 grupos, sem criar um padrão rígido:
+- **Padrão (23rem, sem mudança)**: confirmações de exclusão
+  (`ConfirmIconButton`, desconectar Google Agenda, marcar tarefa
+  concluída ao fim do Foco, rever tutorial), Captura Rápida (1 campo só,
+  já minimalista de propósito) e Editar cuidado de Saúde (4 campos
+  simples, já cabiam bem).
+- **`.medium` (27rem)**: Hábito e Item de Rotina — poucos campos, mas
+  com chips de texto mais longo (“Algumas vezes por semana”) que
+  apertavam em 23rem.
+- **`.wide` (31rem)**: Tarefa, Objetivo e Evento — formulários mais
+  ricos (4 chips de prioridade, textarea, linha de 7 amostras de cor +
+  seletor customizado no Evento).
+
+Implementado como 2 classes novas em `src/components/modal/styles.module.css`
+(`.medium`/`.wide`), aplicadas via `className` por quem chama `<Modal>`
+— o `:where(.modal)` de especificidade zero já existia sob medida pra
+isso, sem precisar tocar no componente base. As duas classes recebem
+`width: 100%` de volta dentro do `@media (max-width: 640px)` já
+existente (onde todo modal vira bottom sheet) — verificado que o
+aumento de largura não quebra o comportamento mobile.
+
+### "Mais opções": Anexos movido, resto avaliado e mantido
+
+Único campo movido de propósito: **Anexos**, em Editar Tarefa — pedido
+explícito do usuário ("avalie se anexar arquivo deveria ficar dentro de
+Mais opções"), e fazia sentido: anexar é raramente o motivo principal de
+editar uma tarefa. Um anexo já existente continua 100% visível e
+gerenciável (`AttachmentsField` não mudou por dentro, só de posição) —
+só precisa de 1 clique em "Mais opções" pra aparecer, mesmo padrão que
+"Compartilhar com" já usava ali. Nada mais foi movido — Passos, por
+exemplo, ficou de fora de propósito (é mais central à ideia de "como
+fazer a tarefa" do que Anexos, que é puramente arquivo solto).
+
+Os outros 4 modais que já tinham "Mais opções" (Objetivo, Hábito,
+Rotina, Evento) foram conferidos campo a campo contra os 3 níveis do
+pedido (essencial/secundário/avançado) e já estavam bem categorizados —
+nenhuma mudança de organização neles, só a largura.
+
+### Bônus, mesma sessão: cor do widget "Próxima ação" ligada à prioridade real
+
+Pedido à parte do usuário, sobre uma tela diferente (dashboard, não um
+modal): o card "Próxima ação" (`features/dashboard/components/next-action`)
+sempre usava a MESMA cor azul (`--color-highlight`) pra qualquer tarefa
+prioritária, não importa se era "alta" ou "crítica" — e o texto de cima
+("Prioridade alta") também era fixo, mostrando "Prioridade alta" mesmo
+pra uma tarefa crítica (achado ao investigar: `KIND_LABEL["priority"]`
+era usado direto no lugar de `action.label`, que já calculava o texto
+certo mas nunca chegava a aparecer). Corrigido nos dois: `INextAction`
+ganhou um campo `priority` opcional (só preenchido quando a ação vem de
+uma tarefa de verdade), o card usa `data-priority` pra escolher a cor —
+reaproveitando a MESMA paleta já usada na borda esquerda do card de
+tarefa (`baixa`→sucesso, `media`→aviso, `alta`→laranja de prioridade,
+`critica`→perigo) — e o texto agora mostra "Prioridade crítica" quando
+é o caso. Teste que fixava o comportamento antigo (`next-action.test.ts`)
+corrigido pra refletir o comportamento certo; teste novo adicionado
+separando "alta" de "crítica" explicitamente.
+
+Validação automatizada em 2026-09: lint, testes e build de produção. A
+inspeção visual dos fluxos autenticados continua sendo um smoke test manual
+no ambiente de revisão com uma conta de teste; ela não faz parte da suíte
+automatizada do repositório.

@@ -6,6 +6,7 @@ import { validationSchema } from "@/validation/habit-schema";
 
 import { Alert, Form, Modal, ModalHeader, Input, Button, ChipGroup, SuggestionChips, CollapsibleSection } from "@/components";
 import { Icon } from "@/components/icon";
+import modalStyles from "@/components/modal/styles.module.css";
 
 import { updateHabitAction } from "@/features/habits/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
@@ -68,7 +69,7 @@ export function EditHabit({ habitBeingEdited, connections, goalOptions }: IEditH
       />
 
       {isOpen && (
-        <Modal onClose={closeModal}>
+        <Modal onClose={closeModal} className={modalStyles.medium}>
           <ModalHeader title="Editar Hábito" onClose={closeModal} />
 
           <Form.Root onSubmit={handleFormSubmit}>

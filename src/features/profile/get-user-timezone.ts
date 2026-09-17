@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import { userPreferences } from "@/db/schema";
+import { requireUserId } from "@/lib/require-user-id";
 
 // Usado só como último recurso, quando o navegador do usuário ainda não
 // teve chance de informar o fuso de verdade (ver `saveUserTimezoneAction`)
@@ -25,4 +26,9 @@ export async function getUserTimezone(userId: string): Promise<string> {
     .limit(1);
 
   return row?.timezone || SERVER_TIMEZONE_FALLBACK;
+}
+
+/** Versão para Server Components do usuário autenticado atual. */
+export async function getCurrentUserTimezone(): Promise<string> {
+  return getUserTimezone(await requireUserId());
 }

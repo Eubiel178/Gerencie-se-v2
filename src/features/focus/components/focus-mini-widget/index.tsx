@@ -23,7 +23,7 @@ import styles from "./focus-mini-widget.module.css";
  */
 export function FocusMiniWidget() {
   const pathname = usePathname();
-  const { session, remaining, isBusy, complete, cancel, extend } = useFocusSession();
+  const { session, remaining, isBusy, pendingAction, complete, cancel, extend } = useFocusSession();
 
   if (!session || pathname?.startsWith("/home/focus")) return null;
 
@@ -55,7 +55,8 @@ export function FocusMiniWidget() {
           root={{
             tone: "highlight",
             "aria-label": "Concluir foco agora",
-            loading: isBusy,
+            disabled: isBusy,
+            loading: pendingAction === "complete",
             onClick: () => complete(),
           }}
         />
@@ -64,7 +65,8 @@ export function FocusMiniWidget() {
           root={{
             tone: "danger",
             "aria-label": "Cancelar sessão de foco",
-            loading: isBusy,
+            disabled: isBusy,
+            loading: pendingAction === "cancel",
             onClick: () => cancel(),
           }}
         />

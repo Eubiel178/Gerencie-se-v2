@@ -1,13 +1,37 @@
+"use client";
+
+import { useSyncExternalStore } from "react";
+
 import { EmptyState } from "@/components";
 import { IFocusSession } from "@/features/focus/domain";
+import { formatFocusSessionStartedAt } from "@/features/focus/format-focus-session-started-at";
 
 import styles from "./history.module.css";
 
-interface HistoryProps {
-  sessions: IFocusSession[];
+function subscribeToTimeZone(): () => void {
+  // Não há evento confiável para mudança de fuso no navegador. A leitura é
+  // refeita após a hidratação por `useSyncExternalStore`; uma nova visita à
+  // página cobre alterações posteriores do sistema operacional.
+  return () => {};
 }
 
-export function History({ sessions }: HistoryProps) {
+function getBrowserTimeZone(): string {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+}
+
+interface HistoryProps {
+  sessions: IFocusSession[];
+  /** Fuso IANA persistido para o usuário; o navegador o confirma após montar. */
+  timeZone: string;
+}
+
+export function History({ sessions, timeZone }: HistoryProps) {
+  // A preferência já torna a renderização inicial determinística. Para a
+  // primeira visita (antes de `useCaptureTimezone` persistir a preferência),
+  // o navegador corrige para seu próprio fuso depois de hidratar, sem depender
+  // do fuso do processo Node.
+  const displayTimeZone = useSyncExternalStore(subscribeToTimeZone, getBrowserTimeZone, () => timeZone);
+
   if (sessions.length === 0) {
     return <EmptyState>Nenhuma sessão de foco ainda — a primeira aparece aqui.</EmptyState>;
   }
@@ -16,7 +40,7 @@ export function History({ sessions }: HistoryProps) {
     <ul className={styles.list}>
       {sessions.map((session) => (
         <li key={session.id} className={styles.item}>
-          <span className={styles.date}>{formatDateTime(session.startedAt)}</span>
+          <span className={styles.date}>{formatFocusSessionStartedAt(session.startedAt, displayTimeZone)}</span>
 
           {session.status === "cancelled" ? (
             <span className={styles.statusCancelled}>Cancelada</span>
@@ -32,15 +56,6 @@ export function History({ sessions }: HistoryProps) {
       ))}
     </ul>
   );
-}
-
-function formatDateTime(date: Date): string {
-  return new Intl.DateTimeFormat("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date);
 }
 
 function formatMinutes(seconds: number): string {
