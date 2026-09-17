@@ -1,7 +1,7 @@
 import { IReadingItem } from "./reading-item";
 
 export type UpdateReadingItem = {
-  update: (params: UpdateReadingItem.Params) => Promise<void>;
+  update: (params: UpdateReadingItem.Params) => Promise<IReadingItem | null>;
 };
 
 export namespace UpdateReadingItem {

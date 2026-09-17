@@ -13,19 +13,21 @@ import {
 
 import type { ActionResult } from "@/types/action-result";
 
+type ReadingActionResult = ActionResult & { item?: domain.IReadingItem };
+
 export async function createReadingItemAction(
   data: domain.CreateReadingItem.Params
-): Promise<ActionResult> {
+): Promise<ReadingActionResult> {
   const parsed = createReadingItemSchema.safeParse(data);
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Dados inválidos." };
   }
 
   try {
-    await getReadingFetcher().create(parsed.data);
+    const item = await getReadingFetcher().create(parsed.data);
     revalidatePath("/home/reading");
 
-    return { error: null };
+    return { error: null, item };
   } catch {
     return { error: "Não foi possível adicionar o livro. Tente novamente." };
   }
@@ -33,17 +35,18 @@ export async function createReadingItemAction(
 
 export async function updateReadingItemAction(
   data: domain.UpdateReadingItem.Params
-): Promise<ActionResult> {
+): Promise<ReadingActionResult> {
   const parsed = updateReadingItemSchema.safeParse(data);
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Dados inválidos." };
   }
 
   try {
-    await getReadingFetcher().update(parsed.data);
+    const item = await getReadingFetcher().update(parsed.data);
+    if (!item) return { error: "Este item não está mais disponível." };
     revalidatePath("/home/reading");
 
-    return { error: null };
+    return { error: null, item };
   } catch {
     return { error: "Não foi possível atualizar. Tente novamente." };
   }
@@ -51,7 +54,7 @@ export async function updateReadingItemAction(
 
 export async function updateReadingCurrentPageAction(
   data: domain.UpdateReadingCurrentPage.Params
-): Promise<ActionResult> {
+): Promise<ReadingActionResult> {
   const parsed = updateReadingCurrentPageSchema.safeParse(data);
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Dados inválidos." };
@@ -68,7 +71,7 @@ export async function updateReadingCurrentPageAction(
     if (result.status !== "updated") return { error: errors[result.status] };
 
     revalidatePath("/home/reading");
-    return { error: null };
+    return { error: null, item: result.item };
   } catch {
     return { error: "Não foi possível atualizar a página. Tente novamente." };
   }
@@ -76,16 +79,17 @@ export async function updateReadingCurrentPageAction(
 
 export async function updateReadingDetailsAction(
   data: domain.UpdateReadingDetails.Params
-): Promise<ActionResult> {
+): Promise<ReadingActionResult> {
   const parsed = updateReadingDetailsSchema.safeParse(data);
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Dados inválidos." };
   }
 
   try {
-    await getReadingFetcher().updateDetails(parsed.data);
+    const item = await getReadingFetcher().updateDetails(parsed.data);
+    if (!item) return { error: "Este item não está mais disponível." };
     revalidatePath("/home/reading");
-    return { error: null };
+    return { error: null, item };
   } catch {
     return { error: "Não foi possível salvar as alterações. Tente novamente." };
   }

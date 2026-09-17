@@ -2,8 +2,6 @@
 
 import { useRef, useState } from "react";
 
-import { useRouter } from "next/navigation";
-
 import { Button, Input, Modal, ModalHeader } from "@/components";
 import { Icon } from "@/components/icon";
 
@@ -41,14 +39,17 @@ interface ItemProps {
   item: IReadingItem;
   openDetails?: boolean;
   onDetailsChange?: (isOpen: boolean) => void;
+  onUpdated: (item: IReadingItem) => void;
+  onDeleted: (id: string) => void;
 }
 
 export function Item({
   item,
   openDetails = false,
   onDetailsChange,
+  onUpdated,
+  onDeleted,
 }: ItemProps) {
-  const router = useRouter();
   const [isRemoving, setIsRemoving] = useState(false);
   const [isDeleteConfirming, setIsDeleteConfirming] = useState(false);
   const [isSavingStatus, setIsSavingStatus] = useState(false);
@@ -110,7 +111,7 @@ export function Item({
         return;
       }
 
-      router.refresh();
+      if (result.item) onUpdated(result.item);
     }, PROGRESS_DEBOUNCE_MS);
   }
 
@@ -139,7 +140,7 @@ export function Item({
         setCurrentPage(item.totalPages.toString());
         setEditCurrentPage(item.totalPages.toString());
       }
-      router.refresh();
+      if (result.item) onUpdated(result.item);
     } finally {
       setIsSavingStatus(false);
     }
@@ -155,7 +156,7 @@ export function Item({
         return false;
       }
 
-      router.refresh();
+      onDeleted(item.id);
       return true;
     } finally {
       setIsRemoving(false);
@@ -196,7 +197,7 @@ export function Item({
       setEditStatus(
         parsedCurrentPage === item.totalPages ? "finished" : "reading",
       );
-      router.refresh();
+      if (result.item) onUpdated(result.item);
     } finally {
       setIsSavingPage(false);
     }
@@ -238,7 +239,7 @@ export function Item({
       }
 
       setIsEditingOptions(false);
-      router.refresh();
+      if (result.item) onUpdated(result.item);
     } finally {
       setIsSavingDetails(false);
     }

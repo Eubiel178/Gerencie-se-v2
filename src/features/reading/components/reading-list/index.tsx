@@ -30,8 +30,9 @@ export function ReadingList({ items }: ReadingListProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [statusFilter, setStatusFilter] = useState<ReadingTab>("all");
   const [openedItemId, setOpenedItemId] = useState<string | null>(null);
+  const [readingItems, setReadingItems] = useState(items);
 
-  const filteredItems = filterReadingItems(items, {
+  const filteredItems = filterReadingItems(readingItems, {
     searchQuery,
     statusFilter,
   });
@@ -94,15 +95,15 @@ export function ReadingList({ items }: ReadingListProps) {
 
       {isAdding && (
         <AddForm
-          onCreated={(status) => {
-            setStatusFilter(status);
+          onCreated={(item) => {
+            setReadingItems((current) => [item, ...current]);
             setIsAdding(false);
           }}
           onCancel={() => setIsAdding(false)}
         />
       )}
 
-      {items.length === 0 ? (
+      {readingItems.length === 0 ? (
         <EmptyState>
           Escolha o próximo livro que você quer acompanhar. O título já basta
           para começar.
@@ -144,6 +145,18 @@ export function ReadingList({ items }: ReadingListProps) {
                 <Item
                   key={item.id}
                   item={item}
+                  onUpdated={(updatedItem) =>
+                    setReadingItems((current) =>
+                      current.map((currentItem) =>
+                        currentItem.id === updatedItem.id ? updatedItem : currentItem,
+                      ),
+                    )
+                  }
+                  onDeleted={(id) =>
+                    setReadingItems((current) =>
+                      current.filter((currentItem) => currentItem.id !== id),
+                    )
+                  }
                   openDetails={openedItemId === item.id}
                   onDetailsChange={(isOpen) =>
                     setOpenedItemId((currentOpenedId) =>

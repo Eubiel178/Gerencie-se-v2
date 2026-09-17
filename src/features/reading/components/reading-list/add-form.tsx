@@ -2,22 +2,20 @@
 
 import { useState } from "react";
 
-import { useRouter } from "next/navigation";
 
 import { Button, CollapsibleSection, Input } from "@/components";
 
 import { createReadingItemAction } from "@/features/reading/actions";
-import type { ReadingStatus } from "@/features/reading/domain";
+import type { IReadingItem } from "@/features/reading/domain";
 
 import styles from "../../reading.module.css";
 
 interface AddFormProps {
-  onCreated: (status: ReadingStatus) => void;
+  onCreated: (item: IReadingItem) => void;
   onCancel: () => void;
 }
 
 export function AddForm({ onCreated, onCancel }: AddFormProps) {
-  const router = useRouter();
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [totalPages, setTotalPages] = useState("");
@@ -79,8 +77,7 @@ export function AddForm({ onCreated, onCancel }: AddFormProps) {
       setTotalPages("");
       setCurrentPage("");
       setDailyReadingGoal("");
-      onCreated(getInitialStatus(parsedTotalPages, parsedCurrentPage));
-      router.refresh();
+      if (result.item) onCreated(result.item);
     } finally {
       setIsSubmitting(false);
     }
@@ -195,16 +192,6 @@ export function AddForm({ onCreated, onCancel }: AddFormProps) {
       {error && <p className={styles.formError}>{error}</p>}
     </form>
   );
-}
-
-function getInitialStatus(
-  totalPages: number | null,
-  currentPage: number | null,
-): ReadingStatus {
-  if (totalPages != null && currentPage != null && currentPage === totalPages)
-    return "finished";
-  if (currentPage != null && currentPage > 0) return "reading";
-  return "want_to_read";
 }
 
 function parseOptionalPageValue(

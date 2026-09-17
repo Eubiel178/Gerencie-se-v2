@@ -1,7 +1,7 @@
 import { IReadingItem } from "./reading-item";
 
 export type CreateReadingItem = {
-  create: (params: CreateReadingItem.Params) => Promise<{ id: string }>;
+  create: (params: CreateReadingItem.Params) => Promise<IReadingItem>;
 };
 
 export namespace CreateReadingItem {

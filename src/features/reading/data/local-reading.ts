@@ -20,7 +20,7 @@ export class LocalReading
     const userId = await requireUserId();
     const id = crypto.randomUUID();
 
-    await db.insert(readingItems).values({
+    const [row] = await db.insert(readingItems).values({
       id,
       userId,
       title: params.title,
@@ -34,9 +34,9 @@ export class LocalReading
           : params.totalPages != null && params.currentPage != null && params.currentPage > 0
             ? "reading"
           : "want_to_read",
-    });
+    }).returning();
 
-    return { id };
+    return mapRowToReadingItem(row);
   }
 
   async update(params: domain.UpdateReadingItem.Params) {
@@ -48,14 +48,17 @@ export class LocalReading
 
     const completingTrackedItem = params.status === "finished" && item?.totalPages != null;
 
-    await db
+    const [row] = await db
       .update(readingItems)
       .set({
         status: params.status,
         progressPercent: params.progressPercent,
         currentPage: completingTrackedItem ? item.totalPages : undefined,
       })
-      .where(and(eq(readingItems.id, params.id), eq(readingItems.userId, userId)));
+      .where(and(eq(readingItems.id, params.id), eq(readingItems.userId, userId)))
+      .returning();
+
+    return row ? mapRowToReadingItem(row) : null;
   }
 
   async updateDetails(params: domain.UpdateReadingDetails.Params) {
@@ -65,7 +68,7 @@ export class LocalReading
       .from(readingItems)
       .where(and(eq(readingItems.id, params.id), eq(readingItems.userId, userId)));
 
-    if (!existing) return;
+    if (!existing) return null;
 
     const currentPage = params.totalPages != null && params.status === "finished"
       ? params.totalPages
@@ -82,7 +85,7 @@ export class LocalReading
       progressPercent = Math.round((currentPage / params.totalPages) * 100);
     }
 
-    await db
+    const [row] = await db
       .update(readingItems)
       .set({
         title: params.title,
@@ -93,7 +96,10 @@ export class LocalReading
         dailyReadingGoal: params.dailyReadingGoal ?? null,
         progressPercent,
       })
-      .where(and(eq(readingItems.id, params.id), eq(readingItems.userId, userId)));
+      .where(and(eq(readingItems.id, params.id), eq(readingItems.userId, userId)))
+      .returning();
+
+    return row ? mapRowToReadingItem(row) : null;
   }
 
   async updateCurrentPage(
@@ -109,15 +115,16 @@ export class LocalReading
     if (item.totalPages == null) return { status: "total-pages-required" };
     if (params.currentPage > item.totalPages) return { status: "page-exceeds-total" };
 
-    await db
+    const [row] = await db
       .update(readingItems)
       .set({
         currentPage: params.currentPage,
         status: params.currentPage === item.totalPages ? "finished" : "reading",
       })
-      .where(and(eq(readingItems.id, params.id), eq(readingItems.userId, userId)));
+      .where(and(eq(readingItems.id, params.id), eq(readingItems.userId, userId)))
+      .returning();
 
-    return { status: "updated" };
+    return { status: "updated", item: mapRowToReadingItem(row) };
   }
 
   async delete(params: domain.DeleteReadingItem.Params) {

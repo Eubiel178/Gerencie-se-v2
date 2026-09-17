@@ -12,7 +12,7 @@ export namespace UpdateReadingCurrentPage {
   };
 
   export type Result =
-    | { status: "updated" }
+    | { status: "updated"; item: IReadingItem }
     | { status: "not-found" }
     | { status: "total-pages-required" }
     | { status: "page-exceeds-total" };
