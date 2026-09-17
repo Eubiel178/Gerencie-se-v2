@@ -19,7 +19,7 @@ export interface GoogleOnlyAccountEmailParams {
  * ainda recebe uma resposta (não fica sem entender por que nada chegou),
  * mas sem link nenhum, já que não há senha pra redefinir. */
 export function renderGoogleOnlyAccountEmail({ name }: GoogleOnlyAccountEmailParams): string {
-  const greetingName = name ? name.split(" ")[0] : "";
+  const greetingName = name?.trim().split(/\s+/)[0] ?? "";
 
   return `
 <!DOCTYPE html>
@@ -41,6 +41,7 @@ export function renderGoogleOnlyAccountEmail({ name }: GoogleOnlyAccountEmailPar
                   Sua conta no Gerencie-se foi criada com "Continuar com Google" e não tem uma senha
                   própria para redefinir. Para entrar, use o botão "Continuar com Google" na tela de login.
                 </p>
+                ${renderSpamFolderHint(MUTED)}
               </td>
             </tr>
           </table>
@@ -52,7 +53,7 @@ export function renderGoogleOnlyAccountEmail({ name }: GoogleOnlyAccountEmailPar
 }
 
 export function renderPasswordResetEmail({ name, resetUrl }: PasswordResetEmailParams): string {
-  const greetingName = name ? name.split(" ")[0] : "";
+  const greetingName = name?.trim().split(/\s+/)[0] ?? "";
 
   return `
 <!DOCTYPE html>
@@ -88,6 +89,7 @@ export function renderPasswordResetEmail({ name, resetUrl }: PasswordResetEmailP
                 <p style="margin:0;font-size:12px;color:${MUTED};">
                   Se você não pediu essa redefinição, pode ignorar este e-mail — sua senha continua a mesma.
                 </p>
+                ${renderSpamFolderHint(MUTED)}
               </td>
             </tr>
           </table>
@@ -97,3 +99,4 @@ export function renderPasswordResetEmail({ name, resetUrl }: PasswordResetEmailP
   </body>
 </html>`;
 }
+import { renderSpamFolderHint } from "@/lib/email-template-hints";

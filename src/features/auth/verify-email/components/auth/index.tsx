@@ -17,24 +17,27 @@ import styles from "../../../auth-page.module.css";
 
 type FormData = z.infer<typeof validationSchema>;
 
-// Tempo mínimo entre um reenvio e o próximo, só pra não deixar clique
-// repetido disparar vários e-mails seguidos por engano — não é uma
-// defesa contra abuso de verdade (isso exigiria um limite do lado do
-// servidor), só uma trava de UX.
+// A interface espelha o mesmo limite que o servidor aplica. O servidor é
+// a proteção real; isto apenas evita um clique que sabemos que falharia.
 const RESEND_COOLDOWN_SECONDS = 30;
 
 interface AuthProps {
   email: string | null;
   deliveryFailed: boolean;
+  resumed: boolean;
 }
 
-export function Auth({ email, deliveryFailed }: AuthProps) {
+export function Auth({ email, deliveryFailed, resumed }: AuthProps) {
   const { showToast } = useToast();
 
   const [formError, setFormError] = useState<string | null>(null);
   const [isResending, setIsResending] = useState(false);
   const [cooldown, setCooldown] = useState(0);
   const [showDeliveryFailed, setShowDeliveryFailed] = useState(deliveryFailed);
+  // Só afirmamos que há um código no e-mail quando o servidor confirmou
+  // que o SMTP aceitou o envio. Isso evita a contradição "enviamos" +
+  // "não conseguimos enviar" quando o primeiro envio falha no cadastro.
+  const [hasDeliveredCode, setHasDeliveredCode] = useState(!deliveryFailed);
 
   const {
     handleSubmit,
@@ -70,13 +73,20 @@ export function Auth({ email, deliveryFailed }: AuthProps) {
 
     if (result.error) {
       setFormError(result.error);
+      if (result.retryAfterSeconds) {
+        startResendCooldown(result.retryAfterSeconds);
+      }
       return;
     }
 
     showToast("Código reenviado.");
     setShowDeliveryFailed(false);
-    setCooldown(RESEND_COOLDOWN_SECONDS);
+    setHasDeliveredCode(true);
+    startResendCooldown(RESEND_COOLDOWN_SECONDS);
+  }
 
+  function startResendCooldown(seconds: number) {
+    setCooldown(seconds);
     const interval = setInterval(() => {
       setCooldown((current) => {
         if (current <= 1) {
@@ -100,14 +110,22 @@ export function Auth({ email, deliveryFailed }: AuthProps) {
       </div>
 
       <p className={styles.formIntro}>
-        {email
-          ? `Enviamos um código de 6 dígitos para ${email}. Digite abaixo para concluir seu cadastro.`
-          : "Enviamos um código de 6 dígitos para o e-mail do seu cadastro. Digite abaixo para continuar."}
+        {hasDeliveredCode
+          ? email
+            ? `Enviamos um código de 6 dígitos para ${email}. Se não encontrá-lo em alguns minutos, verifique a caixa de spam.`
+            : "Enviamos um código de 6 dígitos para o e-mail do seu cadastro. Se não encontrá-lo em alguns minutos, verifique a caixa de spam."
+          : "Ainda não há um código disponível. Tente reenviar para receber um novo código."}
       </p>
 
       {showDeliveryFailed && (
         <Alert variant="warning">
           Não conseguimos enviar o primeiro código. Use “Reenviar código” para tentar novamente.
+        </Alert>
+      )}
+
+      {resumed && !showDeliveryFailed && (
+        <Alert variant="info">
+          Seu cadastro ainda está pendente. Confirme o código para ativar sua conta.
         </Alert>
       )}
 
@@ -148,9 +166,9 @@ export function Auth({ email, deliveryFailed }: AuthProps) {
       </div>
 
       <div className={styles.authSwitch}>
-        <p className={styles.authSwitchText}>Errou o e-mail no cadastro?</p>
+        <p className={styles.authSwitchText}>Informou o e-mail errado?</p>
         <button type="button" className={styles.link} onClick={handleSignOut}>
-          Sair e cadastrar de novo
+          Voltar e usar outro e-mail
         </button>
       </div>
     </section>

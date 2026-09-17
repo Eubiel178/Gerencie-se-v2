@@ -1,18 +1,13 @@
 "use client";
 
-import type { UseFormRegister } from "react-hook-form";
+import type { UseFormRegister, UseFormSetValue } from "react-hook-form";
 
 import { Input } from "@/components";
 
 import { FormData } from "../interfaces";
+import { REMINDER_OPTIONS } from "@/validation/task-schema";
 
 import styles from "./reminder-fields.module.css";
-
-const REMINDER_OPTIONS = [
-  { label: "1 dia antes", value: 1440 },
-  { label: "5 minutos antes", value: 5 },
-  { label: "Na hora", value: 0 },
-];
 
 const RECURRENCE_OPTIONS = [
   { label: "Não repetir", value: "none" },
@@ -22,6 +17,7 @@ const RECURRENCE_OPTIONS = [
 
 interface ReminderFieldsProps {
   register: UseFormRegister<FormData>;
+  setValue: UseFormSetValue<FormData>;
   scheduledAtError?: string;
   hasScheduledAt: boolean;
 }
@@ -36,18 +32,26 @@ interface ReminderFieldsProps {
  * `features/tasks/components/reminder-scheduler`) — só funciona com o
  * Gerencie-se aberto, o que é avisado ali, não aqui no formulário.
  */
-export function ReminderFields({ register, scheduledAtError, hasScheduledAt }: ReminderFieldsProps) {
+export function ReminderFields({ register, setValue, scheduledAtError, hasScheduledAt }: ReminderFieldsProps) {
   return (
     <div className={styles.fields}>
       <Input.Root sharedProps={{ error: scheduledAtError }}>
-        <Input.Label htmlFor="scheduledAt">Data e hora (opcional)</Input.Label>
+        <Input.Label htmlFor="scheduledAt">Concluir até (opcional)</Input.Label>
 
         <Input.Wrapper>
-          <Input.Field {...register("scheduledAt")} type="datetime-local" id="scheduledAt" />
+          <Input.Field
+            {...register("scheduledAt", {
+              onChange: (event) => {
+                if (!event.target.value) setValue("reminderOffsetsMinutes", []);
+              },
+            })}
+            type="datetime-local"
+            id="scheduledAt"
+          />
         </Input.Wrapper>
 
         <p className={styles.hint}>
-          Preencha pra poder agendar lembrete e repetição pra esta tarefa.
+          Defina o prazo. Depois você pode escolher lembretes e repetição, se precisar.
         </p>
 
         <Input.HelperText />

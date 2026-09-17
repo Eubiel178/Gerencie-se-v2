@@ -56,6 +56,31 @@ export const { handlers, auth, signIn } = NextAuth({
       return session;
     },
   },
+  events: {
+    // `profile()` em `auth.config.ts` preenche `emailVerified` ao CRIAR
+    // uma conta via Google. Quando o Google é vinculado a uma conta local
+    // que já existe, porém, o adapter reutiliza a linha e não reaplica os
+    // campos do profile. O callback `signIn` acontece antes desse vínculo;
+    // este evento acontece depois, quando `user.id` já é o ID real da
+    // conta local. Assim ela não cai no gate de `/verify-email` nem espera
+    // por um código que o login Google não deve exigir.
+    async signIn({ account, profile, user }) {
+      if (
+        account?.provider !== "google" ||
+        !user.id ||
+        !profile ||
+        !("email_verified" in profile) ||
+        profile.email_verified !== true
+      ) {
+        return;
+      }
+
+      await db
+        .update(users)
+        .set({ emailVerified: new Date() })
+        .where(eq(users.id, user.id));
+    },
+  },
   providers: [
     ...authConfig.providers,
     Credentials({

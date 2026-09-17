@@ -12,7 +12,7 @@ export interface LoginAlertEmailParams {
 }
 
 export function renderLoginAlertEmail({ name }: LoginAlertEmailParams): string {
-  const greetingName = name ? name.split(" ")[0] : "";
+  const greetingName = name?.trim().split(/\s+/)[0] ?? "";
 
   return `
 <!DOCTYPE html>
@@ -48,6 +48,7 @@ export function renderLoginAlertEmail({ name }: LoginAlertEmailParams): string {
                 <p style="margin:0;font-size:12px;color:${MUTED};">
                   Este é um aviso automático — o Gerencie-se nunca pede sua senha por e-mail.
                 </p>
+                ${renderSpamFolderHint(MUTED)}
               </td>
             </tr>
           </table>
@@ -57,3 +58,4 @@ export function renderLoginAlertEmail({ name }: LoginAlertEmailParams): string {
   </body>
 </html>`;
 }
+import { renderSpamFolderHint } from "@/lib/email-template-hints";

@@ -6,7 +6,10 @@ export interface WeeklySummary {
   tasksOverdue: number;
   focusHours: number;
   bestHabitStreak: number;
+  habitCompletionsThisWeek: number;
+  activeHabits: number;
   avgGoalProgress: number;
+  activeGoals: number;
   runningKm: number;
   mascotName: string;
   mascotLevel: number;

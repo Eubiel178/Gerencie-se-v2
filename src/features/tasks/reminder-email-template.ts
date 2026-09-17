@@ -27,6 +27,7 @@ export function renderTaskReminderEmail(taskTitle: string, label: string): strin
                 <p style="margin:0;font-size:12px;color:${MUTED};">
                   Você recebeu este e-mail porque ativou lembretes de tarefa por e-mail em Configurações → Notificações. Pode desativar a qualquer momento por lá.
                 </p>
+                ${renderSpamFolderHint(MUTED)}
               </td>
             </tr>
           </table>
@@ -36,3 +37,4 @@ export function renderTaskReminderEmail(taskTitle: string, label: string): strin
   </body>
 </html>`;
 }
+import { renderSpamFolderHint } from "@/lib/email-template-hints";

@@ -21,6 +21,7 @@ import {
 } from "@/lib/password-reset-email";
 import {
   createEmailVerificationCode,
+  getEmailVerificationSendAvailability,
   restorePreviousEmailVerificationCode,
   verifyEmailVerificationCode,
 } from "@/lib/email-verification";
@@ -91,19 +92,57 @@ export async function registerAction(
   const email = normalizeEmail(parsed.data.email);
 
   const [existingUser] = await db
-    .select({ id: users.id })
+    .select({
+      id: users.id,
+      emailVerified: users.emailVerified,
+    })
     .from(users)
     .where(eq(users.email, email))
     .limit(1);
 
   if (existingUser) {
+    // Um registro pendente não é uma conta ativa: enquanto o e-mail não
+    // estiver confirmado, a própria pessoa pode reiniciar o cadastro com
+    // outra senha. Não cria uma segunda linha; substitui só os dados que
+    // ainda não foram ativados. O código novo vai para o mesmo e-mail, que
+    // continua sendo a única prova para ativar a conta.
+    if (!existingUser.emailVerified) {
+      const availability = await getEmailVerificationSendAvailability(existingUser.id);
+      if (!availability.available) {
+        return {
+          error: `Aguarde ${availability.retryAfterSeconds}s para reiniciar o cadastro e receber um novo código.`,
+        };
+      }
+
+      const passwordHash = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
+      await db
+        .update(users)
+        .set({ name, passwordHash })
+        .where(eq(users.id, existingUser.id));
+
+      const delivery = await sendVerificationCodeEmail(existingUser.id, email);
+      const deliveryFailed = delivery.status === "failed";
+
+      try {
+        await signIn("credentials", { email, password, redirect: false });
+      } catch {
+        return { error: "Não foi possível reiniciar seu cadastro agora. Tente novamente." };
+      }
+
+      redirect(
+        deliveryFailed
+          ? "/verify-email?delivery=failed&resumed=1"
+          : "/verify-email?resumed=1"
+      );
+    }
+
     return {
       error:
-        "Já existe uma conta com este e-mail. Tente entrar, ou use \"Continuar com Google\" se foi assim que você se cadastrou.",
+        "Já existe uma conta ativa com este e-mail. Entre ou recupere sua senha para acessar.",
     };
   }
 
-  const passwordHash = await bcrypt.hash(password, 12);
+  const passwordHash = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
 
   let userId: string;
 
@@ -122,23 +161,7 @@ export async function registerAction(
   // O cadastro continua existindo mesmo se o provedor de e-mail falhar,
   // mas não dizemos falsamente que um código foi enviado. A tela de
   // verificação recebe esse estado e oferece o reenvio de forma explícita.
-  let verificationEmailDeliveryFailed = false;
-  try {
-    const createdCode = await createEmailVerificationCode(userId);
-    const result = await sendEmail({
-      to: email,
-      subject: "Confirme seu e-mail — Gerencie-se",
-      html: renderVerificationCodeEmail({ name, code: createdCode.code }),
-    });
-    if (result.error) {
-      verificationEmailDeliveryFailed = true;
-      await restorePreviousEmailVerificationCode(userId, createdCode);
-      console.error("[auth] falha ao enviar código de verificação:", result.error);
-    }
-  } catch (error) {
-    verificationEmailDeliveryFailed = true;
-    console.error("[auth] falha ao gerar/enviar código de verificação:", error);
-  }
+  const verificationEmailDeliveryFailed = (await sendVerificationCodeEmail(userId, email)).status === "failed";
 
   try {
     await signIn("credentials", { email, password, redirect: false });
@@ -184,31 +207,32 @@ export async function verifyEmailAction(data: unknown): Promise<VerifyEmailState
 export type ResendVerificationCodeState = {
   error: string | null;
   sent: boolean;
+  retryAfterSeconds?: number;
 };
 
 export async function resendVerificationCodeAction(): Promise<ResendVerificationCodeState> {
   const userId = await requireUserId();
 
   const [user] = await db
-    .select({ name: users.name, email: users.email })
+    .select({ email: users.email, emailVerified: users.emailVerified })
     .from(users)
     .where(eq(users.id, userId))
     .limit(1);
 
-  if (!user?.email) {
+  if (!user?.email || user.emailVerified) {
     return { error: GENERIC_SEND_ERROR, sent: false };
   }
 
-  const createdCode = await createEmailVerificationCode(userId);
-  const result = await sendEmail({
-    to: user.email,
-    subject: "Confirme seu e-mail — Gerencie-se",
-    html: renderVerificationCodeEmail({ name: user.name, code: createdCode.code }),
-  });
+  const delivery = await sendVerificationCodeEmail(userId, user.email);
+  if (delivery.status === "rate-limited") {
+    return {
+      error: `Aguarde ${delivery.retryAfterSeconds}s antes de pedir outro código.`,
+      sent: false,
+      retryAfterSeconds: delivery.retryAfterSeconds,
+    };
+  }
 
-  if (result.error) {
-    await restorePreviousEmailVerificationCode(userId, createdCode);
-    console.error("[auth] falha ao reenviar código de verificação:", result.error);
+  if (delivery.status === "failed") {
     return { error: GENERIC_SEND_ERROR, sent: false };
   }
 
@@ -224,6 +248,47 @@ export type RequestPasswordResetState = {
 // encontrada" ou "SMTP falhou de verdade" — só que algo deu errado agora.
 const GENERIC_SEND_ERROR =
   "Não conseguimos concluir o pedido agora. Tente novamente em instantes.";
+
+/** Gera o código antes de enviar e desfaz essa troca se o SMTP falhar.
+ * Compartilhado por cadastro, retomada e reenvio para que os três caminhos
+ * tenham exatamente a mesma regra de expiração e consistência. */
+type VerificationCodeEmailDelivery =
+  | { status: "sent" }
+  | { status: "failed" }
+  | { status: "rate-limited"; retryAfterSeconds: number };
+
+async function sendVerificationCodeEmail(
+  userId: string,
+  email: string
+): Promise<VerificationCodeEmailDelivery> {
+  const availability = await getEmailVerificationSendAvailability(userId);
+  if (!availability.available) {
+    return { status: "rate-limited", retryAfterSeconds: availability.retryAfterSeconds };
+  }
+
+  let createdCode: Awaited<ReturnType<typeof createEmailVerificationCode>> | null = null;
+
+  try {
+    createdCode = await createEmailVerificationCode(userId);
+    const result = await sendEmail({
+      to: email,
+      subject: "Confirme seu e-mail — Gerencie-se",
+      html: renderVerificationCodeEmail({ code: createdCode.code }),
+    });
+
+    if (!result.error) return { status: "sent" };
+
+    await restorePreviousEmailVerificationCode(userId, createdCode);
+    console.error("[auth] falha ao enviar código de verificação:", result.error);
+  } catch (error) {
+    if (createdCode) {
+      await restorePreviousEmailVerificationCode(userId, createdCode);
+    }
+    console.error("[auth] falha ao gerar/enviar código de verificação:", error);
+  }
+
+  return { status: "failed" };
+}
 
 // Sem conta com esse e-mail, não há nada de verdade pra enviar — mas
 // responder na hora, enquanto o caminho de conta existente espera um envio

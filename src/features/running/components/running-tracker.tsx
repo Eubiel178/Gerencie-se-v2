@@ -16,30 +16,78 @@ type Tab = "manual" | "gps";
 export function RunningTracker() {
   const router = useRouter();
   const [tab, setTab] = useState<Tab>("manual");
+  const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const tabs: Tab[] = ["manual", "gps"];
+
+  function selectTab(nextTab: Tab) {
+    setTab(nextTab);
+  }
+
+  function handleTabKeyDown(event: React.KeyboardEvent<HTMLButtonElement>, index: number) {
+    let nextIndex: number | null = null;
+
+    if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+    if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+    if (event.key === "Home") nextIndex = 0;
+    if (event.key === "End") nextIndex = tabs.length - 1;
+    if (nextIndex == null) return;
+
+    event.preventDefault();
+    selectTab(tabs[nextIndex]);
+    tabRefs.current[nextIndex]?.focus();
+  }
 
   return (
-    <div>
-      <div className={styles.tabs}>
+    <section className={styles.tracker} aria-label="Como registrar sua corrida">
+      <div className={styles.tabs} role="tablist" aria-label="Modo de registro">
         <Button.Root
-          className={tab === "manual" ? undefined : styles.tabButton}
-          onClick={() => setTab("manual")}
+          ref={(element) => {
+            tabRefs.current[0] = element;
+          }}
+          id="running-tab-manual"
+          role="tab"
+          aria-selected={tab === "manual"}
+          aria-controls="running-registration-panel"
+          tabIndex={tab === "manual" ? 0 : -1}
+          className={`${styles.tab} ${tab === "manual" ? styles.tabActive : ""}`}
+          variant="secondary"
+          onClick={() => selectTab("manual")}
+          onKeyDown={(event) => handleTabKeyDown(event, 0)}
         >
           Registro manual
         </Button.Root>
         <Button.Root
-          className={tab === "gps" ? undefined : styles.tabButton}
-          onClick={() => setTab("gps")}
+          ref={(element) => {
+            tabRefs.current[1] = element;
+          }}
+          id="running-tab-gps"
+          role="tab"
+          aria-selected={tab === "gps"}
+          aria-controls="running-registration-panel"
+          tabIndex={tab === "gps" ? 0 : -1}
+          className={`${styles.tab} ${tab === "gps" ? styles.tabActive : ""}`}
+          variant="secondary"
+          onClick={() => selectTab("gps")}
+          onKeyDown={(event) => handleTabKeyDown(event, 1)}
         >
           GPS ao vivo
         </Button.Root>
       </div>
 
-      {tab === "manual" ? (
-        <ManualEntry onSaved={() => router.refresh()} />
-      ) : (
-        <LiveTracker onSaved={() => router.refresh()} />
-      )}
-    </div>
+      <div
+        id="running-registration-panel"
+        className={styles.tabPanel}
+        role="tabpanel"
+        aria-labelledby={tab === "manual" ? "running-tab-manual" : "running-tab-gps"}
+        tabIndex={0}
+      >
+        {tab === "manual" ? (
+          <ManualEntry onSaved={() => router.refresh()} />
+        ) : (
+          <LiveTracker onSaved={() => router.refresh()} />
+        )}
+      </div>
+    </section>
   );
 }
 

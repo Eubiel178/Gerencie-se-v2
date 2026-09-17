@@ -153,6 +153,7 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
               <CollapsibleSection label="Mais opções">
                 <ReminderFields
                   register={register}
+                  setValue={setValue}
                   scheduledAtError={errors.scheduledAt?.message}
                   hasScheduledAt={!!scheduledAt}
                 />

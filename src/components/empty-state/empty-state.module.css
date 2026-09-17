@@ -1,8 +1,10 @@
 .box {
   display: grid;
   place-items: center;
-  min-height: 14rem;
-  padding: var(--space-6);
+  /* Estados vazios precisam ser encontrados, não ocupar a altura de uma
+     tela inteira quando a lista ainda está curta. */
+  min-height: 11rem;
+  padding: var(--space-5);
   border: 1px dashed var(--color-border);
   border-radius: var(--radius-lg);
   text-align: center;
@@ -41,4 +43,10 @@
 .action:focus-visible {
   outline: 2px solid var(--color-highlight);
   outline-offset: 2px;
+}
+@media (max-width: 640px) {
+  .box {
+    min-height: 9rem;
+    padding: var(--space-4);
+  }
 }

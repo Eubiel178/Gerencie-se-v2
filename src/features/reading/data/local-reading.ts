@@ -12,6 +12,7 @@ export class LocalReading
   implements
     domain.CreateReadingItem,
     domain.UpdateReadingItem,
+    domain.UpdateReadingDetails,
     domain.DeleteReadingItem,
     domain.LoadAllReadingItems
 {
@@ -24,6 +25,15 @@ export class LocalReading
       userId,
       title: params.title,
       author: params.author || null,
+      totalPages: params.totalPages ?? null,
+      currentPage: params.currentPage ?? null,
+      dailyReadingGoal: params.dailyReadingGoal ?? null,
+      status:
+        params.totalPages != null && params.currentPage != null && params.currentPage === params.totalPages
+          ? "finished"
+          : params.totalPages != null && params.currentPage != null && params.currentPage > 0
+            ? "reading"
+          : "want_to_read",
     });
 
     return { id };
@@ -31,14 +41,83 @@ export class LocalReading
 
   async update(params: domain.UpdateReadingItem.Params) {
     const userId = await requireUserId();
+    const [item] = await db
+      .select({ totalPages: readingItems.totalPages, currentPage: readingItems.currentPage })
+      .from(readingItems)
+      .where(and(eq(readingItems.id, params.id), eq(readingItems.userId, userId)));
+
+    const completingTrackedItem = params.status === "finished" && item?.totalPages != null;
 
     await db
       .update(readingItems)
       .set({
         status: params.status,
         progressPercent: params.progressPercent,
+        currentPage: completingTrackedItem ? item.totalPages : undefined,
       })
       .where(and(eq(readingItems.id, params.id), eq(readingItems.userId, userId)));
+  }
+
+  async updateDetails(params: domain.UpdateReadingDetails.Params) {
+    const userId = await requireUserId();
+    const [existing] = await db
+      .select({ progressPercent: readingItems.progressPercent })
+      .from(readingItems)
+      .where(and(eq(readingItems.id, params.id), eq(readingItems.userId, userId)));
+
+    if (!existing) return;
+
+    const currentPage = params.totalPages != null && params.status === "finished"
+      ? params.totalPages
+      : params.currentPage;
+    let derivedStatus = params.status;
+    let progressPercent = derivedStatus === "finished" ? 100 : existing.progressPercent;
+
+    if (params.totalPages != null && currentPage != null) {
+      derivedStatus = currentPage === params.totalPages
+        ? "finished"
+        : currentPage > 0
+          ? "reading"
+          : params.status;
+      progressPercent = Math.round((currentPage / params.totalPages) * 100);
+    }
+
+    await db
+      .update(readingItems)
+      .set({
+        title: params.title,
+        author: params.author || null,
+        status: derivedStatus,
+        totalPages: params.totalPages ?? null,
+        currentPage: params.totalPages == null ? null : currentPage ?? 0,
+        dailyReadingGoal: params.dailyReadingGoal ?? null,
+        progressPercent,
+      })
+      .where(and(eq(readingItems.id, params.id), eq(readingItems.userId, userId)));
+  }
+
+  async updateCurrentPage(
+    params: domain.UpdateReadingCurrentPage.Params
+  ): Promise<domain.UpdateReadingCurrentPage.Result> {
+    const userId = await requireUserId();
+    const [item] = await db
+      .select({ totalPages: readingItems.totalPages })
+      .from(readingItems)
+      .where(and(eq(readingItems.id, params.id), eq(readingItems.userId, userId)));
+
+    if (!item) return { status: "not-found" };
+    if (item.totalPages == null) return { status: "total-pages-required" };
+    if (params.currentPage > item.totalPages) return { status: "page-exceeds-total" };
+
+    await db
+      .update(readingItems)
+      .set({
+        currentPage: params.currentPage,
+        status: params.currentPage === item.totalPages ? "finished" : "reading",
+      })
+      .where(and(eq(readingItems.id, params.id), eq(readingItems.userId, userId)));
+
+    return { status: "updated" };
   }
 
   async delete(params: domain.DeleteReadingItem.Params) {
@@ -69,6 +148,9 @@ function mapRowToReadingItem(row: typeof readingItems.$inferSelect): domain.IRea
     author: row.author,
     status: row.status,
     progressPercent: row.progressPercent,
+    totalPages: row.totalPages,
+    currentPage: row.currentPage,
+    dailyReadingGoal: row.dailyReadingGoal,
     addedAt: row.addedAt,
   };
 }

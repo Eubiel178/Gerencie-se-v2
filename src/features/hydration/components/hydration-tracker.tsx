@@ -154,7 +154,9 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
             setIsEditingGoal(true);
           }}
         >
-          Meta: {today.goalMl} ml (editar)
+          <span className={styles.goalLabel}>Meta diária</span>
+          <strong>{today.goalMl} ml</strong>
+          <span className={styles.goalAction}>Editar</span>
         </button>
       )}
 

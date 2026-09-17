@@ -54,6 +54,27 @@
   color: var(--color-on-success);
 }
 
+/* Retomar uma tarefa preserva a prioridade de contexto, mas não deve
+   apagar o sinal da prioridade real dela. A regra verde acima é o
+   fallback para registros legados sem prioridade; quando ela existe,
+   este conjunto a substitui com a mesma linguagem dos cards de tarefa. */
+.card[data-kind="resumed"][data-priority="critica"] {
+  background: var(--color-danger);
+  color: var(--color-on-danger);
+}
+.card[data-kind="resumed"][data-priority="alta"] {
+  background: var(--color-priority-high);
+  color: var(--color-on-priority-high);
+}
+.card[data-kind="resumed"][data-priority="media"] {
+  background: var(--color-warning);
+  color: var(--color-on-warning);
+}
+.card[data-kind="resumed"][data-priority="baixa"] {
+  background: var(--color-success);
+  color: var(--color-on-success);
+}
+
 .eyebrow {
   font-size: var(--font-size-xs);
   font-weight: 600;

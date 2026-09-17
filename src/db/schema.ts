@@ -138,6 +138,9 @@ export const emailVerificationCodes = pgTable("email_verification_code", {
   // de `MAX_VERIFICATION_ATTEMPTS` (ver `email-verification.ts`), o que
   // já é uma ação que a própria pessoa consegue fazer sozinha.
   attempts: integer("attempts").notNull().default(0),
+  // Controle no servidor, não só no botão do cliente: evita que chamadas
+  // diretas ao Server Action disparem vários e-mails em sequência.
+  lastSentAt: timestamp("last_sent_at", { mode: "date" }).notNull().defaultNow(),
 });
 
 /**
@@ -715,6 +718,9 @@ export const readingItems = pgTable("reading_item", {
     .notNull()
     .default("want_to_read"),
   progressPercent: integer("progress_percent").notNull().default(0),
+  totalPages: integer("total_pages"),
+  currentPage: integer("current_page"),
+  dailyReadingGoal: integer("daily_reading_goal"),
   addedAt: timestamp("added_at", { mode: "date" })
     .notNull()
     .$defaultFn(() => new Date()),

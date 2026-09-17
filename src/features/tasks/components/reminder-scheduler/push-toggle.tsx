@@ -144,8 +144,8 @@ export function PushToggle() {
     return (
       <p className={styles.mutedText}>
         {status === "not-configured"
-          ? "Notificação push não configurada neste servidor."
-          : "Seu navegador não aceita notificações push."}
+          ? "Os lembretes neste aparelho ainda não estão disponíveis."
+          : "Este navegador não aceita lembretes mesmo com o app fechado."}
       </p>
     );
   }
@@ -164,7 +164,7 @@ export function PushToggle() {
     return (
       <div className={styles.container}>
         <p className={styles.enabledMessage}>
-          Notificações push ativadas neste aparelho.
+          Lembretes ativados neste aparelho, mesmo quando o app estiver fechado.
         </p>
 
         <div className={styles.buttonRow}>
@@ -185,7 +185,7 @@ export function PushToggle() {
   return (
     <div className={styles.container}>
       <p className={styles.mutedText}>
-        Receba um aviso mesmo com o app fechado. É só pra este aparelho —
+        Receba lembretes mesmo com o app fechado. É só pra este aparelho —
         repita em qualquer outro que você use.
       </p>
 
