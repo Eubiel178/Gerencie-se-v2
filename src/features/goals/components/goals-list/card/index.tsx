@@ -47,8 +47,9 @@ export function Card({ goal, connections }: CardProps) {
           step.id === stepId ? { ...step, completed } : step
         );
         const wasComplete = goal.progressPercent >= 100;
+        const wasGoalCompleted = goal.completionOverride ?? wasComplete;
         const isNowComplete = calculateGoalProgress(stepsAfterToggle) >= 100;
-        if (isNowComplete && !wasComplete) emitMascotEvent("goal-completed");
+        if (isNowComplete && !wasGoalCompleted) emitMascotEvent("goal-completed");
         const steps = goal.steps.map((step) => step.id === stepId ? { ...step, completed } : step);
         replaceGoal({
           ...goal,
@@ -56,6 +57,8 @@ export function Card({ goal, connections }: CardProps) {
           progressPercent: calculateGoalProgress(steps),
           ...(isNowComplete ? { completionOverride: null, completedAt: null } : {}),
         });
+      } else {
+        emitMascotEvent("action-error");
       }
     } finally { setBusyStepId(null); }
   }
@@ -76,11 +79,14 @@ export function Card({ goal, connections }: CardProps) {
     try {
       const result = await setGoalCompletionAction({ id: goal.id, completed: !isCompleted });
       if (!result.error) {
+        if (!isCompleted) emitMascotEvent("goal-completed");
         replaceGoal({
           ...goal,
           completedAt: result.completedAt ?? null,
           completionOverride: result.completionOverride ?? null,
         });
+      } else {
+        emitMascotEvent("action-error");
       }
     } finally {
       setIsTogglingCompletion(false);
