@@ -9,7 +9,13 @@ import { Alert, Form, Modal, ModalHeader, Input, Button, ChipGroup, SuggestionCh
 import { Icon } from "@/components/icon";
 import modalStyles from "@/components/modal/styles.module.css";
 
-import { createGoalStepAction, deleteGoalStepAction, reorderGoalStepsAction, updateGoalAction } from "@/features/goals/actions";
+import {
+  createGoalStepAction,
+  deleteGoalStepAction,
+  reorderGoalStepsAction,
+  updateGoalAction,
+  updateGoalStepAction,
+} from "@/features/goals/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
 import { ShareReadOnlyNote } from "@/features/connections/components/share-readonly-note";
 import { useFormModal } from "@/hooks/use-form-modal";
@@ -29,6 +35,8 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
   const [newSteps, setNewSteps] = useState<string[]>([]);
   const [orderedSteps, setOrderedSteps] = useState(goalBeingEdited.steps);
   const [removedStepIds, setRemovedStepIds] = useState<string[]>([]);
+  const [editingStepId, setEditingStepId] = useState<string | null>(null);
+  const [editingStepTitle, setEditingStepTitle] = useState("");
 
   function moveStep(index: number, direction: -1 | 1) {
     const nextIndex = index + direction;
@@ -36,6 +44,17 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
     const next = [...orderedSteps];
     [next[index], next[nextIndex]] = [next[nextIndex], next[index]];
     setOrderedSteps(next);
+  }
+
+  function saveStepTitle(stepId: string) {
+    const title = editingStepTitle.trim();
+    if (!title) return;
+
+    setOrderedSteps((current) => current.map((step) => (
+      step.id === stepId ? { ...step, title } : step
+    )));
+    setEditingStepId(null);
+    setEditingStepTitle("");
   }
   const {
     register,
@@ -66,6 +85,15 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
         sharedWithUserId: data.sharedWithUserId,
       });
       if (result.error) return result;
+
+      for (const step of orderedSteps) {
+        const originalStep = goalBeingEdited.steps.find((item) => item.id === step.id);
+        if (originalStep && originalStep.title !== step.title) {
+          const stepResult = await updateGoalStepAction({ id: step.id, title: step.title });
+          if (stepResult.error) return stepResult;
+        }
+      }
+
       const createdStepIds: string[] = [];
       for (const id of removedStepIds) {
         const deleteResult = await deleteGoalStepAction({ id });
@@ -183,7 +211,44 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
                     if (title) { setNewSteps((current) => [...current, title]); setStepTitle(""); }
                   }}><Button.Icon name="FaPlus" /></Button.Root>
                 </div>
-                {orderedSteps.length > 0 && <ul className={styles.stepsDraft}>{orderedSteps.map((step, index) => <li key={step.id}><input type="checkbox" checked={step.completed} readOnly aria-label={step.title} /><span>{step.title}</span><button type="button" className={styles.orderButton} disabled={index === 0} onClick={() => moveStep(index, -1)} aria-label={`Mover ${step.title} para cima`}><Icon name="FaChevronUp" /></button><button type="button" className={styles.orderButton} disabled={index === orderedSteps.length - 1} onClick={() => moveStep(index, 1)} aria-label={`Mover ${step.title} para baixo`}><Icon name="FaChevronDown" /></button><ConfirmIconButton icon="FaTrash" ariaLabel={`Remover passo ${step.title}`} confirmText={`Remover o passo \"${step.title}\"?`} className={styles.smallButton} onConfirm={() => { setRemovedStepIds((current) => [...current, step.id]); setOrderedSteps((current) => current.filter((item) => item.id !== step.id)); }} /></li>)}</ul>}
+                {orderedSteps.length > 0 && (
+                  <ul className={styles.stepsDraft}>
+                    {orderedSteps.map((step, index) => (
+                      <li key={step.id}>
+                        <input type="checkbox" checked={step.completed} readOnly aria-label={step.title} />
+                        {editingStepId === step.id ? (
+                          <input
+                            className={styles.editTitle}
+                            value={editingStepTitle}
+                            onChange={(event) => setEditingStepTitle(event.target.value)}
+                            onKeyDown={(event) => {
+                              if (event.key === "Enter") {
+                                event.preventDefault();
+                                saveStepTitle(step.id);
+                              }
+                              if (event.key === "Escape") setEditingStepId(null);
+                            }}
+                            aria-label={`Editar passo ${step.title}`}
+                            autoFocus
+                          />
+                        ) : <span>{step.title}</span>}
+                        {editingStepId === step.id ? (
+                          <>
+                            <button type="button" className={styles.actionButton} onClick={() => saveStepTitle(step.id)} aria-label={`Salvar passo ${step.title}`}><Icon name="FaCheck" /></button>
+                            <button type="button" className={styles.actionButton} onClick={() => setEditingStepId(null)} aria-label="Cancelar edição"><Icon name="FaTimes" /></button>
+                          </>
+                        ) : (
+                          <button type="button" className={styles.actionButton} onClick={() => { setEditingStepId(step.id); setEditingStepTitle(step.title); }} aria-label={`Editar passo ${step.title}`}><Icon name="FaEdit" /></button>
+                        )}
+                        <div className={styles.orderActions} aria-label={`Reordenar ${step.title}`}>
+                          <button type="button" className={styles.actionButton} disabled={index === 0} onClick={() => moveStep(index, -1)} aria-label={`Mover ${step.title} para cima`}><Icon name="FaChevronUp" /></button>
+                          <button type="button" className={styles.actionButton} disabled={index === orderedSteps.length - 1} onClick={() => moveStep(index, 1)} aria-label={`Mover ${step.title} para baixo`}><Icon name="FaChevronDown" /></button>
+                        </div>
+                        <ConfirmIconButton icon="FaTrash" ariaLabel={`Remover passo ${step.title}`} confirmText={`Remover o passo \"${step.title}\"?`} className={styles.smallButton} onConfirm={() => { setRemovedStepIds((current) => [...current, step.id]); setOrderedSteps((current) => current.filter((item) => item.id !== step.id)); }} />
+                      </li>
+                    ))}
+                  </ul>
+                )}
                 {newSteps.length > 0 && <ul className={styles.stepsDraft}>{newSteps.map((title, index) => <li key={`${title}-${index}`}><span className={styles.pendingMarker}>•</span><span>{title}</span><button type="button" onClick={() => setNewSteps((current) => current.filter((_, itemIndex) => itemIndex !== index))} aria-label={`Remover passo ${title}`}>×</button></li>)}</ul>}
               </Input.Root>
 
