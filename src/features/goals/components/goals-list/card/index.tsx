@@ -81,7 +81,6 @@ export function Card({ goal, connections }: CardProps) {
   const isManuallyCompleted = goal.completedAt !== null && goal.completedAt !== undefined;
   const isCompletedBySteps = goal.steps.length > 0 && goal.progressPercent === 100;
   const isCompleted = isManuallyCompleted || isCompletedBySteps;
-  const completionIsManagedBySteps = goal.steps.length > 0;
 
   return (
     <li className={styles.card} data-priority={goal.priority}>
@@ -92,12 +91,9 @@ export function Card({ goal, connections }: CardProps) {
               type="button"
               className={styles.completeCheckbox}
               data-checked={isCompleted}
-              data-managed-by-steps={completionIsManagedBySteps}
               aria-pressed={isCompleted}
-              aria-label={completionIsManagedBySteps
-                ? `Status de ${goal.title}: ${isCompleted ? "concluído" : "em aberto"}. Marque ou desmarque os passos para mudar o status.`
-                : `Marcar objetivo \"${goal.title}\" como ${isCompleted ? "não concluído" : "concluído"}`}
-              disabled={completionIsManagedBySteps || isTogglingCompletion}
+              aria-label={`Marcar objetivo \"${goal.title}\" como ${isCompleted ? "não concluído" : "concluído"}`}
+              disabled={isTogglingCompletion}
               onClick={handleToggleManualCompletion}
             >
               {isCompleted && <Icon name="FaCheck" aria-hidden="true" />}
