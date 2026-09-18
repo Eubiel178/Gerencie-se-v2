@@ -39,6 +39,35 @@
   flex-direction: column;
   gap: var(--space-1);
 }
+.titleLine {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.completeCheckbox {
+  display: inline-grid;
+  flex: 0 0 auto;
+  width: 1.35rem;
+  height: 1.35rem;
+  place-items: center;
+  border: 1px solid var(--color-text-muted);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-on-success);
+  cursor: pointer;
+}
+.completeCheckbox[data-checked="true"] {
+  border-color: var(--color-success);
+  background: var(--color-success);
+}
+.completeCheckbox:focus-visible {
+  outline: 2px solid var(--color-highlight);
+  outline-offset: 2px;
+}
+.completeCheckbox:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
 .cardTitle {
   margin: 0;
   color: var(--color-text);
@@ -130,13 +159,6 @@
   margin: 0;
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
-}
-.completionAction {
-  display: flex;
-  justify-content: flex-start;
-}
-.completionAction button {
-  width: auto;
 }
 .steps {
   display: flex;

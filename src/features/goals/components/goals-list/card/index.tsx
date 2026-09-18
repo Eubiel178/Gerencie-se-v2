@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Button, ConfirmIconButton } from "@/components";
+import { ConfirmIconButton } from "@/components";
 import { Icon } from "@/components/icon";
 import { SharedBadge } from "@/features/connections/components/shared-badge";
 
@@ -85,7 +85,22 @@ export function Card({ goal, connections }: CardProps) {
     <li className={styles.card} data-priority={goal.priority}>
       <div className={styles.cardHeader}>
         <div className={styles.cardTitleGroup}>
-          <h3 className={styles.cardTitle}>{goal.title}</h3>
+          <div className={styles.titleLine}>
+            {goal.steps.length === 0 && (
+              <button
+                type="button"
+                className={styles.completeCheckbox}
+                data-checked={isManuallyCompleted}
+                aria-pressed={isManuallyCompleted}
+                aria-label={`Marcar objetivo \"${goal.title}\" como ${isManuallyCompleted ? "não concluído" : "concluído"}`}
+                disabled={isTogglingCompletion}
+                onClick={handleToggleManualCompletion}
+              >
+                {isManuallyCompleted && <Icon name="FaCheck" aria-hidden="true" />}
+              </button>
+            )}
+            <h3 className={styles.cardTitle}>{goal.title}</h3>
+          </div>
 
           <div className={styles.meta}>
             <span className={`${styles.priorityBadge} ${styles[`priority${capitalize(goal.priority)}`]}`}>
@@ -142,23 +157,11 @@ export function Card({ goal, connections }: CardProps) {
             : `${goal.steps.filter((step) => step.completed).length} de ${goal.steps.length} passos concluídos. Marque todos para concluir o objetivo.`}
         </p>
       ) : (
-        <>
-          <p className={styles.progressHint}>
-            {isManuallyCompleted
-              ? "Objetivo concluído."
-              : "Sem passos: conclua o objetivo quando chegar lá, ou adicione passos em Editar para acompanhar o progresso."}
-          </p>
-          <div className={styles.completionAction}>
-            <Button.Root
-              type="button"
-              variant={isManuallyCompleted ? "secondary" : "primary"}
-              loading={isTogglingCompletion}
-              onClick={handleToggleManualCompletion}
-            >
-              {isManuallyCompleted ? "Reabrir objetivo" : "Concluir objetivo"}
-            </Button.Root>
-          </div>
-        </>
+        <p className={styles.progressHint}>
+          {isManuallyCompleted
+            ? "Objetivo concluído."
+            : "Sem passos. Marque o círculo ao lado do título quando concluir."}
+        </p>
       )}
 
       {goal.steps.length > 0 && (
