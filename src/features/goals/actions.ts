@@ -15,17 +15,17 @@ import type { ActionResult } from "@/types/action-result";
 
 export async function createGoalAction(
   data: domain.CreateGoal.Params
-): Promise<ActionResult> {
+): Promise<ActionResult & { id?: string }> {
   const parsed = createGoalSchema.safeParse(data);
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Dados inválidos." };
   }
 
   try {
-    await getGoalFetcher().create(parsed.data);
+    const { id } = await getGoalFetcher().create(parsed.data);
     revalidatePath("/home/goals");
 
-    return { error: null };
+    return { error: null, id };
   } catch {
     return { error: "Não foi possível salvar o objetivo. Tente novamente." };
   }

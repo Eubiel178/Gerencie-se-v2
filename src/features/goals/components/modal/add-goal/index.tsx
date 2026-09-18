@@ -1,6 +1,7 @@
 "use client";
 
 import dayjs from "dayjs";
+import { useState } from "react";
 
 import { validationSchema } from "@/validation/goal-schema";
 
@@ -8,7 +9,7 @@ import { Alert, Form, Input, Modal, ModalHeader, Button, ChipGroup, SuggestionCh
 import { Icon } from "@/components/icon";
 import modalStyles from "@/components/modal/styles.module.css";
 
-import { createGoalAction } from "@/features/goals/actions";
+import { createGoalAction, createGoalStepAction } from "@/features/goals/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
 import { useFormModal } from "@/hooks/use-form-modal";
 
@@ -23,6 +24,8 @@ const DEADLINE_SHORTCUTS = [
 ];
 
 export function AddGoal({ buttonText, connections }: IAddGoalProps) {
+  const [stepTitle, setStepTitle] = useState("");
+  const [stepTitles, setStepTitles] = useState<string[]>([]);
   const {
     setValue,
     watch,
@@ -42,14 +45,22 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
       priority: "media",
       sharedWithUserId: "",
     },
-    onSubmit: (data) =>
-      createGoalAction({
+    onSubmit: async (data) => {
+      const result = await createGoalAction({
         title: data.title,
         description: data.description,
         deadline: data.deadline || null,
         priority: data.priority,
         sharedWithUserId: data.sharedWithUserId,
-      }),
+      });
+      if (result.error || !result.id) return result;
+      for (const title of stepTitles) {
+        const stepResult = await createGoalStepAction({ goalId: result.id, title });
+        if (stepResult.error) return stepResult;
+      }
+      setStepTitles([]);
+      return result;
+    },
   });
 
   const priority = watch("priority");
@@ -130,6 +141,31 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
                 />
 
                 <Input.HelperText />
+              </Input.Root>
+
+              <Input.Root>
+                <Input.Label>Passos (opcional)</Input.Label>
+                <div className={styles.stepsAddRow}>
+                  <Input.Wrapper>
+                    <Input.Field
+                      value={stepTitle}
+                      onChange={(event) => setStepTitle(event.target.value)}
+                      placeholder="Ex.: Pesquisar opções"
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") {
+                          event.preventDefault();
+                          const title = stepTitle.trim();
+                          if (title) { setStepTitles((current) => [...current, title]); setStepTitle(""); }
+                        }
+                      }}
+                    />
+                  </Input.Wrapper>
+                  <Button.Root type="button" variant="secondary" onClick={() => {
+                    const title = stepTitle.trim();
+                    if (title) { setStepTitles((current) => [...current, title]); setStepTitle(""); }
+                  }}>Adicionar</Button.Root>
+                </div>
+                {stepTitles.length > 0 && <ul className={styles.stepsDraft}>{stepTitles.map((title, index) => <li key={`${title}-${index}`}><span>{title}</span><button type="button" onClick={() => setStepTitles((current) => current.filter((_, itemIndex) => itemIndex !== index))} aria-label={`Remover passo ${title}`}>×</button></li>)}</ul>}
               </Input.Root>
 
               <CollapsibleSection label="Mais opções">

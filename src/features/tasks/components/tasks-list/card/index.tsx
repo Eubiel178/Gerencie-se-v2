@@ -12,6 +12,7 @@ import {
   setTaskWorkStatusAction,
   retryTaskSyncAction,
   toggleTaskCompleteAction,
+  updateTaskStepAction,
 } from "@/features/tasks/actions";
 
 import { Button, ConfirmIconButton } from "@/components";
@@ -84,6 +85,7 @@ export function Card({
   const [isToggling, setIsToggling] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
   const [isUpdatingWorkStatus, setIsUpdatingWorkStatus] = useState(false);
+  const [busyStepId, setBusyStepId] = useState<string | null>(null);
   const removeTask = useTaskStore((state) => state.removeTask);
   const replaceTask = useTaskStore((state) => state.replaceTask);
   const { session, remaining } = useFocusSession();
@@ -155,6 +157,22 @@ export function Card({
       if (!result.error && result.task) replaceTask(result.task);
     } finally {
       setIsRetrying(false);
+    }
+  }
+
+  async function handleToggleStep(stepId: string, completed: boolean) {
+    if (busyStepId) return;
+    setBusyStepId(stepId);
+    try {
+      const result = await updateTaskStepAction({ id: stepId, completed });
+      if (!result.error) {
+        replaceTask({
+          ...task,
+          steps: task.steps.map((step) => step.id === stepId ? { ...step, completed } : step),
+        });
+      }
+    } finally {
+      setBusyStepId(null);
     }
   }
 
@@ -256,20 +274,26 @@ export function Card({
           )}
 
           {task.steps.length > 0 && (
-            <details className={styles.stepsProgress}>
-              <summary>
+            <div className={styles.stepsProgress}>
+              <p className={styles.stepsSummary}>
                 <Icon name="FaListUl" aria-hidden="true" size={11} />
                 {task.steps.filter((step) => step.completed).length}/{task.steps.length} passos
-              </summary>
+              </p>
               <ul className={styles.stepsPreview} aria-label="Passos da tarefa">
                 {task.steps.map((step) => (
                   <li key={step.id} data-completed={step.completed}>
-                    <Icon name={step.completed ? "FaCheck" : "FaRegCircle"} aria-hidden="true" size={10} />
+                    <input
+                      type="checkbox"
+                      checked={step.completed}
+                      disabled={busyStepId === step.id}
+                      onChange={(event) => handleToggleStep(step.id, event.target.checked)}
+                      aria-label={`Concluir passo: ${step.title}`}
+                    />
                     {step.title}
                   </li>
                 ))}
               </ul>
-            </details>
+            </div>
           )}
 
           <SharedBadge

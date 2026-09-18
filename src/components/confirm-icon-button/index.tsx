@@ -51,6 +51,7 @@ export function ConfirmIconButton({
       <Button.Preset
         icon={{ name: icon }}
         root={{
+          type: "button",
           tone: "danger",
           className,
           "aria-label": ariaLabel,
