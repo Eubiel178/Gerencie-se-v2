@@ -80,6 +80,17 @@
   background: var(--color-danger);
   color: var(--color-on-danger);
 }
+.completedBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-success) 14%, transparent);
+  color: var(--color-success);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+}
 .actions {
   display: flex;
   align-items: center;

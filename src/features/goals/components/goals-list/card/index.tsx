@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { Button, ConfirmIconButton } from "@/components";
+import { Icon } from "@/components/icon";
 import { SharedBadge } from "@/features/connections/components/shared-badge";
 
 import {
@@ -78,6 +79,7 @@ export function Card({ goal, connections }: CardProps) {
   }
 
   const isManuallyCompleted = goal.completedAt !== null && goal.completedAt !== undefined;
+  const isCompletedBySteps = goal.steps.length > 0 && goal.progressPercent === 100;
 
   return (
     <li className={styles.card} data-priority={goal.priority}>
@@ -92,6 +94,12 @@ export function Card({ goal, connections }: CardProps) {
 
             {goal.deadline && (
               <span className={styles.deadline}>Prazo: {formatDeadline(goal.deadline)}</span>
+            )}
+
+            {(isManuallyCompleted || isCompletedBySteps) && (
+              <span className={styles.completedBadge}>
+                <Icon name="FaCheck" aria-hidden="true" size={10} /> Concluído
+              </span>
             )}
           </div>
         </div>
@@ -129,7 +137,9 @@ export function Card({ goal, connections }: CardProps) {
 
       {goal.steps.length > 0 ? (
         <p className={styles.progressHint} aria-live="polite">
-          {goal.steps.filter((step) => step.completed).length} de {goal.steps.length} passos concluídos. Marque todos para concluir o objetivo.
+          {isCompletedBySteps
+            ? "Objetivo concluído: todos os passos foram marcados."
+            : `${goal.steps.filter((step) => step.completed).length} de ${goal.steps.length} passos concluídos. Marque todos para concluir o objetivo.`}
         </p>
       ) : (
         <>
