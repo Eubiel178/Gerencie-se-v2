@@ -1,25 +1,26 @@
-.readOnlyNote{margin:0;font-family:var(--font-sans);font-size:var(--font-size-xs);color:var(--color-text-muted)}
+.readOnlyNote {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+}
 
-.titleField{border:none;border-bottom:2px solid var(--color-border);border-radius:0;padding:var(--space-2) 0;background:transparent;font-size:var(--font-size-lg);font-weight:600}
-.titleField:hover:not(:disabled,:focus-visible){border-bottom-color:color-mix(in srgb,var(--color-highlight) 40%,var(--color-border))}
-.titleField:focus-visible{border-bottom-color:var(--color-highlight);outline:none;box-shadow:none}
-.stepsAddRow { display: flex; gap: var(--space-2); }
-.stepsAddRow > :first-child { flex: 1; }
-.stepsDraft { display: flex; flex-direction: column; gap: var(--space-2); margin: var(--space-2) 0 0; padding: 0; list-style: none; }
-.stepsDraft li { display: flex; align-items: center; gap: var(--space-2); color: var(--color-text); font-size: var(--font-size-sm); }
-.stepsDraft li > :nth-child(2) { flex: 1; min-width: 0; }
-.stepsDraft input { inline-size: 1rem; block-size: 1rem; margin: 0; accent-color: var(--color-highlight); }
-.editTitle { min-width: 0; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface-elevated); color: var(--color-text); font: inherit; padding: 0.35rem var(--space-2); }
-.stepsHint { margin: 0 0 var(--space-2); color: var(--color-text-muted); font-size: var(--font-size-xs); }
-.actionButton { display: inline-grid; flex: 0 0 auto; width: 2rem; height: 2rem; place-items: center; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--color-text-muted); cursor: pointer; }
-.actionButton:hover:not(:disabled), .actionButton:focus-visible { background: var(--color-highlight-soft); color: var(--color-highlight); }
-.actionButton:disabled { cursor: not-allowed; opacity: .4; }
-.orderActions { display: inline-flex; flex: 0 0 auto; gap: 0.1rem; }
-.orderActions .actionButton { width: 1.7rem; }
-.smallButton { padding: 0.45rem var(--space-3); font-size: var(--font-size-sm); }
+.titleField {
+  border: none;
+  border-bottom: 2px solid var(--color-border);
+  border-radius: 0;
+  padding: var(--space-2) 0;
+  background: transparent;
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+}
 
-@media (max-width: 30rem) {
-  .stepsDraft li { flex-wrap: wrap; }
-  .stepsDraft li > :nth-child(2) { flex-basis: calc(100% - 2rem); }
-  .orderActions { margin-left: auto; }
+.titleField:hover:not(:disabled, :focus-visible) {
+  border-bottom-color: color-mix(in srgb, var(--color-highlight) 40%, var(--color-border));
+}
+
+.titleField:focus-visible {
+  border-bottom-color: var(--color-highlight);
+  outline: none;
+  box-shadow: none;
 }

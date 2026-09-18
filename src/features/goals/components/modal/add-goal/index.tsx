@@ -1,7 +1,7 @@
 "use client";
 
 import dayjs from "dayjs";
-import { useState } from "react";
+import { useRef } from "react";
 
 import { validationSchema } from "@/validation/goal-schema";
 
@@ -15,6 +15,7 @@ import { ShareSelect } from "@/features/connections/components/share-select";
 import { useFormModal } from "@/hooks/use-form-modal";
 
 import { FormData, IAddGoalProps, PRIORITY_OPTIONS } from "../interfaces";
+import { GoalSteps, GoalStepsDraft } from "../goal-steps";
 
 import styles from "./styles.module.css";
 
@@ -26,8 +27,10 @@ const DEADLINE_SHORTCUTS = [
 
 export function AddGoal({ buttonText, connections }: IAddGoalProps) {
   const addGoal = useGoalStore((state) => state.addGoal);
-  const [stepTitle, setStepTitle] = useState("");
-  const [stepTitles, setStepTitles] = useState<string[]>([]);
+  const stepsDraft = useRef<GoalStepsDraft>({
+    existingSteps: [],
+    newStepTitles: [],
+  });
   const {
     setValue,
     watch,
@@ -57,14 +60,14 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
       });
       if (result.error || !result.goal) return result;
       const createdGoal = result.goal;
-      const titles = stepTitles;
+      const titles = stepsDraft.current.newStepTitles;
       const createdStepIds: string[] = [];
       for (const title of titles) {
         const stepResult = await createGoalStepAction({ goalId: createdGoal.id, title });
         if (stepResult.error) return stepResult;
         if (stepResult.id) createdStepIds.push(stepResult.id);
       }
-      setStepTitles([]);
+      stepsDraft.current = { existingSteps: [], newStepTitles: [] };
       return {
         ...result,
         goal: {
@@ -82,7 +85,6 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
   });
 
   const priority = watch("priority");
-  const totalSteps = stepTitles.length;
 
   return (
     <>
@@ -163,29 +165,15 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
               </Input.Root>
 
               <Input.Root>
-                <Input.Label>Passos (opcional)</Input.Label>
-                {totalSteps > 0 && <p className={styles.stepsHint}>0 de {totalSteps} passos concluídos.</p>}
-                <div className={styles.stepsAddRow}>
-                  <Input.Wrapper>
-                    <Input.Field
-                      value={stepTitle}
-                      onChange={(event) => setStepTitle(event.target.value)}
-                      placeholder="Ex.: Pesquisar opções"
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter") {
-                          event.preventDefault();
-                          const title = stepTitle.trim();
-                          if (title) { setStepTitles((current) => [...current, title]); setStepTitle(""); }
-                        }
-                      }}
-                    />
-                  </Input.Wrapper>
-                  <Button.Root type="button" variant="secondary" className={styles.smallButton} aria-label="Adicionar passo" onClick={() => {
-                    const title = stepTitle.trim();
-                    if (title) { setStepTitles((current) => [...current, title]); setStepTitle(""); }
-                  }}><Button.Icon name="FaPlus" /></Button.Root>
-                </div>
-                {stepTitles.length > 0 && <ul className={styles.stepsDraft}>{stepTitles.map((title, index) => <li key={`${title}-${index}`}><input type="checkbox" checked={false} readOnly aria-label={`Novo passo ${title}`} /><span>{title}</span><button type="button" className={styles.actionButton} onClick={() => setStepTitles((current) => current.filter((_, itemIndex) => itemIndex !== index))} aria-label={`Remover passo ${title}`}><Icon name="FaTimes" /></button></li>)}</ul>}
+                <Input.Label>
+                  <Icon name="FaListUl" size={12} /> Passos (opcional)
+                </Input.Label>
+                <GoalSteps
+                  steps={[]}
+                  onDraftChange={(draft) => {
+                    stepsDraft.current = draft;
+                  }}
+                />
               </Input.Root>
 
               <CollapsibleSection label="Mais opções">

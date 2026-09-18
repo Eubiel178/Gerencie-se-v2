@@ -1,0 +1,122 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.hint {
+  order: 1;
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.addStepForm {
+  order: 2;
+  display: flex;
+  gap: var(--space-2);
+}
+
+.addStepForm input {
+  flex: 1;
+}
+
+.steps:not(.pendingSteps) {
+  order: 3;
+}
+
+.pendingSteps {
+  order: 4;
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.stepTitle {
+  flex: 1;
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+}
+
+.stepTitleDone {
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+}
+
+.editTitle {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-elevated);
+  color: var(--color-text);
+  font: inherit;
+  padding: 0.35rem var(--space-2);
+}
+
+.actionButton {
+  display: inline-grid;
+  flex: 0 0 auto;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.actionButton:hover,
+.actionButton:focus-visible {
+  background: var(--color-highlight-soft);
+  color: var(--color-highlight);
+}
+
+.actionButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.orderActions {
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 0.1rem;
+}
+
+.orderActions .actionButton {
+  width: 1.7rem;
+  height: 2rem;
+}
+
+.smallButton {
+  padding: 0.45rem var(--space-3);
+  font-size: var(--font-size-sm);
+}
+
+@media (max-width: 30rem) {
+  .step {
+    flex-wrap: wrap;
+  }
+
+  .stepTitle,
+  .editTitle {
+    flex: 1 1 calc(100% - 2rem);
+  }
+
+  .orderActions {
+    margin-left: auto;
+  }
+}
