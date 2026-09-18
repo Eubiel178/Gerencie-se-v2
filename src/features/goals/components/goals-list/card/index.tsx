@@ -67,8 +67,12 @@ export function Card({ goal, connections }: CardProps) {
     setIsRemoving(true);
 
     try {
-      await deleteGoalAction({ id: goal.id });
-      removeGoal(goal.id);
+      const result = await deleteGoalAction({ id: goal.id });
+      if (!result.error) {
+        removeGoal(goal.id);
+      } else {
+        emitMascotEvent("action-error");
+      }
     } finally {
       setIsRemoving(false);
     }
