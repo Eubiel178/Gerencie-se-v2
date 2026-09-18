@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 
-import { useRouter } from "next/navigation";
-
 import { Alert, Button, ConfirmIconButton, Input } from "@/components";
 
 import {
@@ -25,7 +23,7 @@ interface HydrationTrackerProps {
 }
 
 export function HydrationTracker({ today, week }: HydrationTrackerProps) {
-  const router = useRouter();
+  const [currentToday, setCurrentToday] = useState(today);
   const [customAmount, setCustomAmount] = useState("");
   const [pendingLogControl, setPendingLogControl] = useState<string | null>(null);
   const [isEditingGoal, setIsEditingGoal] = useState(false);
@@ -48,7 +46,7 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
       }
 
       emitMascotEvent("hydration-logged");
-      router.refresh();
+      if (result.id) setCurrentToday((current) => ({ ...current, totalMl: current.totalMl + amountMl, logs: [...current.logs, { id: result.id!, userId: "", date: current.date, amountMl, loggedAt: new Date() }] }));
     } finally {
       setPendingLogControl(null);
     }
@@ -80,7 +78,7 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
         return;
       }
 
-      router.refresh();
+      setCurrentToday((current) => ({ ...current, totalMl: Math.max(0, current.totalMl - (current.logs.find((log) => log.id === id)?.amountMl ?? 0)), logs: current.logs.filter((log) => log.id !== id) }));
     } finally {
       setDeletingLogId(null);
     }
@@ -108,18 +106,18 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
       }
 
       setIsEditingGoal(false);
-      router.refresh();
+      setCurrentToday((current) => ({ ...current, goalMl }));
     } finally {
       setIsSavingGoal(false);
     }
   }
 
-  const percent = calculateHydrationGoalPercent(today);
-  const maxWeekMl = Math.max(...week.map((day) => day.totalMl), today.goalMl);
+  const percent = calculateHydrationGoalPercent(currentToday);
+  const maxWeekMl = Math.max(...week.map((day) => day.totalMl), currentToday.goalMl);
 
   return (
     <div className={styles.panel}>
-      <span className={styles.amount}>{today.totalMl} ml</span>
+      <span className={styles.amount}>{currentToday.totalMl} ml</span>
 
       {actionError && <Alert variant="error">{actionError}</Alert>}
 
@@ -150,12 +148,12 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
           type="button"
           className={styles.goal}
           onClick={() => {
-            setGoalInput(String(today.goalMl));
+            setGoalInput(String(currentToday.goalMl));
             setIsEditingGoal(true);
           }}
         >
           <span className={styles.goalLabel}>Meta diária</span>
-          <strong>{today.goalMl} ml</strong>
+          <strong>{currentToday.goalMl} ml</strong>
           <span className={styles.goalAction}>Editar</span>
         </button>
       )}
@@ -192,9 +190,9 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
         </Button.Root>
       </form>
 
-      {today.logs.length > 0 && (
+      {currentToday.logs.length > 0 && (
         <ul className={styles.logs}>
-          {today.logs.map((log) => (
+          {currentToday.logs.map((log) => (
             <li key={log.id} className={styles.logItem}>
               <span>
                 {log.amountMl} ml às{" "}

@@ -30,7 +30,8 @@ export class LocalGoal
     domain.DeleteGoal,
     domain.CreateGoalStep,
     domain.UpdateGoalStep,
-    domain.DeleteGoalStep
+    domain.DeleteGoalStep,
+    domain.ReorderGoalSteps
 {
   async create(params: domain.CreateGoal.Params) {
     const userId = await requireUserId();
@@ -170,10 +171,12 @@ export class LocalGoal
 
     await this.assertStepAccess(params.id, userId);
 
-    await db
-      .update(goalSteps)
-      .set({ completed: params.completed })
-      .where(eq(goalSteps.id, params.id));
+    const update: Partial<Pick<typeof goalSteps.$inferInsert, "completed" | "title">> = {};
+    if (typeof params.completed === "boolean") update.completed = params.completed;
+    if (params.title !== undefined) update.title = params.title.trim();
+    if (Object.keys(update).length === 0) return;
+
+    await db.update(goalSteps).set(update).where(eq(goalSteps.id, params.id));
   }
 
   async deleteStep(params: domain.DeleteGoalStep.Params) {
@@ -182,6 +185,41 @@ export class LocalGoal
     await this.assertStepAccess(params.id, userId);
 
     await db.delete(goalSteps).where(eq(goalSteps.id, params.id));
+  }
+
+  async reorderSteps(params: domain.ReorderGoalSteps.Params) {
+    const userId = await requireUserId();
+    const [accessibleGoal] = await db
+      .select({ id: goals.id })
+      .from(goals)
+      .where(
+        and(eq(goals.id, params.goalId), or(eq(goals.userId, userId), eq(goals.sharedWithUserId, userId)))
+      )
+      .limit(1);
+
+    if (!accessibleGoal) throw new Error("Objetivo não encontrado.");
+
+    const rows = await db
+      .select({ id: goalSteps.id })
+      .from(goalSteps)
+      .where(eq(goalSteps.goalId, params.goalId));
+    const existingIds = new Set(rows.map((row) => row.id));
+
+    if (
+      params.orderedStepIds.length !== rows.length ||
+      new Set(params.orderedStepIds).size !== rows.length ||
+      params.orderedStepIds.some((id) => !existingIds.has(id))
+    ) {
+      throw new Error("A ordem das etapas é inválida.");
+    }
+
+    await db.transaction(async (tx) => {
+      await Promise.all(
+        params.orderedStepIds.map((id, order) =>
+          tx.update(goalSteps).set({ order }).where(eq(goalSteps.id, id))
+        )
+      );
+    });
   }
 
   /** Etapa não tem dono próprio — o acesso é sempre decidido pelo

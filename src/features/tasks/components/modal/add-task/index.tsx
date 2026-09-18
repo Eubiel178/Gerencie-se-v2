@@ -11,6 +11,7 @@ import modalStyles from "@/components/modal/styles.module.css";
 
 import { createTaskAction } from "@/features/tasks/actions";
 import { isVagueTaskTitle } from "@/features/tasks/is-vague-title";
+import { useTaskStore } from "@/features/tasks/task-store";
 
 import { ShareSelect } from "@/features/connections/components/share-select";
 import { useFormModal } from "@/hooks/use-form-modal";
@@ -23,6 +24,7 @@ import styles from "./styles.module.css";
 
 export function AddTask({ buttonText, isGoogleConnected, connections }: IAddTaskProps) {
   const formTags = useFormTags();
+  const addTask = useTaskStore((state) => state.addTask);
 
   const {
     register,
@@ -34,7 +36,7 @@ export function AddTask({ buttonText, isGoogleConnected, connections }: IAddTask
     closeModal,
     submitError,
     handleFormSubmit,
-  } = useFormModal<FormData>({
+  } = useFormModal<FormData, Awaited<ReturnType<typeof createTaskAction>>>({
     schema: validationSchema,
     defaultValues: {
       tag: "",
@@ -48,6 +50,9 @@ export function AddTask({ buttonText, isGoogleConnected, connections }: IAddTask
       syncEnabled: false,
     },
     onSubmit: (data) => createTaskAction(data),
+    onSuccess: (result) => {
+      if (result.task) addTask(result.task);
+    },
   });
 
   const syncEnabled = useWatch({ control, name: "syncEnabled" });

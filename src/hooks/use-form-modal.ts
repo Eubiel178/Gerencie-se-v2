@@ -10,10 +10,16 @@ import type { ZodType } from "zod";
 
 import type { ActionResult } from "@/types/action-result";
 
-interface UseFormModalOptions<TFormData extends FieldValues> {
+interface UseFormModalOptions<
+  TFormData extends FieldValues,
+  TResult extends ActionResult = ActionResult,
+> {
   schema: ZodType<TFormData>;
   defaultValues: DefaultValues<TFormData>;
-  onSubmit: (data: TFormData) => Promise<ActionResult>;
+  onSubmit: (data: TFormData) => Promise<TResult>;
+  /** Atualiza somente a área afetada. Sem callback, mantém a revalidação
+   * padrão para formulários cujo resultado altera dados do layout. */
+  onSuccess?: (result: TResult) => void;
 }
 
 /**
@@ -26,11 +32,15 @@ interface UseFormModalOptions<TFormData extends FieldValues> {
  * padrão e a action a chamar; o resto do formulário (campos, layout)
  * continua inteiramente no componente.
  */
-export function useFormModal<TFormData extends FieldValues>({
+export function useFormModal<
+  TFormData extends FieldValues,
+  TResult extends ActionResult = ActionResult,
+>({
   schema,
   defaultValues,
   onSubmit,
-}: UseFormModalOptions<TFormData>) {
+  onSuccess,
+}: UseFormModalOptions<TFormData, TResult>) {
   const [isOpen, setIsOpen] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const router = useRouter();
@@ -62,7 +72,11 @@ export function useFormModal<TFormData extends FieldValues>({
     }
 
     closeModal();
-    router.refresh();
+    if (onSuccess) {
+      onSuccess(result);
+    } else {
+      router.refresh();
+    }
   });
 
   return {

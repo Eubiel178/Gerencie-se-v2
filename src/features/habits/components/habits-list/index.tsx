@@ -34,14 +34,15 @@ export function HabitsList({ habitsList, connections, goalOptions }: HabitsListP
   const [searchQuery, setSearchQuery] = useState("");
   const [frequencyFilter, setFrequencyFilter] = useState<HabitFrequencyFilter>("all");
   const [statusFilter, setStatusFilter] = useState<HabitStatusFilter>("all");
+  const [habits, setHabits] = useState(habitsList);
 
-  if (habitsList.length === 0) {
+  if (habits.length === 0) {
     return <EmptyState variant="box">Você ainda não tem hábitos. Comece adicionando o primeiro.</EmptyState>;
   }
 
   const today = dayjs().format("YYYY-MM-DD");
   const goalTitleById = new Map(goalOptions.map((goal) => [goal.id, goal.title]));
-  const filteredHabits = filterHabits(habitsList, { searchQuery, frequencyFilter, statusFilter });
+  const filteredHabits = filterHabits(habits, { searchQuery, frequencyFilter, statusFilter });
 
   function clearFilters() {
     setSearchQuery("");
@@ -103,6 +104,8 @@ export function HabitsList({ habitsList, connections, goalOptions }: HabitsListP
               today={today}
               connections={connections}
               goalOptions={goalOptions}
+              onRemove={(id) => setHabits((current) => current.filter((habit) => habit.id !== id))}
+              onToggle={(id, completed) => setHabits((current) => current.map((habit) => habit.id === id ? { ...habit, completedToday: completed, completionsThisWeek: Math.max(0, habit.completionsThisWeek + (completed ? 1 : -1)), currentStreak: completed ? habit.currentStreak + 1 : Math.max(0, habit.currentStreak - 1) } : habit))}
               linkedGoalTitle={habit.goalId ? goalTitleById.get(habit.goalId) : undefined}
             />
           ))}

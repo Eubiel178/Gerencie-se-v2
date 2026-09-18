@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 
-import { useRouter } from "next/navigation";
-
 import { Icon } from "@/components/icon";
 
 import { deleteEventAction } from "@/features/events/actions";
@@ -18,7 +16,6 @@ import styles from "@/styles/workspace.module.css";
 import { useEventStore } from "@/features/events/event-store";
 
 export function Card(event: IEvent) {
-  const router = useRouter();
   const [isRemoving, setIsRemoving] = useState(false);
   const removeEvent = useEventStore((state) => state.removeEvent);
 
@@ -28,7 +25,6 @@ export function Card(event: IEvent) {
     try {
       const result = await deleteEventAction({ id: event.id });
       if (!result.error) removeEvent(event.id);
-      router.refresh();
     } finally {
       setIsRemoving(false);
     }

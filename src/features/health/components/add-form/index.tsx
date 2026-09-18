@@ -1,19 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Alert, Button, Input } from "@/components";
 
 import { createHealthCheckupAction } from "@/features/health/actions";
+import { IHealthCheckup } from "@/features/health/domain";
 import { healthCheckupFormSchema, HealthCheckupFormData } from "@/validation/health-schema";
 
 import styles from "./styles.module.css";
 
-export function AddForm() {
-  const router = useRouter();
+export function AddForm({ onAdd }: { onAdd?: (checkup: IHealthCheckup) => void }) {
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
@@ -43,7 +42,7 @@ export function AddForm() {
     }
 
     reset();
-    router.refresh();
+    if (result.checkup) onAdd?.(result.checkup);
   }
 
   return (

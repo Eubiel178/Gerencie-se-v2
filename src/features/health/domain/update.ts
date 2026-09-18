@@ -14,7 +14,7 @@ export namespace UpdateHealthCheckup {
 // Registra que o cuidado foi feito hoje — atualiza `lastDoneAt`, base
 // pro cálculo do próximo vencimento.
 export type MarkHealthCheckupDone = {
-  markDone: (params: MarkHealthCheckupDone.Params) => Promise<void>;
+  markDone: (params: MarkHealthCheckupDone.Params) => Promise<{ lastDoneAt: string }>;
 };
 
 export namespace MarkHealthCheckupDone {

@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 
-import { useRouter } from "next/navigation";
-
 import { Icon } from "@/components/icon";
 
 import { Button, ConfirmIconButton } from "@/components";
@@ -29,6 +27,8 @@ interface CardProps {
   connections: LoadAcceptedConnections.Model;
   goalOptions: GoalOption[];
   linkedGoalTitle?: string;
+  onRemove: (id: string) => void;
+  onToggle: (id: string, completed: boolean) => void;
 }
 
 export function Card({
@@ -37,8 +37,9 @@ export function Card({
   connections,
   goalOptions,
   linkedGoalTitle,
+  onRemove,
+  onToggle,
 }: CardProps) {
-  const router = useRouter();
   const [isRemoving, setIsRemoving] = useState(false);
   const [isToggling, setIsToggling] = useState(false);
 
@@ -46,8 +47,8 @@ export function Card({
     setIsRemoving(true);
 
     try {
-      await deleteHabitAction({ id: habit.id });
-      router.refresh();
+      const result = await deleteHabitAction({ id: habit.id });
+      if (!result.error) onRemove(habit.id);
     } finally {
       setIsRemoving(false);
     }
@@ -63,7 +64,7 @@ export function Card({
       } else if (result.completed) {
         emitMascotEvent("habit-completed");
       }
-      router.refresh();
+      if (!result.error) onToggle(habit.id, !!result.completed);
     } finally {
       setIsToggling(false);
     }

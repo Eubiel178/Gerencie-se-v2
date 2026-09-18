@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { EmptyState } from "@/components";
@@ -17,16 +16,27 @@ interface HabitsTodayProps {
 }
 
 export function HabitsToday({ habits, today }: HabitsTodayProps) {
-  const router = useRouter();
+  const [visibleHabits, setVisibleHabits] = useState(habits);
   const [pendingId, setPendingId] = useState<string | null>(null);
-  const active = habits.filter((habit) => !habit.archived);
+  const active = visibleHabits.filter((habit) => !habit.archived);
 
   async function handleToggle(habitId: string) {
     setPendingId(habitId);
 
     try {
-      await toggleHabitLogAction({ habitId, date: today });
-      router.refresh();
+      const result = await toggleHabitLogAction({ habitId, date: today });
+      if (!result.error) {
+        setVisibleHabits((current) => current.map((habit) => {
+          if (habit.id !== habitId) return habit;
+          const completedToday = !!result.completed;
+          return {
+            ...habit,
+            completedToday,
+            completionsThisWeek: Math.max(0, habit.completionsThisWeek + (completedToday ? 1 : -1)),
+            currentStreak: completedToday ? habit.currentStreak + 1 : Math.max(0, habit.currentStreak - 1),
+          };
+        }));
+      }
     } finally {
       setPendingId(null);
     }

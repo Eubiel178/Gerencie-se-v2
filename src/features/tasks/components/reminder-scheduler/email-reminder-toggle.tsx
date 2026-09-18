@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 import { updateEmailTaskRemindersPreferenceAction } from "@/features/tasks/actions";
 
@@ -17,7 +16,6 @@ interface EmailReminderToggleProps {
  * por isso o e-mail só cobre esse tipo por enquanto.
  */
 export function EmailReminderToggle({ enabled }: EmailReminderToggleProps) {
-  const router = useRouter();
   // Estado otimista, não só a prop `enabled` (valor vindo do servidor) —
   // antes o `checked` do checkbox dependia inteiramente de
   // `router.refresh()` completar e o Server Component pai reenviar a
@@ -39,8 +37,6 @@ export function EmailReminderToggle({ enabled }: EmailReminderToggleProps) {
       // Falha real: desfaz o otimismo, senão o checkbox mentiria sobre
       // o que de fato ficou salvo.
       setChecked(!nextChecked);
-    } else {
-      router.refresh();
     }
 
     setIsSaving(false);

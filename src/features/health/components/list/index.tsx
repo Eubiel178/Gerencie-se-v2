@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 
-import { useRouter } from "next/navigation";
-
 import { Icon } from "@/components/icon";
 
 import { Button, ConfirmIconButton, EmptyState } from "@/components";
@@ -13,6 +11,7 @@ import {
   markHealthCheckupDoneAction,
 } from "@/features/health/actions";
 import { IHealthCheckup } from "@/features/health/domain";
+import { computeCheckupDueState } from "@/features/health/domain";
 
 import { EditCheckup } from "../edit-checkup";
 
@@ -56,15 +55,27 @@ function groupByCategory(checkups: IHealthCheckup[]): CategoryGroup[] {
 }
 
 export function List({ checkups }: { checkups: IHealthCheckup[] }) {
-  const router = useRouter();
+  const [visibleCheckups, setVisibleCheckups] = useState(checkups);
+  const [previousCheckups, setPreviousCheckups] = useState(checkups);
   const [busyId, setBusyId] = useState<string | null>(null);
+
+  if (checkups !== previousCheckups) {
+    setPreviousCheckups(checkups);
+    setVisibleCheckups(checkups);
+  }
 
   async function handleMarkDone(id: string) {
     setBusyId(id);
 
     try {
-      await markHealthCheckupDoneAction({ id });
-      router.refresh();
+      const result = await markHealthCheckupDoneAction({ id });
+      if (!result.error && result.lastDoneAt) {
+        setVisibleCheckups((current) => current.map((checkup) => {
+          if (checkup.id !== id) return checkup;
+          const dueState = computeCheckupDueState(result.lastDoneAt, checkup.intervalDays);
+          return { ...checkup, lastDoneAt: result.lastDoneAt, ...dueState };
+        }));
+      }
     } finally {
       setBusyId(null);
     }
@@ -74,18 +85,18 @@ export function List({ checkups }: { checkups: IHealthCheckup[] }) {
     setBusyId(id);
 
     try {
-      await deleteHealthCheckupAction({ id });
-      router.refresh();
+      const result = await deleteHealthCheckupAction({ id });
+      if (!result.error) setVisibleCheckups((current) => current.filter((checkup) => checkup.id !== id));
     } finally {
       setBusyId(null);
     }
   }
 
-  if (checkups.length === 0) {
+  if (visibleCheckups.length === 0) {
     return <EmptyState>Adicione um cuidado preventivo para acompanhar quando ele precisa da sua atenção.</EmptyState>;
   }
 
-  const groups = groupByCategory(checkups);
+  const groups = groupByCategory(visibleCheckups);
 
   return (
     <div className={styles.groups}>

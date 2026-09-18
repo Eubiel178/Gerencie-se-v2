@@ -9,6 +9,7 @@ export type TaskStatusFilter = "all" | "pending" | "completed" | "overdue";
 interface TaskStore {
   tasks: ITask[];
   setTasks: (tasks: ITask[]) => void;
+  addTask: (task: ITask) => void;
   removeTask: (taskId: string) => void;
   replaceTask: (task: ITask) => void;
 
@@ -38,6 +39,7 @@ interface TaskStore {
 export const useTaskStore = create<TaskStore>((set) => ({
   tasks: [],
   setTasks: (tasks) => set({ tasks }),
+  addTask: (task) => set((state) => ({ tasks: [task, ...state.tasks] })),
   removeTask: (taskId) =>
     set((state) => ({ tasks: state.tasks.filter((task) => task.id !== taskId) })),
   replaceTask: (task) =>

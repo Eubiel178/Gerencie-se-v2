@@ -6,7 +6,7 @@ import { ReminderScheduler, type ReminderTask } from "./scheduler";
  * busca as tarefas com lembrete configurado e delega o agendamento em si
  * para o Client Component, que decide se pode notificar. */
 export async function TaskReminders() {
-  const tasks = await getTaskFetcher().loadAll();
+  const tasks = await getTaskFetcher().loadReminderTasks();
 
   const reminderTasks: ReminderTask[] = tasks
     .filter(
@@ -17,7 +17,7 @@ export async function TaskReminders() {
       id: task.id,
       title: task.title,
       scheduledAt: task.scheduledAt as string,
-      reminderOffsetsMinutes: task.reminderOffsetsMinutes as number[],
+      reminderOffsetsMinutes: task.reminderOffsetsMinutes ?? [],
     }));
 
   if (reminderTasks.length === 0) return null;

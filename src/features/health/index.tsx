@@ -1,6 +1,6 @@
 import { getHealthFetcher } from "@/features/health/data/get-health-fetcher";
 
-import { AddForm, List } from "./components";
+import { HealthContent } from "./components";
 
 import styles from "./styles.module.css";
 
@@ -28,8 +28,7 @@ export async function Health() {
         estimativas simples (última vez + intervalo que você definiu).
       </p>
 
-      <AddForm />
-      <List checkups={checkups} />
+      <HealthContent checkups={checkups} />
     </section>
   );
 }

@@ -4,10 +4,16 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
+import type { ActionResult } from "@/types/action-result";
+
 interface UseStepChecklistActions {
-  addStep: (title: string) => Promise<unknown>;
-  toggleStep: (stepId: string, completed: boolean) => Promise<unknown>;
-  removeStep: (stepId: string) => Promise<unknown>;
+  addStep: (title: string) => Promise<ActionResult & { id?: string }>;
+  toggleStep: (stepId: string, completed: boolean) => Promise<ActionResult>;
+  removeStep: (stepId: string) => Promise<ActionResult>;
+  refreshAfterAction?: boolean;
+  onAdded?: (title: string, id?: string) => void;
+  onToggled?: (stepId: string, completed: boolean) => void;
+  onRemoved?: (stepId: string) => void;
 }
 
 /**
@@ -22,7 +28,15 @@ interface UseStepChecklistActions {
  * ao bater 100%) fica dentro do `toggleStep`/`addStep` que o chamador
  * passa, nunca aqui.
  */
-export function useStepChecklist({ addStep, toggleStep, removeStep }: UseStepChecklistActions) {
+export function useStepChecklist({
+  addStep,
+  toggleStep,
+  removeStep,
+  refreshAfterAction = true,
+  onAdded,
+  onToggled,
+  onRemoved,
+}: UseStepChecklistActions) {
   const router = useRouter();
   const [newTitle, setNewTitle] = useState("");
   const [isAdding, setIsAdding] = useState(false);
@@ -36,9 +50,12 @@ export function useStepChecklist({ addStep, toggleStep, removeStep }: UseStepChe
 
     setIsAdding(true);
     try {
-      await addStep(title);
-      setNewTitle("");
-      router.refresh();
+      const result = await addStep(title);
+      if (!result.error) {
+        setNewTitle("");
+        onAdded?.(title, result.id);
+        if (refreshAfterAction) router.refresh();
+      }
     } finally {
       setIsAdding(false);
     }
@@ -49,8 +66,11 @@ export function useStepChecklist({ addStep, toggleStep, removeStep }: UseStepChe
 
     setBusyStepId(stepId);
     try {
-      await toggleStep(stepId, completed);
-      router.refresh();
+      const result = await toggleStep(stepId, completed);
+      if (!result.error) {
+        onToggled?.(stepId, completed);
+        if (refreshAfterAction) router.refresh();
+      }
     } finally {
       setBusyStepId(null);
     }
@@ -61,8 +81,11 @@ export function useStepChecklist({ addStep, toggleStep, removeStep }: UseStepChe
 
     setBusyStepId(stepId);
     try {
-      await removeStep(stepId);
-      router.refresh();
+      const result = await removeStep(stepId);
+      if (!result.error) {
+        onRemoved?.(stepId);
+        if (refreshAfterAction) router.refresh();
+      }
     } finally {
       setBusyStepId(null);
     }

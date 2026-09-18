@@ -58,6 +58,23 @@ test("buildNextAction: sem tarefa comecada, cai pra atrasada normalmente", () =>
   assert.equal(action.kind, "overdue");
 });
 
+test("buildNextAction: tarefa pausada não é apresentada como em andamento", () => {
+  const tasks = [
+    task({
+      id: "pausada",
+      title: "Pausada",
+      startedAt: new Date("2020-01-01T00:00:00.000Z"),
+      workStatus: "paused",
+    }),
+    task({ id: "atrasada", title: "Atrasada", scheduledAt: "2020-01-01T00:00:00.000Z" }),
+  ];
+
+  const action = buildNextAction({ tasks, routine: [], habits: [] });
+
+  assert.equal(action.kind, "overdue");
+  assert.equal(action.title, "Atrasada");
+});
+
 test("buildNextAction: tarefa pendente prioridade media/sem horario ainda conta como próxima ação (achado: caía direto em 'Tudo em dia')", () => {
   const tasks = [task({ id: "solta", title: "Despejo mental", priority: "media" })];
 

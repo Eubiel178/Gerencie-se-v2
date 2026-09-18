@@ -10,17 +10,17 @@ import type { ActionResult } from "@/types/action-result";
 
 export async function createRunningSessionAction(
   data: domain.CreateRunningSession.Params
-): Promise<ActionResult> {
+): Promise<ActionResult & { session?: domain.IRunningSession }> {
   const parsed = createRunningSessionSchema.safeParse(data);
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Dados inválidos." };
   }
 
   try {
-    await getRunningFetcher().create(parsed.data);
+    const session = await getRunningFetcher().create(parsed.data);
     revalidatePath("/home/running");
 
-    return { error: null };
+    return { error: null, session };
   } catch {
     return { error: "Não foi possível salvar a corrida. Tente novamente." };
   }

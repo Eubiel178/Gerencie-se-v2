@@ -28,7 +28,9 @@ export class LocalConnection
     domain.RespondConnection,
     domain.DeleteConnection
 {
-  async invite(params: domain.CreateConnection.Params): Promise<{ id: string; error: string | null }> {
+  async invite(
+    params: domain.CreateConnection.Params
+  ): Promise<Awaited<ReturnType<domain.CreateConnection["invite"]>>> {
     const me = await requireCurrentUser();
     const email = normalizeEmail(params.email);
 
@@ -82,7 +84,19 @@ export class LocalConnection
       if (result.error) console.error("[connections] falha ao enviar e-mail de convite:", result.error);
     });
 
-    return { id, error: null };
+    return {
+      id,
+      error: null,
+      connection: {
+        id,
+        status: "pending",
+        createdAt: new Date(),
+        direction: "sent",
+        otherPersonEmail: email,
+        otherPersonName: existingAccount?.name ?? null,
+        otherPersonUserId: existingAccount?.id ?? null,
+      },
+    };
   }
 
   async loadAll(): Promise<domain.LoadAllConnections.Model> {

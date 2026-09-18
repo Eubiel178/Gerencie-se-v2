@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 
-import { useRouter } from "next/navigation";
-
 import dayjs from "dayjs";
 
 import { Button, ConfirmIconButton } from "@/components";
@@ -25,10 +23,11 @@ interface RoutineListItemProps {
   taskOptions: TaskOption[];
   connections: LoadAcceptedConnections.Model;
   linkedTaskTitle?: string;
+  onToggle: (id: string, completedToday: boolean) => void;
+  onRemove: (id: string) => void;
 }
 
-export function RoutineListItem({ item, taskOptions, connections, linkedTaskTitle }: RoutineListItemProps) {
-  const router = useRouter();
+export function RoutineListItem({ item, taskOptions, connections, linkedTaskTitle, onToggle, onRemove }: RoutineListItemProps) {
   const [isRemoving, setIsRemoving] = useState(false);
   const [isToggling, setIsToggling] = useState(false);
 
@@ -36,8 +35,8 @@ export function RoutineListItem({ item, taskOptions, connections, linkedTaskTitl
     setIsRemoving(true);
 
     try {
-      await deleteRoutineItemAction({ id: item.id });
-      router.refresh();
+      const result = await deleteRoutineItemAction({ id: item.id });
+      if (!result.error) onRemove(item.id);
     } finally {
       setIsRemoving(false);
     }
@@ -56,7 +55,7 @@ export function RoutineListItem({ item, taskOptions, connections, linkedTaskTitl
         emitMascotEvent("routine-completed");
       }
 
-      router.refresh();
+      if (!result.error) onToggle(item.id, !!result.completed);
     } finally {
       setIsToggling(false);
     }

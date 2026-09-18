@@ -13,7 +13,8 @@ export type UpdateGoalStep = {
 };
 
 export namespace UpdateGoalStep {
-  export type Params = Pick<IGoalStep, "id" | "completed">;
+  export type Params = Pick<IGoalStep, "id"> &
+    Partial<Pick<IGoalStep, "completed" | "title">>;
 }
 
 export type DeleteGoalStep = {
@@ -22,4 +23,12 @@ export type DeleteGoalStep = {
 
 export namespace DeleteGoalStep {
   export type Params = Pick<IGoalStep, "id">;
+}
+
+export type ReorderGoalSteps = {
+  reorderSteps: (params: ReorderGoalSteps.Params) => Promise<void>;
+};
+
+export namespace ReorderGoalSteps {
+  export type Params = { goalId: string; orderedStepIds: string[] };
 }

@@ -8,17 +8,17 @@ import { logWaterSchema, updateGoalSchema } from "@/validation/hydration-schema"
 
 import type { ActionResult } from "@/types/action-result";
 
-export async function logWaterAction(data: domain.LogWater.Params): Promise<ActionResult> {
+export async function logWaterAction(data: domain.LogWater.Params): Promise<ActionResult & { id?: string }> {
   const parsed = logWaterSchema.safeParse(data);
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Dados inválidos." };
   }
 
   try {
-    await getHydrationFetcher().logWater(parsed.data);
+    const { id } = await getHydrationFetcher().logWater(parsed.data);
     revalidatePath("/home/hydration");
 
-    return { error: null };
+    return { error: null, id };
   } catch {
     return { error: "Não foi possível registrar. Tente novamente." };
   }

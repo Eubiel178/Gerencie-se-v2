@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import { useWatch } from "react-hook-form";
 import { useFormTags } from "@/features/tasks/hooks/use-form-tags";
 
@@ -9,7 +10,7 @@ import { Alert, Form, Modal, ModalHeader, Input, Button, ChipGroup, CollapsibleS
 import { Icon } from "@/components/icon";
 import modalStyles from "@/components/modal/styles.module.css";
 
-import { updateTaskAction } from "@/features/tasks/actions";
+import { createTaskStepsAction, updateTaskAction } from "@/features/tasks/actions";
 import { isVagueTaskTitle } from "@/features/tasks/is-vague-title";
 
 import { ShareSelect } from "@/features/connections/components/share-select";
@@ -26,6 +27,7 @@ import styles from "./styles.module.css";
 
 export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IEditTaskProps) {
   const formTags = useFormTags();
+  const pendingStepTitles = useRef<string[]>([]);
 
   const {
     register,
@@ -50,7 +52,20 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
       sharedWithUserId: taskBeingEdited.sharedWithUserId ?? "",
       syncEnabled: taskBeingEdited.syncEnabled,
     },
-    onSubmit: (data) => updateTaskAction({ ...data, id: taskBeingEdited.id }),
+    onSubmit: async (data) => {
+      const taskResult = await updateTaskAction({ ...data, id: taskBeingEdited.id });
+      if (taskResult.error) return taskResult;
+
+      const stepResult = await createTaskStepsAction({
+        taskId: taskBeingEdited.id,
+        titles: pendingStepTitles.current,
+      });
+      if (stepResult.error) return stepResult;
+
+      pendingStepTitles.current = [];
+
+      return { error: null };
+    },
   });
 
   const syncEnabled = useWatch({ control, name: "syncEnabled" });
@@ -147,7 +162,13 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
                 <Input.Label>
                   <Icon name="FaListUl" size={12} /> Passos
                 </Input.Label>
-                <TaskSteps taskId={taskBeingEdited.id} steps={taskBeingEdited.steps} />
+                <TaskSteps
+                  taskId={taskBeingEdited.id}
+                  steps={taskBeingEdited.steps}
+                  onPendingStepsChange={(titles) => {
+                    pendingStepTitles.current = titles;
+                  }}
+                />
               </Input.Root>
 
               <CollapsibleSection label="Mais opções">

@@ -2,19 +2,21 @@
 
 import { useState } from "react";
 
-import { useRouter } from "next/navigation";
-
 import { Button, Input } from "@/components";
 
 import { createCycleEntryAction } from "@/features/menstrual-cycle/actions";
 import { todayForDateInput } from "@/utils";
+import { ICycleEntry } from "@/features/menstrual-cycle/domain";
 
 import styles from "./styles.module.css";
 
 const COMMON_SYMPTOMS = ["Cólica", "Dor de cabeça", "Inchaço", "Fadiga", "Mudança de humor"];
 
-export function AddEntryForm() {
-  const router = useRouter();
+interface AddEntryFormProps {
+  onAdd: (entry: ICycleEntry) => void;
+}
+
+export function AddEntryForm({ onAdd }: AddEntryFormProps) {
   const [startDate, setStartDate] = useState(todayForDateInput);
   const [periodLengthDays, setPeriodLengthDays] = useState("");
   const [symptoms, setSymptoms] = useState<string[]>([]);
@@ -39,17 +41,30 @@ export function AddEntryForm() {
     setError(null);
 
     try {
-      await createCycleEntryAction({
+      const result = await createCycleEntryAction({
         startDate,
         periodLengthDays: periodLengthDays ? Number(periodLengthDays) : null,
         symptoms,
         notes: null,
       });
 
+      if (result.error || !result.id) {
+        setError(result.error ?? "Não foi possível salvar o registro.");
+        return;
+      }
+
+      onAdd({
+        id: result.id,
+        userId: "",
+        startDate,
+        periodLengthDays: periodLengthDays ? Number(periodLengthDays) : null,
+        symptoms,
+        notes: null,
+        createdAt: new Date(),
+      });
       setStartDate(todayForDateInput());
       setPeriodLengthDays("");
       setSymptoms([]);
-      router.refresh();
     } finally {
       setIsSubmitting(false);
     }

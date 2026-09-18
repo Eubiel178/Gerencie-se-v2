@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 
-import { useRouter } from "next/navigation";
-
 import { Button, ConfirmIconButton, EmptyState } from "@/components";
 
 import { deleteCycleEntryAction } from "@/features/menstrual-cycle/actions";
@@ -11,16 +9,15 @@ import { ICycleEntry } from "@/features/menstrual-cycle/domain";
 
 import styles from "./styles.module.css";
 
-export function History({ entries }: { entries: ICycleEntry[] }) {
-  const router = useRouter();
+export function History({ entries, onRemove }: { entries: ICycleEntry[]; onRemove: (id: string) => void }) {
   const [removingId, setRemovingId] = useState<string | null>(null);
 
   async function handleDelete(id: string) {
     setRemovingId(id);
 
     try {
-      await deleteCycleEntryAction({ id });
-      router.refresh();
+      const result = await deleteCycleEntryAction({ id });
+      if (!result.error) onRemove(id);
     } finally {
       setRemovingId(null);
     }

@@ -64,17 +64,17 @@ export async function deleteGoalAction(
 
 export async function createGoalStepAction(
   data: domain.CreateGoalStep.Params
-): Promise<ActionResult> {
+): Promise<ActionResult & { id?: string }> {
   const parsed = createGoalStepSchema.safeParse(data);
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Dados inválidos." };
   }
 
   try {
-    await getGoalFetcher().createStep(parsed.data);
+    const { id } = await getGoalFetcher().createStep(parsed.data);
     revalidatePath("/home/goals");
 
-    return { error: null };
+    return { error: null, id };
   } catch {
     return { error: "Não foi possível adicionar a etapa. Tente novamente." };
   }
@@ -108,5 +108,17 @@ export async function deleteGoalStepAction(
     return { error: null };
   } catch {
     return { error: "Não foi possível excluir a etapa. Tente novamente." };
+  }
+}
+
+export async function reorderGoalStepsAction(
+  params: domain.ReorderGoalSteps.Params
+): Promise<ActionResult> {
+  try {
+    await getGoalFetcher().reorderSteps(params);
+    revalidatePath("/home/goals");
+    return { error: null };
+  } catch {
+    return { error: "Não foi possível reordenar as etapas. Tente novamente." };
   }
 }

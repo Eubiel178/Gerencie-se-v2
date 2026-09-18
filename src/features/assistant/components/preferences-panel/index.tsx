@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 import { updateAssistantPreferencesAction } from "@/features/assistant/actions";
 import { IAssistantPreferences } from "@/features/assistant/domain";
@@ -16,9 +15,15 @@ interface PreferencesPanelProps {
 }
 
 export function PreferencesPanel({ preferences, mascotName }: PreferencesPanelProps) {
-  const router = useRouter();
+  const [visiblePreferences, setVisiblePreferences] = useState(preferences);
+  const [previousPreferences, setPreviousPreferences] = useState(preferences);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  if (preferences !== previousPreferences) {
+    setPreviousPreferences(preferences);
+    setVisiblePreferences(preferences);
+  }
 
   async function handleToggle(patch: Partial<IAssistantPreferences>) {
     setIsSaving(true);
@@ -29,7 +34,7 @@ export function PreferencesPanel({ preferences, mascotName }: PreferencesPanelPr
     if (result.error) {
       setError(result.error);
     } else {
-      router.refresh();
+      setVisiblePreferences((current) => ({ ...current, ...patch }));
     }
 
     setIsSaving(false);
@@ -40,18 +45,18 @@ export function PreferencesPanel({ preferences, mascotName }: PreferencesPanelPr
       <label className={styles.row}>
         <input
           type="checkbox"
-          checked={preferences.enabled}
+          checked={visiblePreferences.enabled}
           disabled={isSaving}
           onChange={(event) => handleToggle({ enabled: event.target.checked })}
         />
         <span>Mostrar o assistente ({mascotName})</span>
       </label>
 
-      <label className={styles.row} data-disabled={!preferences.enabled}>
+      <label className={styles.row} data-disabled={!visiblePreferences.enabled}>
         <input
           type="checkbox"
-          checked={preferences.reducedPresence}
-          disabled={isSaving || !preferences.enabled}
+          checked={visiblePreferences.reducedPresence}
+          disabled={isSaving || !visiblePreferences.enabled}
           onChange={(event) => handleToggle({ reducedPresence: event.target.checked })}
         />
         <span>Presença reduzida (não abrir mensagens sozinho)</span>

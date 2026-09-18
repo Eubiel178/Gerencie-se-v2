@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 
-import { useRouter } from "next/navigation";
-
 import { Button, ConfirmIconButton, EmptyState } from "@/components";
 
 import { deleteRunningSessionAction } from "@/features/running/actions";
@@ -13,18 +11,18 @@ import styles from "./styles.module.css";
 
 interface HistoryProps {
   sessions: IRunningSession[];
+  onRemove: (id: string) => void;
 }
 
-export function History({ sessions }: HistoryProps) {
-  const router = useRouter();
+export function History({ sessions, onRemove }: HistoryProps) {
   const [removingId, setRemovingId] = useState<string | null>(null);
 
   async function handleDelete(id: string) {
     setRemovingId(id);
 
     try {
-      await deleteRunningSessionAction({ id });
-      router.refresh();
+      const result = await deleteRunningSessionAction({ id });
+      if (!result.error) onRemove(id);
     } finally {
       setRemovingId(null);
     }

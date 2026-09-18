@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 import { Icon } from "@/components/icon";
 import { dismissOnboardingAction } from "../../actions";
@@ -15,7 +14,7 @@ interface OnboardingChecklistProps {
 }
 
 export function OnboardingChecklist({ items }: OnboardingChecklistProps) {
-  const router = useRouter();
+  const [isDismissed, setIsDismissed] = useState(false);
   const [isDismissing, setIsDismissing] = useState(false);
 
   const doneCount = items.filter((item) => item.done).length;
@@ -26,9 +25,11 @@ export function OnboardingChecklist({ items }: OnboardingChecklistProps) {
 
     setIsDismissing(true);
     const result = await dismissOnboardingAction();
-    if (!result.error) router.refresh();
+    if (!result.error) setIsDismissed(true);
     setIsDismissing(false);
   }
+
+  if (isDismissed) return null;
 
   return (
     <div className={styles.card}>

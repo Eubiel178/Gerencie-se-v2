@@ -1,4 +1,5 @@
 import { getAssistantService } from "@/features/assistant/services/assistant-service";
+import { IMascotState } from "@/features/focus/domain";
 
 import { Widget } from "./components/widget";
 
@@ -15,8 +16,8 @@ export { PreferencesPanel } from "./components/preferences-panel";
  * Server Component: busca o snapshot (preferências + mensagem do momento)
  * e não desenha nada se o usuário desativou o assistente.
  */
-export async function Assistant() {
-  const snapshot = await getAssistantService().getSnapshot();
+export async function Assistant({ mascot }: { mascot?: IMascotState }) {
+  const snapshot = await getAssistantService().getSnapshot(mascot);
 
   if (!snapshot.enabled) return null;
 

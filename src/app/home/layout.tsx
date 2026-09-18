@@ -64,7 +64,7 @@ const HomeLayout = async ({ children }: { children: React.ReactNode }) => {
 
         <main className={styles.main}>{children}</main>
 
-        <Assistant />
+        <Assistant mascot={mascot} />
         <TaskReminders />
         <CommandPalette />
         <MascotPet characterId={mascotCharacterId} />

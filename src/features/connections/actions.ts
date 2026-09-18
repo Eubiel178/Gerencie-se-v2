@@ -6,8 +6,11 @@ import { getConnectionFetcher } from "@/features/connections/data/get-connection
 import { inviteConnectionSchema } from "@/validation/connection-schema";
 
 import type { ActionResult } from "@/types/action-result";
+import type { IConnection } from "@/features/connections/domain";
 
-export async function inviteConnectionAction(data: { email: string }): Promise<ActionResult> {
+export async function inviteConnectionAction(
+  data: { email: string }
+): Promise<ActionResult & { connection?: IConnection }> {
   const parsed = inviteConnectionSchema.safeParse(data);
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "E-mail inválido." };
@@ -17,7 +20,7 @@ export async function inviteConnectionAction(data: { email: string }): Promise<A
     const result = await getConnectionFetcher().invite(parsed.data);
     revalidatePath("/home/settings");
 
-    return { error: result.error };
+    return { error: result.error, connection: result.connection };
   } catch {
     return { error: "Não foi possível enviar o convite. Tente novamente." };
   }

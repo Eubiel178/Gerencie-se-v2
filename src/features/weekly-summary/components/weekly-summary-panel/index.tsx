@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 import { Alert, Button } from "@/components";
 import { updateWeeklySummaryPreferenceAction, sendTestWeeklySummaryAction } from "../../actions";
@@ -14,7 +13,7 @@ interface WeeklySummaryPanelProps {
 }
 
 export function WeeklySummaryPanel({ enabled, email }: WeeklySummaryPanelProps) {
-  const router = useRouter();
+  const [isEnabled, setIsEnabled] = useState(enabled);
   const [isSaving, setIsSaving] = useState(false);
   const [isSendingTest, setIsSendingTest] = useState(false);
   const [testResult, setTestResult] = useState<string | null>(null);
@@ -33,7 +32,7 @@ export function WeeklySummaryPanel({ enabled, email }: WeeklySummaryPanelProps) 
         return;
       }
 
-      router.refresh();
+      setIsEnabled(checked);
     } finally {
       setIsSaving(false);
     }
@@ -55,7 +54,7 @@ export function WeeklySummaryPanel({ enabled, email }: WeeklySummaryPanelProps) 
       <label className={styles.row}>
         <input
           type="checkbox"
-          checked={enabled}
+          checked={isEnabled}
           disabled={isSaving}
           onChange={(event) => handleToggle(event.target.checked)}
         />

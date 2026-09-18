@@ -3,6 +3,7 @@ import { ITaskStep } from "./task-step";
 export type TaskSyncStatus = "NONE" | "PENDING" | "SYNCED" | "ERROR";
 export type TaskPriority = "baixa" | "media" | "alta" | "critica";
 export type TaskRecurrence = "none" | "daily" | "weekly";
+export type TaskWorkStatus = "pending" | "in_progress" | "paused";
 
 export interface ITask {
   id: string;
@@ -20,10 +21,12 @@ export interface ITask {
   // gerido por uma ação dedicada, não por um campo de formulário comum).
   completed: boolean;
   completedAt?: Date | null;
-  // "Começar também conta": marcado uma vez (nunca desfeito) na primeira
-  // vez que a tarefa é explicitamente iniciada — ver `MarkTaskStarted`.
-  // Nulo = ainda não iniciada.
+  // Estado atual de início: nulo = ainda não iniciada. A pessoa pode
+  // desfazer o início sem apagar o XP histórico recebido ao começar.
   startedAt?: Date | null;
+  /** Estado atual, separado do registro histórico de quando a tarefa foi
+   * iniciada pela primeira vez. */
+  workStatus?: TaskWorkStatus;
   // "Quebrar em passos menores" (Modo Assistido) — sempre carregado
   // junto (mesmo raciocínio de `IGoal.steps`), nunca gerado sozinho.
   steps: ITaskStep[];

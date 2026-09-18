@@ -2,15 +2,15 @@
 
 import { useState } from "react";
 
-import { useRouter } from "next/navigation";
-
 import { Button, ConfirmIconButton, Input } from "@/components";
+import { Icon } from "@/components/icon";
 import { SharedBadge } from "@/features/connections/components/shared-badge";
 
 import {
   createGoalStepAction,
   deleteGoalAction,
   deleteGoalStepAction,
+  reorderGoalStepsAction,
   updateGoalStepAction,
 } from "@/features/goals/actions";
 import { EditGoal } from "../../modal";
@@ -21,6 +21,7 @@ import { LoadAcceptedConnections } from "@/features/connections/domain";
 
 import { emitMascotEvent } from "@/features/mascot-pet";
 import { useStepChecklist } from "@/hooks/use-step-checklist";
+import { useGoalStore } from "@/features/goals/goal-store";
 
 import styles from "./styles.module.css";
 
@@ -30,8 +31,12 @@ interface CardProps {
 }
 
 export function Card({ goal, connections }: CardProps) {
-  const router = useRouter();
   const [isRemoving, setIsRemoving] = useState(false);
+  const [isReordering, setIsReordering] = useState(false);
+  const [editingStepId, setEditingStepId] = useState<string | null>(null);
+  const [editingStepTitle, setEditingStepTitle] = useState("");
+  const replaceGoal = useGoalStore((state) => state.replaceGoal);
+  const removeGoal = useGoalStore((state) => state.removeGoal);
 
   const {
     newTitle: newStepTitle,
@@ -44,6 +49,20 @@ export function Card({ goal, connections }: CardProps) {
   } = useStepChecklist({
     addStep: (title) => createGoalStepAction({ goalId: goal.id, title }),
     removeStep: (id) => deleteGoalStepAction({ id }),
+    refreshAfterAction: false,
+    onAdded: (title, id) => {
+      if (!id) return;
+      const steps = [...goal.steps, { id, goalId: goal.id, title, completed: false, order: goal.steps.length }];
+      replaceGoal({ ...goal, steps, progressPercent: calculateGoalProgress(steps) });
+    },
+    onRemoved: (id) => {
+      const steps = goal.steps.filter((step) => step.id !== id);
+      replaceGoal({ ...goal, steps, progressPercent: calculateGoalProgress(steps) });
+    },
+    onToggled: (stepId, completed) => {
+      const steps = goal.steps.map((step) => step.id === stepId ? { ...step, completed } : step);
+      replaceGoal({ ...goal, steps, progressPercent: calculateGoalProgress(steps) });
+    },
     toggleStep: async (stepId, completed) => {
       const result = await updateGoalStepAction({ id: stepId, completed });
 
@@ -61,6 +80,8 @@ export function Card({ goal, connections }: CardProps) {
         const isNowComplete = calculateGoalProgress(stepsAfterToggle) >= 100;
         if (isNowComplete && !wasComplete) emitMascotEvent("goal-completed");
       }
+
+      return result;
     },
   });
 
@@ -69,9 +90,46 @@ export function Card({ goal, connections }: CardProps) {
 
     try {
       await deleteGoalAction({ id: goal.id });
-      router.refresh();
+      removeGoal(goal.id);
     } finally {
       setIsRemoving(false);
+    }
+  }
+
+  async function handleMoveStep(stepId: string, direction: -1 | 1) {
+    if (isReordering) return;
+
+    const currentIndex = goal.steps.findIndex((step) => step.id === stepId);
+    const nextIndex = currentIndex + direction;
+    if (currentIndex < 0 || nextIndex < 0 || nextIndex >= goal.steps.length) return;
+
+    const orderedIds = goal.steps.map((step) => step.id);
+    [orderedIds[currentIndex], orderedIds[nextIndex]] = [orderedIds[nextIndex], orderedIds[currentIndex]];
+    setIsReordering(true);
+    try {
+      const result = await reorderGoalStepsAction({ goalId: goal.id, orderedStepIds: orderedIds });
+      if (!result.error) {
+        const steps = orderedIds.map((id, order) => ({
+          ...goal.steps.find((step) => step.id === id)!,
+          order,
+        }));
+        replaceGoal({ ...goal, steps });
+      }
+    } finally {
+      setIsReordering(false);
+    }
+  }
+
+  async function handleSaveStepTitle(stepId: string) {
+    const title = editingStepTitle.trim();
+    if (!title) return;
+
+    const result = await updateGoalStepAction({ id: stepId, title });
+    if (!result.error) {
+      setEditingStepId(null);
+      setEditingStepTitle("");
+      const steps = goal.steps.map((step) => step.id === stepId ? { ...step, title } : step);
+      replaceGoal({ ...goal, steps });
     }
   }
 
@@ -144,7 +202,7 @@ export function Card({ goal, connections }: CardProps) {
 
       {goal.steps.length > 0 && (
         <ul className={styles.steps}>
-          {goal.steps.map((step) => (
+          {goal.steps.map((step, index) => (
             <li key={step.id} className={styles.step}>
               <input
                 type="checkbox"
@@ -153,9 +211,48 @@ export function Card({ goal, connections }: CardProps) {
                 onChange={(event) => handleToggleStep(step.id, event.target.checked)}
                 aria-label={step.title}
               />
-              <span className={`${styles.stepTitle} ${step.completed ? styles.stepTitleDone : ""}`}>
-                {step.title}
-              </span>
+              {editingStepId === step.id ? (
+                <input
+                  className={styles.editTitle}
+                  aria-label={`Editar etapa ${step.title}`}
+                  value={editingStepTitle}
+                  onChange={(event) => setEditingStepTitle(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      handleSaveStepTitle(step.id);
+                    }
+                    if (event.key === "Escape") setEditingStepId(null);
+                  }}
+                  autoFocus
+                />
+              ) : (
+                <span className={`${styles.stepTitle} ${step.completed ? styles.stepTitleDone : ""}`}>
+                  {step.title}
+                </span>
+              )}
+              {editingStepId === step.id ? (
+                <>
+                  <button type="button" className={styles.orderButton} onClick={() => handleSaveStepTitle(step.id)} aria-label={`Salvar etapa ${step.title}`}>
+                    <Icon name="FaCheck" aria-hidden="true" />
+                  </button>
+                  <button type="button" className={styles.orderButton} onClick={() => setEditingStepId(null)} aria-label="Cancelar edição">
+                    <Icon name="FaTimes" aria-hidden="true" />
+                  </button>
+                </>
+              ) : (
+                <button type="button" className={styles.orderButton} onClick={() => { setEditingStepId(step.id); setEditingStepTitle(step.title); }} aria-label={`Editar etapa ${step.title}`}>
+                  <Icon name="FaEdit" aria-hidden="true" />
+                </button>
+              )}
+              <div className={styles.orderActions} aria-label={`Reordenar ${step.title}`}>
+                <button type="button" className={styles.orderButton} onClick={() => handleMoveStep(step.id, -1)} disabled={index === 0 || isReordering} aria-label={`Mover ${step.title} para cima`}>
+                  <Icon name="FaChevronUp" aria-hidden="true" />
+                </button>
+                <button type="button" className={styles.orderButton} onClick={() => handleMoveStep(step.id, 1)} disabled={index === goal.steps.length - 1 || isReordering} aria-label={`Mover ${step.title} para baixo`}>
+                  <Icon name="FaChevronDown" aria-hidden="true" />
+                </button>
+              </div>
               <ConfirmIconButton
                 icon="FaTrash"
                 ariaLabel={`Remover etapa ${step.title}`}

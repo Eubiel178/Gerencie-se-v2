@@ -41,5 +41,8 @@ export const createGoalStepSchema = z.object({
 
 export const updateGoalStepSchema = z.object({
   id: z.string().min(1),
-  completed: z.boolean(),
+  completed: z.boolean().optional(),
+  title: z.string().min(1, "Campo obrigatório").max(STEP_TITLE_MAX_LENGTH, STEP_TITLE_TOO_LONG_MESSAGE).optional(),
+}).refine((data) => data.completed !== undefined || data.title !== undefined, {
+  message: "Nenhuma alteração foi informada para a etapa.",
 });

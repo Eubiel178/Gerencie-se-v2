@@ -21,16 +21,16 @@ export class LocalHealth
     const userId = await requireUserId();
     const id = crypto.randomUUID();
 
-    await db.insert(healthCheckups).values({
+    const [row] = await db.insert(healthCheckups).values({
       id,
       userId,
       title: params.title,
       category: params.category,
       intervalDays: params.intervalDays ?? null,
       notes: params.notes ?? null,
-    });
+    }).returning();
 
-    return { id };
+    return mapRowToCheckup(row);
   }
 
   async update(params: domain.UpdateHealthCheckup.Params) {
@@ -49,11 +49,14 @@ export class LocalHealth
 
   async markDone(params: domain.MarkHealthCheckupDone.Params) {
     const userId = await requireUserId();
+    const lastDoneAt = dayjs().format("YYYY-MM-DD");
 
     await db
       .update(healthCheckups)
-      .set({ lastDoneAt: dayjs().format("YYYY-MM-DD") })
+      .set({ lastDoneAt })
       .where(and(eq(healthCheckups.id, params.id), eq(healthCheckups.userId, userId)));
+
+    return { lastDoneAt };
   }
 
   async delete(params: domain.DeleteHealthCheckup.Params) {

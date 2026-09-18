@@ -43,9 +43,12 @@ export class LocalTask
     domain.DeleteTask,
     domain.ToggleTaskComplete,
     domain.MarkTaskStarted,
+    domain.SetTaskWorkStatus,
     domain.CreateTaskStep,
+    domain.CreateTaskSteps,
     domain.UpdateTaskStep,
-    domain.DeleteTaskStep
+    domain.DeleteTaskStep,
+    domain.ReorderTaskSteps
 {
   async create(params: domain.CreateTask.Params) {
     const userId = await requireUserId();
@@ -109,6 +112,29 @@ export class LocalTask
     return rows.map((row) =>
       mapRowToTask(row, userId, ownerById.get(row.userId), stepsByTaskId.get(row.id) ?? [])
     );
+  }
+
+  /** Dados mínimos para o agendador global de lembretes. Não usa
+   * `loadAll()`: o layout é revalidado com frequência e o agendador não
+   * precisa buscar passos, donos nem os demais campos de cada tarefa. */
+  async loadReminderTasks() {
+    const userId = await requireUserId();
+
+    const rows = await db
+      .select({
+        id: tasks.id,
+        title: tasks.title,
+        completed: tasks.completed,
+        scheduledAt: tasks.scheduledAt,
+        reminderOffsetsMinutes: tasks.reminderOffsetsMinutes,
+      })
+      .from(tasks)
+      .where(or(eq(tasks.userId, userId), eq(tasks.sharedWithUserId, userId)));
+
+    return rows.map((row) => ({
+      ...row,
+      reminderOffsetsMinutes: deserializeReminders(row.reminderOffsetsMinutes),
+    }));
   }
 
   async update(params: domain.UpdateTask.Params) {
@@ -233,20 +259,38 @@ export class LocalTask
       )
       .limit(1);
 
-    if (!row || row.startedAt) {
+    if (!row) {
       return { xpEarned: 0 };
     }
 
     await db
       .update(tasks)
-      .set({ startedAt: new Date() })
+      .set({ startedAt: row.startedAt ?? new Date(), workStatus: "in_progress" })
       .where(eq(tasks.id, params.id));
 
-    return { xpEarned: TASK_START_XP };
+    return { xpEarned: row.startedAt ? 0 : TASK_START_XP };
+  }
+
+  async setWorkStatus(params: domain.SetTaskWorkStatus.Params): Promise<void> {
+    const userId = await requireUserId();
+    await db
+      .update(tasks)
+      .set({ workStatus: params.workStatus })
+      .where(
+        and(eq(tasks.id, params.id), or(eq(tasks.userId, userId), eq(tasks.sharedWithUserId, userId)))
+      );
   }
 
   async createStep(params: domain.CreateTaskStep.Params) {
+    const { ids } = await this.createSteps({ taskId: params.taskId, titles: [params.title] });
+    return { id: ids[0] };
+  }
+
+  async createSteps(params: domain.CreateTaskSteps.Params) {
     const userId = await requireUserId();
+
+    const titles = params.titles.map((title) => title.trim()).filter(Boolean);
+    if (titles.length === 0) return { ids: [] };
 
     // `taskId` vem do cliente — sem essa checagem, qualquer usuário
     // autenticado que soubesse/adivinhasse o UUID de uma tarefa alheia
@@ -264,22 +308,25 @@ export class LocalTask
       throw new Error("Tarefa não encontrada.");
     }
 
-    const id = crypto.randomUUID();
-
     const [{ maxOrder }] = await db
       .select({ maxOrder: max(taskSteps.order) })
       .from(taskSteps)
       .where(eq(taskSteps.taskId, params.taskId));
 
-    await db.insert(taskSteps).values({
-      id,
-      taskId: params.taskId,
-      userId,
-      title: params.title,
-      order: (maxOrder ?? -1) + 1,
+    const ids = titles.map(() => crypto.randomUUID());
+    await db.transaction(async (tx) => {
+      await tx.insert(taskSteps).values(
+        titles.map((title, index) => ({
+          id: ids[index],
+          taskId: params.taskId,
+          userId,
+          title,
+          order: (maxOrder ?? -1) + index + 1,
+        }))
+      );
     });
 
-    return { id };
+    return { ids };
   }
 
   async updateStep(params: domain.UpdateTaskStep.Params) {
@@ -287,10 +334,14 @@ export class LocalTask
 
     await this.assertStepAccess(params.id, userId);
 
-    await db
-      .update(taskSteps)
-      .set({ completed: params.completed })
-      .where(eq(taskSteps.id, params.id));
+    const update: Partial<Pick<typeof taskSteps.$inferInsert, "completed" | "title">> = {};
+
+    if (typeof params.completed === "boolean") update.completed = params.completed;
+    if (params.title !== undefined) update.title = params.title.trim();
+
+    if (Object.keys(update).length === 0) return;
+
+    await db.update(taskSteps).set(update).where(eq(taskSteps.id, params.id));
   }
 
   async deleteStep(params: domain.DeleteTaskStep.Params) {
@@ -299,6 +350,42 @@ export class LocalTask
     await this.assertStepAccess(params.id, userId);
 
     await db.delete(taskSteps).where(eq(taskSteps.id, params.id));
+  }
+
+  async reorderSteps(params: domain.ReorderTaskSteps.Params) {
+    const userId = await requireUserId();
+
+    const accessible = await db
+      .select({ id: tasks.id })
+      .from(tasks)
+      .where(
+        and(eq(tasks.id, params.taskId), or(eq(tasks.userId, userId), eq(tasks.sharedWithUserId, userId)))
+      )
+      .limit(1);
+
+    if (!accessible[0]) throw new Error("Tarefa não encontrada.");
+
+    const rows = await db
+      .select({ id: taskSteps.id })
+      .from(taskSteps)
+      .where(eq(taskSteps.taskId, params.taskId));
+    const existingIds = new Set(rows.map((row) => row.id));
+
+    if (
+      params.orderedStepIds.length !== rows.length ||
+      new Set(params.orderedStepIds).size !== rows.length ||
+      params.orderedStepIds.some((id) => !existingIds.has(id))
+    ) {
+      throw new Error("A ordem dos passos é inválida.");
+    }
+
+    await db.transaction(async (tx) => {
+      await Promise.all(
+        params.orderedStepIds.map((id, order) =>
+          tx.update(taskSteps).set({ order }).where(eq(taskSteps.id, id))
+        )
+      );
+    });
   }
 
   /** Passo não tem dono próprio — o acesso é sempre decidido pela tarefa
@@ -426,6 +513,7 @@ function mapRowToTask(
     completed: row.completed,
     completedAt: row.completedAt,
     startedAt: row.startedAt,
+    workStatus: row.workStatus as domain.TaskWorkStatus,
     steps,
     scheduledAt: row.scheduledAt ?? undefined,
     syncEnabled: row.syncEnabled,

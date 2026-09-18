@@ -1,6 +1,6 @@
 import { getRunningFetcher } from "@/features/running/data/get-running-fetcher";
 
-import { History, RunningTracker, Totals } from "./components";
+import { RunningContent } from "./components";
 
 import styles from "./styles.module.css";
 
@@ -11,7 +11,7 @@ export * from "./actions";
 export { getRunningFetcher } from "./data/get-running-fetcher";
 
 export async function Running() {
-  const { sessions, totals } = await getRunningFetcher().loadAll();
+  const { sessions } = await getRunningFetcher().loadAll();
 
   return (
     <section className={styles.section}>
@@ -22,9 +22,7 @@ export async function Running() {
         </div>
       </header>
 
-      <Totals totals={totals} />
-      <RunningTracker />
-      <History sessions={sessions} />
+      <RunningContent sessions={sessions} />
     </section>
   );
 }

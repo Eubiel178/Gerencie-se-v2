@@ -19,15 +19,15 @@ export class LocalRunning
     const userId = await requireUserId();
     const id = crypto.randomUUID();
 
-    await db.insert(runningSessions).values({
+    const [row] = await db.insert(runningSessions).values({
       id,
       userId,
       durationSeconds: params.durationSeconds,
       distanceMeters: params.distanceMeters,
       source: params.source,
-    });
+    }).returning();
 
-    return { id };
+    return mapRowToSession(row);
   }
 
   async delete(params: domain.DeleteRunningSession.Params) {

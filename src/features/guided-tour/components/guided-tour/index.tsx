@@ -46,15 +46,20 @@ function measure(el: Element): Rect {
   return { top: rect.top, left: rect.left, width: rect.width, height: rect.height };
 }
 
+function isVisibleTarget(el: Element | null): el is Element {
+  return !!el && el.getClientRects().length > 0;
+}
+
 function tooltipPositionFor(rect: Rect | null): TooltipPosition {
+  const tooltipWidth = Math.min(TOOLTIP_WIDTH, window.innerWidth - VIEWPORT_MARGIN * 2);
   if (!rect) {
     // Passo "solto" (boas-vindas/fim) - centralizado na tela.
-    return { top: window.innerHeight / 2 - 90, left: window.innerWidth / 2 - TOOLTIP_WIDTH / 2 };
+    return { top: window.innerHeight / 2 - 90, left: window.innerWidth / 2 - tooltipWidth / 2 };
   }
 
   const left = Math.min(
     Math.max(rect.left, VIEWPORT_MARGIN),
-    window.innerWidth - TOOLTIP_WIDTH - VIEWPORT_MARGIN
+    window.innerWidth - tooltipWidth - VIEWPORT_MARGIN
   );
 
   // Limite superior de `top`/`bottom` pra garantir que o tooltip inteiro
@@ -171,7 +176,7 @@ function computeInitialSteps(active: boolean, mascotName: string): GuidedTourSte
     if (!step.target) return true;
     if (isMobileViewport && MOBILE_NAV_PANEL_TARGETS.has(step.target)) return true;
     if (step.path && step.path !== currentPath) return true;
-    return !!document.querySelector(step.target);
+    return isVisibleTarget(document.querySelector(step.target));
   });
   return available.length > 0 ? available : null;
 }
@@ -305,7 +310,7 @@ export function GuidedTour({ active, mascotName, userId }: GuidedTourProps) {
       const el = await waitForTarget(step!.target, timeout);
       if (cancelled) return;
 
-      if (!el) {
+      if (!isVisibleTarget(el)) {
         // Alvo não apareceu a tempo - pula este passo (nunca trava o
         // tour apontando pro nada). Último passo nesse estado só fecha.
         setStepIndex((current) => (current + 1 < (steps?.length ?? 0) ? current + 1 : current));
@@ -424,7 +429,7 @@ export function GuidedTour({ active, mascotName, userId }: GuidedTourProps) {
       <div
         ref={containerRef}
         className={styles.tooltip}
-        style={{ width: TOOLTIP_WIDTH, top: position.top, bottom: position.bottom, left: position.left }}
+        style={{ width: Math.min(TOOLTIP_WIDTH, window.innerWidth - VIEWPORT_MARGIN * 2), top: position.top, bottom: position.bottom, left: position.left }}
         role="dialog"
         aria-modal="true"
         aria-labelledby="guided-tour-title"

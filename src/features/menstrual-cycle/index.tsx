@@ -1,6 +1,6 @@
 import { getCycleFetcher } from "@/features/menstrual-cycle/data/get-cycle-fetcher";
 
-import { AddEntryForm, EstimatePanel, History } from "./components";
+import { CycleContent } from "./components";
 
 import styles from "./styles.module.css";
 
@@ -28,9 +28,7 @@ export async function MenstrualCycle() {
         registrar, mais precisa a estimativa tende a ficar.
       </p>
 
-      <EstimatePanel estimate={estimate} />
-      <AddEntryForm />
-      <History entries={entries} />
+      <CycleContent entries={entries} estimate={estimate} />
     </section>
   );
 }

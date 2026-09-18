@@ -1,13 +1,13 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 
 import { Modal, ModalHeader, Form, Input, Button } from "@/components";
 import { Icon } from "@/components/icon";
 import { useToast } from "@/providers/toast-context";
 
 import { quickCaptureTaskAction } from "@/features/tasks/actions";
+import { useTaskStore } from "@/features/tasks/task-store";
 
 import styles from "./styles.module.css";
 
@@ -20,8 +20,8 @@ import styles from "./styles.module.css";
  * algo antes que se perca.
  */
 export function QuickCapture({ triggerClassName }: { triggerClassName?: string }) {
-  const router = useRouter();
   const { showToast } = useToast();
+  const addTask = useTaskStore((state) => state.addTask);
 
   const [isOpen, setIsOpen] = useState(false);
   const [title, setTitle] = useState("");
@@ -56,8 +56,8 @@ export function QuickCapture({ triggerClassName }: { triggerClassName?: string }
     }
 
     showToast("Capturado! Já vira uma tarefa em Tarefas.");
+    if (result.task) addTask(result.task);
     close();
-    router.refresh();
   }
 
   return (

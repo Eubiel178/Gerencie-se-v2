@@ -266,10 +266,12 @@ export const tasks = pgTable("task", {
     .default("media"),
   completed: boolean("completed").notNull().default(false),
   completedAt: timestamp("completed_at", { mode: "date" }),
-  // "Começar também conta" (Modo Assistido) — marcado uma vez, na
-  // primeira vez que a tarefa é explicitamente iniciada; nunca
-  // desfeito. Nulo = ainda não iniciada.
+  // Estado atual de início da tarefa. Pode voltar a nulo quando a pessoa
+  // desfaz o início; o XP recebido por começar continua sendo histórico.
   startedAt: timestamp("started_at", { mode: "date" }),
+  workStatus: text("work_status", { enum: ["pending", "in_progress", "paused"] })
+    .notNull()
+    .default("pending"),
 
   // Vínculo opcional com um objetivo (nulo = tarefa avulsa).
   goalId: text("goal_id").references(() => goals.id, { onDelete: "set null" }),

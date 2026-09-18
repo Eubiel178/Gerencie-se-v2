@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 import { Alert, Button, ConfirmIconButton, EmptyState, Input } from "@/components";
 
@@ -21,11 +20,17 @@ const STATUS_LABEL: Record<IConnection["status"], string> = {
 };
 
 export function PeoplePanel({ connections }: { connections: IConnection[] }) {
-  const router = useRouter();
+  const [visibleConnections, setVisibleConnections] = useState(connections);
+  const [previousConnections, setPreviousConnections] = useState(connections);
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  if (connections !== previousConnections) {
+    setPreviousConnections(connections);
+    setVisibleConnections(connections);
+  }
 
   async function handleInvite(event: React.FormEvent) {
     event.preventDefault();
@@ -41,7 +46,9 @@ export function PeoplePanel({ connections }: { connections: IConnection[] }) {
       }
 
       setEmail("");
-      router.refresh();
+      if (result.connection) {
+        setVisibleConnections((current) => [result.connection!, ...current]);
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -58,7 +65,11 @@ export function PeoplePanel({ connections }: { connections: IConnection[] }) {
         return;
       }
 
-      router.refresh();
+      setVisibleConnections((current) => current.map((connection) =>
+        connection.id === id
+          ? { ...connection, status: accept ? "accepted" : "declined" }
+          : connection
+      ));
     } finally {
       setPendingId(null);
     }
@@ -75,7 +86,7 @@ export function PeoplePanel({ connections }: { connections: IConnection[] }) {
         return;
       }
 
-      router.refresh();
+      setVisibleConnections((current) => current.filter((connection) => connection.id !== id));
     } finally {
       setPendingId(null);
     }
@@ -103,14 +114,14 @@ export function PeoplePanel({ connections }: { connections: IConnection[] }) {
 
       {error && <Alert variant="error">{error}</Alert>}
 
-      {connections.length === 0 ? (
+      {visibleConnections.length === 0 ? (
         <EmptyState tone="muted">
           Ninguém conectado ainda. Convide alguém pra compartilhar tarefas,
           rotina, hábitos ou metas.
         </EmptyState>
       ) : (
         <ul className={styles.list}>
-          {connections.map((connection) => (
+          {visibleConnections.map((connection) => (
             <li key={connection.id} className={styles.item}>
               <div className={styles.itemInfo}>
                 <span className={styles.email}>

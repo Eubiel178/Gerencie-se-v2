@@ -40,20 +40,21 @@ export type IAssistantSnapshot =
  * instanciado.
  */
 export class AssistantService {
-  async getSnapshot(): Promise<IAssistantSnapshot> {
+  async getSnapshot(mascotFromLayout?: IMascotState): Promise<IAssistantSnapshot> {
     const preferences = await getAssistantPreferencesFetcher().getPreferences();
 
     if (!preferences.enabled) {
       return { enabled: false, reducedPresence: preferences.reducedPresence };
     }
 
-    const [tasks, habits, goals, routine, mascot] = await Promise.all([
+    const [tasks, habits, goals, routine, fetchedMascot] = await Promise.all([
       getTaskFetcher().loadAll(),
       getHabitFetcher().loadAll(),
       getGoalFetcher().loadAll(),
       getRoutineFetcher().loadAll(),
-      getMascotFetcher().getMascot(),
+      mascotFromLayout ? Promise.resolve(mascotFromLayout) : getMascotFetcher().getMascot(),
     ]);
+    const mascot = mascotFromLayout ?? fetchedMascot;
 
     const messages = new RuleBasedAssistantProvider().buildMessages({
       tasks,

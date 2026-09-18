@@ -1,7 +1,6 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 
 import {
   cancelFocusSessionAction,
@@ -62,8 +61,6 @@ interface FocusSessionProviderProps {
  * usuário na própria página de Foco).
  */
 export function FocusSessionProvider({ initialSession, userId, children }: FocusSessionProviderProps) {
-  const router = useRouter();
-
   const [session, setSession] = useState(initialSession);
   // Nunca `Date.now()` aqui (achado da auditoria pré-deploy: risco real
   // de mismatch de hidratação) - o valor inicial do estado roda tanto no
@@ -140,15 +137,13 @@ export function FocusSessionProvider({ initialSession, userId, children }: Focus
 
       setLastCompletion({ xpEarned: result.xpEarned ?? 0, taskId: session.taskId ?? null });
       setSession(null);
-      router.refresh();
-
       return { error: null, xpEarned: result.xpEarned };
     } finally {
       setIsBusy(false);
       setPendingAction(null);
       isCompletingRef.current = false;
     }
-  }, [session, router]);
+  }, [session]);
 
   // Única autoridade que decide "o tempo acabou" - antes esse efeito
   // morava dentro do `Timer` da página de Foco; se o widget compacto
@@ -190,14 +185,13 @@ export function FocusSessionProvider({ initialSession, userId, children }: Focus
           setRemaining(result.session.plannedDurationSeconds);
         }
 
-        router.refresh();
         return { error: result.error };
       } finally {
         setIsBusy(false);
         setPendingAction(null);
       }
     },
-    [userId, router]
+    [userId]
   );
 
   const cancel = useCallback(async (): Promise<{ error: string | null }> => {
@@ -211,7 +205,6 @@ export function FocusSessionProvider({ initialSession, userId, children }: Focus
 
       if (!result.error) {
         setSession(null);
-        router.refresh();
       }
 
       return { error: result.error };
@@ -219,7 +212,7 @@ export function FocusSessionProvider({ initialSession, userId, children }: Focus
       setIsBusy(false);
       setPendingAction(null);
     }
-  }, [session, router]);
+  }, [session]);
 
   const extend = useCallback(
     async (additionalSeconds: number): Promise<{ error: string | null }> => {

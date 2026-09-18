@@ -67,7 +67,7 @@ export function buildGuidedTourSteps(mascotName: string): GuidedTourStep[] {
       path: "/home/tasks",
       target: '[data-tour="new-task"]',
       title: "Criar uma tarefa",
-      body: "Prioridade, prazo, lembrete, tudo aqui. A cor da borda esquerda de cada card já mostra a prioridade dela, sem precisar abrir nada.",
+      body: "Comece por aqui para adicionar uma tarefa. Você poderá definir prioridade, prazo e lembrete no formulário, apenas quando precisar.",
     },
     {
       id: "focus",

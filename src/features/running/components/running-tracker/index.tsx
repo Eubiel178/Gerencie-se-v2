@@ -2,19 +2,16 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import { useRouter } from "next/navigation";
-
 import { Button, Input } from "@/components";
 
 import { createRunningSessionAction } from "@/features/running/actions";
-import { calculatePaceMinPerKm, haversineMeters } from "@/features/running/domain";
+import { calculatePaceMinPerKm, haversineMeters, IRunningSession } from "@/features/running/domain";
 
 import styles from "./styles.module.css";
 
 type Tab = "manual" | "gps";
 
-export function RunningTracker() {
-  const router = useRouter();
+export function RunningTracker({ onSessionCreated }: { onSessionCreated: (session: IRunningSession) => void }) {
   const [tab, setTab] = useState<Tab>("manual");
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const tabs: Tab[] = ["manual", "gps"];
@@ -82,16 +79,16 @@ export function RunningTracker() {
         tabIndex={0}
       >
         {tab === "manual" ? (
-          <ManualEntry onSaved={() => router.refresh()} />
+          <ManualEntry onSaved={onSessionCreated} />
         ) : (
-          <LiveTracker onSaved={() => router.refresh()} />
+          <LiveTracker onSaved={onSessionCreated} />
         )}
       </div>
     </section>
   );
 }
 
-function ManualEntry({ onSaved }: { onSaved: () => void }) {
+function ManualEntry({ onSaved }: { onSaved: (session: IRunningSession) => void }) {
   const [distanceKm, setDistanceKm] = useState("");
   const [minutes, setMinutes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -130,7 +127,7 @@ function ManualEntry({ onSaved }: { onSaved: () => void }) {
 
       setDistanceKm("");
       setMinutes("");
-      onSaved();
+      if (result.session) onSaved(result.session);
     } finally {
       setIsSubmitting(false);
     }
@@ -175,7 +172,7 @@ function ManualEntry({ onSaved }: { onSaved: () => void }) {
   );
 }
 
-function LiveTracker({ onSaved }: { onSaved: () => void }) {
+function LiveTracker({ onSaved }: { onSaved: (session: IRunningSession) => void }) {
   const [isTracking, setIsTracking] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [distanceMeters, setDistanceMeters] = useState(0);
@@ -269,15 +266,20 @@ function LiveTracker({ onSaved }: { onSaved: () => void }) {
     setIsSaving(true);
 
     try {
-      await createRunningSessionAction({
+      const result = await createRunningSessionAction({
         distanceMeters: Math.round(distanceMeters),
         durationSeconds: elapsedSeconds,
         source: "gps",
       });
 
+      if (result.error) {
+        setPermissionError(result.error);
+        return;
+      }
+
       setDistanceMeters(0);
       setElapsedSeconds(0);
-      onSaved();
+      if (result.session) onSaved(result.session);
     } finally {
       setIsSaving(false);
     }

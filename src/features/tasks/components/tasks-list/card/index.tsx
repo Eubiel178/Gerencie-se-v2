@@ -9,6 +9,7 @@ import { Icon } from "@/components/icon";
 import {
   deleteTaskAction,
   markTaskStartedAction,
+  setTaskWorkStatusAction,
   retryTaskSyncAction,
   toggleTaskCompleteAction,
 } from "@/features/tasks/actions";
@@ -21,14 +22,44 @@ import { PRIORITY_LABELS } from "../../modal/interfaces";
 import { ITask } from "@/features/tasks/domain";
 import { LoadAcceptedConnections } from "@/features/connections/domain";
 
-import styles from "../../shared/styles.module.css";
+import styles from "./styles.module.css";
 import { useTaskStore } from "@/features/tasks/task-store";
 import { emitMascotEvent } from "@/features/mascot-pet";
+import { useFocusSession } from "@/features/focus/focus-session-context";
 
-const HIGH_PRIORITY_BADGE_CLASS = {
-  critica: "priorityBadgeError",
-  alta: "priorityBadgeWarning",
-} as const;
+function formatDeadline(value: string): string {
+  const date = new Date(value);
+  const now = new Date();
+  const startOfToday = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+  );
+  const startOfTomorrow = new Date(startOfToday);
+  startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
+  const day = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const dayLabel =
+    day.getTime() === startOfToday.getTime()
+      ? "Hoje"
+      : day.getTime() === startOfTomorrow.getTime()
+        ? "Amanhã"
+        : new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short" })
+            .format(date)
+            .replace(".", "");
+  const time = new Intl.DateTimeFormat("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+  return `${dayLabel} · até ${time}`;
+}
+
+function formatRemaining(seconds: number): string {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  return hours > 0
+    ? `${hours}h ${String(minutes).padStart(2, "0")}min`
+    : `${minutes} min`;
+}
 
 interface CardProps {
   task: ITask;
@@ -52,7 +83,12 @@ export function Card({
   const [isRetrying, setIsRetrying] = useState(false);
   const [isToggling, setIsToggling] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
+  const [isUpdatingWorkStatus, setIsUpdatingWorkStatus] = useState(false);
   const removeTask = useTaskStore((state) => state.removeTask);
+  const replaceTask = useTaskStore((state) => state.replaceTask);
+  const { session, remaining } = useFocusSession();
+  const isFocused = session?.taskId === task.id;
+  const workStatus = task.workStatus ?? (task.startedAt ? "in_progress" : "pending");
 
   async function handleTaskRemove() {
     setIsRemoving(true);
@@ -60,7 +96,6 @@ export function Card({
     try {
       const result = await deleteTaskAction({ id: task.id });
       if (!result.error) removeTask(task.id);
-      router.refresh();
     } finally {
       setIsRemoving(false);
     }
@@ -76,7 +111,12 @@ export function Card({
       } else if (result.completed) {
         emitMascotEvent("task-completed");
       }
-      router.refresh();
+      if (!result.error)
+        replaceTask({
+          ...task,
+          completed: !!result.completed,
+          completedAt: result.completed ? new Date() : null,
+        });
     } finally {
       setIsToggling(false);
     }
@@ -87,10 +127,23 @@ export function Card({
     setIsStarting(true);
 
     try {
-      await markTaskStartedAction({ id: task.id });
-      router.refresh();
+      const result = await markTaskStartedAction({ id: task.id });
+      if (!result.error)
+        replaceTask({ ...task, startedAt: task.startedAt ?? new Date() });
     } finally {
       setIsStarting(false);
+    }
+  }
+
+  async function handleWorkStatus(nextStatus: "pending" | "in_progress" | "paused") {
+    if (isUpdatingWorkStatus) return;
+    setIsUpdatingWorkStatus(true);
+
+    try {
+      const result = await setTaskWorkStatusAction({ id: task.id, workStatus: nextStatus });
+      if (!result.error) replaceTask({ ...task, workStatus: nextStatus });
+    } finally {
+      setIsUpdatingWorkStatus(false);
     }
   }
 
@@ -98,8 +151,8 @@ export function Card({
     setIsRetrying(true);
 
     try {
-      await retryTaskSyncAction({ id: task.id });
-      router.refresh();
+      const result = await retryTaskSyncAction({ id: task.id });
+      if (!result.error && result.task) replaceTask(result.task);
     } finally {
       setIsRetrying(false);
     }
@@ -122,99 +175,91 @@ export function Card({
               {task.completed && <Icon name="FaCheck" aria-hidden="true" />}
             </button>
 
-            <p className={styles.tagLabel}>{tagLabel}</p>
+            <div className={styles.titleGroup}>
+              <h3 className={styles.taskTitle} data-completed={task.completed}>
+                {task.title}
+              </h3>
+              <p className={styles.tagLabel}>{tagLabel}</p>
+            </div>
           </div>
-
-          <div className={styles.headerActions}>
-            {!task.completed && !task.startedAt && (
-              <Button.Preset
-                icon={{ name: "FaPlay" }}
-                root={{
-                  tone: "highlight",
-                  "aria-label": `Começar tarefa ${task.title}`,
-                  loading: isStarting,
-                  onClick: handleMarkStarted,
-                }}
+          <details className={styles.overflowMenu}>
+            <summary aria-label={`Mais ações para ${task.title}`}>
+              <Icon name="FaEllipsisV" aria-hidden="true" />
+            </summary>
+            <div className={styles.overflowMenuContent}>
+              <EditTask
+                taskBeingEdited={task}
+                isGoogleConnected={isGoogleConnected}
+                connections={connections}
               />
-            )}
-
-            {!task.completed && (
-              <Button.Preset
-                icon={{ name: "MdTimer" }}
-                root={{
-                  "aria-label": `Focar nesta tarefa: ${task.title}`,
-                  onClick: () => router.push(`/home/focus?taskId=${task.id}`),
-                }}
-              />
-            )}
-
-            {!task.isSharedWithMe && (
-              <ConfirmIconButton
-                icon="FaTrash"
-                ariaLabel={`Excluir tarefa ${task.title}`}
-                confirmText="Excluir esta tarefa?"
-                loading={isRemoving}
-                onConfirm={handleTaskRemove}
-              />
-            )}
-
-            <EditTask
-              taskBeingEdited={task}
-              isGoogleConnected={isGoogleConnected}
-              connections={connections}
-            />
-          </div>
+              {!task.isSharedWithMe && (
+                <ConfirmIconButton
+                  icon="FaTrash"
+                  ariaLabel={`Excluir tarefa ${task.title}`}
+                  confirmText="Excluir esta tarefa?"
+                  loading={isRemoving}
+                  onConfirm={handleTaskRemove}
+                />
+              )}
+            </div>
+          </details>
         </div>
       </div>
 
       <div className={styles.cardBody}>
         <div className={styles.cardTop}>
-          {task.startedAt && !task.completed && (
+          {workStatus === "in_progress" && !task.completed && (
             <span className={styles.startedBadge}>
               <Icon name="FaPlay" aria-hidden="true" size={10} />
               Em andamento
             </span>
           )}
+          {workStatus === "paused" && !task.completed && (
+            <span className={styles.pausedBadge}>
+              <Icon name="FaPause" aria-hidden="true" size={10} /> Pausada
+            </span>
+          )}
 
           <div className={styles.titleRow}>
-            <div className={styles.titleGroup}>
-              <h3 className={styles.taskTitle} data-completed={task.completed}>
-                {task.title}
-              </h3>
-
-              {task.recurrence !== "none" && (
-                <Icon
-                  name="FaRedo"
-                  role="img"
-                  aria-label={
-                    task.recurrence === "daily"
-                      ? "Repete diariamente"
-                      : "Repete semanalmente"
-                  }
-                  title={
-                    task.recurrence === "daily"
-                      ? "Repete diariamente"
-                      : "Repete semanalmente"
-                  }
-                  size={12}
-                  color="var(--color-text-muted)"
-                />
-              )}
-            </div>
-
-            {(task.priority === "critica" || task.priority === "alta") && (
-              <p className={styles[HIGH_PRIORITY_BADGE_CLASS[task.priority]]}>
-                {PRIORITY_LABELS[task.priority]}
-              </p>
+            {task.recurrence !== "none" && (
+              <Icon
+                name="FaRedo"
+                role="img"
+                aria-label={
+                  task.recurrence === "daily"
+                    ? "Repete diariamente"
+                    : "Repete semanalmente"
+                }
+                title={
+                  task.recurrence === "daily"
+                    ? "Repete diariamente"
+                    : "Repete semanalmente"
+                }
+                size={12}
+                color="var(--color-text-muted)"
+              />
             )}
+            <p className={styles.priorityBadge}>
+              {PRIORITY_LABELS[task.priority]}
+            </p>
           </div>
 
-          <p className={styles.description}>{task.description}</p>
+          {task.description && (
+            <p className={styles.description}>{task.description}</p>
+          )}
+
+          {task.scheduledAt && (
+            <p className={styles.deadline}>
+              <Icon name="FaCalendarAlt" aria-hidden="true" size={12} />{" "}
+              {formatDeadline(task.scheduledAt)}
+            </p>
+          )}
 
           {task.steps.length > 0 && (
             <p className={styles.stepsProgress}>
               <Icon name="FaListUl" aria-hidden="true" size={11} />
-              {task.steps.filter((step) => step.completed).length}/{task.steps.length} passos
+              {task.steps.filter((step) => step.completed).length}/
+              {task.steps.length} passos
             </p>
           )}
 
@@ -225,6 +270,13 @@ export function Card({
             label="Compartilhada"
             className={styles.sharedBadge}
           />
+
+          {isFocused && (
+            <p className={styles.focusState}>
+              <Icon name="MdTimer" aria-hidden="true" /> Em foco ·{" "}
+              {formatRemaining(remaining)} restantes
+            </p>
+          )}
         </div>
 
         {task.syncEnabled && (
@@ -255,6 +307,50 @@ export function Card({
                 </Button.Root>
               </>
             )}
+          </div>
+        )}
+
+        {!task.completed && (
+          <div className={styles.primaryActions}>
+            {workStatus === "pending" && (
+              <Button.Root
+                type="button"
+                loading={isStarting}
+                onClick={handleMarkStarted}
+              >
+                <Icon name="FaPlay" aria-hidden="true" /> Começar
+              </Button.Root>
+            )}
+
+            {workStatus === "in_progress" && !isFocused && (
+              <Button.Root
+                type="button"
+                variant="secondary"
+                loading={isUpdatingWorkStatus}
+                onClick={() => handleWorkStatus("paused")}
+              >
+                <Icon name="FaPause" aria-hidden="true" /> Pausar
+              </Button.Root>
+            )}
+
+            {workStatus === "paused" && (
+              <Button.Root
+                type="button"
+                loading={isUpdatingWorkStatus}
+                onClick={() => handleWorkStatus("in_progress")}
+              >
+                <Icon name="FaPlay" aria-hidden="true" /> Retomar
+              </Button.Root>
+            )}
+
+            <Button.Root
+              type="button"
+              variant="secondary"
+              onClick={() => router.push(`/home/focus?taskId=${task.id}`)}
+            >
+              <Icon name="MdTimer" aria-hidden="true" />{" "}
+              {isFocused ? "Abrir foco" : "Focar"}
+            </Button.Root>
           </div>
         )}
       </div>

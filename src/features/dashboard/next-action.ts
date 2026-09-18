@@ -45,7 +45,7 @@ export function buildNextAction(params: {
   // pessoa pra outra coisa antes de oferecer continuar o que já estava
   // em andamento.
   const resumedTask = pendingTasks
-    .filter((task) => task.startedAt)
+    .filter((task) => task.workStatus === "in_progress" || (!task.workStatus && task.startedAt))
     .sort((a, b) => dayjs(b.startedAt).valueOf() - dayjs(a.startedAt).valueOf())[0];
 
   if (resumedTask) {

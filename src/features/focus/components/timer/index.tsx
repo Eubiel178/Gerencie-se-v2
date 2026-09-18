@@ -2,8 +2,6 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { useRouter } from "next/navigation";
-
 import { Button, Input, Modal, ModalHeader } from "@/components";
 
 import { IMascotState, MascotEvent } from "@/features/focus/domain";
@@ -50,7 +48,6 @@ interface TimerProps {
  * a sessão quando o tempo acaba - ver comentário completo no provider.
  */
 export function Timer({ mascot, task, pendingTasks }: TimerProps) {
-  const router = useRouter();
   const { session, remaining, isBusy, pendingAction, lastCompletion, start, complete, cancel, extend, clearLastCompletion } =
     useFocusSession();
 
@@ -207,8 +204,8 @@ export function Timer({ mascot, task, pendingTasks }: TimerProps) {
 
     setIsMarkingTaskComplete(true);
     try {
-      await toggleTaskCompleteAction({ id: task.id });
-      router.refresh();
+      const result = await toggleTaskCompleteAction({ id: task.id });
+      if (result.error) setActionError(result.error);
     } finally {
       setIsMarkingTaskComplete(false);
       setShowTaskCompleteConfirm(false);

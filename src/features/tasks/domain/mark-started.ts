@@ -1,7 +1,6 @@
 // "Começar também conta": um pequeno reconhecimento (XP) por só começar
-// uma tarefa, não só por terminá-la — uma vez marcada, nunca desmarca
-// (ver `LocalTask.markStarted`, que ignora silenciosamente uma segunda
-// chamada em vez de recontar XP).
+// uma tarefa, não só por terminá-la. Pausar ou retomar não remove o XP
+// histórico (ver `LocalTask.setWorkStatus`).
 export type MarkTaskStarted = {
   markStarted: (params: MarkTaskStarted.Params) => Promise<MarkTaskStarted.Result>;
 };

@@ -33,7 +33,7 @@ import type { ActionResult } from "@/types/action-result";
 
 export async function createTaskAction(
   data: domain.CreateTask.Params
-): Promise<ActionResult> {
+): Promise<ActionResult & { task?: domain.ITask }> {
   const parsed = createTaskSchema.safeParse(data);
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Dados inválidos." };
@@ -66,11 +66,12 @@ export async function createTaskAction(
       },
       repo
     );
+    const task = await repo.getById(id);
 
     revalidatePath("/home");
     revalidatePath("/home/tasks");
 
-    return { error: null };
+    return { error: null, task: task ?? undefined };
   } catch {
     return { error: "Não foi possível salvar a tarefa. Tente novamente." };
   }
@@ -84,7 +85,9 @@ export async function createTaskAction(
  * nunca deixar a fricção de "preencher o formulário inteiro" competir
  * com o impulso de anotar algo antes que se perca.
  */
-export async function quickCaptureTaskAction(rawTitle: string): Promise<ActionResult> {
+export async function quickCaptureTaskAction(
+  rawTitle: string
+): Promise<ActionResult & { task?: domain.ITask }> {
   const title = rawTitle.trim();
 
   if (!title) {
@@ -222,26 +225,64 @@ export async function markTaskStartedAction(
   }
 }
 
+export async function setTaskWorkStatusAction(
+  params: domain.SetTaskWorkStatus.Params
+): Promise<ActionResult> {
+  try {
+    await getTaskFetcher().setWorkStatus(params);
+    revalidatePath("/home");
+    revalidatePath("/home/tasks");
+    return { error: null };
+  } catch {
+    return { error: "Não foi possível atualizar o status da tarefa. Tente novamente." };
+  }
+}
+
 /** "Quebrar tarefa em passos menores" (Modo Assistido) — mesma
  * orquestração simples usada em Goals: repositório cuida só da entidade,
  * a action só chama e revalida. */
 export async function createTaskStepAction(
   params: domain.CreateTaskStep.Params
-): Promise<ActionResult> {
+): Promise<ActionResult & { id?: string }> {
   try {
-    await getTaskFetcher().createStep(params);
+    const { id } = await getTaskFetcher().createStep(params);
     revalidatePath("/home/tasks");
     revalidatePath("/home");
 
-    return { error: null };
+    return { error: null, id };
   } catch {
     return { error: "Não foi possível adicionar o passo. Tente novamente." };
+  }
+}
+
+export async function createTaskStepsAction(
+  params: domain.CreateTaskSteps.Params
+): Promise<ActionResult> {
+  if (params.titles.some((title) => !title.trim())) {
+    return { error: "Cada passo precisa ter um título." };
+  }
+
+  try {
+    await getTaskFetcher().createSteps(params);
+    revalidatePath("/home/tasks");
+    revalidatePath("/home");
+    return { error: null };
+  } catch {
+    return { error: "Não foi possível adicionar os passos. Tente novamente." };
   }
 }
 
 export async function updateTaskStepAction(
   params: domain.UpdateTaskStep.Params
 ): Promise<ActionResult> {
+  if (params.title !== undefined && !params.title.trim()) {
+    return { error: "O passo precisa ter um título." };
+  }
+
+  if (params.completed === undefined && params.title === undefined) {
+    return { error: "Nenhuma alteração foi informada para o passo." };
+  }
+
   try {
     await getTaskFetcher().updateStep(params);
     revalidatePath("/home/tasks");
@@ -267,12 +308,25 @@ export async function deleteTaskStepAction(
   }
 }
 
+export async function reorderTaskStepsAction(
+  params: domain.ReorderTaskSteps.Params
+): Promise<ActionResult> {
+  try {
+    await getTaskFetcher().reorderSteps(params);
+    revalidatePath("/home/tasks");
+    revalidatePath("/home");
+    return { error: null };
+  } catch {
+    return { error: "Não foi possível reordenar os passos. Tente novamente." };
+  }
+}
+
 /** Permite tentar de novo uma sincronização que ficou com `syncStatus:
  * "ERROR"` (Google indisponível, token expirado sem conseguir renovar,
  * etc.) sem precisar reabrir e resalvar o formulário de edição. */
 export async function retryTaskSyncAction(
   params: domain.DeleteTask.Params
-): Promise<ActionResult> {
+): Promise<ActionResult & { task?: domain.ITask }> {
   try {
     const repo = getTaskFetcher();
     const task = await repo.getById(params.id);
@@ -281,11 +335,12 @@ export async function retryTaskSyncAction(
       return { error: "Tarefa não encontrada." };
     }
 
-    await syncTaskToGoogle(task, repo);
-    revalidatePath("/home");
-    revalidatePath("/home/tasks");
+      await syncTaskToGoogle(task, repo);
+      const refreshedTask = await repo.getById(params.id);
+      revalidatePath("/home");
+      revalidatePath("/home/tasks");
 
-    return { error: null };
+      return { error: null, task: refreshedTask ?? undefined };
   } catch {
     return { error: "Não foi possível sincronizar agora. Tente novamente." };
   }
