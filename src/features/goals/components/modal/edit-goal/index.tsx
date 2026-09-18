@@ -9,7 +9,7 @@ import { Alert, Form, Modal, ModalHeader, Input, Button, ChipGroup, SuggestionCh
 import { Icon } from "@/components/icon";
 import modalStyles from "@/components/modal/styles.module.css";
 
-import { createGoalStepAction, updateGoalAction } from "@/features/goals/actions";
+import { createGoalStepAction, reorderGoalStepsAction, updateGoalAction } from "@/features/goals/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
 import { ShareReadOnlyNote } from "@/features/connections/components/share-readonly-note";
 import { useFormModal } from "@/hooks/use-form-modal";
@@ -27,6 +27,19 @@ const DEADLINE_SHORTCUTS = [
 export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
   const [stepTitle, setStepTitle] = useState("");
   const [newSteps, setNewSteps] = useState<string[]>([]);
+  const [orderedSteps, setOrderedSteps] = useState(goalBeingEdited.steps);
+  const [isReordering, setIsReordering] = useState(false);
+
+  async function moveStep(index: number, direction: -1 | 1) {
+    const nextIndex = index + direction;
+    if (nextIndex < 0 || nextIndex >= orderedSteps.length || isReordering) return;
+    const next = [...orderedSteps];
+    [next[index], next[nextIndex]] = [next[nextIndex], next[index]];
+    setIsReordering(true);
+    const result = await reorderGoalStepsAction({ goalId: goalBeingEdited.id, orderedStepIds: next.map((step) => step.id) });
+    if (!result.error) setOrderedSteps(next);
+    setIsReordering(false);
+  }
   const {
     register,
     setValue,
@@ -152,6 +165,7 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
 
               <Input.Root>
                 <Input.Label>Adicionar passos</Input.Label>
+                {orderedSteps.length > 0 && <ul className={styles.stepsDraft}>{orderedSteps.map((step, index) => <li key={step.id}><span className={styles.pendingMarker}>•</span><span>{step.title}</span><button type="button" className={styles.orderButton} disabled={index === 0 || isReordering} onClick={() => moveStep(index, -1)} aria-label={`Mover ${step.title} para cima`}><Icon name="FaChevronUp" /></button><button type="button" className={styles.orderButton} disabled={index === orderedSteps.length - 1 || isReordering} onClick={() => moveStep(index, 1)} aria-label={`Mover ${step.title} para baixo`}><Icon name="FaChevronDown" /></button></li>)}</ul>}
                 <div className={styles.stepsAddRow}>
                   <Input.Wrapper>
                     <Input.Field value={stepTitle} onChange={(event) => setStepTitle(event.target.value)} placeholder="Ex.: Pesquisar opções" />
