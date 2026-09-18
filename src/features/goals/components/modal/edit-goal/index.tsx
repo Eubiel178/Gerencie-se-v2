@@ -173,6 +173,7 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
 
               <Input.Root>
                 <Input.Label>Adicionar passos</Input.Label>
+                {orderedSteps.length > 0 && <p className={styles.stepsHint}>{orderedSteps.filter((step) => step.completed).length} de {orderedSteps.length} passos concluídos.</p>}
                 <div className={styles.stepsAddRow}>
                   <Input.Wrapper>
                     <Input.Field value={stepTitle} onChange={(event) => setStepTitle(event.target.value)} placeholder="Ex.: Pesquisar opções" />
@@ -182,7 +183,7 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
                     if (title) { setNewSteps((current) => [...current, title]); setStepTitle(""); }
                   }}><Button.Icon name="FaPlus" /></Button.Root>
                 </div>
-                {orderedSteps.length > 0 && <ul className={styles.stepsDraft}>{orderedSteps.map((step, index) => <li key={step.id}><span className={styles.pendingMarker}>•</span><span>{step.title}</span><button type="button" className={styles.orderButton} disabled={index === 0} onClick={() => moveStep(index, -1)} aria-label={`Mover ${step.title} para cima`}><Icon name="FaChevronUp" /></button><button type="button" className={styles.orderButton} disabled={index === orderedSteps.length - 1} onClick={() => moveStep(index, 1)} aria-label={`Mover ${step.title} para baixo`}><Icon name="FaChevronDown" /></button><ConfirmIconButton icon="FaTrash" ariaLabel={`Remover passo ${step.title}`} confirmText={`Remover o passo \"${step.title}\"?`} className={styles.smallButton} onConfirm={() => { setRemovedStepIds((current) => [...current, step.id]); setOrderedSteps((current) => current.filter((item) => item.id !== step.id)); }} /></li>)}</ul>}
+                {orderedSteps.length > 0 && <ul className={styles.stepsDraft}>{orderedSteps.map((step, index) => <li key={step.id}><input type="checkbox" checked={step.completed} readOnly aria-label={step.title} /><span>{step.title}</span><button type="button" className={styles.orderButton} disabled={index === 0} onClick={() => moveStep(index, -1)} aria-label={`Mover ${step.title} para cima`}><Icon name="FaChevronUp" /></button><button type="button" className={styles.orderButton} disabled={index === orderedSteps.length - 1} onClick={() => moveStep(index, 1)} aria-label={`Mover ${step.title} para baixo`}><Icon name="FaChevronDown" /></button><ConfirmIconButton icon="FaTrash" ariaLabel={`Remover passo ${step.title}`} confirmText={`Remover o passo \"${step.title}\"?`} className={styles.smallButton} onConfirm={() => { setRemovedStepIds((current) => [...current, step.id]); setOrderedSteps((current) => current.filter((item) => item.id !== step.id)); }} /></li>)}</ul>}
                 {newSteps.length > 0 && <ul className={styles.stepsDraft}>{newSteps.map((title, index) => <li key={`${title}-${index}`}><span className={styles.pendingMarker}>•</span><span>{title}</span><button type="button" onClick={() => setNewSteps((current) => current.filter((_, itemIndex) => itemIndex !== index))} aria-label={`Remover passo ${title}`}>×</button></li>)}</ul>}
               </Input.Root>
 

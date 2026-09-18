@@ -63,51 +63,6 @@ export function Card({ goal, connections }: CardProps) {
     }
   }
 
-  /*async function handleMoveStep(stepId: string, direction: -1 | 1) {
-    if (isReordering) return;
-
-    const currentIndex = goal.steps.findIndex((step) => step.id === stepId);
-    const nextIndex = currentIndex + direction;
-    if (currentIndex < 0 || nextIndex < 0 || nextIndex >= goal.steps.length) return;
-
-    const orderedIds = goal.steps.map((step) => step.id);
-    [orderedIds[currentIndex], orderedIds[nextIndex]] = [orderedIds[nextIndex], orderedIds[currentIndex]];
-    setIsReordering(true);
-    try {
-      const result = await reorderGoalStepsAction({ goalId: goal.id, orderedStepIds: orderedIds });
-      if (!result.error) {
-        const steps = orderedIds.map((id, order) => ({
-          ...goal.steps.find((step) => step.id === id)!,
-          order,
-        }));
-        replaceGoal({ ...goal, steps });
-      }
-    } finally {
-      setIsReordering(false);
-    }
-  }*/
-
-  /*async function handleSaveStepTitle(stepId: string) {
-    const title = editingStepTitle.trim();
-    if (!title) return;
-
-    const result = await updateGoalStepAction({ id: stepId, title });
-    if (!result.error) {
-      setEditingStepId(null);
-      setEditingStepTitle("");
-      const steps = goal.steps.map((step) => step.id === stepId ? { ...step, title } : step);
-      replaceGoal({ ...goal, steps });
-    }
-  }*/
-
-  // `useStepChecklist.handleAddStep` não recebe evento - o form daqui
-  // (diferente do de `TaskSteps`, que não é um <form> de verdade) precisa
-  // impedir o recarregamento padrão do navegador antes de chamar ele.
-  /*function handleAddStep(event: React.FormEvent) {
-    event.preventDefault();
-    submitNewStep();
-  }*/
-
   return (
     <li className={styles.card} data-priority={goal.priority}>
       <div className={styles.cardHeader}>
@@ -158,12 +113,11 @@ export function Card({ goal, connections }: CardProps) {
 
       {goal.steps.length > 0 ? (
         <p className={styles.progressHint}>
-          {goal.steps.filter((step) => step.completed).length} de {goal.steps.length} etapas concluídas
-          — progresso calculado automaticamente.
+          {goal.steps.filter((step) => step.completed).length} de {goal.steps.length} passos concluídos. Marque todos para concluir o objetivo.
         </p>
       ) : (
         <p className={styles.progressHint}>
-          Adicione etapas abaixo para o progresso ser calculado automaticamente.
+          Adicione passos em Editar para acompanhar o progresso do objetivo.
         </p>
       )}
 
