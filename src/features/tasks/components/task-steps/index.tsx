@@ -9,6 +9,7 @@ import {
   updateTaskStepAction,
 } from "@/features/tasks/actions";
 import { ITaskStep } from "@/features/tasks/domain";
+import { useTaskStore } from "@/features/tasks/task-store";
 import { useState } from "react";
 
 import styles from "./styles.module.css";
@@ -37,8 +38,14 @@ export function TaskSteps({ taskId, steps, onPendingStepsChange }: TaskStepsProp
   const [busyStepId, setBusyStepId] = useState<string | null>(null);
   const [editingStepId, setEditingStepId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState("");
+  const replaceTask = useTaskStore((state) => state.replaceTask);
   const completedSteps = visibleSteps.filter((step) => step.completed).length;
   const totalSteps = visibleSteps.length + pendingSteps.length;
+
+  function updateCardSteps(update: (current: ITaskStep[]) => ITaskStep[]) {
+    const task = useTaskStore.getState().tasks.find((item) => item.id === taskId);
+    if (task) replaceTask({ ...task, steps: update(task.steps) });
+  }
 
   function handleQueueStep() {
     const title = newStepTitle.trim();
@@ -76,6 +83,7 @@ export function TaskSteps({ taskId, steps, onPendingStepsChange }: TaskStepsProp
       const result = await updateTaskStepAction({ id, completed });
       if (!result.error) {
         setVisibleSteps((current) => current.map((step) => step.id === id ? { ...step, completed } : step));
+        updateCardSteps((current) => current.map((step) => step.id === id ? { ...step, completed } : step));
       }
     } finally {
       setBusyStepId(null);
@@ -91,6 +99,7 @@ export function TaskSteps({ taskId, steps, onPendingStepsChange }: TaskStepsProp
       const result = await updateTaskStepAction({ id, title });
       if (!result.error) {
         setVisibleSteps((current) => current.map((step) => step.id === id ? { ...step, title } : step));
+        updateCardSteps((current) => current.map((step) => step.id === id ? { ...step, title } : step));
         setEditingStepId(null);
         setEditingTitle("");
       }
@@ -105,7 +114,10 @@ export function TaskSteps({ taskId, steps, onPendingStepsChange }: TaskStepsProp
     setBusyStepId(id);
     try {
       const result = await deleteTaskStepAction({ id });
-      if (!result.error) setVisibleSteps((current) => current.filter((step) => step.id !== id));
+      if (!result.error) {
+        setVisibleSteps((current) => current.filter((step) => step.id !== id));
+        updateCardSteps((current) => current.filter((step) => step.id !== id));
+      }
     } finally {
       setBusyStepId(null);
     }
@@ -126,7 +138,17 @@ export function TaskSteps({ taskId, steps, onPendingStepsChange }: TaskStepsProp
     try {
       const result = await reorderTaskStepsAction({ taskId, orderedStepIds });
       if (!result.error) {
-        setVisibleSteps(reordered.map((step, order) => ({ ...step, order })));
+        const reorderedSteps = reordered.map((step, order) => ({ ...step, order }));
+        setVisibleSteps(reorderedSteps);
+        updateCardSteps((current) => {
+          const currentById = new Map(current.map((step) => [step.id, step]));
+          const reorderedIds = new Set(reorderedSteps.map((step) => step.id));
+          const reorderedCurrentSteps = reorderedSteps.flatMap((step) => {
+            const currentStep = currentById.get(step.id);
+            return currentStep ? [{ ...currentStep, order: step.order }] : [];
+          });
+          return [...reorderedCurrentSteps, ...current.filter((step) => !reorderedIds.has(step.id))];
+        });
       }
     } finally {
       setBusyStepId(null);
