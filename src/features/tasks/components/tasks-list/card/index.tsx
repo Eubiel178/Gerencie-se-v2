@@ -277,7 +277,7 @@ export function Card({
             <div className={styles.stepsProgress}>
               <p className={styles.stepsSummary}>
                 <Icon name="FaListUl" aria-hidden="true" size={11} />
-                {task.steps.filter((step) => step.completed).length}/{task.steps.length} passos
+                {task.steps.filter((step) => step.completed).length} de {task.steps.length} passos concluídos
               </p>
               <ul className={styles.stepsPreview} aria-label="Passos da tarefa">
                 {task.steps.map((step) => (
