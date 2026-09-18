@@ -17,3 +17,9 @@
 .orderActions { display: inline-flex; flex: 0 0 auto; gap: 0.1rem; }
 .orderActions .actionButton { width: 1.7rem; }
 .smallButton { padding: 0.45rem var(--space-3); font-size: var(--font-size-sm); }
+
+@media (max-width: 30rem) {
+  .stepsDraft li { flex-wrap: wrap; }
+  .stepsDraft li > :nth-child(2) { flex-basis: calc(100% - 2rem); }
+  .orderActions { margin-left: auto; }
+}

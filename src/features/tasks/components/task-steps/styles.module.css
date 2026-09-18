@@ -97,3 +97,18 @@
   padding: 0.45rem var(--space-3);
   font-size: var(--font-size-sm);
 }
+
+@media (max-width: 30rem) {
+  .step {
+    flex-wrap: wrap;
+  }
+
+  .stepTitle,
+  .editTitle {
+    flex: 1 1 calc(100% - 2rem);
+  }
+
+  .orderActions {
+    margin-left: auto;
+  }
+}

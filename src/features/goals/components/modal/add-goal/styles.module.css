@@ -11,3 +11,8 @@
 .actionButton { display: inline-grid; flex: 0 0 auto; width: 2rem; height: 2rem; place-items: center; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--color-text-muted); cursor: pointer; }
 .actionButton:hover, .actionButton:focus-visible { background: var(--color-highlight-soft); color: var(--color-highlight); }
 .smallButton { padding: 0.45rem var(--space-3); font-size: var(--font-size-sm); }
+
+@media (max-width: 30rem) {
+  .stepsDraft li { flex-wrap: wrap; }
+  .stepsDraft li > :nth-child(2) { flex-basis: calc(100% - 2rem); }
+}
