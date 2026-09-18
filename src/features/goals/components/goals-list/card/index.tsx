@@ -44,23 +44,30 @@ export function Card({ goal, connections }: CardProps) {
         // carregados, sem esperar o `router.refresh()` pra saber se
         // acabou de bater 100%.
         const stepsAfterToggle = goal.steps.map((step) =>
-          step.id === stepId ? { ...step, completed } : step
+          step.id === stepId ? { ...step, completed } : step,
         );
         const wasComplete = goal.progressPercent >= 100;
         const wasGoalCompleted = goal.completionOverride ?? wasComplete;
         const isNowComplete = calculateGoalProgress(stepsAfterToggle) >= 100;
-        if (isNowComplete && !wasGoalCompleted) emitMascotEvent("goal-completed");
-        const steps = goal.steps.map((step) => step.id === stepId ? { ...step, completed } : step);
+        if (isNowComplete && !wasGoalCompleted)
+          emitMascotEvent("goal-completed");
+        const steps = goal.steps.map((step) =>
+          step.id === stepId ? { ...step, completed } : step,
+        );
         replaceGoal({
           ...goal,
           steps,
           progressPercent: calculateGoalProgress(steps),
-          ...(isNowComplete ? { completionOverride: null, completedAt: null } : {}),
+          ...(isNowComplete
+            ? { completionOverride: null, completedAt: null }
+            : {}),
         });
       } else {
         emitMascotEvent("action-error");
       }
-    } finally { setBusyStepId(null); }
+    } finally {
+      setBusyStepId(null);
+    }
   }
 
   async function handleRemoveGoal() {
@@ -81,7 +88,10 @@ export function Card({ goal, connections }: CardProps) {
   async function handleToggleManualCompletion() {
     setIsTogglingCompletion(true);
     try {
-      const result = await setGoalCompletionAction({ id: goal.id, completed: !isCompleted });
+      const result = await setGoalCompletionAction({
+        id: goal.id,
+        completed: !isCompleted,
+      });
       if (!result.error) {
         if (!isCompleted) emitMascotEvent("goal-completed");
         replaceGoal({
@@ -97,7 +107,8 @@ export function Card({ goal, connections }: CardProps) {
     }
   }
 
-  const isCompletedBySteps = goal.steps.length > 0 && goal.progressPercent === 100;
+  const isCompletedBySteps =
+    goal.steps.length > 0 && goal.progressPercent === 100;
   const isCompleted = goal.completionOverride ?? isCompletedBySteps;
 
   return (
@@ -120,12 +131,16 @@ export function Card({ goal, connections }: CardProps) {
           </div>
 
           <div className={styles.meta}>
-            <span className={`${styles.priorityBadge} ${styles[`priority${capitalize(goal.priority)}`]}`}>
+            <span
+              className={`${styles.priorityBadge} ${styles[`priority${capitalize(goal.priority)}`]}`}
+            >
               {PRIORITY_LABELS[goal.priority]}
             </span>
 
             {goal.deadline && (
-              <span className={styles.deadline}>Prazo: {formatDeadline(goal.deadline)}</span>
+              <span className={styles.deadline}>
+                Prazo: {formatDeadline(goal.deadline)}
+              </span>
             )}
 
             {isCompleted && (
@@ -150,30 +165,31 @@ export function Card({ goal, connections }: CardProps) {
           )}
         </div>
       </div>
-
       <SharedBadge
         isSharedWithMe={goal.isSharedWithMe}
         ownerLabel={goal.ownerLabel}
         isShared={!!goal.sharedWithUserId}
         className={styles.sharedBadge}
       />
-
-      {goal.description && <p className={styles.description}>{goal.description}</p>}
-
+      {goal.description && (
+        <p className={styles.description}>{goal.description}</p>
+      )}
       <div className={styles.progressRow}>
         <div className={styles.progressTrack}>
-          <div className={styles.progressFill} style={{ width: `${goal.progressPercent}%` }} />
+          <div
+            className={styles.progressFill}
+            style={{ width: `${goal.progressPercent}%` }}
+          />
         </div>
         <span className={styles.progressLabel}>{goal.progressPercent}%</span>
       </div>
-
       {goal.steps.length > 0 ? (
         <p className={styles.progressHint} aria-live="polite">
           {isCompletedBySteps
             ? "Objetivo concluído: todos os passos foram marcados."
             : isCompleted
               ? "Objetivo marcado como concluído."
-            : `${goal.steps.filter((step) => step.completed).length} de ${goal.steps.length} passos concluídos. Marque todos para concluir o objetivo.`}
+              : `${goal.steps.filter((step) => step.completed).length} de ${goal.steps.length} passos concluídos. Marque todos para concluir o objetivo.`}
         </p>
       ) : (
         <p className={styles.progressHint}>
@@ -182,7 +198,6 @@ export function Card({ goal, connections }: CardProps) {
             : "Sem passos. Marque a caixa ao lado do título quando concluir."}
         </p>
       )}
-
       {goal.steps.length > 0 && (
         <ul className={styles.steps}>
           {goal.steps.map((step) => (
@@ -191,10 +206,14 @@ export function Card({ goal, connections }: CardProps) {
                 type="checkbox"
                 checked={step.completed}
                 disabled={busyStepId === step.id}
-                onChange={(event) => handleToggleStep(step.id, event.target.checked)}
+                onChange={(event) =>
+                  handleToggleStep(step.id, event.target.checked)
+                }
                 aria-label={step.title}
               />
-              <span className={`${styles.stepTitle} ${step.completed ? styles.stepTitleDone : ""}`}>
+              <span
+                className={`${styles.stepTitle} ${step.completed ? styles.stepTitleDone : ""}`}
+              >
                 {step.title}
               </span>
             </li>
