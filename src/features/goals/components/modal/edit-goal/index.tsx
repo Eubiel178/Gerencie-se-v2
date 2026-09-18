@@ -225,7 +225,7 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
 
               <Input.Root>
                 <Input.Label>Adicionar passos</Input.Label>
-                {totalSteps > 0 && <p className={styles.stepsHint}>{completedSteps} de {totalSteps} passos concluídos.</p>}
+                {totalSteps > 0 && <p className={styles.stepsHint} aria-live="polite">{completedSteps} de {totalSteps} passos concluídos.</p>}
                 <div className={styles.stepsAddRow}>
                   <Input.Wrapper>
                     <Input.Field value={stepTitle} onChange={(event) => setStepTitle(event.target.value)} placeholder="Ex.: Pesquisar opções" />

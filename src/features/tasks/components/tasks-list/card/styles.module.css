@@ -348,6 +348,20 @@
   color: var(--color-highlight);
   font-size: var(--font-size-xs);
 }
+.completedBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  width: fit-content;
+  margin: 0;
+  padding: 0.2rem var(--space-2);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-success) 14%, transparent);
+  color: var(--color-success);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+}
 .pausedBadge {
   display: inline-flex;
   align-items: center;

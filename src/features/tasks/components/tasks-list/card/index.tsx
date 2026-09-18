@@ -226,6 +226,11 @@ export function Card({
 
       <div className={styles.cardBody}>
         <div className={styles.cardTop}>
+          {task.completed && (
+            <span className={styles.completedBadge}>
+              <Icon name="FaCheck" aria-hidden="true" size={10} /> Concluída
+            </span>
+          )}
           {workStatus === "in_progress" && !task.completed && (
             <span className={styles.startedBadge}>
               <Icon name="FaPlay" aria-hidden="true" size={10} />
@@ -275,7 +280,7 @@ export function Card({
 
           {task.steps.length > 0 && (
             <div className={styles.stepsProgress}>
-              <p className={styles.stepsSummary}>
+              <p className={styles.stepsSummary} aria-live="polite">
                 <Icon name="FaListUl" aria-hidden="true" size={11} />
                 {task.steps.filter((step) => step.completed).length} de {task.steps.length} passos concluídos
               </p>

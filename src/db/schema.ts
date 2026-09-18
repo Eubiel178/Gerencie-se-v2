@@ -423,6 +423,7 @@ export const goals = pgTable("goal", {
     .notNull()
     .default("media"),
   archived: boolean("archived").notNull().default(false),
+  completedAt: timestamp("completed_at", { mode: "date" }),
   createdAt: timestamp("created_at", { mode: "date" })
     .notNull()
     .$defaultFn(() => new Date()),

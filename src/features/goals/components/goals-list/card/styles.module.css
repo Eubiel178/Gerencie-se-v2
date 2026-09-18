@@ -120,6 +120,13 @@
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
 }
+.completionAction {
+  display: flex;
+  justify-content: flex-start;
+}
+.completionAction button {
+  width: auto;
+}
 .steps {
   display: flex;
   flex-direction: column;

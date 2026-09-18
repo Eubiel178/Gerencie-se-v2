@@ -12,6 +12,8 @@ export interface IGoal {
   deadline?: string | null; // "YYYY-MM-DD"
   priority: GoalPriority;
   archived: boolean;
+  /** Preenchido apenas quando um objetivo sem passos é concluído manualmente. */
+  completedAt?: Date | null;
   createdAt: Date;
 
   // Etapas do objetivo, sempre carregadas junto (ver `LocalGoal.loadAll`) —

@@ -62,6 +62,18 @@ export async function deleteGoalAction(
   }
 }
 
+export async function toggleGoalCompletionAction(
+  params: domain.ToggleGoalCompletion.Params
+): Promise<ActionResult & Partial<domain.ToggleGoalCompletion.Result>> {
+  try {
+    const result = await getGoalFetcher().toggleCompletion(params);
+    revalidatePath("/home/goals");
+    return { error: null, ...result };
+  } catch {
+    return { error: "Não foi possível atualizar a conclusão do objetivo. Tente novamente." };
+  }
+}
+
 export async function createGoalStepAction(
   data: domain.CreateGoalStep.Params
 ): Promise<ActionResult & { id?: string }> {

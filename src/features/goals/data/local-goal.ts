@@ -31,7 +31,8 @@ export class LocalGoal
     domain.CreateGoalStep,
     domain.UpdateGoalStep,
     domain.DeleteGoalStep,
-    domain.ReorderGoalSteps
+    domain.ReorderGoalSteps,
+    domain.ToggleGoalCompletion
 {
   async create(params: domain.CreateGoal.Params) {
     const userId = await requireUserId();
@@ -62,6 +63,7 @@ export class LocalGoal
         deadline: params.deadline || null,
         priority: params.priority,
         archived: false,
+        completedAt: null,
         createdAt,
         steps: [],
         progressPercent: 0,
@@ -144,6 +146,21 @@ export class LocalGoal
     await db
       .delete(goals)
       .where(and(eq(goals.id, params.id), eq(goals.userId, userId)));
+  }
+
+  async toggleCompletion(params: domain.ToggleGoalCompletion.Params) {
+    const userId = await requireUserId();
+    const [goal] = await db
+      .select({ completedAt: goals.completedAt })
+      .from(goals)
+      .where(and(eq(goals.id, params.id), or(eq(goals.userId, userId), eq(goals.sharedWithUserId, userId))))
+      .limit(1);
+
+    if (!goal) throw new Error("Objetivo não encontrado.");
+
+    const completedAt = goal.completedAt ? null : new Date();
+    await db.update(goals).set({ completedAt }).where(eq(goals.id, params.id));
+    return { completed: completedAt !== null, completedAt };
   }
 
   async createStep(params: domain.CreateGoalStep.Params) {
@@ -284,6 +301,7 @@ function mapRowToGoal(
     deadline: row.deadline,
     priority: row.priority,
     archived: row.archived,
+    completedAt: row.completedAt,
     createdAt: row.createdAt,
     steps,
     progressPercent,

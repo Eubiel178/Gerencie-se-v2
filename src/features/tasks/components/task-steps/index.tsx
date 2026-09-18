@@ -97,7 +97,7 @@ export function TaskSteps({ steps, onDraftChange }: TaskStepsProps) {
 
   return (
     <div className={styles.wrapper}>
-      {totalSteps > 0 && <p className={styles.hint}>{completedSteps} de {totalSteps} passos concluídos.</p>}
+      {totalSteps > 0 && <p className={styles.hint} aria-live="polite">{completedSteps} de {totalSteps} passos concluídos.</p>}
 
       {pendingSteps.length > 0 && (
         <ul className={`${styles.steps} ${styles.pendingSteps}`} aria-label="Novos passos a salvar">
