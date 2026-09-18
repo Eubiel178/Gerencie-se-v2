@@ -36,6 +36,7 @@ export class LocalGoal
   async create(params: domain.CreateGoal.Params) {
     const userId = await requireUserId();
     const id = crypto.randomUUID();
+    const createdAt = new Date();
 
     if (params.sharedWithUserId) {
       await assertAcceptedConnection(userId, params.sharedWithUserId);
@@ -49,9 +50,26 @@ export class LocalGoal
       deadline: params.deadline || null,
       priority: params.priority,
       sharedWithUserId: params.sharedWithUserId || null,
+      createdAt,
     });
 
-    return { id };
+    return {
+      goal: {
+        id,
+        userId,
+        title: params.title,
+        description: params.description,
+        deadline: params.deadline || null,
+        priority: params.priority,
+        archived: false,
+        createdAt,
+        steps: [],
+        progressPercent: 0,
+        sharedWithUserId: params.sharedWithUserId || null,
+        isSharedWithMe: false,
+        ownerLabel: null,
+      },
+    };
   }
 
   async loadAll(): Promise<domain.LoadAllGoals.Model> {

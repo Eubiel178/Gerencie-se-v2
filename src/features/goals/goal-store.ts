@@ -7,6 +7,7 @@ import type { IGoal } from "./domain";
 interface GoalStore {
   goals: IGoal[];
   setGoals: (goals: IGoal[]) => void;
+  addGoal: (goal: IGoal) => void;
   replaceGoal: (goal: IGoal) => void;
   removeGoal: (goalId: string) => void;
 }
@@ -17,6 +18,7 @@ interface GoalStore {
 export const useGoalStore = create<GoalStore>((set) => ({
   goals: [],
   setGoals: (goals) => set({ goals }),
+  addGoal: (goal) => set((state) => ({ goals: [goal, ...state.goals] })),
   replaceGoal: (goal) => set((state) => ({
     goals: state.goals.map((current) => current.id === goal.id ? goal : current),
   })),

@@ -10,6 +10,7 @@ import { Icon } from "@/components/icon";
 import modalStyles from "@/components/modal/styles.module.css";
 
 import { createGoalAction, createGoalStepAction } from "@/features/goals/actions";
+import { useGoalStore } from "@/features/goals/goal-store";
 import { ShareSelect } from "@/features/connections/components/share-select";
 import { useFormModal } from "@/hooks/use-form-modal";
 
@@ -24,6 +25,7 @@ const DEADLINE_SHORTCUTS = [
 ];
 
 export function AddGoal({ buttonText, connections }: IAddGoalProps) {
+  const addGoal = useGoalStore((state) => state.addGoal);
   const [stepTitle, setStepTitle] = useState("");
   const [stepTitles, setStepTitles] = useState<string[]>([]);
   const {
@@ -36,7 +38,7 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
     closeModal,
     submitError,
     handleFormSubmit,
-  } = useFormModal<FormData>({
+  } = useFormModal<FormData, Awaited<ReturnType<typeof createGoalAction>>>({
     schema: validationSchema,
     defaultValues: {
       title: "",
@@ -53,13 +55,29 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
         priority: data.priority,
         sharedWithUserId: data.sharedWithUserId,
       });
-      if (result.error || !result.id) return result;
-      for (const title of stepTitles) {
-        const stepResult = await createGoalStepAction({ goalId: result.id, title });
+      if (result.error || !result.goal) return result;
+      const createdGoal = result.goal;
+      const titles = stepTitles;
+      const createdStepIds: string[] = [];
+      for (const title of titles) {
+        const stepResult = await createGoalStepAction({ goalId: createdGoal.id, title });
         if (stepResult.error) return stepResult;
+        if (stepResult.id) createdStepIds.push(stepResult.id);
       }
       setStepTitles([]);
-      return result;
+      return {
+        ...result,
+        goal: {
+          ...createdGoal,
+          steps: titles.flatMap((title, index) => {
+            const id = createdStepIds[index];
+            return id ? [{ id, goalId: createdGoal.id, title, completed: false, order: index }] : [];
+          }),
+        },
+      };
+    },
+    onSuccess: (result) => {
+      if (result.goal) addGoal(result.goal);
     },
   });
 
