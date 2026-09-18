@@ -10,7 +10,13 @@ import { Alert, Form, Modal, ModalHeader, Input, Button, ChipGroup, CollapsibleS
 import { Icon } from "@/components/icon";
 import modalStyles from "@/components/modal/styles.module.css";
 
-import { createTaskStepsAction, updateTaskAction } from "@/features/tasks/actions";
+import {
+  createTaskStepsAction,
+  deleteTaskStepAction,
+  reorderTaskStepsAction,
+  updateTaskAction,
+  updateTaskStepAction,
+} from "@/features/tasks/actions";
 import { isVagueTaskTitle } from "@/features/tasks/is-vague-title";
 import { useTaskStore } from "@/features/tasks/task-store";
 
@@ -21,14 +27,17 @@ import { useFormModal } from "@/hooks/use-form-modal";
 import { SyncWithGoogle } from "../sync-with-google";
 import { ReminderFields } from "../reminder-fields";
 import { AttachmentsField } from "../../attachments-field";
-import { TaskSteps } from "../../task-steps";
+import { TaskSteps, TaskStepsDraft } from "../../task-steps";
 import { FormData, IEditTaskProps, PRIORITY_OPTIONS } from "../interfaces";
 
 import styles from "./styles.module.css";
 
 export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IEditTaskProps) {
   const formTags = useFormTags();
-  const pendingStepTitles = useRef<string[]>([]);
+  const stepsDraft = useRef<TaskStepsDraft>({
+    existingSteps: taskBeingEdited.steps,
+    newStepTitles: [],
+  });
   const replaceTask = useTaskStore((state) => state.replaceTask);
 
   const {
@@ -58,14 +67,42 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
       const taskResult = await updateTaskAction({ ...data, id: taskBeingEdited.id });
       if (taskResult.error) return taskResult;
 
-      const titles = pendingStepTitles.current;
+      const draft = stepsDraft.current;
+      const originalStepsById = new Map(taskBeingEdited.steps.map((step) => [step.id, step]));
+
+      for (const step of draft.existingSteps) {
+        const originalStep = originalStepsById.get(step.id);
+        if (!originalStep) continue;
+        if (originalStep.title !== step.title || originalStep.completed !== step.completed) {
+          const stepResult = await updateTaskStepAction({
+            id: step.id,
+            ...(originalStep.title !== step.title ? { title: step.title } : {}),
+            ...(originalStep.completed !== step.completed ? { completed: step.completed } : {}),
+          });
+          if (stepResult.error) return stepResult;
+        }
+      }
+
+      const draftStepIds = new Set(draft.existingSteps.map((step) => step.id));
+      for (const step of taskBeingEdited.steps) {
+        if (!draftStepIds.has(step.id)) {
+          const stepResult = await deleteTaskStepAction({ id: step.id });
+          if (stepResult.error) return stepResult;
+        }
+      }
+
+      const titles = draft.newStepTitles;
       const stepResult = await createTaskStepsAction({
         taskId: taskBeingEdited.id,
         titles,
       });
       if (stepResult.error) return stepResult;
 
-      pendingStepTitles.current = [];
+      const orderedStepIds = [...draft.existingSteps.map((step) => step.id), ...(stepResult.ids ?? [])];
+      if (orderedStepIds.length > 0) {
+        const reorderResult = await reorderTaskStepsAction({ taskId: taskBeingEdited.id, orderedStepIds });
+        if (reorderResult.error) return reorderResult;
+      }
 
       const currentTask = useTaskStore.getState().tasks.find((task) => task.id === taskBeingEdited.id) ?? taskBeingEdited;
       replaceTask({
@@ -74,10 +111,10 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
         scheduledAt: data.scheduledAt || undefined,
         sharedWithUserId: data.sharedWithUserId || null,
         steps: [
-          ...currentTask.steps,
+          ...draft.existingSteps.map((step, order) => ({ ...step, order })),
           ...titles.flatMap((title, index) => {
             const id = stepResult.ids?.[index];
-            return id ? [{ id, taskId: taskBeingEdited.id, title, completed: false, order: currentTask.steps.length + index }] : [];
+            return id ? [{ id, taskId: taskBeingEdited.id, title, completed: false, order: draft.existingSteps.length + index }] : [];
           }),
         ],
       });
@@ -182,10 +219,9 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
                   <Icon name="FaListUl" size={12} /> Passos
                 </Input.Label>
                 <TaskSteps
-                  taskId={taskBeingEdited.id}
                   steps={taskBeingEdited.steps}
-                  onPendingStepsChange={(titles) => {
-                    pendingStepTitles.current = titles;
+                  onDraftChange={(draft) => {
+                    stepsDraft.current = draft;
                   }}
                 />
               </Input.Root>
