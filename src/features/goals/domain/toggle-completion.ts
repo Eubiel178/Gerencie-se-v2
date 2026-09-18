@@ -1,8 +1,8 @@
-export type ToggleGoalCompletion = {
-  toggleCompletion: (params: ToggleGoalCompletion.Params) => Promise<ToggleGoalCompletion.Result>;
+export type SetGoalCompletion = {
+  setCompletion: (params: SetGoalCompletion.Params) => Promise<SetGoalCompletion.Result>;
 };
 
-export namespace ToggleGoalCompletion {
-  export type Params = { id: string };
-  export type Result = { completed: boolean; completedAt: Date | null };
+export namespace SetGoalCompletion {
+  export type Params = { id: string; completed: boolean };
+  export type Result = { completedAt: Date | null; completionOverride: boolean };
 }

@@ -32,7 +32,7 @@ export class LocalGoal
     domain.UpdateGoalStep,
     domain.DeleteGoalStep,
     domain.ReorderGoalSteps,
-    domain.ToggleGoalCompletion
+    domain.SetGoalCompletion
 {
   async create(params: domain.CreateGoal.Params) {
     const userId = await requireUserId();
@@ -64,6 +64,7 @@ export class LocalGoal
         priority: params.priority,
         archived: false,
         completedAt: null,
+        completionOverride: null,
         createdAt,
         steps: [],
         progressPercent: 0,
@@ -148,19 +149,22 @@ export class LocalGoal
       .where(and(eq(goals.id, params.id), eq(goals.userId, userId)));
   }
 
-  async toggleCompletion(params: domain.ToggleGoalCompletion.Params) {
+  async setCompletion(params: domain.SetGoalCompletion.Params) {
     const userId = await requireUserId();
     const [goal] = await db
-      .select({ completedAt: goals.completedAt })
+      .select({ id: goals.id })
       .from(goals)
       .where(and(eq(goals.id, params.id), or(eq(goals.userId, userId), eq(goals.sharedWithUserId, userId))))
       .limit(1);
 
     if (!goal) throw new Error("Objetivo não encontrado.");
 
-    const completedAt = goal.completedAt ? null : new Date();
-    await db.update(goals).set({ completedAt }).where(eq(goals.id, params.id));
-    return { completed: completedAt !== null, completedAt };
+    const completedAt = params.completed ? new Date() : null;
+    await db
+      .update(goals)
+      .set({ completedAt, completionOverride: params.completed })
+      .where(eq(goals.id, params.id));
+    return { completedAt, completionOverride: params.completed };
   }
 
   async createStep(params: domain.CreateGoalStep.Params) {
@@ -212,6 +216,29 @@ export class LocalGoal
     if (Object.keys(update).length === 0) return;
 
     await db.update(goalSteps).set(update).where(eq(goalSteps.id, params.id));
+
+    // Concluir todas as etapas volta a deixar o estado do objetivo ser
+    // automático, inclusive se ele tinha sido reaberto manualmente antes.
+    if (params.completed === true) {
+      const [step] = await db
+        .select({ goalId: goalSteps.goalId })
+        .from(goalSteps)
+        .where(eq(goalSteps.id, params.id))
+        .limit(1);
+      if (step) {
+        const [pendingStep] = await db
+          .select({ id: goalSteps.id })
+          .from(goalSteps)
+          .where(and(eq(goalSteps.goalId, step.goalId), eq(goalSteps.completed, false)))
+          .limit(1);
+        if (!pendingStep) {
+          await db
+            .update(goals)
+            .set({ completionOverride: null, completedAt: null })
+            .where(eq(goals.id, step.goalId));
+        }
+      }
+    }
   }
 
   async deleteStep(params: domain.DeleteGoalStep.Params) {
@@ -302,6 +329,7 @@ function mapRowToGoal(
     priority: row.priority,
     archived: row.archived,
     completedAt: row.completedAt,
+    completionOverride: row.completionOverride,
     createdAt: row.createdAt,
     steps,
     progressPercent,

@@ -239,6 +239,13 @@
       "when": 1789739388733,
       "tag": "0033_third_screwball",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1789740014050,
+      "tag": "0034_strange_killmonger",
+      "breakpoints": true
     }
   ]
 }

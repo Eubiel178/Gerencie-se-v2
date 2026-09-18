@@ -8,7 +8,7 @@ import { SharedBadge } from "@/features/connections/components/shared-badge";
 
 import {
   deleteGoalAction,
-  toggleGoalCompletionAction,
+  setGoalCompletionAction,
   updateGoalStepAction,
 } from "@/features/goals/actions";
 import { EditGoal } from "../../modal";
@@ -50,7 +50,12 @@ export function Card({ goal, connections }: CardProps) {
         const isNowComplete = calculateGoalProgress(stepsAfterToggle) >= 100;
         if (isNowComplete && !wasComplete) emitMascotEvent("goal-completed");
         const steps = goal.steps.map((step) => step.id === stepId ? { ...step, completed } : step);
-        replaceGoal({ ...goal, steps, progressPercent: calculateGoalProgress(steps) });
+        replaceGoal({
+          ...goal,
+          steps,
+          progressPercent: calculateGoalProgress(steps),
+          ...(isNowComplete ? { completionOverride: null, completedAt: null } : {}),
+        });
       }
     } finally { setBusyStepId(null); }
   }
@@ -69,18 +74,21 @@ export function Card({ goal, connections }: CardProps) {
   async function handleToggleManualCompletion() {
     setIsTogglingCompletion(true);
     try {
-      const result = await toggleGoalCompletionAction({ id: goal.id });
+      const result = await setGoalCompletionAction({ id: goal.id, completed: !isCompleted });
       if (!result.error) {
-        replaceGoal({ ...goal, completedAt: result.completedAt ?? null });
+        replaceGoal({
+          ...goal,
+          completedAt: result.completedAt ?? null,
+          completionOverride: result.completionOverride ?? null,
+        });
       }
     } finally {
       setIsTogglingCompletion(false);
     }
   }
 
-  const isManuallyCompleted = goal.completedAt !== null && goal.completedAt !== undefined;
   const isCompletedBySteps = goal.steps.length > 0 && goal.progressPercent === 100;
-  const isCompleted = isManuallyCompleted || isCompletedBySteps;
+  const isCompleted = goal.completionOverride ?? isCompletedBySteps;
 
   return (
     <li className={styles.card} data-priority={goal.priority}>
@@ -157,7 +165,7 @@ export function Card({ goal, connections }: CardProps) {
         </p>
       ) : (
         <p className={styles.progressHint}>
-          {isManuallyCompleted
+          {isCompleted
             ? "Objetivo concluído."
             : "Sem passos. Marque o círculo ao lado do título quando concluir."}
         </p>

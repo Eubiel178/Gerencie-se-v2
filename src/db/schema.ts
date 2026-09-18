@@ -424,6 +424,7 @@ export const goals = pgTable("goal", {
     .default("media"),
   archived: boolean("archived").notNull().default(false),
   completedAt: timestamp("completed_at", { mode: "date" }),
+  completionOverride: boolean("completion_override"),
   createdAt: timestamp("created_at", { mode: "date" })
     .notNull()
     .$defaultFn(() => new Date()),

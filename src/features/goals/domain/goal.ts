@@ -14,6 +14,8 @@ export interface IGoal {
   archived: boolean;
   /** Preenchido apenas quando um objetivo sem passos é concluído manualmente. */
   completedAt?: Date | null;
+  /** `null` segue os passos; `true`/`false` é uma decisão manual da pessoa. */
+  completionOverride?: boolean | null;
   createdAt: Date;
 
   // Etapas do objetivo, sempre carregadas junto (ver `LocalGoal.loadAll`) —

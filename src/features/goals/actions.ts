@@ -62,11 +62,11 @@ export async function deleteGoalAction(
   }
 }
 
-export async function toggleGoalCompletionAction(
-  params: domain.ToggleGoalCompletion.Params
-): Promise<ActionResult & Partial<domain.ToggleGoalCompletion.Result>> {
+export async function setGoalCompletionAction(
+  params: domain.SetGoalCompletion.Params
+): Promise<ActionResult & Partial<domain.SetGoalCompletion.Result>> {
   try {
-    const result = await getGoalFetcher().toggleCompletion(params);
+    const result = await getGoalFetcher().setCompletion(params);
     revalidatePath("/home/goals");
     return { error: null, ...result };
   } catch {
