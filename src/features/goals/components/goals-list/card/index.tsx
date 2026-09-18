@@ -2,15 +2,11 @@
 
 import { useState } from "react";
 
-import { Button, ConfirmIconButton, Input } from "@/components";
-import { Icon } from "@/components/icon";
+import { ConfirmIconButton } from "@/components";
 import { SharedBadge } from "@/features/connections/components/shared-badge";
 
 import {
-  createGoalStepAction,
   deleteGoalAction,
-  deleteGoalStepAction,
-  reorderGoalStepsAction,
   updateGoalStepAction,
 } from "@/features/goals/actions";
 import { EditGoal } from "../../modal";
@@ -20,7 +16,6 @@ import { IGoal, calculateGoalProgress } from "@/features/goals/domain";
 import { LoadAcceptedConnections } from "@/features/connections/domain";
 
 import { emitMascotEvent } from "@/features/mascot-pet";
-import { useStepChecklist } from "@/hooks/use-step-checklist";
 import { useGoalStore } from "@/features/goals/goal-store";
 
 import styles from "./styles.module.css";
@@ -32,43 +27,15 @@ interface CardProps {
 
 export function Card({ goal, connections }: CardProps) {
   const [isRemoving, setIsRemoving] = useState(false);
-  const [isReordering, setIsReordering] = useState(false);
-  const [editingStepId, setEditingStepId] = useState<string | null>(null);
-  const [editingStepTitle, setEditingStepTitle] = useState("");
+  const [busyStepId, setBusyStepId] = useState<string | null>(null);
   const replaceGoal = useGoalStore((state) => state.replaceGoal);
   const removeGoal = useGoalStore((state) => state.removeGoal);
 
-  const {
-    newTitle: newStepTitle,
-    setNewTitle: setNewStepTitle,
-    isAdding: isAddingStep,
-    busyStepId,
-    handleAddStep: submitNewStep,
-    handleToggleStep,
-    handleRemoveStep,
-  } = useStepChecklist({
-    addStep: (title) => createGoalStepAction({ goalId: goal.id, title }),
-    removeStep: (id) => deleteGoalStepAction({ id }),
-    refreshAfterAction: false,
-    onAdded: (title, id) => {
-      if (!id) return;
-      const steps = [...goal.steps, { id, goalId: goal.id, title, completed: false, order: goal.steps.length }];
-      replaceGoal({ ...goal, steps, progressPercent: calculateGoalProgress(steps) });
-    },
-    onRemoved: (id) => {
-      const steps = goal.steps.filter((step) => step.id !== id);
-      replaceGoal({ ...goal, steps, progressPercent: calculateGoalProgress(steps) });
-    },
-    onToggled: (stepId, completed) => {
-      const steps = goal.steps.map((step) => step.id === stepId ? { ...step, completed } : step);
-      replaceGoal({ ...goal, steps, progressPercent: calculateGoalProgress(steps) });
-    },
-    toggleStep: async (stepId, completed) => {
+  async function handleToggleStep(stepId: string, completed: boolean) {
+    setBusyStepId(stepId);
+    try {
       const result = await updateGoalStepAction({ id: stepId, completed });
-
-      if (result.error) {
-        emitMascotEvent("action-error");
-      } else {
+      if (!result.error) {
         // Progresso é sempre calculado (nunca guardado - ver progress.ts),
         // então prevemos aqui o valor pós-toggle com os mesmos dados já
         // carregados, sem esperar o `router.refresh()` pra saber se
@@ -79,11 +46,11 @@ export function Card({ goal, connections }: CardProps) {
         const wasComplete = goal.progressPercent >= 100;
         const isNowComplete = calculateGoalProgress(stepsAfterToggle) >= 100;
         if (isNowComplete && !wasComplete) emitMascotEvent("goal-completed");
+        const steps = goal.steps.map((step) => step.id === stepId ? { ...step, completed } : step);
+        replaceGoal({ ...goal, steps, progressPercent: calculateGoalProgress(steps) });
       }
-
-      return result;
-    },
-  });
+    } finally { setBusyStepId(null); }
+  }
 
   async function handleRemoveGoal() {
     setIsRemoving(true);
@@ -96,7 +63,7 @@ export function Card({ goal, connections }: CardProps) {
     }
   }
 
-  async function handleMoveStep(stepId: string, direction: -1 | 1) {
+  /*async function handleMoveStep(stepId: string, direction: -1 | 1) {
     if (isReordering) return;
 
     const currentIndex = goal.steps.findIndex((step) => step.id === stepId);
@@ -118,9 +85,9 @@ export function Card({ goal, connections }: CardProps) {
     } finally {
       setIsReordering(false);
     }
-  }
+  }*/
 
-  async function handleSaveStepTitle(stepId: string) {
+  /*async function handleSaveStepTitle(stepId: string) {
     const title = editingStepTitle.trim();
     if (!title) return;
 
@@ -131,15 +98,15 @@ export function Card({ goal, connections }: CardProps) {
       const steps = goal.steps.map((step) => step.id === stepId ? { ...step, title } : step);
       replaceGoal({ ...goal, steps });
     }
-  }
+  }*/
 
   // `useStepChecklist.handleAddStep` não recebe evento - o form daqui
   // (diferente do de `TaskSteps`, que não é um <form> de verdade) precisa
   // impedir o recarregamento padrão do navegador antes de chamar ele.
-  function handleAddStep(event: React.FormEvent) {
+  /*function handleAddStep(event: React.FormEvent) {
     event.preventDefault();
     submitNewStep();
-  }
+  }*/
 
   return (
     <li className={styles.card} data-priority={goal.priority}>
