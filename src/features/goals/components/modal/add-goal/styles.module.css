@@ -1,23 +1,11 @@
 .titleField{border:none;border-bottom:2px solid var(--color-border);border-radius:0;padding:var(--space-2) 0;background:transparent;font-size:var(--font-size-lg);font-weight:600}
 .titleField:hover:not(:disabled,:focus-visible){border-bottom-color:color-mix(in srgb,var(--color-highlight) 40%,var(--color-border))}
 .titleField:focus-visible{border-bottom-color:var(--color-highlight);outline:none;box-shadow:none}
-.stepsAddRow {
-  display: flex;
-  gap: var(--space-2);
-}
+.stepsAddRow { display: flex; gap: var(--space-2); }
 .stepsAddRow > :first-child { flex: 1; }
-.stepsDraft {
-  display: grid;
-  gap: var(--space-1);
-  margin: var(--space-2) 0 0;
-  padding: 0;
-  list-style: none;
-}
-.stepsDraft li {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--space-2);
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-}
+.stepsDraft { display: flex; flex-direction: column; gap: var(--space-2); margin: var(--space-2) 0 0; padding: 0; list-style: none; }
+.stepsDraft li { display: flex; align-items: center; gap: var(--space-2); color: var(--color-text); font-size: var(--font-size-sm); }
+.stepsDraft li > :nth-child(2) { flex: 1; }
 .stepsDraft button { color: var(--color-highlight); }
+.pendingMarker { display: inline-grid; width: 1.25rem; height: 1.25rem; place-items: center; border-radius: 50%; background: var(--color-highlight-soft); color: var(--color-highlight); font-weight: 700; }
+.smallButton { padding: 0.45rem var(--space-3); font-size: var(--font-size-sm); }

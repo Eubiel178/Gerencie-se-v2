@@ -202,7 +202,7 @@ export function Card({ goal, connections }: CardProps) {
 
       {goal.steps.length > 0 && (
         <ul className={styles.steps}>
-          {goal.steps.map((step, index) => (
+          {goal.steps.map((step) => (
             <li key={step.id} className={styles.step}>
               <input
                 type="checkbox"
@@ -211,78 +211,13 @@ export function Card({ goal, connections }: CardProps) {
                 onChange={(event) => handleToggleStep(step.id, event.target.checked)}
                 aria-label={step.title}
               />
-              {editingStepId === step.id ? (
-                <input
-                  className={styles.editTitle}
-                  aria-label={`Editar etapa ${step.title}`}
-                  value={editingStepTitle}
-                  onChange={(event) => setEditingStepTitle(event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") {
-                      event.preventDefault();
-                      handleSaveStepTitle(step.id);
-                    }
-                    if (event.key === "Escape") setEditingStepId(null);
-                  }}
-                  autoFocus
-                />
-              ) : (
-                <span className={`${styles.stepTitle} ${step.completed ? styles.stepTitleDone : ""}`}>
-                  {step.title}
-                </span>
-              )}
-              {editingStepId === step.id ? (
-                <>
-                  <button type="button" className={styles.orderButton} onClick={() => handleSaveStepTitle(step.id)} aria-label={`Salvar etapa ${step.title}`}>
-                    <Icon name="FaCheck" aria-hidden="true" />
-                  </button>
-                  <button type="button" className={styles.orderButton} onClick={() => setEditingStepId(null)} aria-label="Cancelar edição">
-                    <Icon name="FaTimes" aria-hidden="true" />
-                  </button>
-                </>
-              ) : (
-                <button type="button" className={styles.orderButton} onClick={() => { setEditingStepId(step.id); setEditingStepTitle(step.title); }} aria-label={`Editar etapa ${step.title}`}>
-                  <Icon name="FaEdit" aria-hidden="true" />
-                </button>
-              )}
-              <div className={styles.orderActions} aria-label={`Reordenar ${step.title}`}>
-                <button type="button" className={styles.orderButton} onClick={() => handleMoveStep(step.id, -1)} disabled={index === 0 || isReordering} aria-label={`Mover ${step.title} para cima`}>
-                  <Icon name="FaChevronUp" aria-hidden="true" />
-                </button>
-                <button type="button" className={styles.orderButton} onClick={() => handleMoveStep(step.id, 1)} disabled={index === goal.steps.length - 1 || isReordering} aria-label={`Mover ${step.title} para baixo`}>
-                  <Icon name="FaChevronDown" aria-hidden="true" />
-                </button>
-              </div>
-              <ConfirmIconButton
-                icon="FaTrash"
-                ariaLabel={`Remover etapa ${step.title}`}
-                confirmText={`Remover a etapa "${step.title}"?`}
-                className={styles.smallButton}
-                loading={busyStepId === step.id}
-                onConfirm={() => handleRemoveStep(step.id)}
-              />
+              <span className={`${styles.stepTitle} ${step.completed ? styles.stepTitleDone : ""}`}>
+                {step.title}
+              </span>
             </li>
           ))}
         </ul>
       )}
-
-      <form className={styles.addStepForm} onSubmit={handleAddStep}>
-        <Input.Field
-          aria-label="Título da nova etapa"
-          placeholder="Nova etapa..."
-          value={newStepTitle}
-          onChange={(event) => setNewStepTitle(event.target.value)}
-        />
-        <Button.Root
-          type="submit"
-          variant="secondary"
-          className={styles.smallButton}
-          aria-label="Adicionar etapa"
-          loading={isAddingStep}
-        >
-          <Button.Icon name="FaPlus" />
-        </Button.Root>
-      </form>
     </li>
   );
 }

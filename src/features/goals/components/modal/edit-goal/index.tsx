@@ -1,6 +1,7 @@
 "use client";
 
 import dayjs from "dayjs";
+import { useState } from "react";
 
 import { validationSchema } from "@/validation/goal-schema";
 
@@ -8,7 +9,7 @@ import { Alert, Form, Modal, ModalHeader, Input, Button, ChipGroup, SuggestionCh
 import { Icon } from "@/components/icon";
 import modalStyles from "@/components/modal/styles.module.css";
 
-import { updateGoalAction } from "@/features/goals/actions";
+import { createGoalStepAction, updateGoalAction } from "@/features/goals/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
 import { ShareReadOnlyNote } from "@/features/connections/components/share-readonly-note";
 import { useFormModal } from "@/hooks/use-form-modal";
@@ -24,6 +25,8 @@ const DEADLINE_SHORTCUTS = [
 ];
 
 export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
+  const [stepTitle, setStepTitle] = useState("");
+  const [newSteps, setNewSteps] = useState<string[]>([]);
   const {
     register,
     setValue,
@@ -43,15 +46,23 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
       priority: goalBeingEdited.priority,
       sharedWithUserId: goalBeingEdited.sharedWithUserId ?? "",
     },
-    onSubmit: (data) =>
-      updateGoalAction({
+    onSubmit: async (data) => {
+      const result = await updateGoalAction({
         id: goalBeingEdited.id,
         title: data.title,
         description: data.description,
         deadline: data.deadline || null,
         priority: data.priority,
         sharedWithUserId: data.sharedWithUserId,
-      }),
+      });
+      if (result.error) return result;
+      for (const title of newSteps) {
+        const stepResult = await createGoalStepAction({ goalId: goalBeingEdited.id, title });
+        if (stepResult.error) return stepResult;
+      }
+      setNewSteps([]);
+      return result;
+    },
   });
 
   const priority = watch("priority");
@@ -137,6 +148,20 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
                 />
 
                 <Input.HelperText />
+              </Input.Root>
+
+              <Input.Root>
+                <Input.Label>Adicionar passos</Input.Label>
+                <div className={styles.stepsAddRow}>
+                  <Input.Wrapper>
+                    <Input.Field value={stepTitle} onChange={(event) => setStepTitle(event.target.value)} placeholder="Ex.: Pesquisar opções" />
+                  </Input.Wrapper>
+                  <Button.Root type="button" variant="secondary" className={styles.smallButton} aria-label="Adicionar passo" onClick={() => {
+                    const title = stepTitle.trim();
+                    if (title) { setNewSteps((current) => [...current, title]); setStepTitle(""); }
+                  }}><Button.Icon name="FaPlus" /></Button.Root>
+                </div>
+                {newSteps.length > 0 && <ul className={styles.stepsDraft}>{newSteps.map((title, index) => <li key={`${title}-${index}`}><span className={styles.pendingMarker}>+</span><span>{title}</span><button type="button" onClick={() => setNewSteps((current) => current.filter((_, itemIndex) => itemIndex !== index))} aria-label={`Remover passo ${title}`}>×</button></li>)}</ul>}
               </Input.Root>
 
               <CollapsibleSection label="Mais opções">
