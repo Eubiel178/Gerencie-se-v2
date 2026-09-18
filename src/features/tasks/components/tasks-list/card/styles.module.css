@@ -358,14 +358,37 @@
   font-size: var(--font-size-xs);
 }
 .stepsProgress {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
   margin: 0;
   width: fit-content;
   font-family: var(--font-sans);
   color: var(--color-text-muted);
   font-size: var(--font-size-xs);
+}
+.stepsProgress summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  cursor: pointer;
+  list-style: none;
+}
+.stepsProgress summary::-webkit-details-marker { display: none; }
+.stepsPreview {
+  display: grid;
+  gap: 0.3rem;
+  margin: var(--space-2) 0 0;
+  padding: var(--space-2) 0 0;
+  list-style: none;
+  border-top: 1px solid var(--color-border);
+}
+.stepsPreview li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--color-text);
+}
+.stepsPreview li[data-completed="true"] {
+  color: var(--color-text-muted);
+  text-decoration: line-through;
 }
 .syncSection {
   display: flex;

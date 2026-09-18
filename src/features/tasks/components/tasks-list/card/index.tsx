@@ -256,11 +256,20 @@ export function Card({
           )}
 
           {task.steps.length > 0 && (
-            <p className={styles.stepsProgress}>
-              <Icon name="FaListUl" aria-hidden="true" size={11} />
-              {task.steps.filter((step) => step.completed).length}/
-              {task.steps.length} passos
-            </p>
+            <details className={styles.stepsProgress}>
+              <summary>
+                <Icon name="FaListUl" aria-hidden="true" size={11} />
+                {task.steps.filter((step) => step.completed).length}/{task.steps.length} passos
+              </summary>
+              <ul className={styles.stepsPreview} aria-label="Passos da tarefa">
+                {task.steps.map((step) => (
+                  <li key={step.id} data-completed={step.completed}>
+                    <Icon name={step.completed ? "FaCheck" : "FaRegCircle"} aria-hidden="true" size={10} />
+                    {step.title}
+                  </li>
+                ))}
+              </ul>
+            </details>
           )}
 
           <SharedBadge
