@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useWatch } from "react-hook-form";
 import { useFormTags } from "@/features/tasks/hooks/use-form-tags";
 
@@ -9,7 +10,7 @@ import { Alert, Form, Input, Modal, ModalHeader, Button, ChipGroup, CollapsibleS
 import { Icon } from "@/components/icon";
 import modalStyles from "@/components/modal/styles.module.css";
 
-import { createTaskAction } from "@/features/tasks/actions";
+import { createTaskAction, createTaskStepsAction } from "@/features/tasks/actions";
 import { isVagueTaskTitle } from "@/features/tasks/is-vague-title";
 import { useTaskStore } from "@/features/tasks/task-store";
 
@@ -25,6 +26,8 @@ import styles from "./styles.module.css";
 export function AddTask({ buttonText, isGoogleConnected, connections }: IAddTaskProps) {
   const formTags = useFormTags();
   const addTask = useTaskStore((state) => state.addTask);
+  const [stepTitle, setStepTitle] = useState("");
+  const [stepTitles, setStepTitles] = useState<string[]>([]);
 
   const {
     register,
@@ -49,7 +52,14 @@ export function AddTask({ buttonText, isGoogleConnected, connections }: IAddTask
       sharedWithUserId: "",
       syncEnabled: false,
     },
-    onSubmit: (data) => createTaskAction(data),
+    onSubmit: async (data) => {
+      const result = await createTaskAction(data);
+      if (result.error || !result.task) return result;
+      const stepsResult = await createTaskStepsAction({ taskId: result.task.id, titles: stepTitles });
+      if (stepsResult.error) return stepsResult;
+      setStepTitles([]);
+      return result;
+    },
     onSuccess: (result) => {
       if (result.task) addTask(result.task);
     },
@@ -138,6 +148,15 @@ export function AddTask({ buttonText, isGoogleConnected, connections }: IAddTask
                 </Input.Wrapper>
 
                 <Input.HelperText />
+              </Input.Root>
+
+              <Input.Root>
+                <Input.Label><Icon name="FaListUl" size={12} /> Passos (opcional)</Input.Label>
+                <div className={styles.stepsAddRow}>
+                  <Input.Wrapper><Input.Field value={stepTitle} onChange={(event) => setStepTitle(event.target.value)} placeholder="Adicionar um passo..." /></Input.Wrapper>
+                  <Button.Root type="button" variant="secondary" className={styles.smallButton} aria-label="Adicionar passo" onClick={() => { const title = stepTitle.trim(); if (title) { setStepTitles((current) => [...current, title]); setStepTitle(""); } }}><Button.Icon name="FaPlus" /></Button.Root>
+                </div>
+                {stepTitles.length > 0 && <ul className={styles.stepsDraft}>{stepTitles.map((title, index) => <li key={`${title}-${index}`}><span className={styles.pendingMarker}>•</span><span>{title}</span><button type="button" onClick={() => setStepTitles((current) => current.filter((_, itemIndex) => itemIndex !== index))} aria-label={`Remover passo ${title}`}>×</button></li>)}</ul>}
               </Input.Root>
 
               <CollapsibleSection label="Mais opções">
