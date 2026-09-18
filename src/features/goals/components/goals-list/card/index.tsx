@@ -161,13 +161,15 @@ export function Card({ goal, connections }: CardProps) {
         <p className={styles.progressHint} aria-live="polite">
           {isCompletedBySteps
             ? "Objetivo concluído: todos os passos foram marcados."
+            : isCompleted
+              ? "Objetivo marcado como concluído."
             : `${goal.steps.filter((step) => step.completed).length} de ${goal.steps.length} passos concluídos. Marque todos para concluir o objetivo.`}
         </p>
       ) : (
         <p className={styles.progressHint}>
           {isCompleted
             ? "Objetivo concluído."
-            : "Sem passos. Marque o círculo ao lado do título quando concluir."}
+            : "Sem passos. Marque a caixa ao lado do título quando concluir."}
         </p>
       )}
 
