@@ -105,18 +105,20 @@
      o card normalmente (min-height nunca limita o crescimento). */
   min-height: 12rem;
   overflow: hidden;
+  gap: var(--space-3);
+  padding: var(--space-4);
   border: 1px solid var(--color-border);
   border-left: 0.3rem solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-surface);
   box-shadow: 0 0.5rem 1.25rem var(--color-shadow);
   transition:
-    transform var(--duration-base) var(--easing-standard),
+    opacity var(--duration-base) var(--easing-standard),
     box-shadow var(--duration-base) var(--easing-standard);
 }
 .taskCard:hover {
-  transform: translateY(-0.25rem);
-  box-shadow: 0 1rem 2rem var(--color-shadow);
+  opacity: 0.96;
+  box-shadow: 0 0.75rem 1.5rem var(--color-shadow);
 }
 /* Cor da borda esquerda = prioridade, pra dar pra escanear a lista sem
    precisar ler o rótulo de cada card - mesmas cores já usadas no seletor
@@ -136,9 +138,22 @@
 }
 .taskCardHeader {
   display: flex;
-  align-items: flex-start;
-  background: var(--color-surface-elevated);
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
   color: var(--color-text);
+}
+.cardTitleGroup {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.titleLine {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: var(--space-2);
 }
 .taskTitle {
   margin: 0;
@@ -146,42 +161,21 @@
   font-size: 1.05rem;
   line-height: 1.35;
   letter-spacing: -0.025em;
+  overflow-wrap: anywhere;
 }
 .taskTitle[data-completed="true"] {
   color: var(--color-text-muted);
   text-decoration: line-through;
 }
-.headerInner {
+.actions {
   display: flex;
-  flex: 1;
-  /* Sem isso, um item flex nunca encolhe abaixo da largura do próprio
-     conteúdo (padrão `min-width:auto`) - com até 4 botões de ação
-     visíveis ao mesmo tempo (Começar/Focar/Excluir/Editar) + a tag, o
-     cabeçalho ficava mais largo que o card e o último ícone (Editar)
-     saía cortado pelo `overflow:hidden` do card (achado em auditoria
-     visual). `.tagLabel` abaixo é quem cede espaço primeiro (trunca),
-     nunca os botões de ação. */
-  min-width: 0;
-  justify-content: space-between;
   align-items: center;
-  padding: var(--space-3) var(--space-2);
-  color: var(--color-text);
-}
-.headerLeft {
-  display: flex;
-  min-width: 0;
-  gap: var(--space-2);
-  align-items: center;
-  color: var(--color-text);
-}
-.headerActions {
-  display: flex;
   flex-shrink: 0;
-  gap: var(--space-3);
+  gap: var(--space-1);
   color: var(--color-text);
 }
 .tagLabel {
-  min-width: 0;
+  width: fit-content;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -199,7 +193,7 @@
   flex-direction: column;
   flex: 1;
   justify-content: space-between;
-  padding: var(--space-3);
+  gap: var(--space-3);
   color: var(--color-text);
 }
 .cardTop {
@@ -208,15 +202,7 @@
   gap: var(--space-3);
   color: var(--color-text);
 }
-.titleRow {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--space-2);
-  color: var(--color-text);
-}
-.titleGroup {
+.meta {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
@@ -260,18 +246,40 @@
   display: inline-flex;
   align-items: center;
   margin: 0;
-  padding: 0.2rem var(--space-2);
-  border: 1px solid var(--color-border);
+  padding: 0.15rem 0.55rem;
+  border: 0;
   border-radius: var(--radius-full);
-  color: var(--color-text);
   font-size: var(--font-size-xs);
   font-weight: 600;
+}
+.taskCard[data-priority="baixa"] .priorityBadge {
+  background: var(--color-success);
+  color: var(--color-on-success);
+}
+.taskCard[data-priority="media"] .priorityBadge {
+  background: var(--color-warning);
+  color: var(--color-on-warning);
+}
+.taskCard[data-priority="alta"] .priorityBadge {
+  background: var(--color-priority-high);
+  color: var(--color-on-priority-high);
+}
+.taskCard[data-priority="critica"] .priorityBadge {
+  background: var(--color-danger);
+  color: var(--color-on-danger);
 }
 .deadline {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
   margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+.recurrenceBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
   color: var(--color-text-muted);
   font-size: var(--font-size-xs);
 }
@@ -300,12 +308,21 @@
 .overflowMenu summary {
   display: grid;
   place-items: center;
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 2rem;
+  height: 2rem;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
   cursor: pointer;
   list-style: none;
+  transition:
+    opacity var(--duration-fast) var(--easing-standard),
+    border-color var(--duration-fast) var(--easing-standard);
+}
+.overflowMenu summary:hover {
+  opacity: 0.72;
+  border-color: color-mix(in srgb, var(--color-border) 70%, var(--color-highlight));
 }
 .overflowMenu summary::-webkit-details-marker {
   display: none;
@@ -321,11 +338,20 @@
   top: calc(100% + var(--space-1));
   display: flex;
   gap: var(--space-1);
-  padding: var(--space-1);
+  padding: 0.2rem;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface-elevated);
   box-shadow: 0 0.5rem 1.25rem var(--color-shadow);
+}
+.overflowMenuContent :global(button) {
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  opacity: 0.85;
+}
+.overflowMenuContent :global(button:hover) {
+  opacity: 0.65;
 }
 .description {
   margin: 0;
@@ -343,10 +369,15 @@
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
+  width: fit-content;
   margin: 0;
+  padding: 0.15rem 0.55rem;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-highlight) 12%, transparent);
   font-family: var(--font-sans);
   color: var(--color-highlight);
   font-size: var(--font-size-xs);
+  font-weight: 600;
 }
 .completedBadge {
   display: inline-flex;
@@ -366,10 +397,15 @@
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
+  width: fit-content;
   margin: 0;
+  padding: 0.15rem 0.55rem;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-text-muted) 12%, transparent);
   font-family: var(--font-sans);
   color: var(--color-text-muted);
   font-size: var(--font-size-xs);
+  font-weight: 600;
 }
 .stepsProgress {
   display: flex;

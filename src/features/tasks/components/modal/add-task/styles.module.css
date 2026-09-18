@@ -25,11 +25,3 @@
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
 }
-.stepsAddRow { display: flex; gap: var(--space-2); }
-.stepsAddRow > :first-child { flex: 1; }
-.stepsDraft { display: flex; flex-direction: column; gap: var(--space-2); margin: var(--space-2) 0 0; padding: 0; list-style: none; }
-.stepsDraft li { display: flex; align-items: center; gap: var(--space-2); color: var(--color-text); font-size: var(--font-size-sm); }
-.stepsDraft li > :nth-child(2) { flex: 1; }
-.stepsDraft button { color: var(--color-highlight); }
-.pendingMarker { display: inline-grid; width: 1.25rem; height: 1.25rem; place-items: center; border-radius: 50%; background: var(--color-highlight-soft); color: var(--color-highlight); font-weight: 700; }
-.smallButton { padding: 0.45rem var(--space-3); font-size: var(--font-size-sm); }

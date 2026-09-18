@@ -1,16 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useRef } from "react";
 import { useWatch } from "react-hook-form";
 import { useFormTags } from "@/features/tasks/hooks/use-form-tags";
 
 import { validationSchema } from "@/validation/task-schema";
 
-import { Alert, Form, Input, Modal, ModalHeader, Button, ChipGroup, CollapsibleSection } from "@/components";
+import {
+  Alert,
+  Form,
+  Input,
+  Modal,
+  ModalHeader,
+  Button,
+  ChipGroup,
+  CollapsibleSection,
+} from "@/components";
 import { Icon } from "@/components/icon";
-import modalStyles from "@/components/modal/styles.module.css";
 
-import { createTaskAction, createTaskStepsAction } from "@/features/tasks/actions";
+import {
+  createTaskAction,
+  createTaskStepsAction,
+} from "@/features/tasks/actions";
 import { isVagueTaskTitle } from "@/features/tasks/is-vague-title";
 import { useTaskStore } from "@/features/tasks/task-store";
 
@@ -19,15 +30,23 @@ import { useFormModal } from "@/hooks/use-form-modal";
 
 import { SyncWithGoogle } from "../sync-with-google";
 import { ReminderFields } from "../reminder-fields";
+import { TaskSteps, TaskStepsDraft } from "../../task-steps";
 import { FormData, IAddTaskProps, PRIORITY_OPTIONS } from "../interfaces";
 
+import modalStyles from "@/components/modal/styles.module.css";
 import styles from "./styles.module.css";
 
-export function AddTask({ buttonText, isGoogleConnected, connections }: IAddTaskProps) {
+export function AddTask({
+  buttonText,
+  isGoogleConnected,
+  connections,
+}: IAddTaskProps) {
   const formTags = useFormTags();
   const addTask = useTaskStore((state) => state.addTask);
-  const [stepTitle, setStepTitle] = useState("");
-  const [stepTitles, setStepTitles] = useState<string[]>([]);
+  const stepsDraft = useRef<TaskStepsDraft>({
+    existingSteps: [],
+    newStepTitles: [],
+  });
 
   const {
     register,
@@ -56,10 +75,13 @@ export function AddTask({ buttonText, isGoogleConnected, connections }: IAddTask
       const result = await createTaskAction(data);
       if (result.error || !result.task) return result;
       const createdTask = result.task;
-      const titles = stepTitles;
-      const stepsResult = await createTaskStepsAction({ taskId: createdTask.id, titles });
+      const titles = stepsDraft.current.newStepTitles;
+      const stepsResult = await createTaskStepsAction({
+        taskId: createdTask.id,
+        titles,
+      });
       if (stepsResult.error) return stepsResult;
-      setStepTitles([]);
+      stepsDraft.current = { existingSteps: [], newStepTitles: [] };
       return {
         ...result,
         task: {
@@ -68,7 +90,17 @@ export function AddTask({ buttonText, isGoogleConnected, connections }: IAddTask
             ...createdTask.steps,
             ...titles.flatMap((title, index) => {
               const id = stepsResult.ids?.[index];
-              return id ? [{ id, taskId: createdTask.id, title, completed: false, order: createdTask.steps.length + index }] : [];
+              return id
+                ? [
+                    {
+                      id,
+                      taskId: createdTask.id,
+                      title,
+                      completed: false,
+                      order: createdTask.steps.length + index,
+                    },
+                  ]
+                : [];
             }),
           ],
         },
@@ -110,8 +142,8 @@ export function AddTask({ buttonText, isGoogleConnected, connections }: IAddTask
 
                 {isVagueTaskTitle(title) && (
                   <p className={styles.vagueHint}>
-                    Que tal detalhar um pouco mais? Você também pode quebrar em passos menores
-                    depois de criar.
+                    Que tal detalhar um pouco mais? Você também pode quebrar em
+                    passos menores depois de criar.
                   </p>
                 )}
 
@@ -127,7 +159,11 @@ export function AddTask({ buttonText, isGoogleConnected, connections }: IAddTask
                   aria-label="Prioridade"
                   options={PRIORITY_OPTIONS}
                   value={priority}
-                  onChange={(value) => setValue("priority", value as FormData["priority"], { shouldValidate: true })}
+                  onChange={(value) =>
+                    setValue("priority", value as FormData["priority"], {
+                      shouldValidate: true,
+                    })
+                  }
                 />
 
                 <Input.HelperText />
@@ -165,12 +201,15 @@ export function AddTask({ buttonText, isGoogleConnected, connections }: IAddTask
               </Input.Root>
 
               <Input.Root>
-                <Input.Label><Icon name="FaListUl" size={12} /> Passos (opcional)</Input.Label>
-                <div className={styles.stepsAddRow}>
-                  <Input.Wrapper><Input.Field value={stepTitle} onChange={(event) => setStepTitle(event.target.value)} placeholder="Adicionar um passo..." /></Input.Wrapper>
-                  <Button.Root type="button" variant="secondary" className={styles.smallButton} aria-label="Adicionar passo" onClick={() => { const title = stepTitle.trim(); if (title) { setStepTitles((current) => [...current, title]); setStepTitle(""); } }}><Button.Icon name="FaPlus" /></Button.Root>
-                </div>
-                {stepTitles.length > 0 && <ul className={styles.stepsDraft}>{stepTitles.map((title, index) => <li key={`${title}-${index}`}><span className={styles.pendingMarker}>•</span><span>{title}</span><button type="button" onClick={() => setStepTitles((current) => current.filter((_, itemIndex) => itemIndex !== index))} aria-label={`Remover passo ${title}`}>×</button></li>)}</ul>}
+                <Input.Label>
+                  <Icon name="FaListUl" size={12} /> Passos (opcional)
+                </Input.Label>
+                <TaskSteps
+                  steps={[]}
+                  onDraftChange={(draft) => {
+                    stepsDraft.current = draft;
+                  }}
+                />
               </Input.Root>
 
               <CollapsibleSection label="Mais opções">
@@ -181,11 +220,18 @@ export function AddTask({ buttonText, isGoogleConnected, connections }: IAddTask
                   hasScheduledAt={!!scheduledAt}
                 />
 
-                <Input.Root sharedProps={{ error: errors.sharedWithUserId?.message }}>
-                  <Input.Label htmlFor="sharedWithUserId">Compartilhar com</Input.Label>
+                <Input.Root
+                  sharedProps={{ error: errors.sharedWithUserId?.message }}
+                >
+                  <Input.Label htmlFor="sharedWithUserId">
+                    Compartilhar com
+                  </Input.Label>
 
                   <Input.Wrapper>
-                    <ShareSelect connections={connections} {...register("sharedWithUserId")} />
+                    <ShareSelect
+                      connections={connections}
+                      {...register("sharedWithUserId")}
+                    />
                   </Input.Wrapper>
 
                   <Input.HelperText />

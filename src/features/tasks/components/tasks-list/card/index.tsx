@@ -90,7 +90,8 @@ export function Card({
   const replaceTask = useTaskStore((state) => state.replaceTask);
   const { session, remaining } = useFocusSession();
   const isFocused = session?.taskId === task.id;
-  const workStatus = task.workStatus ?? (task.startedAt ? "in_progress" : "pending");
+  const workStatus =
+    task.workStatus ?? (task.startedAt ? "in_progress" : "pending");
 
   async function handleTaskRemove() {
     setIsRemoving(true);
@@ -137,12 +138,17 @@ export function Card({
     }
   }
 
-  async function handleWorkStatus(nextStatus: "pending" | "in_progress" | "paused") {
+  async function handleWorkStatus(
+    nextStatus: "pending" | "in_progress" | "paused",
+  ) {
     if (isUpdatingWorkStatus) return;
     setIsUpdatingWorkStatus(true);
 
     try {
-      const result = await setTaskWorkStatusAction({ id: task.id, workStatus: nextStatus });
+      const result = await setTaskWorkStatusAction({
+        id: task.id,
+        workStatus: nextStatus,
+      });
       if (!result.error) replaceTask({ ...task, workStatus: nextStatus });
     } finally {
       setIsUpdatingWorkStatus(false);
@@ -168,7 +174,9 @@ export function Card({
       if (!result.error) {
         replaceTask({
           ...task,
-          steps: task.steps.map((step) => step.id === stepId ? { ...step, completed } : step),
+          steps: task.steps.map((step) =>
+            step.id === stepId ? { ...step, completed } : step,
+          ),
         });
       }
     } finally {
@@ -179,8 +187,8 @@ export function Card({
   return (
     <li key={task.id} className={styles.taskCard} data-priority={task.priority}>
       <div className={styles.taskCardHeader}>
-        <div className={styles.headerInner}>
-          <div className={styles.headerLeft}>
+        <div className={styles.cardTitleGroup}>
+          <div className={styles.titleLine}>
             <button
               type="button"
               className={styles.completeCheckbox}
@@ -193,13 +201,52 @@ export function Card({
               {task.completed && <Icon name="FaCheck" aria-hidden="true" />}
             </button>
 
-            <div className={styles.titleGroup}>
-              <h3 className={styles.taskTitle} data-completed={task.completed}>
-                {task.title}
-              </h3>
-              <p className={styles.tagLabel}>{tagLabel}</p>
-            </div>
+            <h3 className={styles.taskTitle} data-completed={task.completed}>
+              {task.title}
+            </h3>
           </div>
+
+          <div className={styles.meta}>
+            <span className={styles.priorityBadge}>
+              {PRIORITY_LABELS[task.priority]}
+            </span>
+
+            <span className={styles.tagLabel}>{tagLabel}</span>
+
+            {task.scheduledAt && (
+              <span className={styles.deadline}>
+                <Icon name="FaCalendarAlt" aria-hidden="true" size={12} />
+                {formatDeadline(task.scheduledAt)}
+              </span>
+            )}
+
+            {task.recurrence !== "none" && (
+              <span className={styles.recurrenceBadge}>
+                <Icon name="FaRedo" aria-hidden="true" size={11} />
+                {task.recurrence === "daily" ? "Diária" : "Semanal"}
+              </span>
+            )}
+
+            {task.completed && (
+              <span className={styles.completedBadge}>
+                <Icon name="FaCheck" aria-hidden="true" size={10} /> Concluída
+              </span>
+            )}
+            {workStatus === "in_progress" && !task.completed && (
+              <span className={styles.startedBadge}>
+                <Icon name="FaPlay" aria-hidden="true" size={10} />
+                Em andamento
+              </span>
+            )}
+            {workStatus === "paused" && !task.completed && (
+              <span className={styles.pausedBadge}>
+                <Icon name="FaPause" aria-hidden="true" size={10} /> Pausada
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className={styles.actions}>
           <details className={styles.overflowMenu}>
             <summary aria-label={`Mais ações para ${task.title}`}>
               <Icon name="FaEllipsisV" aria-hidden="true" />
@@ -226,63 +273,16 @@ export function Card({
 
       <div className={styles.cardBody}>
         <div className={styles.cardTop}>
-          {task.completed && (
-            <span className={styles.completedBadge}>
-              <Icon name="FaCheck" aria-hidden="true" size={10} /> Concluída
-            </span>
-          )}
-          {workStatus === "in_progress" && !task.completed && (
-            <span className={styles.startedBadge}>
-              <Icon name="FaPlay" aria-hidden="true" size={10} />
-              Em andamento
-            </span>
-          )}
-          {workStatus === "paused" && !task.completed && (
-            <span className={styles.pausedBadge}>
-              <Icon name="FaPause" aria-hidden="true" size={10} /> Pausada
-            </span>
-          )}
-
-          <div className={styles.titleRow}>
-            {task.recurrence !== "none" && (
-              <Icon
-                name="FaRedo"
-                role="img"
-                aria-label={
-                  task.recurrence === "daily"
-                    ? "Repete diariamente"
-                    : "Repete semanalmente"
-                }
-                title={
-                  task.recurrence === "daily"
-                    ? "Repete diariamente"
-                    : "Repete semanalmente"
-                }
-                size={12}
-                color="var(--color-text-muted)"
-              />
-            )}
-            <p className={styles.priorityBadge}>
-              {PRIORITY_LABELS[task.priority]}
-            </p>
-          </div>
-
           {task.description && (
             <p className={styles.description}>{task.description}</p>
-          )}
-
-          {task.scheduledAt && (
-            <p className={styles.deadline}>
-              <Icon name="FaCalendarAlt" aria-hidden="true" size={12} />{" "}
-              {formatDeadline(task.scheduledAt)}
-            </p>
           )}
 
           {task.steps.length > 0 && (
             <div className={styles.stepsProgress}>
               <p className={styles.stepsSummary} aria-live="polite">
                 <Icon name="FaListUl" aria-hidden="true" size={11} />
-                {task.steps.filter((step) => step.completed).length} de {task.steps.length} passos concluídos
+                {task.steps.filter((step) => step.completed).length} de{" "}
+                {task.steps.length} passos concluídos
               </p>
               <ul className={styles.stepsPreview} aria-label="Passos da tarefa">
                 {task.steps.map((step) => (
@@ -291,7 +291,9 @@ export function Card({
                       type="checkbox"
                       checked={step.completed}
                       disabled={busyStepId === step.id}
-                      onChange={(event) => handleToggleStep(step.id, event.target.checked)}
+                      onChange={(event) =>
+                        handleToggleStep(step.id, event.target.checked)
+                      }
                       aria-label={`Concluir passo: ${step.title}`}
                     />
                     {step.title}

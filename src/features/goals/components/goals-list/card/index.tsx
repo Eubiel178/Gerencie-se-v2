@@ -189,7 +189,7 @@ export function Card({ goal, connections }: CardProps) {
             ? "Objetivo concluído: todos os passos foram marcados."
             : isCompleted
               ? "Objetivo marcado como concluído."
-              : `${goal.steps.filter((step) => step.completed).length} de ${goal.steps.length} passos concluídos. Marque todos para concluir o objetivo.`}
+              : `${goal.steps.filter((step) => step.completed).length} de ${goal.steps.length} passos concluídos.`}
         </p>
       ) : (
         <p className={styles.progressHint}>
