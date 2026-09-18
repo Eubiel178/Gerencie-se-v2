@@ -45,28 +45,35 @@
   gap: var(--space-2);
 }
 .completeCheckbox {
-  display: inline-grid;
-  flex: 0 0 auto;
-  width: 1.35rem;
-  height: 1.35rem;
-  place-items: center;
-  border: 1px solid var(--color-text-muted);
-  border-radius: var(--radius-full);
-  background: transparent;
-  color: var(--color-on-success);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  flex-shrink: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-on-highlight);
+  font-size: 0.75rem;
   cursor: pointer;
+  transition: background var(--duration-fast) var(--easing-standard);
 }
 .completeCheckbox[data-checked="true"] {
-  border-color: var(--color-success);
   background: var(--color-success);
+  border-color: var(--color-success);
 }
 .completeCheckbox:focus-visible {
   outline: 2px solid var(--color-highlight);
   outline-offset: 2px;
 }
 .completeCheckbox:disabled {
-  cursor: wait;
-  opacity: 0.65;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.completeCheckbox[data-managed-by-steps="true"]:disabled {
+  opacity: 1;
+  cursor: default;
 }
 .cardTitle {
   margin: 0;

@@ -80,25 +80,28 @@ export function Card({ goal, connections }: CardProps) {
 
   const isManuallyCompleted = goal.completedAt !== null && goal.completedAt !== undefined;
   const isCompletedBySteps = goal.steps.length > 0 && goal.progressPercent === 100;
+  const isCompleted = isManuallyCompleted || isCompletedBySteps;
+  const completionIsManagedBySteps = goal.steps.length > 0;
 
   return (
     <li className={styles.card} data-priority={goal.priority}>
       <div className={styles.cardHeader}>
         <div className={styles.cardTitleGroup}>
           <div className={styles.titleLine}>
-            {goal.steps.length === 0 && (
-              <button
-                type="button"
-                className={styles.completeCheckbox}
-                data-checked={isManuallyCompleted}
-                aria-pressed={isManuallyCompleted}
-                aria-label={`Marcar objetivo \"${goal.title}\" como ${isManuallyCompleted ? "não concluído" : "concluído"}`}
-                disabled={isTogglingCompletion}
-                onClick={handleToggleManualCompletion}
-              >
-                {isManuallyCompleted && <Icon name="FaCheck" aria-hidden="true" />}
-              </button>
-            )}
+            <button
+              type="button"
+              className={styles.completeCheckbox}
+              data-checked={isCompleted}
+              data-managed-by-steps={completionIsManagedBySteps}
+              aria-pressed={isCompleted}
+              aria-label={completionIsManagedBySteps
+                ? `Status de ${goal.title}: ${isCompleted ? "concluído" : "em aberto"}. Marque ou desmarque os passos para mudar o status.`
+                : `Marcar objetivo \"${goal.title}\" como ${isCompleted ? "não concluído" : "concluído"}`}
+              disabled={completionIsManagedBySteps || isTogglingCompletion}
+              onClick={handleToggleManualCompletion}
+            >
+              {isCompleted && <Icon name="FaCheck" aria-hidden="true" />}
+            </button>
             <h3 className={styles.cardTitle}>{goal.title}</h3>
           </div>
 
@@ -111,7 +114,7 @@ export function Card({ goal, connections }: CardProps) {
               <span className={styles.deadline}>Prazo: {formatDeadline(goal.deadline)}</span>
             )}
 
-            {(isManuallyCompleted || isCompletedBySteps) && (
+            {isCompleted && (
               <span className={styles.completedBadge}>
                 <Icon name="FaCheck" aria-hidden="true" size={10} /> Concluído
               </span>
