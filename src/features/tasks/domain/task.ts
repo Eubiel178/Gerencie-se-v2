@@ -30,6 +30,7 @@ export interface ITask {
   // "Quebrar em passos menores" (Modo Assistido) — sempre carregado
   // junto (mesmo raciocínio de `IGoal.steps`), nunca gerado sozinho.
   steps: ITaskStep[];
+  attachmentCount?: number;
 
   // Data/hora agendada (formato de `<input type="datetime-local">`, ex.
   // "2026-10-01T14:30"). Opcional para uma tarefa comum; obrigatória no

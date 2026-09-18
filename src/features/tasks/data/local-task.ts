@@ -1,12 +1,12 @@
 import "server-only";
 
-import { and, eq, inArray, max, or } from "drizzle-orm";
+import { and, count, eq, inArray, max, or } from "drizzle-orm";
 
 import * as domain from "@/features/tasks/domain";
 import type { TaskSyncStatus } from "@/features/tasks/domain";
 
 import { db } from "@/db/client";
-import { taskSteps, tasks, users } from "@/db/schema";
+import { taskAttachments, taskSteps, tasks, users } from "@/db/schema";
 import { requireUserId } from "@/lib/require-user-id";
 import { assertAcceptedConnection, resolveSharedWithUserIdOnUpdate } from "@/lib/assert-accepted-connection";
 
@@ -109,8 +109,29 @@ export class LocalTask
       stepsByTaskId.set(step.taskId, list);
     }
 
+    const attachmentRows =
+      taskIds.length === 0
+        ? []
+        : await db
+            .select({
+              taskId: taskAttachments.taskId,
+              total: count(taskAttachments.id),
+            })
+            .from(taskAttachments)
+            .where(inArray(taskAttachments.taskId, taskIds))
+            .groupBy(taskAttachments.taskId);
+    const attachmentCountByTaskId = new Map(
+      attachmentRows.map((row) => [row.taskId, row.total])
+    );
+
     return rows.map((row) =>
-      mapRowToTask(row, userId, ownerById.get(row.userId), stepsByTaskId.get(row.id) ?? [])
+      mapRowToTask(
+        row,
+        userId,
+        ownerById.get(row.userId),
+        stepsByTaskId.get(row.id) ?? [],
+        attachmentCountByTaskId.get(row.id) ?? 0
+      )
     );
   }
 
@@ -501,7 +522,8 @@ function mapRowToTask(
   row: typeof tasks.$inferSelect,
   viewerId: string,
   owner?: { name: string | null; email: string | null },
-  steps: domain.ITaskStep[] = []
+  steps: domain.ITaskStep[] = [],
+  attachmentCount = 0
 ): domain.ITask {
   return {
     id: row.id,
@@ -515,6 +537,7 @@ function mapRowToTask(
     startedAt: row.startedAt,
     workStatus: row.workStatus as domain.TaskWorkStatus,
     steps,
+    attachmentCount,
     scheduledAt: row.scheduledAt ?? undefined,
     syncEnabled: row.syncEnabled,
     syncStatus: row.syncStatus as TaskSyncStatus,

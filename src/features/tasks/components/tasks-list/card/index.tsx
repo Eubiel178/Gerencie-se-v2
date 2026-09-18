@@ -227,6 +227,14 @@ export function Card({
               </span>
             )}
 
+            {(task.attachmentCount ?? 0) > 0 && (
+              <span className={styles.attachmentBadge}>
+                <Icon name="FaPaperclip" aria-hidden="true" size={11} />
+                {task.attachmentCount}{" "}
+                {task.attachmentCount === 1 ? "anexo" : "anexos"}
+              </span>
+            )}
+
             {task.completed && (
               <span className={styles.completedBadge}>
                 <Icon name="FaCheck" aria-hidden="true" size={10} /> Concluída
