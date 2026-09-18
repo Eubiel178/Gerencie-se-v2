@@ -157,7 +157,7 @@ export function TaskSteps({ taskId, steps, onPendingStepsChange }: TaskStepsProp
         <ul className={`${styles.steps} ${styles.pendingSteps}`} aria-label="Novos passos a salvar">
           {pendingSteps.map((step) => (
             <li key={step.id} className={styles.step}>
-              <span className={styles.pendingMarker} aria-hidden="true">•</span>
+              <input type="checkbox" checked={false} readOnly aria-label={`Novo passo ${step.title}`} />
               <input
                 className={styles.editTitle}
                 aria-label="Novo passo"

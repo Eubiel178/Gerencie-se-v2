@@ -249,7 +249,7 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
                     ))}
                   </ul>
                 )}
-                {newSteps.length > 0 && <ul className={styles.stepsDraft}>{newSteps.map((title, index) => <li key={`${title}-${index}`}><span className={styles.pendingMarker}>•</span><span>{title}</span><button type="button" onClick={() => setNewSteps((current) => current.filter((_, itemIndex) => itemIndex !== index))} aria-label={`Remover passo ${title}`}>×</button></li>)}</ul>}
+                {newSteps.length > 0 && <ul className={styles.stepsDraft}>{newSteps.map((title, index) => <li key={`${title}-${index}`}><input type="checkbox" checked={false} readOnly aria-label={`Novo passo ${title}`} /><span>{title}</span><button type="button" className={styles.actionButton} onClick={() => setNewSteps((current) => current.filter((_, itemIndex) => itemIndex !== index))} aria-label={`Remover passo ${title}`}><Icon name="FaTimes" /></button></li>)}</ul>}
               </Input.Root>
 
               <CollapsibleSection label="Mais opções">

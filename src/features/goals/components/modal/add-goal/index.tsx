@@ -165,7 +165,7 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
                     if (title) { setStepTitles((current) => [...current, title]); setStepTitle(""); }
                   }}><Button.Icon name="FaPlus" /></Button.Root>
                 </div>
-                {stepTitles.length > 0 && <ul className={styles.stepsDraft}>{stepTitles.map((title, index) => <li key={`${title}-${index}`}><span className={styles.pendingMarker}>•</span><span>{title}</span><button type="button" onClick={() => setStepTitles((current) => current.filter((_, itemIndex) => itemIndex !== index))} aria-label={`Remover passo ${title}`}>×</button></li>)}</ul>}
+                {stepTitles.length > 0 && <ul className={styles.stepsDraft}>{stepTitles.map((title, index) => <li key={`${title}-${index}`}><input type="checkbox" checked={false} readOnly aria-label={`Novo passo ${title}`} /><span>{title}</span><button type="button" className={styles.actionButton} onClick={() => setStepTitles((current) => current.filter((_, itemIndex) => itemIndex !== index))} aria-label={`Remover passo ${title}`}><Icon name="FaTimes" /></button></li>)}</ul>}
               </Input.Root>
 
               <CollapsibleSection label="Mais opções">

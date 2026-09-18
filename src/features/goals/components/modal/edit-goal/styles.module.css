@@ -16,5 +16,4 @@
 .actionButton:disabled { cursor: not-allowed; opacity: .4; }
 .orderActions { display: inline-flex; flex: 0 0 auto; gap: 0.1rem; }
 .orderActions .actionButton { width: 1.7rem; }
-.pendingMarker { display: inline-grid; width: 1.25rem; height: 1.25rem; place-items: center; border-radius: 50%; background: var(--color-highlight-soft); color: var(--color-highlight); font-weight: 700; }
 .smallButton { padding: 0.45rem var(--space-3); font-size: var(--font-size-sm); }
