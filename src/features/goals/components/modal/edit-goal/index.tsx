@@ -28,17 +28,13 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
   const [stepTitle, setStepTitle] = useState("");
   const [newSteps, setNewSteps] = useState<string[]>([]);
   const [orderedSteps, setOrderedSteps] = useState(goalBeingEdited.steps);
-  const [isReordering, setIsReordering] = useState(false);
 
-  async function moveStep(index: number, direction: -1 | 1) {
+  function moveStep(index: number, direction: -1 | 1) {
     const nextIndex = index + direction;
-    if (nextIndex < 0 || nextIndex >= orderedSteps.length || isReordering) return;
+    if (nextIndex < 0 || nextIndex >= orderedSteps.length) return;
     const next = [...orderedSteps];
     [next[index], next[nextIndex]] = [next[nextIndex], next[index]];
-    setIsReordering(true);
-    const result = await reorderGoalStepsAction({ goalId: goalBeingEdited.id, orderedStepIds: next.map((step) => step.id) });
-    if (!result.error) setOrderedSteps(next);
-    setIsReordering(false);
+    setOrderedSteps(next);
   }
   const {
     register,
@@ -69,10 +65,17 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
         sharedWithUserId: data.sharedWithUserId,
       });
       if (result.error) return result;
+      const createdStepIds: string[] = [];
       for (const title of newSteps) {
         const stepResult = await createGoalStepAction({ goalId: goalBeingEdited.id, title });
         if (stepResult.error) return stepResult;
+        if (stepResult.id) createdStepIds.push(stepResult.id);
       }
+      const reorderResult = await reorderGoalStepsAction({
+        goalId: goalBeingEdited.id,
+        orderedStepIds: [...orderedSteps.map((step) => step.id), ...createdStepIds],
+      });
+      if (reorderResult.error) return reorderResult;
       setNewSteps([]);
       return result;
     },
@@ -165,7 +168,7 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
 
               <Input.Root>
                 <Input.Label>Adicionar passos</Input.Label>
-                {orderedSteps.length > 0 && <ul className={styles.stepsDraft}>{orderedSteps.map((step, index) => <li key={step.id}><span className={styles.pendingMarker}>•</span><span>{step.title}</span><button type="button" className={styles.orderButton} disabled={index === 0 || isReordering} onClick={() => moveStep(index, -1)} aria-label={`Mover ${step.title} para cima`}><Icon name="FaChevronUp" /></button><button type="button" className={styles.orderButton} disabled={index === orderedSteps.length - 1 || isReordering} onClick={() => moveStep(index, 1)} aria-label={`Mover ${step.title} para baixo`}><Icon name="FaChevronDown" /></button></li>)}</ul>}
+                {orderedSteps.length > 0 && <ul className={styles.stepsDraft}>{orderedSteps.map((step, index) => <li key={step.id}><span className={styles.pendingMarker}>•</span><span>{step.title}</span><button type="button" className={styles.orderButton} disabled={index === 0} onClick={() => moveStep(index, -1)} aria-label={`Mover ${step.title} para cima`}><Icon name="FaChevronUp" /></button><button type="button" className={styles.orderButton} disabled={index === orderedSteps.length - 1} onClick={() => moveStep(index, 1)} aria-label={`Mover ${step.title} para baixo`}><Icon name="FaChevronDown" /></button></li>)}</ul>}
                 <div className={styles.stepsAddRow}>
                   <Input.Wrapper>
                     <Input.Field value={stepTitle} onChange={(event) => setStepTitle(event.target.value)} placeholder="Ex.: Pesquisar opções" />
@@ -175,7 +178,7 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
                     if (title) { setNewSteps((current) => [...current, title]); setStepTitle(""); }
                   }}><Button.Icon name="FaPlus" /></Button.Root>
                 </div>
-                {newSteps.length > 0 && <ul className={styles.stepsDraft}>{newSteps.map((title, index) => <li key={`${title}-${index}`}><span className={styles.pendingMarker}>+</span><span>{title}</span><button type="button" onClick={() => setNewSteps((current) => current.filter((_, itemIndex) => itemIndex !== index))} aria-label={`Remover passo ${title}`}>×</button></li>)}</ul>}
+                {newSteps.length > 0 && <ul className={styles.stepsDraft}>{newSteps.map((title, index) => <li key={`${title}-${index}`}><span className={styles.pendingMarker}>•</span><span>{title}</span><button type="button" onClick={() => setNewSteps((current) => current.filter((_, itemIndex) => itemIndex !== index))} aria-label={`Remover passo ${title}`}>×</button></li>)}</ul>}
               </Input.Root>
 
               <CollapsibleSection label="Mais opções">

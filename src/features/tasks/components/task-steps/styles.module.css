@@ -9,6 +9,10 @@
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
 }
+.hint { order: 1; }
+.steps:not(.pendingSteps) { order: 2; }
+.addStepForm { order: 3; }
+.pendingSteps { order: 4; }
 
 .steps {
   display: flex;

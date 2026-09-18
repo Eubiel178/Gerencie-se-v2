@@ -154,10 +154,10 @@ export function TaskSteps({ taskId, steps, onPendingStepsChange }: TaskStepsProp
       )}
 
       {pendingSteps.length > 0 && (
-        <ul className={styles.steps} aria-label="Novos passos a salvar">
+        <ul className={`${styles.steps} ${styles.pendingSteps}`} aria-label="Novos passos a salvar">
           {pendingSteps.map((step) => (
             <li key={step.id} className={styles.step}>
-              <span className={styles.pendingMarker} aria-hidden="true">+</span>
+              <span className={styles.pendingMarker} aria-hidden="true">•</span>
               <input
                 className={styles.editTitle}
                 aria-label="Novo passo"
