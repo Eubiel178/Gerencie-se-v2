@@ -64,6 +64,7 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
   });
 
   const priority = watch("priority");
+  const totalSteps = stepTitles.length;
 
   return (
     <>
@@ -145,6 +146,7 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
 
               <Input.Root>
                 <Input.Label>Passos (opcional)</Input.Label>
+                {totalSteps > 0 && <p className={styles.stepsHint}>0 de {totalSteps} passos concluídos.</p>}
                 <div className={styles.stepsAddRow}>
                   <Input.Wrapper>
                     <Input.Field

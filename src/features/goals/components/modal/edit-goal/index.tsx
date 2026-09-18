@@ -18,6 +18,8 @@ import {
 } from "@/features/goals/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
 import { ShareReadOnlyNote } from "@/features/connections/components/share-readonly-note";
+import { calculateGoalProgress } from "@/features/goals/domain";
+import { useGoalStore } from "@/features/goals/goal-store";
 import { useFormModal } from "@/hooks/use-form-modal";
 
 import { FormData, IEditGoalProps, PRIORITY_OPTIONS } from "../interfaces";
@@ -37,6 +39,9 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
   const [removedStepIds, setRemovedStepIds] = useState<string[]>([]);
   const [editingStepId, setEditingStepId] = useState<string | null>(null);
   const [editingStepTitle, setEditingStepTitle] = useState("");
+  const replaceGoal = useGoalStore((state) => state.replaceGoal);
+  const completedSteps = orderedSteps.filter((step) => step.completed).length;
+  const totalSteps = orderedSteps.length + newSteps.length;
 
   function moveStep(index: number, direction: -1 | 1) {
     const nextIndex = index + direction;
@@ -109,9 +114,28 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
         orderedStepIds: [...orderedSteps.map((step) => step.id), ...createdStepIds],
       });
       if (reorderResult.error) return reorderResult;
+
+      const steps = [
+        ...orderedSteps.map((step, order) => ({ ...step, order })),
+        ...newSteps.flatMap((title, index) => {
+          const id = createdStepIds[index];
+          return id ? [{ id, goalId: goalBeingEdited.id, title, completed: false, order: orderedSteps.length + index }] : [];
+        }),
+      ];
+      replaceGoal({
+        ...goalBeingEdited,
+        title: data.title,
+        description: data.description,
+        deadline: data.deadline || null,
+        priority: data.priority,
+        sharedWithUserId: data.sharedWithUserId || null,
+        steps,
+        progressPercent: calculateGoalProgress(steps),
+      });
       setNewSteps([]);
       return result;
     },
+    onSuccess: () => {},
   });
 
   const priority = watch("priority");
@@ -201,7 +225,7 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
 
               <Input.Root>
                 <Input.Label>Adicionar passos</Input.Label>
-                {orderedSteps.length > 0 && <p className={styles.stepsHint}>{orderedSteps.filter((step) => step.completed).length} de {orderedSteps.length} passos concluídos.</p>}
+                {totalSteps > 0 && <p className={styles.stepsHint}>{completedSteps} de {totalSteps} passos concluídos.</p>}
                 <div className={styles.stepsAddRow}>
                   <Input.Wrapper>
                     <Input.Field value={stepTitle} onChange={(event) => setStepTitle(event.target.value)} placeholder="Ex.: Pesquisar opções" />

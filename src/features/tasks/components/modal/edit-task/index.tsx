@@ -12,6 +12,7 @@ import modalStyles from "@/components/modal/styles.module.css";
 
 import { createTaskStepsAction, updateTaskAction } from "@/features/tasks/actions";
 import { isVagueTaskTitle } from "@/features/tasks/is-vague-title";
+import { useTaskStore } from "@/features/tasks/task-store";
 
 import { ShareSelect } from "@/features/connections/components/share-select";
 import { ShareReadOnlyNote } from "@/features/connections/components/share-readonly-note";
@@ -28,6 +29,7 @@ import styles from "./styles.module.css";
 export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IEditTaskProps) {
   const formTags = useFormTags();
   const pendingStepTitles = useRef<string[]>([]);
+  const replaceTask = useTaskStore((state) => state.replaceTask);
 
   const {
     register,
@@ -56,16 +58,33 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
       const taskResult = await updateTaskAction({ ...data, id: taskBeingEdited.id });
       if (taskResult.error) return taskResult;
 
+      const titles = pendingStepTitles.current;
       const stepResult = await createTaskStepsAction({
         taskId: taskBeingEdited.id,
-        titles: pendingStepTitles.current,
+        titles,
       });
       if (stepResult.error) return stepResult;
 
       pendingStepTitles.current = [];
 
+      const currentTask = useTaskStore.getState().tasks.find((task) => task.id === taskBeingEdited.id) ?? taskBeingEdited;
+      replaceTask({
+        ...currentTask,
+        ...data,
+        scheduledAt: data.scheduledAt || undefined,
+        sharedWithUserId: data.sharedWithUserId || null,
+        steps: [
+          ...currentTask.steps,
+          ...titles.flatMap((title, index) => {
+            const id = stepResult.ids?.[index];
+            return id ? [{ id, taskId: taskBeingEdited.id, title, completed: false, order: currentTask.steps.length + index }] : [];
+          }),
+        ],
+      });
+
       return { error: null };
     },
+    onSuccess: () => {},
   });
 
   const syncEnabled = useWatch({ control, name: "syncEnabled" });

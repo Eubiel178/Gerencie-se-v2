@@ -55,10 +55,24 @@ export function AddTask({ buttonText, isGoogleConnected, connections }: IAddTask
     onSubmit: async (data) => {
       const result = await createTaskAction(data);
       if (result.error || !result.task) return result;
-      const stepsResult = await createTaskStepsAction({ taskId: result.task.id, titles: stepTitles });
+      const createdTask = result.task;
+      const titles = stepTitles;
+      const stepsResult = await createTaskStepsAction({ taskId: createdTask.id, titles });
       if (stepsResult.error) return stepsResult;
       setStepTitles([]);
-      return result;
+      return {
+        ...result,
+        task: {
+          ...createdTask,
+          steps: [
+            ...createdTask.steps,
+            ...titles.flatMap((title, index) => {
+              const id = stepsResult.ids?.[index];
+              return id ? [{ id, taskId: createdTask.id, title, completed: false, order: createdTask.steps.length + index }] : [];
+            }),
+          ],
+        },
+      };
     },
     onSuccess: (result) => {
       if (result.task) addTask(result.task);

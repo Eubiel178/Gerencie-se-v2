@@ -257,16 +257,16 @@ export async function createTaskStepAction(
 
 export async function createTaskStepsAction(
   params: domain.CreateTaskSteps.Params
-): Promise<ActionResult> {
+): Promise<ActionResult & { ids?: string[] }> {
   if (params.titles.some((title) => !title.trim())) {
     return { error: "Cada passo precisa ter um título." };
   }
 
   try {
-    await getTaskFetcher().createSteps(params);
+    const { ids } = await getTaskFetcher().createSteps(params);
     revalidatePath("/home/tasks");
     revalidatePath("/home");
-    return { error: null };
+    return { error: null, ids };
   } catch {
     return { error: "Não foi possível adicionar os passos. Tente novamente." };
   }

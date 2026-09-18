@@ -37,6 +37,8 @@ export function TaskSteps({ taskId, steps, onPendingStepsChange }: TaskStepsProp
   const [busyStepId, setBusyStepId] = useState<string | null>(null);
   const [editingStepId, setEditingStepId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState("");
+  const completedSteps = visibleSteps.filter((step) => step.completed).length;
+  const totalSteps = visibleSteps.length + pendingSteps.length;
 
   function handleQueueStep() {
     const title = newStepTitle.trim();
@@ -147,9 +149,9 @@ export function TaskSteps({ taskId, steps, onPendingStepsChange }: TaskStepsProp
 
   return (
     <div className={styles.wrapper}>
-      {visibleSteps.length > 0 && (
+      {totalSteps > 0 && (
         <p className={styles.hint}>
-          {visibleSteps.filter((step) => step.completed).length} de {visibleSteps.length} passos concluídos.
+          {completedSteps} de {totalSteps} passos concluídos.
         </p>
       )}
 
