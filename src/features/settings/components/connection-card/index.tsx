@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 import {
   disconnectGoogleCalendarAction,
@@ -32,7 +31,8 @@ export function ConnectionCard({
   selectedCalendarId,
   calendars,
 }: ConnectionCardProps) {
-  const router = useRouter();
+  const [isLocallyConnected, setIsLocallyConnected] = useState(isConnected);
+  const [calendarId, setCalendarId] = useState(selectedCalendarId ?? "");
   const [isDisconnecting, setIsDisconnecting] = useState(false);
   const [isChangingCalendar, setIsChangingCalendar] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -52,7 +52,7 @@ export function ConnectionCard({
       return;
     }
 
-    router.refresh();
+    setIsLocallyConnected(false);
   }
 
   async function handleCalendarChange(event: React.ChangeEvent<HTMLSelectElement>) {
@@ -68,10 +68,10 @@ export function ConnectionCard({
       return;
     }
 
-    router.refresh();
+    setCalendarId(event.target.value);
   }
 
-  if (!isConnected) {
+  if (!isLocallyConnected) {
     return (
       <div className={styles.panel}>
         <div className={styles.statusRow}>
@@ -103,7 +103,7 @@ export function ConnectionCard({
         <Input.Wrapper>
           <Input.FieldSelect
             id="calendarId"
-            defaultValue={selectedCalendarId}
+            value={calendarId}
             optionsArray={calendars.map((calendar) => ({
               label: calendar.primary ? `${calendar.summary} (principal)` : calendar.summary,
               value: calendar.id,
