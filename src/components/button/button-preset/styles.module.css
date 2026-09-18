@@ -1,17 +1,17 @@
 :where(.iconButton) {
   display: inline-grid;
   place-items: center;
-  width: 2rem;
-  height: 2rem;
-  min-width: 2rem;
+  width: 1.55rem;
+  height: 1.55rem;
+  min-width: 1.55rem;
   padding: 0;
   opacity: 0.88;
 }
 
 :where(.iconButton) svg {
   display: block;
-  width: 1rem;
-  height: 1rem;
+  width: 0.95rem;
+  height: 0.95rem;
   flex-shrink: 0;
 }
 
