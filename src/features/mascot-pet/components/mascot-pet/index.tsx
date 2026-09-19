@@ -3,7 +3,10 @@
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 
-import { DEFAULT_MASCOT_CHARACTER_ID, MASCOT_CHARACTERS } from "@/features/mascot-pet/domain/characters";
+import {
+  DEFAULT_MASCOT_CHARACTER_ID,
+  MASCOT_CHARACTERS,
+} from "@/features/mascot-pet/domain/characters";
 import { isQuietModeRoute } from "@/features/mascot-pet/engine/quiet-mode-routes";
 import { MascotRuntime } from "@/features/mascot-pet/engine/runtime";
 
@@ -30,7 +33,8 @@ export function MascotPet({ characterId }: MascotPetProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const runtimeRef = useRef<MascotRuntime | null>(null);
   const pathname = usePathname();
-  const resolvedId = characterId === null ? null : (characterId ?? DEFAULT_MASCOT_CHARACTER_ID);
+  const resolvedId =
+    characterId === null ? null : (characterId ?? DEFAULT_MASCOT_CHARACTER_ID);
   const character = resolvedId ? MASCOT_CHARACTERS[resolvedId] : undefined;
 
   useEffect(() => {
@@ -42,7 +46,8 @@ export function MascotPet({ characterId }: MascotPetProps) {
     let cancelled = false;
 
     runtime.mount().catch((error: unknown) => {
-      if (!cancelled) console.error("[mascot-pet] falha ao inicializar o PixiJS", error);
+      if (!cancelled)
+        console.error("[mascot-pet] falha ao inicializar o PixiJS", error);
     });
 
     return () => {
@@ -69,7 +74,7 @@ export function MascotPet({ characterId }: MascotPetProps) {
 
   return (
     <div className={styles.stage} aria-hidden="true">
-      <div ref={wrapperRef} className={styles.wrapper} />
+      ss <div ref={wrapperRef} className={styles.wrapper} />
     </div>
   );
 }

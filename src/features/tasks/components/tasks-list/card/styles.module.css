@@ -329,7 +329,11 @@
 }
 .overflowMenu summary:hover {
   opacity: 0.72;
-  border-color: color-mix(in srgb, var(--color-border) 70%, var(--color-highlight));
+  border-color: color-mix(
+    in srgb,
+    var(--color-border) 70%,
+    var(--color-highlight)
+  );
 }
 .overflowMenu summary::-webkit-details-marker {
   display: none;
@@ -422,9 +426,16 @@
   font-family: var(--font-sans);
 }
 .stepsSummary {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+
   margin: 0;
   color: var(--color-text-muted);
   font-size: var(--font-size-xs);
+
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
 }
 .stepsPreview {
   display: flex;

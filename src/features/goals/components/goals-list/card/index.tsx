@@ -195,7 +195,7 @@ export function Card({ goal, connections }: CardProps) {
         <p className={styles.progressHint}>
           {isCompleted
             ? "Objetivo concluído."
-            : "Sem passos. Marque a caixa ao lado do título quando concluir."}
+            : "Marque como concluído quando atingir este objetivo."}
         </p>
       )}
       {goal.steps.length > 0 && (
