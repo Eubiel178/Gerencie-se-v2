@@ -44,7 +44,7 @@ function formatDeadline(value: string): string {
     day.getTime() === startOfToday.getTime()
       ? "Hoje"
       : day.getTime() === startOfTomorrow.getTime()
-        ? "Amanhã"
+        ? "Amanha"
         : new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short" })
             .format(date)
             .replace(".", "");
@@ -52,7 +52,11 @@ function formatDeadline(value: string): string {
     hour: "2-digit",
     minute: "2-digit",
   }).format(date);
-  return `${dayLabel} · até ${time}`;
+  return `${dayLabel}, ate ${time}`;
+}
+
+function isOverdue(value: string): boolean {
+  return new Date(value) < new Date();
 }
 
 function formatRemaining(seconds: number): string {
@@ -65,10 +69,6 @@ function formatRemaining(seconds: number): string {
 
 interface CardProps {
   task: ITask;
-  // Rótulo de exibição da tag (ex.: "#Estudo") — mantido separado de
-  // `task.tag` (que continua sendo o valor real, ex.: "studie") para que o
-  // formulário de edição sempre receba a tarefa original, nunca a versão
-  // formatada só para exibição.
   tagLabel: string;
   isGoogleConnected: boolean;
   connections: LoadAcceptedConnections.Model;
@@ -87,14 +87,21 @@ export function Card({
   const [isStarting, setIsStarting] = useState(false);
   const [isUpdatingWorkStatus, setIsUpdatingWorkStatus] = useState(false);
   const [busyStepId, setBusyStepId] = useState<string | null>(null);
+  const [showSteps, setShowSteps] = useState(false);
+  const [showDescription, setShowDescription] = useState(false);
   const removeTask = useTaskStore((state) => state.removeTask);
   const replaceTask = useTaskStore((state) => state.replaceTask);
   const { session: focusSession, remaining } = useFocusSession();
   const isFocused = focusSession?.taskId === task.id;
   const executionSession = useExecutionCompanionStore((s) => s.session);
-  const isExecuting = executionSession?.taskId === task.id && executionSession.status === "active";
+  const isExecuting =
+    executionSession?.taskId === task.id && executionSession.status === "active";
   const workStatus =
     task.workStatus ?? (task.startedAt ? "in_progress" : "pending");
+
+  const completedSteps = task.steps.filter((s) => s.completed).length;
+  const totalSteps = task.steps.length;
+  const stepsPercent = totalSteps > 0 ? (completedSteps / totalSteps) * 100 : 0;
 
   async function handleTaskRemove() {
     setIsRemoving(true);
@@ -187,8 +194,15 @@ export function Card({
     }
   }
 
+  const showPrimaryActions = !task.completed;
+  const hasSyncIssue =
+    task.syncEnabled && task.syncStatus === "ERROR";
+  const hasSyncSuccess =
+    task.syncEnabled && task.syncStatus === "SYNCED";
+
   return (
     <li key={task.id} className={styles.taskCard} data-priority={task.priority}>
+      {/* Header: checkbox + titulo + menu */}
       <div className={styles.taskCardHeader}>
         <div className={styles.cardTitleGroup}>
           <div className={styles.titleLine}>
@@ -197,7 +211,7 @@ export function Card({
               className={styles.completeCheckbox}
               data-checked={task.completed}
               aria-pressed={task.completed}
-              aria-label={`Marcar tarefa "${task.title}" como ${task.completed ? "não concluída" : "concluída"}`}
+              aria-label={`Marcar tarefa "${task.title}" como ${task.completed ? "nao concluida" : "concluida"}`}
               disabled={isToggling}
               onClick={handleToggleComplete}
             >
@@ -209,63 +223,52 @@ export function Card({
             </h3>
           </div>
 
+          {/* Metadados compactos - linha unica */}
           <div className={styles.meta}>
-            <span className={styles.priorityBadge}>
+            <span className={styles.priorityText}>
               {PRIORITY_LABELS[task.priority]}
             </span>
+
+            <span className={styles.metaSep} aria-hidden="true">·</span>
 
             <span className={styles.tagLabel}>{tagLabel}</span>
 
             {task.scheduledAt && (
-              <span className={styles.deadline}>
-                <Icon name="FaCalendarAlt" aria-hidden="true" size={12} />
-                {formatDeadline(task.scheduledAt)}
-              </span>
+              <>
+                <span className={styles.metaSep} aria-hidden="true">·</span>
+                <span
+                  className={styles.deadline}
+                  data-overdue={isOverdue(task.scheduledAt) && !task.completed}
+                >
+                  {formatDeadline(task.scheduledAt)}
+                </span>
+              </>
             )}
 
             {task.recurrence !== "none" && (
-              <span className={styles.recurrenceBadge}>
-                <Icon name="FaRedo" aria-hidden="true" size={11} />
-                {task.recurrence === "daily" ? "Diária" : "Semanal"}
-              </span>
+              <>
+                <span className={styles.metaSep} aria-hidden="true">·</span>
+                <span className={styles.recurrenceInfo}>
+                  {task.recurrence === "daily" ? "Diaria" : "Semanal"}
+                </span>
+              </>
             )}
 
             {(task.attachmentCount ?? 0) > 0 && (
-              <span className={styles.attachmentBadge}>
-                <Icon name="FaPaperclip" aria-hidden="true" size={11} />
-                {task.attachmentCount}{" "}
-                {task.attachmentCount === 1 ? "anexo" : "anexos"}
-              </span>
-            )}
-
-            {task.completed && (
-              <span className={styles.completedBadge}>
-                <Icon name="FaCheck" aria-hidden="true" size={10} /> Concluída
-              </span>
-            )}
-            {workStatus === "in_progress" && !task.completed && (
-              <span className={styles.startedBadge}>
-                <Icon name="FaPlay" aria-hidden="true" size={10} />
-                Em andamento
-              </span>
-            )}
-            {workStatus === "paused" && !task.completed && (
-              <span className={styles.pausedBadge}>
-                <Icon name="FaPause" aria-hidden="true" size={10} /> Pausada
-              </span>
-            )}
-            {isExecuting && (
-              <span className={styles.startedBadge}>
-                <Icon name="FaPlay" aria-hidden="true" size={10} />
-                Fazendo agora
-              </span>
+              <>
+                <span className={styles.metaSep} aria-hidden="true">·</span>
+                <span className={styles.attachmentInfo}>
+                  {task.attachmentCount}{" "}
+                  {task.attachmentCount === 1 ? "anexo" : "anexos"}
+                </span>
+              </>
             )}
           </div>
         </div>
 
         <div className={styles.actions}>
           <details className={styles.overflowMenu}>
-            <summary aria-label={`Mais ações para ${task.title}`}>
+            <summary aria-label={`Mais acoes para ${task.title}`}>
               <Icon name="FaEllipsisV" aria-hidden="true" />
             </summary>
             <div className={styles.overflowMenuContent}>
@@ -289,19 +292,73 @@ export function Card({
       </div>
 
       <div className={styles.cardBody}>
-        <div className={styles.cardTop}>
-          {task.description && (
-            <p className={styles.description}>{task.description}</p>
+        {/* Status row */}
+        <div className={styles.statusRow}>
+          {isExecuting && (
+            <span className={styles.statusExecuting}>
+              <span className={styles.pulse} aria-hidden="true" />
+              Fazendo agora
+            </span>
           )}
 
-          {task.steps.length > 0 && (
-            <div className={styles.stepsProgress}>
-              <p className={styles.stepsSummary} aria-live="polite">
-                <Icon name="FaListUl" aria-hidden="true" size={11} />
-                {task.steps.filter((step) => step.completed).length} de{" "}
-                {task.steps.length} passos concluídos
-              </p>
-              <ul className={styles.stepsPreview} aria-label="Passos da tarefa">
+          {!isExecuting && workStatus === "in_progress" && !task.completed && (
+            <span className={styles.statusInProgress}>
+              <Icon name="FaPlay" aria-hidden="true" size={10} />
+              Em andamento
+            </span>
+          )}
+
+          {!isExecuting && workStatus === "paused" && !task.completed && (
+            <span className={styles.statusPaused}>
+              <Icon name="FaPause" aria-hidden="true" size={10} /> Pausada
+            </span>
+          )}
+
+          {task.completed && (
+            <span className={styles.statusCompleted}>
+              <Icon name="FaCheck" aria-hidden="true" size={10} /> Concluida
+            </span>
+          )}
+
+          {isFocused && (
+            <span className={styles.focusIndicator}>
+              <Icon name="MdTimer" aria-hidden="true" size={11} /> Em foco ·{" "}
+              {formatRemaining(remaining)}
+            </span>
+          )}
+        </div>
+
+        {/* Progresso - barra compacta */}
+        {totalSteps > 0 && (
+          <div className={styles.stepsCompact}>
+            <div className={styles.stepsCompactSummary}>
+              <span>
+                {completedSteps} de {totalSteps} passos
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowSteps((prev) => !prev)}
+                aria-expanded={showSteps}
+              >
+                {showSteps ? "Ocultar" : "Ver passos"}
+              </button>
+            </div>
+            <div
+              className={styles.stepsBar}
+              role="progressbar"
+              aria-valuenow={completedSteps}
+              aria-valuemin={0}
+              aria-valuemax={totalSteps}
+              aria-label={`${completedSteps} de ${totalSteps} passos concluidos`}
+            >
+              <div
+                className={styles.stepsBarFill}
+                style={{ width: `${stepsPercent}%` }}
+              />
+            </div>
+
+            {showSteps && (
+              <ul className={styles.stepsExpanded} aria-label="Passos da tarefa">
                 {task.steps.map((step) => (
                   <li key={step.id} data-completed={step.completed}>
                     <input
@@ -317,73 +374,82 @@ export function Card({
                   </li>
                 ))}
               </ul>
-            </div>
-          )}
-
-          <SharedBadge
-            isSharedWithMe={task.isSharedWithMe}
-            ownerLabel={task.ownerLabel}
-            isShared={!!task.sharedWithUserId}
-            label="Compartilhada"
-            className={styles.sharedBadge}
-          />
-
-          {isFocused && (
-            <p className={styles.focusState}>
-              <Icon name="MdTimer" aria-hidden="true" /> Em foco ·{" "}
-              {formatRemaining(remaining)} restantes
-            </p>
-          )}
-        </div>
-
-        {task.syncEnabled && (
-          <div className={styles.syncSection}>
-            {task.syncStatus === "SYNCED" && (
-              <p className={styles.syncSuccess}>
-                Sincronizado com o Google Agenda
-              </p>
-            )}
-
-            {task.syncStatus === "ERROR" && (
-              <>
-                <p className={styles.syncError}>
-                  {task.syncError ||
-                    "Falha ao sincronizar com o Google Agenda."}
-                </p>
-
-                <Button.Root
-                  type="button"
-                  className={styles.retryButton}
-                  loading={isRetrying}
-                  onClick={handleRetrySync}
-                >
-                  <span className={styles.retryButtonContent}>
-                    <Icon name="FaSyncAlt" aria-hidden="true" />
-                    <span>Tentar novamente</span>
-                  </span>
-                </Button.Root>
-              </>
             )}
           </div>
         )}
 
-        {!task.completed && (
-          <div className={styles.primaryActions}>
+        {/* Descricao - Progressive Disclosure */}
+        {task.description && (
+          <div className={styles.descriptionSection}>
+            <button
+              type="button"
+              className={styles.descriptionToggle}
+              onClick={() => setShowDescription((prev) => !prev)}
+              aria-expanded={showDescription}
+            >
+              {showDescription ? "Ocultar descricao" : "Ver descricao"}
+            </button>
+            {showDescription && (
+              <p className={styles.descriptionContent}>{task.description}</p>
+            )}
+          </div>
+        )}
+
+        <SharedBadge
+          isSharedWithMe={task.isSharedWithMe}
+          ownerLabel={task.ownerLabel}
+          isShared={!!task.sharedWithUserId}
+          label="Compartilhada"
+          className={styles.sharedBadge}
+        />
+
+        {/* Sincronizacao */}
+        {hasSyncSuccess && (
+          <p className={styles.syncSuccess}>
+            Sincronizado com o Google Agenda
+          </p>
+        )}
+
+        {hasSyncIssue && (
+          <div className={styles.syncSection}>
+            <p className={styles.syncError}>
+              {task.syncError ||
+                "Falha ao sincronizar com o Google Agenda."}
+            </p>
+
+            <Button.Root
+              type="button"
+              className={styles.retryButton}
+              loading={isRetrying}
+              onClick={handleRetrySync}
+            >
+              <span className={styles.retryButtonContent}>
+                <Icon name="FaSyncAlt" aria-hidden="true" />
+                <span>Tentar novamente</span>
+              </span>
+            </Button.Root>
+          </div>
+        )}
+
+        {/* Acoes */}
+        {showPrimaryActions && (
+          <div className={styles.cardActions}>
             {workStatus === "pending" && (
               <Button.Root
                 type="button"
                 loading={isStarting}
+                className={styles.actionPrimary}
                 onClick={handleMarkStarted}
               >
-                <Icon name="FaPlay" aria-hidden="true" /> Começar
+                <Icon name="FaPlay" aria-hidden="true" /> Comecar
               </Button.Root>
             )}
 
             {workStatus === "in_progress" && !isFocused && (
               <Button.Root
                 type="button"
-                variant="secondary"
                 loading={isUpdatingWorkStatus}
+                className={styles.actionPrimary}
                 onClick={() => handleWorkStatus("paused")}
               >
                 <Icon name="FaPause" aria-hidden="true" /> Pausar
@@ -394,6 +460,7 @@ export function Card({
               <Button.Root
                 type="button"
                 loading={isUpdatingWorkStatus}
+                className={styles.actionPrimary}
                 onClick={() => handleWorkStatus("in_progress")}
               >
                 <Icon name="FaPlay" aria-hidden="true" /> Retomar
@@ -403,10 +470,11 @@ export function Card({
             <Button.Root
               type="button"
               variant="secondary"
+              className={styles.actionSecondary}
               onClick={() => router.push(`/home/focus?taskId=${task.id}`)}
             >
               <Icon name="MdTimer" aria-hidden="true" />{" "}
-              {isFocused ? "Abrir foco" : "Focar"}
+              {isFocused ? "Abrir foco" : "Focar nesta tarefa"}
             </Button.Root>
           </div>
         )}
