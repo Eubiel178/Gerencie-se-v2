@@ -88,7 +88,6 @@ export function Card({
   const [isUpdatingWorkStatus, setIsUpdatingWorkStatus] = useState(false);
   const [busyStepId, setBusyStepId] = useState<string | null>(null);
   const [showSteps, setShowSteps] = useState(false);
-  const [showDescription, setShowDescription] = useState(false);
   const removeTask = useTaskStore((state) => state.removeTask);
   const replaceTask = useTaskStore((state) => state.replaceTask);
   const { session: focusSession, remaining } = useFocusSession();
@@ -328,7 +327,12 @@ export function Card({
           )}
         </div>
 
-        {/* Progresso - barra compacta */}
+        {/* Descricao — estilo secundario, line-clamp */}
+        {task.description && (
+          <p className={styles.description}>{task.description}</p>
+        )}
+
+        {/* Progresso */}
         {totalSteps > 0 && (
           <div className={styles.stepsCompact}>
             <div className={styles.stepsCompactSummary}>
@@ -374,23 +378,6 @@ export function Card({
                   </li>
                 ))}
               </ul>
-            )}
-          </div>
-        )}
-
-        {/* Descricao - Progressive Disclosure */}
-        {task.description && (
-          <div className={styles.descriptionSection}>
-            <button
-              type="button"
-              className={styles.descriptionToggle}
-              onClick={() => setShowDescription((prev) => !prev)}
-              aria-expanded={showDescription}
-            >
-              {showDescription ? "Ocultar descricao" : "Ver descricao"}
-            </button>
-            {showDescription && (
-              <p className={styles.descriptionContent}>{task.description}</p>
             )}
           </div>
         )}
