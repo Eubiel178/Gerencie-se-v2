@@ -6,8 +6,8 @@ import * as domain from "@/features/tasks/domain";
 
 import { db } from "@/db/client";
 import { taskAttachments, tasks } from "@/db/schema";
-import { requireUserId } from "@/lib/require-user-id";
-import { MAX_ATTACHMENT_SIZE_BYTES } from "@/lib/upload-limits";
+import { requireUserId } from "@/lib/auth";
+import { MAX_ATTACHMENT_SIZE_BYTES } from "@/lib/security/upload-limits";
 
 const ATTACHMENT_METADATA_COLUMNS = {
   id: taskAttachments.id,

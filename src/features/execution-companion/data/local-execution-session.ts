@@ -4,7 +4,7 @@ import { and, eq } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import { executionSessions } from "@/db/schema";
-import { requireUserId } from "@/lib/require-user-id";
+import { requireUserId } from "@/lib/auth";
 
 import type { IExecutionSession } from "../domain/types";
 

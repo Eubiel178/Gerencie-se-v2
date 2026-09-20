@@ -8,7 +8,7 @@ import { db } from "@/db/client";
 import { emailVerificationCodes, users } from "@/db/schema";
 import {
   getVerificationResendRetryAfterSeconds,
-} from "@/lib/email-verification-send-limit";
+} from "./verification-send-limit";
 
 // 15 minutos — curto o bastante pra não sobreviver muito além de quando a
 // pessoa efetivamente abre o e-mail (janela normal de "acabei de me

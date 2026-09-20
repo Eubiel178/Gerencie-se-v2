@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import { userPreferences } from "@/db/schema";
-import { requireUserId } from "@/lib/require-user-id";
+import { requireUserId } from "@/lib/auth";
 
 /** true = ainda não viu (nem pulou) o tour guiado - mesmo raciocínio de
  * `getOnboardingStatus`: sem linha em `user_preference` ainda (usuário

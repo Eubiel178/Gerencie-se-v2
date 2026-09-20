@@ -17,7 +17,7 @@ import { Icon } from "@/components/icon";
 import { Alert, Form, Input, Button } from "@/components";
 
 import { loginAction } from "@/features/auth/actions";
-import { authErrorMessage } from "@/lib/auth-error-messages";
+import { authErrorMessage } from "@/lib/auth/error-messages";
 
 type FormData = z.infer<typeof validationSchema>;
 

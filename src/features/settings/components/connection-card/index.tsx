@@ -9,7 +9,7 @@ import {
 
 import { Button, Input, Modal, ModalHeader } from "@/components";
 
-import type { GoogleCalendarOption } from "@/lib/google-calendar";
+import type { GoogleCalendarOption } from "@/lib/integrations/google-calendar";
 
 import styles from "./styles.module.css";
 

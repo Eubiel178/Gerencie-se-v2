@@ -4,7 +4,7 @@ import test from "node:test";
 import {
   VERIFICATION_RESEND_COOLDOWN_MS,
   getVerificationResendRetryAfterSeconds,
-} from "./email-verification-send-limit";
+} from "./verification-send-limit";
 
 test("libera o primeiro envio quando ainda não existe código", () => {
   assert.equal(getVerificationResendRetryAfterSeconds(null), null);

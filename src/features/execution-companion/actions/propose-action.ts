@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import { requireUserId } from "@/lib/require-user-id";
+import { requireUserId } from "@/lib/auth";
 import { getMascotFetcher } from "@/features/focus/data/get-focus-fetcher";
 import { GeminiAssistantProvider } from "@/lib/ai/gemini-provider";
 import { validateActionProposal, executeAction, type ActionProposal } from "../services/action-executor";

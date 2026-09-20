@@ -6,7 +6,7 @@ import * as domain from "@/features/events/domain";
 
 import { db } from "@/db/client";
 import { events } from "@/db/schema";
-import { requireUserId } from "@/lib/require-user-id";
+import { requireUserId } from "@/lib/auth";
 
 /**
  * Implementação local (Drizzle + Postgres) dos casos de uso de Event.

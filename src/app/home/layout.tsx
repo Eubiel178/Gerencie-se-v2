@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
-import { isEmailVerified } from "@/lib/email-verification";
+import { isEmailVerified } from "@/lib/email/verification";
 
 import { Header } from "@/components";
 import { Assistant } from "@/features/assistant";

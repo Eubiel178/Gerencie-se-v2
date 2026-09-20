@@ -8,7 +8,7 @@ import {
   getCalendarEventSnapshot,
   isGoogleCalendarConnected,
   updateCalendarEventForTask,
-} from "@/lib/google-calendar";
+} from "@/lib/integrations/google-calendar";
 
 /**
  * Orquestra a sincronização App→Google de UMA tarefa, chamada depois que

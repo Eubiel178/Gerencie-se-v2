@@ -12,7 +12,7 @@ import type { IExecutionSession } from "@/features/execution-companion/domain/ty
 import { sendAssistantMessage } from "@/features/mascot-pet/actions";
 import { confirmAndExecuteAction } from "@/features/execution-companion/actions/propose-action";
 import type { ActionProposal } from "@/features/execution-companion/services/action-executor";
-import { useSpeak } from "@/lib/speak-text";
+import { useSpeak } from "@/lib/speech/speak-text";
 import { useChatHistory } from "../../hooks/use-chat-history";
 
 import styles from "./styles.module.css";

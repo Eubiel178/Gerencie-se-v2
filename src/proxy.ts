@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import { NextResponse } from "next/server";
 
-import authConfig from "@/lib/auth.config";
+import { authConfig } from "@/lib/auth";
 
 // O middleware roda no Edge Runtime, que não suporta o driver `postgres`
 // (Node-only). Por isso ele usa a config "edge-safe" (`auth.config.ts`, sem

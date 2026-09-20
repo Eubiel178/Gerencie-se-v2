@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import { userPreferences } from "@/db/schema";
-import { requireUserId } from "@/lib/require-user-id";
+import { requireUserId } from "@/lib/auth";
 
 // Usado só como último recurso, quando o navegador do usuário ainda não
 // teve chance de informar o fuso de verdade (ver `saveUserTimezoneAction`)

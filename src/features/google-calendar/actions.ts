@@ -2,11 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 
-import { requireUserId } from "@/lib/require-user-id";
+import { requireUserId } from "@/lib/auth";
 import {
   disconnectGoogleCalendar,
   updateSelectedCalendar,
-} from "@/lib/google-calendar";
+} from "@/lib/integrations/google-calendar";
 
 import type { ActionResult } from "@/types/action-result";
 

@@ -4,8 +4,8 @@ import { eq } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import { users } from "@/db/schema";
-import { requireUserId } from "@/lib/require-user-id";
-import { isEmailVerified } from "@/lib/email-verification";
+import { requireUserId } from "@/lib/auth";
+import { isEmailVerified } from "@/lib/email/verification";
 
 import { Auth } from "./components";
 import { Figure, Main } from "../components";

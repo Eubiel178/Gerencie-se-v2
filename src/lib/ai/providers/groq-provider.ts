@@ -3,7 +3,11 @@ import "server-only";
 import Groq from "groq-sdk";
 import type { AIProvider, AIProviderResponse } from "./types";
 
-const MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
+const GROQ_MODELS: readonly string[] = (() => {
+  const primary = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
+  const fallbacks = ["llama-3.1-8b-instant", "mixtral-8x7b-32768"];
+  return [primary, ...fallbacks.filter((m) => m !== primary)];
+})();
 
 let client: Groq | null = null;
 
@@ -17,6 +21,7 @@ function getClient(): Groq | null {
 
 export class GroqProvider implements AIProvider {
   readonly name = "groq";
+  readonly models = GROQ_MODELS;
 
   isAvailable(): boolean {
     return getClient() !== null;
@@ -25,13 +30,16 @@ export class GroqProvider implements AIProvider {
   async generateText(params: {
     prompt: string;
     systemInstruction: string;
+    model?: string;
     operation?: string;
   }): Promise<AIProviderResponse | null> {
     const groq = getClient();
     if (!groq) return null;
 
+    const model = params.model ?? GROQ_MODELS[0];
+
     const completion = await groq.chat.completions.create({
-      model: MODEL,
+      model,
       messages: [
         { role: "system", content: params.systemInstruction },
         { role: "user", content: params.prompt },
@@ -41,21 +49,23 @@ export class GroqProvider implements AIProvider {
     const text = completion.choices[0]?.message?.content?.trim();
     if (!text) return null;
 
-    return { text, model: MODEL };
+    return { text, model };
   }
 
   async generateJSON(params: {
     prompt: string;
     systemInstruction: string;
+    model?: string;
     operation?: string;
   }): Promise<AIProviderResponse | null> {
     const groq = getClient();
     if (!groq) return null;
 
+    const model = params.model ?? GROQ_MODELS[0];
     const jsonPrompt = `${params.prompt}\n\nResponda APENAS com um JSON válido, sem markdown.`;
 
     const completion = await groq.chat.completions.create({
-      model: MODEL,
+      model,
       messages: [
         { role: "system", content: params.systemInstruction },
         { role: "user", content: jsonPrompt },
@@ -66,6 +76,6 @@ export class GroqProvider implements AIProvider {
     const text = completion.choices[0]?.message?.content?.trim();
     if (!text) return null;
 
-    return { text, model: MODEL };
+    return { text, model };
   }
 }

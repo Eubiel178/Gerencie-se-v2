@@ -7,8 +7,8 @@ import * as domain from "@/features/routine/domain";
 
 import { db } from "@/db/client";
 import { routineItemLogs, routineItems, users } from "@/db/schema";
-import { requireUserId } from "@/lib/require-user-id";
-import { assertAcceptedConnection, resolveSharedWithUserIdOnUpdate } from "@/lib/assert-accepted-connection";
+import { requireUserId } from "@/lib/auth";
+import { assertAcceptedConnection, resolveSharedWithUserIdOnUpdate } from "@/lib/auth/assert-accepted-connection";
 
 /**
  * Implementação local (Drizzle + Postgres) dos casos de uso de RoutineItem.

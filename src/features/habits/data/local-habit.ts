@@ -7,8 +7,8 @@ import * as domain from "@/features/habits/domain";
 
 import { db } from "@/db/client";
 import { habitLogs, habits, users } from "@/db/schema";
-import { requireUserId } from "@/lib/require-user-id";
-import { assertAcceptedConnection, resolveSharedWithUserIdOnUpdate } from "@/lib/assert-accepted-connection";
+import { requireUserId } from "@/lib/auth";
+import { assertAcceptedConnection, resolveSharedWithUserIdOnUpdate } from "@/lib/auth/assert-accepted-connection";
 
 const STREAK_WINDOW_DAYS = 60;
 

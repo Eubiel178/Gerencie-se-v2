@@ -55,4 +55,4 @@ export function renderVerificationCodeEmail({ code }: VerificationCodeEmailParam
   </body>
 </html>`;
 }
-import { renderSpamFolderHint } from "@/lib/email-template-hints";
+import { renderSpamFolderHint } from "./template-hints";

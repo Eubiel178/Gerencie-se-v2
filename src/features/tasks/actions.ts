@@ -6,8 +6,8 @@ import * as domain from "@/features/tasks/domain";
 import { getTaskFetcher } from "@/features/tasks/data/get-task-fetcher";
 import { createTaskSchema, updateTaskSchema } from "@/validation/task-schema";
 
-import { requireUserId } from "@/lib/require-user-id";
-import { deleteCalendarEventForTask } from "@/lib/google-calendar";
+import { requireUserId } from "@/lib/auth";
+import { deleteCalendarEventForTask } from "@/lib/integrations/google-calendar";
 import { getMascotFetcher } from "@/features/focus/data/get-focus-fetcher";
 
 import { db } from "@/db/client";

@@ -6,7 +6,7 @@ import * as domain from "@/features/running/domain";
 
 import { db } from "@/db/client";
 import { runningSessions } from "@/db/schema";
-import { requireUserId } from "@/lib/require-user-id";
+import { requireUserId } from "@/lib/auth";
 
 export class LocalRunning
   implements

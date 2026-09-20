@@ -5,7 +5,7 @@ import { validationSchema } from "@/validation/goal-schema";
 import { IGoal } from "@/features/goals/domain";
 import { LoadAcceptedConnections } from "@/features/connections/domain";
 
-export { PRIORITY_OPTIONS, PRIORITY_LABELS } from "@/lib/priority";
+export { PRIORITY_OPTIONS, PRIORITY_LABELS } from "@/lib/shared/priority";
 
 export interface FormData extends z.infer<typeof validationSchema> {}
 

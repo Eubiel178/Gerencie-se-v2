@@ -3,8 +3,8 @@ import { and, eq, isNotNull, isNull, lt, or } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import { executionSessions, tasks } from "@/db/schema";
-import { isValidCronSecret } from "@/lib/cron-auth";
-import { sendPushToUser } from "@/lib/web-push";
+import { isValidCronSecret } from "@/lib/integrations/cron-auth";
+import { sendPushToUser } from "@/lib/notifications/web-push";
 
 /**
  * Check-in push para sessões de execução paradas ou pausadas há muito tempo.

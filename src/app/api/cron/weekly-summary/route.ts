@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import { userPreferences } from "@/db/schema";
-import { isValidCronSecret } from "@/lib/cron-auth";
+import { isValidCronSecret } from "@/lib/integrations/cron-auth";
 import { getWeeklySummaryForUser } from "@/features/weekly-summary/get-weekly-summary-for-user";
 import { sendWeeklySummaryEmail } from "@/features/weekly-summary/send-weekly-summary";
 

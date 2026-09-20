@@ -2,7 +2,7 @@ import "server-only";
 
 import nodemailer from "nodemailer";
 
-import { wasSmtpDeliveryAccepted } from "@/lib/smtp-delivery";
+import { wasSmtpDeliveryAccepted } from "./smtp-delivery";
 
 /**
  * Envio de e-mail transacional (convites, redefinição de senha, alerta

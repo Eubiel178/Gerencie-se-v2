@@ -6,7 +6,7 @@ import * as domain from "@/features/connections/domain";
 
 import { db } from "@/db/client";
 import { connections, users } from "@/db/schema";
-import { requireCurrentUser } from "@/lib/require-user-id";
+import { requireCurrentUser } from "@/lib/auth";
 import { sendEmail } from "@/lib/email";
 import { normalizeEmail } from "@/utils/normalize-email";
 import { inviteEmailHtml } from "../email-templates";

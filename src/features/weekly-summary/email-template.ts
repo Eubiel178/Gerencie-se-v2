@@ -1,5 +1,5 @@
 import { WeeklySummary } from "./types";
-import { renderSpamFolderHint } from "@/lib/email-template-hints";
+import { renderSpamFolderHint } from "@/lib/email/template-hints";
 
 // E-mail = HTML "old school": sem CSS externo, sem flexbox/grid (suporte
 // inconsistente entre clientes) — tabela + estilo inline, mesma técnica

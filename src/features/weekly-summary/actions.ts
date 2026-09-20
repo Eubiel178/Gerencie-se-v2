@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import { userPreferences } from "@/db/schema";
-import { requireUserId } from "@/lib/require-user-id";
+import { requireUserId } from "@/lib/auth";
 
 import { getWeeklySummaryForCurrentUser } from "./get-weekly-summary";
 import { sendWeeklySummaryEmail } from "./send-weekly-summary";

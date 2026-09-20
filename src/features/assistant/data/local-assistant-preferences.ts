@@ -7,8 +7,8 @@ import * as domain from "@/features/assistant/domain";
 
 import { db } from "@/db/client";
 import { userPreferences } from "@/db/schema";
-import { requireUserId } from "@/lib/require-user-id";
-import { getOrCreateUserPreferencesRow } from "@/lib/get-or-create-user-preferences";
+import { requireUserId } from "@/lib/auth";
+import { getOrCreateUserPreferencesRow } from "@/lib/shared/get-or-create-user-preferences";
 
 // No máximo 5 interrupções auto-abertas por dia — depois disso o
 // widget continua existindo (avatar visível), só para de auto-abrir o

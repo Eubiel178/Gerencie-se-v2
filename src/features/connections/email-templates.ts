@@ -1,5 +1,5 @@
-import { appUrl } from "@/lib/app-url";
-import { renderSpamFolderHint } from "@/lib/email-template-hints";
+import { appUrl } from "@/lib/shared/app-url";
+import { renderSpamFolderHint } from "@/lib/email/template-hints";
 
 // Realinhado ao mesmo sistema visual dos outros e-mails transacionais
 // (ver `src/lib/password-reset-email.ts`, `src/lib/login-alert-email.ts`,

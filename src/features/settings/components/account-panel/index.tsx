@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Alert, Button, Form, Input } from "@/components";
-import { formatFileSize, MAX_ATTACHMENT_SIZE_BYTES } from "@/lib/upload-limits";
+import { formatFileSize, MAX_ATTACHMENT_SIZE_BYTES } from "@/lib/security/upload-limits";
 import { validationSchema } from "@/validation/profile-schema";
 import { updateAvatarAction, updateProfileAction } from "@/features/profile/actions";
 import { ProfileOverview } from "@/features/profile/get-profile-overview";

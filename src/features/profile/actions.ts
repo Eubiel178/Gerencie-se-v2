@@ -7,8 +7,8 @@ import sharp from "sharp";
 
 import { db } from "@/db/client";
 import { users, userPreferences } from "@/db/schema";
-import { requireUserId } from "@/lib/require-user-id";
-import { isFileTooLarge, isAvatarTypeAllowed, formatFileSize, MAX_ATTACHMENT_SIZE_BYTES } from "@/lib/upload-limits";
+import { requireUserId } from "@/lib/auth";
+import { isFileTooLarge, isAvatarTypeAllowed, formatFileSize, MAX_ATTACHMENT_SIZE_BYTES } from "@/lib/security/upload-limits";
 import { validationSchema } from "@/validation/profile-schema";
 import { changePasswordSchema } from "@/validation/change-password-schema";
 

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { renderVerificationCodeEmail } from "./email-verification-email";
+import { renderVerificationCodeEmail } from "./verification-email";
 
 test("e-mail de verificação não usa nome de perfil", () => {
   const email = renderVerificationCodeEmail({ code: "123456" });

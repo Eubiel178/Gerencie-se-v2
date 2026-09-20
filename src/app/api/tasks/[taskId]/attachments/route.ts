@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { getTaskAttachmentFetcher } from "@/features/tasks/data/get-task-attachment-fetcher";
-import { MAX_ATTACHMENT_SIZE_BYTES, formatFileSize, isAttachmentTypeAllowed } from "@/lib/upload-limits";
+import { MAX_ATTACHMENT_SIZE_BYTES, formatFileSize, isAttachmentTypeAllowed } from "@/lib/security/upload-limits";
 
 const TOO_LARGE_MESSAGE = `Arquivo muito grande. O tamanho máximo permitido é ${formatFileSize(MAX_ATTACHMENT_SIZE_BYTES)} por arquivo.`;
 const TYPE_NOT_ALLOWED_MESSAGE = "Tipo de arquivo não permitido. Envie imagens, PDF ou documentos de texto/planilha/apresentação.";

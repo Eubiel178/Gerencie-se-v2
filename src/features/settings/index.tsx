@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
-import { requireUserId } from "@/lib/require-user-id";
+import { requireUserId } from "@/lib/auth";
 import { isGoogleAccountLinked } from "@/lib/auth";
-import { getGoogleConnection, listUserCalendars } from "@/lib/google-calendar";
+import { getGoogleConnection, listUserCalendars } from "@/lib/integrations/google-calendar";
 
 import { ThemeToggle } from "@/design-system/theme/theme-toggle";
 

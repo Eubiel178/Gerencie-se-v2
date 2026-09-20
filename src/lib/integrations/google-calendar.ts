@@ -8,7 +8,7 @@ import { eq } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import { googleConnections } from "@/db/schema";
-import { decryptToken, encryptToken } from "@/lib/token-encryption";
+import { decryptToken, encryptToken } from "@/lib/security/token-encryption";
 import { getUserTimezone } from "@/features/profile/get-user-timezone";
 
 // Precisa dos plugins `utc`+`timezone` (não vem no dayjs "puro") pra

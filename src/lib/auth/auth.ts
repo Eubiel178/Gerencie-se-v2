@@ -8,10 +8,10 @@ import { and, eq } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import { accounts, sessions, users, verificationTokens } from "@/db/schema";
-import { handleFailedLoginAttempt, handleSuccessfulLogin } from "@/lib/login-attempt-tracker";
+import { handleFailedLoginAttempt, handleSuccessfulLogin } from "./login-attempt-tracker";
 import { normalizeEmail } from "@/utils/normalize-email";
 
-import authConfig from "./auth.config";
+import authConfig from "./config";
 
 /**
  * Configuração completa do Auth.js — usada nas rotas de API, Server Actions

@@ -1,5 +1,5 @@
-import { requireUserId } from "@/lib/require-user-id";
-import { isGoogleCalendarConnected } from "@/lib/google-calendar";
+import { requireUserId } from "@/lib/auth";
+import { isGoogleCalendarConnected } from "@/lib/integrations/google-calendar";
 import { syncTasksFromGoogle } from "@/features/tasks/sync";
 import { getConnectionFetcher } from "@/features/connections/data/get-connection-fetcher";
 

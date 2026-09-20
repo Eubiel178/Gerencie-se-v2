@@ -6,7 +6,7 @@ import * as domain from "@/features/focus/domain";
 
 import { db } from "@/db/client";
 import { mascotStates } from "@/db/schema";
-import { requireUserId } from "@/lib/require-user-id";
+import { requireUserId } from "@/lib/auth";
 
 export class LocalMascot implements domain.GetMascotState, domain.AddMascotXp, domain.UpdateMascot {
   async getMascot(): Promise<domain.IMascotState> {

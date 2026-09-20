@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 
-import { requireUserId } from "@/lib/require-user-id";
-import { toCsv } from "@/lib/csv";
-import { toXlsx } from "@/lib/xlsx";
+import { requireUserId } from "@/lib/auth";
+import { toCsv } from "@/lib/export/csv";
+import { toXlsx } from "@/lib/export/xlsx";
 
 import { getTaskFetcher } from "@/features/tasks/data/get-task-fetcher";
 import { getHabitFetcher } from "@/features/habits/data/get-habit-fetcher";

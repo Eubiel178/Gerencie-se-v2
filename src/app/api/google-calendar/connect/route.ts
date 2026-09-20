@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import {
   GOOGLE_CALENDAR_STATE_COOKIE,
   getGoogleCalendarAuthUrl,
-} from "@/lib/google-calendar";
+} from "@/lib/integrations/google-calendar";
 
 /**
  * Início do fluxo de conexão do Google Agenda — totalmente separado do

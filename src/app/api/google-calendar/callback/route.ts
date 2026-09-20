@@ -6,7 +6,7 @@ import {
   exchangeCodeForGoogleCalendarTokens,
   fetchGoogleAccountEmail,
   saveGoogleConnection,
-} from "@/lib/google-calendar";
+} from "@/lib/integrations/google-calendar";
 
 /**
  * Volta do consentimento do Google especificamente para o Calendar — nunca

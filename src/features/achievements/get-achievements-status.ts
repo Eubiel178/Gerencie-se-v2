@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import { achievementUnlocks } from "@/db/schema";
-import { requireUserId } from "@/lib/require-user-id";
+import { requireUserId } from "@/lib/auth";
 import { getMascotFetcher } from "@/features/focus/data/get-focus-fetcher";
 
 import { ITask } from "@/features/tasks/domain";

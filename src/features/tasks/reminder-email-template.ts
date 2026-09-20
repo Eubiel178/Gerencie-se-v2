@@ -37,4 +37,4 @@ export function renderTaskReminderEmail(taskTitle: string, label: string): strin
   </body>
 </html>`;
 }
-import { renderSpamFolderHint } from "@/lib/email-template-hints";
+import { renderSpamFolderHint } from "@/lib/email/template-hints";

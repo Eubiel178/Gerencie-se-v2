@@ -6,7 +6,7 @@ import * as domain from "@/features/focus/domain";
 
 import { db } from "@/db/client";
 import { focusSessions } from "@/db/schema";
-import { requireUserId } from "@/lib/require-user-id";
+import { requireUserId } from "@/lib/auth";
 
 // 1 XP por minuto focado, arredondado pra baixo — sessões com menos de um
 // minuto não rendem XP (evita ganhar recompensa por iniciar e cancelar na

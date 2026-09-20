@@ -8,24 +8,24 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import { users } from "@/db/schema";
 import { signIn } from "@/lib/auth";
-import { appUrl } from "@/lib/app-url";
+import { appUrl } from "@/lib/shared/app-url";
 import { sendEmail } from "@/lib/email";
-import { requireUserId } from "@/lib/require-user-id";
+import { requireUserId } from "@/lib/auth";
 import {
   createPasswordResetToken,
   consumePasswordResetToken,
-} from "@/lib/password-reset";
+} from "@/lib/auth/password-reset";
 import {
   renderPasswordResetEmail,
   renderGoogleOnlyAccountEmail,
-} from "@/lib/password-reset-email";
+} from "@/lib/auth/password-reset-email";
 import {
   createEmailVerificationCode,
   getEmailVerificationSendAvailability,
   restorePreviousEmailVerificationCode,
   verifyEmailVerificationCode,
-} from "@/lib/email-verification";
-import { renderVerificationCodeEmail } from "@/lib/email-verification-email";
+} from "@/lib/email/verification";
+import { renderVerificationCodeEmail } from "@/lib/email/verification-email";
 import { validationSchema as loginSchema } from "@/validation/login-schema";
 import { validationSchema as registerSchema } from "@/validation/register-schema";
 import { validationSchema as forgotPasswordSchema } from "@/validation/forgot-password-schema";

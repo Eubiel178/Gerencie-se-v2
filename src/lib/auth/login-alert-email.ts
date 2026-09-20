@@ -58,4 +58,4 @@ export function renderLoginAlertEmail({ name }: LoginAlertEmailParams): string {
   </body>
 </html>`;
 }
-import { renderSpamFolderHint } from "@/lib/email-template-hints";
+import { renderSpamFolderHint } from "@/lib/email/template-hints";

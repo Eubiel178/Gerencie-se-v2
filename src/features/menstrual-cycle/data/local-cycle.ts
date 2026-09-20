@@ -6,7 +6,7 @@ import * as domain from "@/features/menstrual-cycle/domain";
 
 import { db } from "@/db/client";
 import { menstrualCycleEntries } from "@/db/schema";
-import { requireUserId } from "@/lib/require-user-id";
+import { requireUserId } from "@/lib/auth";
 
 export class LocalCycle
   implements domain.CreateCycleEntry, domain.DeleteCycleEntry, domain.LoadAllCycleEntries

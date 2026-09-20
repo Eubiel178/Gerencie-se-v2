@@ -3,8 +3,8 @@ import { and, eq, inArray, isNotNull } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import { tasks, taskReminderSent, users, userPreferences } from "@/db/schema";
-import { isValidCronSecret } from "@/lib/cron-auth";
-import { sendPushToUser } from "@/lib/web-push";
+import { isValidCronSecret } from "@/lib/integrations/cron-auth";
+import { sendPushToUser } from "@/lib/notifications/web-push";
 import { sendEmail } from "@/lib/email";
 import { deserializeReminders } from "@/features/tasks/data/local-task";
 import { computeDueReminders, reminderSentKey, ReminderCandidateTask } from "@/features/tasks/domain/due-reminders";

@@ -4,8 +4,8 @@ import { eq } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import { userPreferences } from "@/db/schema";
-import { requireUserId } from "@/lib/require-user-id";
-import { isGoogleCalendarConnected } from "@/lib/google-calendar";
+import { requireUserId } from "@/lib/auth";
+import { isGoogleCalendarConnected } from "@/lib/integrations/google-calendar";
 
 import { ITask } from "@/features/tasks/domain";
 import { IHabit } from "@/features/habits/domain";

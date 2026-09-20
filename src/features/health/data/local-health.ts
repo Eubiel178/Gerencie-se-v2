@@ -7,7 +7,7 @@ import * as domain from "@/features/health/domain";
 
 import { db } from "@/db/client";
 import { healthCheckups } from "@/db/schema";
-import { requireUserId } from "@/lib/require-user-id";
+import { requireUserId } from "@/lib/auth";
 
 export class LocalHealth
   implements

@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 
-import { requireUserId } from "@/lib/require-user-id";
-import { synthesizeSpeech } from "@/lib/edge-tts";
-import { isMascotSpeechValid } from "@/lib/mascot-speech";
+import { requireUserId } from "@/lib/auth";
+import { synthesizeSpeech } from "@/lib/speech/edge-tts";
+import { isMascotSpeechValid } from "@/lib/speech/mascot-speech";
 
 /**
  * Só existe pra dar voz à fala do mascote (ver `speak()` em

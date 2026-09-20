@@ -5,12 +5,12 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import { loginAttempts, users } from "@/db/schema";
 import { sendEmail } from "@/lib/email";
-import { renderLoginAlertEmail } from "@/lib/login-alert-email";
+import { renderLoginAlertEmail } from "./login-alert-email";
 import {
   recordFailedAttempt,
   resetLoginAttemptState,
   type LoginAttemptState,
-} from "@/lib/login-attempt-guard";
+} from "./login-attempt-guard";
 
 async function loadState(userId: string): Promise<LoginAttemptState | null> {
   const [row] = await db.select().from(loginAttempts).where(eq(loginAttempts.userId, userId)).limit(1);

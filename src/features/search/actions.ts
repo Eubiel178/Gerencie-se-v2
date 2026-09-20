@@ -4,7 +4,7 @@ import { and, eq, ilike } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import { events, goals, habits, readingItems, tasks } from "@/db/schema";
-import { requireUserId } from "@/lib/require-user-id";
+import { requireUserId } from "@/lib/auth";
 
 export type SearchResultType = "task" | "habit" | "goal" | "event" | "reading";
 

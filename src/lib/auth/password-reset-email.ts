@@ -99,4 +99,4 @@ export function renderPasswordResetEmail({ name, resetUrl }: PasswordResetEmailP
   </body>
 </html>`;
 }
-import { renderSpamFolderHint } from "@/lib/email-template-hints";
+import { renderSpamFolderHint } from "@/lib/email/template-hints";

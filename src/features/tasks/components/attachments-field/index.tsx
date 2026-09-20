@@ -10,7 +10,7 @@ import {
   MAX_ATTACHMENT_SIZE_BYTES,
   formatFileSize,
   isFileTooLarge,
-} from "@/lib/upload-limits";
+} from "@/lib/security/upload-limits";
 
 import styles from "./styles.module.css";
 
