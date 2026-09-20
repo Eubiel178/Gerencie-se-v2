@@ -71,7 +71,7 @@ export function TasksList({ tasksList, isGoogleConnected, connections }: TasksLi
             <Card
               key={task.id}
               task={task}
-              tagLabel={"#" + formTags.tagsLabels[task.tag]}
+              tagLabel={formTags.tagsLabels[task.tag]}
               isGoogleConnected={isGoogleConnected}
               connections={connections}
             />

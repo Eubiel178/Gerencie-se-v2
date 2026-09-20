@@ -228,12 +228,13 @@ export function Card({
               {PRIORITY_LABELS[task.priority]}
             </span>
 
-            <span className={styles.metaSep} aria-hidden="true">·</span>
-
-            <span className={styles.tagLabel}>{tagLabel}</span>
+            <span className={styles.metaGroup}>
+              <span className={styles.metaSep} aria-hidden="true">·</span>
+              <span className={styles.tagLabel}>{tagLabel}</span>
+            </span>
 
             {task.scheduledAt && (
-              <>
+              <span className={styles.metaGroup}>
                 <span className={styles.metaSep} aria-hidden="true">·</span>
                 <span
                   className={styles.deadline}
@@ -241,26 +242,29 @@ export function Card({
                 >
                   {formatDeadline(task.scheduledAt)}
                 </span>
-              </>
+              </span>
             )}
 
             {task.recurrence !== "none" && (
-              <>
+              <span className={styles.metaGroup}>
                 <span className={styles.metaSep} aria-hidden="true">·</span>
                 <span className={styles.recurrenceInfo}>
                   {task.recurrence === "daily" ? "Diaria" : "Semanal"}
                 </span>
-              </>
+              </span>
             )}
 
             {(task.attachmentCount ?? 0) > 0 && (
-              <>
+              <span className={styles.metaGroup}>
                 <span className={styles.metaSep} aria-hidden="true">·</span>
-                <span className={styles.attachmentInfo}>
-                  {task.attachmentCount}{" "}
-                  {task.attachmentCount === 1 ? "anexo" : "anexos"}
+                <span
+                  className={styles.attachmentInfo}
+                  aria-label={`${task.attachmentCount} ${task.attachmentCount === 1 ? "anexo" : "anexos"}`}
+                >
+                  <Icon name="FaPaperclip" aria-hidden="true" size={10} />
+                  {task.attachmentCount}
                 </span>
-              </>
+              </span>
             )}
           </div>
         </div>
