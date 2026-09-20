@@ -27,6 +27,7 @@ import styles from "./styles.module.css";
 import { useTaskStore } from "@/features/tasks/task-store";
 import { emitMascotEvent } from "@/features/mascot-pet";
 import { useFocusSession } from "@/features/focus/focus-session-context";
+import { useExecutionCompanionStore } from "@/features/execution-companion";
 
 function formatDeadline(value: string): string {
   const date = new Date(value);
@@ -88,8 +89,10 @@ export function Card({
   const [busyStepId, setBusyStepId] = useState<string | null>(null);
   const removeTask = useTaskStore((state) => state.removeTask);
   const replaceTask = useTaskStore((state) => state.replaceTask);
-  const { session, remaining } = useFocusSession();
-  const isFocused = session?.taskId === task.id;
+  const { session: focusSession, remaining } = useFocusSession();
+  const isFocused = focusSession?.taskId === task.id;
+  const executionSession = useExecutionCompanionStore((s) => s.session);
+  const isExecuting = executionSession?.taskId === task.id && executionSession.status === "active";
   const workStatus =
     task.workStatus ?? (task.startedAt ? "in_progress" : "pending");
 
@@ -249,6 +252,12 @@ export function Card({
             {workStatus === "paused" && !task.completed && (
               <span className={styles.pausedBadge}>
                 <Icon name="FaPause" aria-hidden="true" size={10} /> Pausada
+              </span>
+            )}
+            {isExecuting && (
+              <span className={styles.startedBadge}>
+                <Icon name="FaPlay" aria-hidden="true" size={10} />
+                Fazendo agora
               </span>
             )}
           </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useState, useEffect, useRef, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 
 import { Button } from "@/components";
@@ -8,13 +8,19 @@ import { Icon } from "@/components/icon";
 
 import { IAssistantMessage } from "@/features/assistant/domain";
 import { IMascotState } from "@/features/focus/domain";
+import type { IExecutionSession } from "@/features/execution-companion/domain/types";
+import { sendAssistantMessage } from "@/features/mascot-pet/actions";
+import { confirmAndExecuteAction } from "@/features/execution-companion/actions/propose-action";
+import type { ActionProposal } from "@/features/execution-companion/services/action-executor";
 import { useSpeak } from "@/lib/speak-text";
+import { useChatHistory } from "../../hooks/use-chat-history";
 
 import styles from "./styles.module.css";
 
 type Mood = "idle" | "speaking" | "warning" | "celebrating";
 
-function moodFor(message: IAssistantMessage | null): Mood {
+function moodFor(message: IAssistantMessage | null, hasExecution: boolean): Mood {
+  if (hasExecution) return "speaking";
   if (!message) return "idle";
 
   const messages: Record<IAssistantMessage["tone"], Mood> = {
@@ -26,26 +32,30 @@ function moodFor(message: IAssistantMessage | null): Mood {
   return messages[message.tone];
 }
 
+const ACTION_LABELS: Record<string, string> = {
+  "task.create": "Criar tarefa",
+  "task.complete": "Concluir tarefa",
+  "task.updateDueDate": "Mudar prazo",
+  "task.addStep": "Adicionar passo",
+  "task.startExecution": "Iniciar acompanhamento",
+};
+
+const RISK_LABELS: Record<string, string> = {
+  low: "baixo",
+  medium: "médio",
+  high: "alto",
+};
+
 interface WidgetProps {
   initialMessage: IAssistantMessage | null;
   reducedPresence: boolean;
-  // Mesmo personagem do Focus (nome/espécie/voz) — o widget do
-  // assistente É o mascote, não um segundo bichinho à parte.
   mascot: IMascotState;
+  executionSession: IExecutionSession | null;
+  executionTaskTitle: string | null;
 }
 
 const DISMISSED_KEY = "assistant-dismissed-message";
 
-// Mostrado quando não há mensagem contextual nenhuma - sem isso, clicar
-// no avatar sem mensagem pendente não fazia NADA (`if (!message) return`),
-// o que lia como o botão estar quebrado (achado relatado: "eu clico nao
-// faz nada"). O avatar sempre responde ao clique agora.
-const FALLBACK_TEXT = "Sem novidades por agora. Continue assim!";
-
-// `sessionStorage` não existe durante o render no servidor —
-// `useSyncExternalStore` (não `useEffect` + `setState`) é o jeito de ler
-// isso sem arriscar mismatch de hidratação, mesmo padrão de
-// `design-system/theme/use-theme.ts`.
 function subscribeNoop() {
   return () => {};
 }
@@ -62,14 +72,6 @@ function getDismissedServerSnapshot(): string | null {
   return null;
 }
 
-// Mesmo breakpoint mobile documentado em `tokens.css`. Abrir o balão
-// SOZINHO numa tela pequena não tem como respeitar o conteúdo por trás -
-// diferente do desktop, onde sempre sobra espaço, no celular o balão
-// (mesmo com o teto de altura de `.bubble`) cobria campos e botões de
-// verdade (ex.: "Registrar" no Ciclo, "Concluir agora"/"Cancelar" no
-// Foco com sessão ativa) - achado em auditoria visual mobile. O aviso de
-// mensagem nova continua existindo (`pingDot`) e o avatar sempre responde
-// ao toque - só a abertura AUTOMÁTICA fica reservada pro desktop.
 const MOBILE_QUERY = "(max-width: 640px)";
 
 function subscribeToMobileQuery(callback: () => void) {
@@ -86,32 +88,34 @@ function getIsMobileServerSnapshot(): boolean {
   return false;
 }
 
-/**
- * Presença discreta do JARVIS: um avatar fixo no canto, que abre um balão
- * de fala quando há uma mensagem contextual. Nunca interrompe sozinho -
- * o balão só some quando o usuário clica em fechar, e com presença
- * reduzida OU numa tela pequena (`isMobile`) o balão nem abre
- * automaticamente (fica só o avatar com o `pingDot` avisando que tem
- * mensagem nova) - no celular não sobra espaço garantido pra abrir por
- * cima de conteúdo sem cobrir algo de verdade.
- *
- * `initialMessage` vem de nova busca no servidor a cada
- * `router.refresh()` (chamado por praticamente toda ação do app) —
- * `dismissedText` (via `sessionStorage`) garante que a MESMA mensagem já
- * dispensada não reapareça sozinha se o componente remontar antes do
- * servidor gerar uma mensagem realmente nova. `manuallyToggled` é a
- * abertura/fechamento manual pelo avatar, que sempre pode sobrepor essa
- * regra (mesmo com presença reduzida ou mensagem já dispensada).
- */
+function getExecutionText(
+  executionSession: IExecutionSession,
+  taskTitle: string | null,
+): string {
+  const title = taskTitle ?? "sua tarefa";
+  if (executionSession.status === "paused") {
+    return `Você estava fazendo: ${title}. Quando quiser voltar, é só clicar.`;
+  }
+  return `Você está fazendo: ${title}. Continue quando quiser.`;
+}
+
 export function Widget({
   initialMessage,
   reducedPresence,
   mascot,
+  executionSession,
+  executionTaskTitle,
 }: WidgetProps) {
   const pathname = usePathname();
   const [message, setMessage] = useState(initialMessage);
+  const [chatInput, setChatInput] = useState("");
+  const [chatLoading, setChatLoading] = useState(false);
   const [manuallyToggled, setManuallyToggled] = useState<boolean | null>(null);
+  const [pendingProposal, setPendingProposal] = useState<ActionProposal | null>(null);
+  const [proposalLoading, setProposalLoading] = useState(false);
   const { isSpeaking, speak: handleSpeak } = useSpeak();
+  const { messages, addUserMessage, addMascotMessage, clearHistory, hydrated } = useChatHistory();
+  const chatEndRef = useRef<HTMLDivElement>(null);
 
   const dismissedText = useSyncExternalStore(
     subscribeNoop,
@@ -124,28 +128,34 @@ export function Widget({
     getIsMobileServerSnapshot,
   );
 
-  const autoOpen =
-    !!message && message.text !== dismissedText && !reducedPresence && !isMobile;
-  const isOpen = manuallyToggled ?? autoOpen;
-  const mood = moodFor(message);
-  const displayText = message?.text ?? FALLBACK_TEXT;
+  const hasExecution = !!executionSession;
+  const executionText = hasExecution
+    ? getExecutionText(executionSession, executionTaskTitle)
+    : null;
 
-  // Sempre responde ao clique, com mensagem pendente ou não - antes,
-  // sem mensagem, clicar não fazia nada (achado relatado). Sem
-  // mensagem de verdade, o balão mostra `FALLBACK_TEXT` em vez de ficar
-  // vazio.
+  const initialText = executionText ?? message?.text ?? null;
+  const hasChatHistory = hydrated && messages.length > 0;
+
+  const autoOpen =
+    (!!initialText || hasChatHistory) && initialText !== dismissedText && !reducedPresence && !isMobile;
+  const isOpen = manuallyToggled ?? autoOpen;
+  const mood = moodFor(message, hasExecution);
+
+  useEffect(() => {
+    if (isOpen && chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [isOpen, messages.length, pendingProposal]);
+
   function handleAvatarClick() {
     setManuallyToggled(!isOpen);
   }
 
   function handleDismiss() {
-    if (message) {
+    if (initialText) {
       try {
-        sessionStorage.setItem(DISMISSED_KEY, message.text);
+        sessionStorage.setItem(DISMISSED_KEY, initialText);
       } catch {
-        // sessionStorage indisponível (modo privado etc.) — o dismiss desta
-        // sessão de render continua funcionando, só não sobrevive a um
-        // remount do componente.
       }
     }
 
@@ -153,32 +163,178 @@ export function Widget({
     setManuallyToggled(null);
   }
 
-  // O Foco já tem seu próprio balão do mesmo mascote, contextualizado pro
-  // que está acontecendo ali (`features/focus/components/mascot`) - os
-  // dois juntos mostravam falas quase idênticas ao mesmo tempo, competindo
-  // por atenção sem agregar nada (achado em auditoria visual). Mesmo
-  // padrão de `FocusMiniWidget`, que já se esconde nessa rota pelo mesmo
-  // motivo (o painel de Foco já mostra tudo que ele mostraria).
+  async function handleSendChat() {
+    const text = chatInput.trim();
+    if (!text || chatLoading) return;
+
+    setChatLoading(true);
+    setChatInput("");
+    addUserMessage(text);
+
+    try {
+      // UMA chamada server-side — interpreta ação E gera resposta
+      const result = await sendAssistantMessage(text);
+
+      if (result.proposal) {
+        // Gemini detectou uma ação controlada
+        setPendingProposal(result.proposal);
+      } else if (result.message) {
+        // Resposta de chat (Gemini ou fallback context-aware)
+        addMascotMessage(result.message);
+        setMessage(null);
+      }
+    } catch {
+      addMascotMessage("Algo deu errado. Tenta de novo.");
+    } finally {
+      setChatLoading(false);
+    }
+  }
+
+  async function handleConfirmAction() {
+    if (!pendingProposal) return;
+
+    setProposalLoading(true);
+    try {
+      const result = await confirmAndExecuteAction({
+        action: pendingProposal.action,
+        params: pendingProposal.params,
+      });
+
+      if (result.error) {
+        addMascotMessage(`Não consegui: ${result.error}`);
+      } else {
+        const label = ACTION_LABELS[pendingProposal.action] ?? pendingProposal.action;
+        addMascotMessage(`${label} feito!`);
+      }
+    } catch {
+      addMascotMessage("Algo deu errado ao executar. Tenta de novo.");
+    } finally {
+      setPendingProposal(null);
+      setProposalLoading(false);
+      setMessage(null);
+    }
+  }
+
+  function handleRejectAction() {
+    setPendingProposal(null);
+    addMascotMessage("Tá, cancelei. O que mais?");
+  }
+
+  function handleChatKeyDown(e: React.KeyboardEvent) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSendChat();
+    }
+  }
+
   if (pathname?.startsWith("/home/focus")) return null;
 
   return (
     <div className={styles.wrapper}>
       {isOpen && (
-        <div className={styles.bubble} role="status">
-          <p className={styles.bubbleName}>{mascot.name}</p>
-          <p className={styles.bubbleText}>{displayText}</p>
+        <div className={styles.bubble}>
+          <div className={styles.bubbleHeader}>
+            <p className={styles.bubbleName}>{mascot.name}</p>
+            {hasChatHistory && (
+              <button
+                type="button"
+                className={styles.clearChat}
+                onClick={clearHistory}
+                aria-label="Limpar conversa"
+              >
+                <Icon name="FaTrash" aria-hidden="true" size={10} />
+              </button>
+            )}
+          </div>
 
-          <div className={styles.bubbleActions}>
+          <div className={styles.chatArea}>
+            {!hasChatHistory && initialText && (
+              <div className={styles.chatMsg} data-role="mascot">
+                <p>{initialText}</p>
+              </div>
+            )}
+
+            {messages.map((msg) => (
+              <div key={msg.id} className={styles.chatMsg} data-role={msg.role}>
+                <p>{msg.text}</p>
+              </div>
+            ))}
+
+            {pendingProposal && (
+              <div className={styles.proposalCard}>
+                <div className={styles.proposalHeader}>
+                  <Icon name="FaBolt" aria-hidden="true" size={12} />
+                  <span className={styles.proposalAction}>
+                    {ACTION_LABELS[pendingProposal.action] ?? pendingProposal.action}
+                  </span>
+                </div>
+                <p className={styles.proposalRisk}>
+                  Risco: {RISK_LABELS[pendingProposal.risk] ?? pendingProposal.risk}
+                </p>
+                <div className={styles.proposalActions}>
+                  <Button.Preset
+                    root={{
+                      tone: "highlight",
+                      disabled: proposalLoading,
+                      onClick: handleConfirmAction,
+                    }}
+                    text={{ children: proposalLoading ? "Executando..." : "Confirmar" }}
+                  />
+                  <Button.Preset
+                    root={{
+                      tone: "muted",
+                      disabled: proposalLoading,
+                      onClick: handleRejectAction,
+                    }}
+                    text={{ children: "Cancelar" }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {chatLoading && !pendingProposal && (
+              <div className={styles.chatMsg} data-role="mascot">
+                <p className={styles.typing}>digitando...</p>
+              </div>
+            )}
+
+            <div ref={chatEndRef} />
+          </div>
+
+          <div className={styles.chatActions}>
+            {!hasChatHistory && initialText && (
+              <Button.Preset
+                icon={{
+                  name: "FaVolumeUp",
+                  className: isSpeaking ? styles.speakingIcon : undefined,
+                }}
+                root={{
+                  tone: "muted",
+                  "aria-label": isSpeaking ? "Falando" : `Ouvir ${mascot.name}`,
+                  disabled: isSpeaking,
+                  onClick: () => handleSpeak(initialText),
+                }}
+              />
+            )}
+          </div>
+
+          <div className={styles.chatInput}>
+            <input
+              type="text"
+              value={chatInput}
+              onChange={(e) => setChatInput(e.target.value)}
+              onKeyDown={handleChatKeyDown}
+              placeholder={`Fala com ${mascot.name}...`}
+              disabled={chatLoading}
+              className={styles.chatField}
+            />
             <Button.Preset
-              icon={{
-                name: "FaVolumeUp",
-                className: isSpeaking ? styles.speakingIcon : undefined,
-              }}
+              icon={{ name: "FaPaperPlane" }}
               root={{
                 tone: "muted",
-                "aria-label": isSpeaking ? "Falando" : `Ouvir ${mascot.name}`,
-                disabled: isSpeaking,
-                onClick: () => handleSpeak(displayText),
+                "aria-label": "Enviar mensagem",
+                disabled: chatLoading || !chatInput.trim(),
+                onClick: handleSendChat,
               }}
             />
           </div>
@@ -186,7 +342,7 @@ export function Widget({
           <button
             type="button"
             className={styles.dismiss}
-            aria-label={message ? "Dispensar mensagem do assistente" : "Fechar"}
+            aria-label="Fechar"
             onClick={handleDismiss}
           >
             <Icon name="MdClose" aria-hidden="true" />
@@ -206,13 +362,8 @@ export function Widget({
         aria-expanded={isOpen}
         onClick={handleAvatarClick}
       >
-        {/* Ícone neutro, sem nenhuma ligação com o mascote/bicho - nem
-            sprite (nunca ficava bom, achado relatado várias vezes) nem
-            emoji do bicho (pedido explícito: "eu falei que não queria
-            [o mascote na bolha]"). Só comunica "isto abre uma
-            mensagem", que é literalmente o que o botão faz. */}
         <Icon name="FaCommentDots" aria-hidden="true" className={styles.avatarIcon} />
-        {!isOpen && message && (
+        {!isOpen && (initialText || hasChatHistory) && (
           <span className={styles.pingDot} aria-hidden="true" />
         )}
       </button>

@@ -812,6 +812,51 @@ export const menstrualCycleEntries = pgTable("menstrual_cycle_entry", {
     .$defaultFn(() => new Date()),
 });
 
+/**
+ * Sessão de execução ("Começar comigo") — representa um momento ativo em
+ * que o usuário está trabajando numa tarefa com acompanhamento do mascote.
+ * Uma sessão pode estar ativa, pausada ou concluída. Possui passos
+ * gerados por IA (ou determinísticos) e progresso rastreado.
+ */
+export const executionSessions = pgTable("execution_session", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  taskId: text("task_id")
+    .notNull()
+    .references(() => tasks.id, { onDelete: "cascade" }),
+  status: text("status", {
+    enum: ["active", "paused", "completed", "abandoned"],
+  })
+    .notNull()
+    .default("active"),
+  currentStepIndex: integer("current_step_index").notNull().default(0),
+  startedAt: timestamp("started_at", { mode: "date" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  pausedAt: timestamp("paused_at", { mode: "date" }),
+  completedAt: timestamp("completed_at", { mode: "date" }),
+  updatedAt: timestamp("updated_at", { mode: "date" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  // Último check-in push enviado pra esta sessão (evita spam do cron).
+  lastCheckinSentAt: timestamp("last_checkin_sent_at", { mode: "date" }),
+});
+
+export const executionSessionsRelations = relations(executionSessions, ({ one }) => ({
+  user: one(users, {
+    fields: [executionSessions.userId],
+    references: [users.id],
+  }),
+  task: one(tasks, {
+    fields: [executionSessions.taskId],
+    references: [tasks.id],
+  }),
+}));
+
 export const usersRelations = relations(users, ({ one, many }) => ({
   googleConnection: one(googleConnections, {
     fields: [users.id],
@@ -829,6 +874,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
     fields: [users.id],
     references: [userPreferences.userId],
   }),
+  executionSessions: many(executionSessions),
 }));
 
 export const goalsRelations = relations(goals, ({ one, many }) => ({
@@ -862,6 +908,7 @@ export const tasksRelations = relations(tasks, ({ one, many }) => ({
     references: [goals.id],
   }),
   steps: many(taskSteps),
+  executionSessions: many(executionSessions),
 }));
 
 export const taskStepsRelations = relations(taskSteps, ({ one }) => ({

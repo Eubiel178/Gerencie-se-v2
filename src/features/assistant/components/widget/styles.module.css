@@ -11,26 +11,31 @@
 
 .bubble {
   position: relative;
-  max-width: 18rem;
-  /* Limite de altura + scroll interno: numa tela baixa (celular), um
-     balão sem teto podia crescer o bastante pra cobrir um cartão ou
-     campo inteiro atrás dele (achado em auditoria visual mobile — a
-     mesma altura sem limite em telas de ~700-800px de altura chegava a
-     tampar conteúdo real). O balão nunca precisa de mais que uma
-     mensagem curta + o botão de ouvir, então este teto é generoso, não
-     apertado. */
-  max-height: min(60vh, 20rem);
-  overflow-y: auto;
-  padding: var(--space-3) var(--space-6) var(--space-3) var(--space-3);
+  width: 20rem;
+  max-height: min(60vh, 24rem);
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-3);
+  padding-top: 0;
   border-radius: var(--radius-lg);
   background: var(--color-surface-elevated);
   border: 1px solid var(--color-border);
   box-shadow: 0 0.5rem 1.5rem var(--color-shadow);
   animation: pop var(--duration-base) var(--easing-standard);
+  overflow: hidden;
+}
+
+.bubbleHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
 }
 
 .bubbleName {
-  margin: 0 0 var(--space-1);
+  margin: 0;
   color: var(--color-text-muted);
   font-size: var(--font-size-xs);
   font-weight: 700;
@@ -38,23 +43,139 @@
   letter-spacing: 0.03em;
 }
 
-.bubbleText {
-  margin: 0;
-  color: var(--color-text);
+.clearChat {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 0;
+}
+.clearChat:hover {
+  background: var(--color-border);
+  color: var(--color-danger);
+}
+
+.chatArea {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+  min-height: 4rem;
+  max-height: min(45vh, 16rem);
+}
+
+.chatMsg {
+  max-width: 85%;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
   line-height: var(--line-height-base);
+  color: var(--color-text);
+  word-break: break-word;
 }
 
-.bubbleActions {
+.chatMsg p {
+  margin: 0;
+}
+
+.chatMsg[data-role="user"] {
+  align-self: flex-end;
+  background: var(--color-highlight);
+  color: var(--color-text-inverse, #fff);
+  border-bottom-right-radius: var(--radius-xs);
+}
+
+.chatMsg[data-role="mascot"] {
+  align-self: flex-start;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-bottom-left-radius: var(--radius-xs);
+}
+
+.typing {
+  color: var(--color-text-muted);
+  font-style: italic;
+  font-size: var(--font-size-xs);
+}
+
+.chatActions {
   display: flex;
   justify-content: flex-end;
-  margin-top: var(--space-2);
+  padding: var(--space-1) 0;
+  flex-shrink: 0;
 }
 
-/* Enquanto a fala está tocando, o ícone pulsa em vez de virar um spinner
-   de carregamento — a fala pode durar vários segundos, e um anel girando
-   por tanto tempo passa a impressão de estar travado/quebrado, não de
-   "falando agora" (mesmo tratamento do botão de ouvir no Focus). */
+.proposalCard {
+  padding: var(--space-2);
+  border: 1px solid var(--color-highlight);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  animation: pop var(--duration-base) var(--easing-standard);
+}
+
+.proposalHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-bottom: var(--space-1);
+}
+
+.proposalAction {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-highlight);
+}
+
+.proposalRisk {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.proposalActions {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.chatInput {
+  display: flex;
+  gap: var(--space-1);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.chatField {
+  flex: 1;
+  min-width: 0;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  outline: none;
+  transition: border-color var(--duration-fast) var(--easing-standard);
+}
+.chatField:focus {
+  border-color: var(--color-highlight);
+}
+.chatField:disabled {
+  opacity: 0.6;
+}
+.chatField::placeholder {
+  color: var(--color-text-muted);
+}
+
+/* Enquanto a fala está tocando, o ícone pulsa em vez de virar um spinner */
 .speakingIcon {
   animation: speakingPulse 1s ease-in-out infinite;
 }
@@ -80,6 +201,7 @@
   background: transparent;
   color: var(--color-text-muted);
   cursor: pointer;
+  z-index: 1;
 }
 .dismiss:hover {
   background: var(--color-border);
@@ -124,9 +246,6 @@
   outline-offset: 2px;
 }
 
-/* Anel de humor: um halo suave em vez de uma borda sólida - lê como um
-   brilho de "atenção"/"comemorando", não como uma cor de erro de
-   formulário. */
 .avatar[data-mood="warning"] {
   box-shadow:
     0 0.25rem 0.75rem var(--color-shadow),
@@ -201,6 +320,6 @@
     bottom: var(--space-3);
   }
   .bubble {
-    max-width: calc(100vw - 5rem);
+    width: calc(100vw - 5rem);
   }
 }

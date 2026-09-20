@@ -246,6 +246,20 @@
       "when": 1789740014050,
       "tag": "0034_strange_killmonger",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1789781739748,
+      "tag": "0035_normal_nighthawk",
+      "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1789800000000,
+      "tag": "0036_simplify_execution_session",
+      "breakpoints": true
     }
   ]
 }

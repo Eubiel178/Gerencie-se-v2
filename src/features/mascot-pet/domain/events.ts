@@ -13,7 +13,13 @@ export type MascotEventType =
   | "achievement-unlocked"
   | "hydration-logged"
   | "action-error"
-  | "user-idle";
+  | "user-idle"
+  | "execution-started"
+  | "execution-distracted"
+  | "execution-stuck"
+  | "execution-step-done"
+  | "execution-resumed"
+  | "execution-completed";
 
 type MascotEventListener = (type: MascotEventType) => void;
 

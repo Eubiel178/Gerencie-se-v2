@@ -62,6 +62,12 @@ const EVENT_REACTION: Record<MascotEventType, ReactiveState> = {
   "hydration-logged": "happy",
   "action-error": "sad",
   "user-idle": "sleep",
+  "execution-started": "happy",
+  "execution-distracted": "sad",
+  "execution-stuck": "sad",
+  "execution-step-done": "happy",
+  "execution-resumed": "happy",
+  "execution-completed": "celebrate",
 };
 
 function randomBetween([min, max]: [number, number]): number {

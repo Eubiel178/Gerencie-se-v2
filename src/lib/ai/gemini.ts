@@ -1,19 +1,8 @@
 import "server-only";
-import { GoogleGenAI } from "@google/genai";
 
-const apiKey = process.env.GEMINI_API_KEY;
+import { generateText, sanitizeUserContent } from "./gateway";
 
-if (!apiKey) {
-  throw new Error("GEMINI_API_KEY não configurada.");
-}
-
-const ai = new GoogleGenAI({
-  apiKey,
-});
-
-const models = ["gemini-3.6-flash", "gemini-3.5-flash-lite"] as const;
-
-const systemPrompt = `
+const SYSTEM_PROMPT = `
 Você é o companheiro de execução do Gerencie-se.
 
 Seu objetivo é ajudar o usuário a começar, continuar e concluir
@@ -28,30 +17,15 @@ Regras:
 - não diga que realizou ações que o sistema não realizou.
 `;
 
-export async function askGemini(message: string) {
-  for (const model of models) {
-    try {
-      const response = await ai.interactions.create({
-        model,
-        system_instruction: systemPrompt,
-        input: message,
-      });
-
-      const text = response.output_text?.trim();
-
-      if (text) {
-        return {
-          text,
-          model,
-        };
-      }
-    } catch (error) {
-      console.error(`[Gemini] ${model} falhou`, error);
-    }
-  }
-
-  return {
-    text: "Tô aqui com você. Vamos por uma coisa de cada vez. O que está te impedindo de continuar agora?",
-    model: "local",
-  };
+/**
+ * Chat direto com o Companion — SOMENTE sob demanda.
+ * Retorna null quando todos os providers indisponíveis
+ * para que o chamador use fallback context-aware.
+ */
+export async function askGemini(message: string): Promise<{ text: string; model: string } | null> {
+  return generateText({
+    prompt: sanitizeUserContent(message),
+    systemInstruction: SYSTEM_PROMPT,
+    operation: "chat",
+  });
 }

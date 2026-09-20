@@ -3,19 +3,12 @@ import { IMascotState } from "@/features/focus/domain";
 
 import { Widget } from "./components/widget";
 
-// Reexports pra permitir `import { X } from "@/features/assistant"` em
-// vez de caminhos profundos.
 export * from "./domain";
 export * from "./actions";
 export { getAssistantService } from "./services/assistant-service";
 export { getAssistantPreferencesFetcher } from "./data/get-assistant-preferences-fetcher";
 export { PreferencesPanel } from "./components/preferences-panel";
 
-/**
- * Renderizado uma vez no layout de /home/* (ver `src/app/home/layout.tsx`).
- * Server Component: busca o snapshot (preferências + mensagem do momento)
- * e não desenha nada se o usuário desativou o assistente.
- */
 export async function Assistant({ mascot }: { mascot?: IMascotState }) {
   const snapshot = await getAssistantService().getSnapshot(mascot);
 
@@ -26,6 +19,8 @@ export async function Assistant({ mascot }: { mascot?: IMascotState }) {
       initialMessage={snapshot.message}
       reducedPresence={snapshot.reducedPresence}
       mascot={snapshot.mascot}
+      executionSession={snapshot.executionSession}
+      executionTaskTitle={snapshot.executionTaskTitle}
     />
   );
 }
