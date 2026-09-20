@@ -27,7 +27,7 @@ import styles from "./styles.module.css";
 import { useTaskStore } from "@/features/tasks/task-store";
 import { emitMascotEvent } from "@/features/mascot-pet";
 import { useFocusSession } from "@/features/focus/focus-session-context";
-import { useExecutionCompanionStore } from "@/features/execution-companion";
+import { useExecutionCompanionStore, useExecutionCompanion } from "@/features/execution-companion";
 
 function formatDeadline(value: string): string {
   const date = new Date(value);
@@ -93,6 +93,7 @@ export function Card({
   const { session: focusSession, remaining } = useFocusSession();
   const isFocused = focusSession?.taskId === task.id;
   const executionSession = useExecutionCompanionStore((s) => s.session);
+  const { pauseSession, resumeSession } = useExecutionCompanion();
   const isExecuting =
     executionSession?.taskId === task.id && executionSession.status === "active";
   const workStatus =
@@ -158,7 +159,17 @@ export function Card({
         id: task.id,
         workStatus: nextStatus,
       });
-      if (!result.error) replaceTask({ ...task, workStatus: nextStatus });
+      if (!result.error) {
+        replaceTask({ ...task, workStatus: nextStatus });
+
+        if (executionSession?.taskId === task.id) {
+          if (nextStatus === "paused") {
+            await pauseSession();
+          } else if (nextStatus === "in_progress") {
+            await resumeSession();
+          }
+        }
+      }
     } finally {
       setIsUpdatingWorkStatus(false);
     }
