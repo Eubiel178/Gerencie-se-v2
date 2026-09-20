@@ -344,7 +344,7 @@ export function Card({
                 onClick={() => setShowSteps((prev) => !prev)}
                 aria-expanded={showSteps}
               >
-                {showSteps ? "Ocultar" : "Ver passos"}
+                {showSteps ? "Ocultar passos" : "Ver passos"}
               </button>
             </div>
             <div
