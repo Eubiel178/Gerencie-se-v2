@@ -7,10 +7,16 @@ export interface ChatMessage {
   role: "user" | "mascot";
   text: string;
   timestamp: number;
+  /** Tarefa em execução no momento em que a mensagem foi enviada (ou
+   *  `null` se nenhuma) — usado pra nunca mandar pro modelo, como
+   *  histórico, uma troca de mensagens que era sobre outra tarefa. Ver
+   *  `Widget.handleSendChat`. */
+  taskId: string | null;
 }
 
 const STORAGE_KEY = "assistant-chat-history";
 const MAX_MESSAGES = 50;
+const EMPTY_MESSAGES: readonly ChatMessage[] = [];
 
 function loadHistory(): ChatMessage[] {
   if (typeof window === "undefined") return [];
@@ -61,31 +67,57 @@ function getSnapshot(): ChatMessage[] {
   return memory;
 }
 
-function getServerSnapshot(): ChatMessage[] {
-  return [];
+function getServerSnapshot(): readonly ChatMessage[] {
+  return EMPTY_MESSAGES;
+}
+
+function subscribeHydrationNoop() {
+  return () => {};
+}
+
+function getHydratedClientSnapshot(): boolean {
+  return true;
+}
+
+function getHydratedServerSnapshot(): boolean {
+  return false;
 }
 
 export function useChatHistory() {
   const messages = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
-  const addUserMessage = useCallback((text: string) => {
+  // Mesmo truque de `useSyncExternalStore` acima, não um `useEffect` +
+  // `useState` — no SSR e na primeira passada de hidratação do client, o
+  // React usa `getServerSnapshot` (false) pra bater com o HTML do
+  // servidor; só depois de hidratado ele troca pra `getSnapshot` (true).
+  // Isso evita o mismatch de hidratação (o Widget usa esse valor pra
+  // decidir se abre o bubble) sem o setState síncrono dentro de efeito.
+  const hydrated = useSyncExternalStore(
+    subscribeHydrationNoop,
+    getHydratedClientSnapshot,
+    getHydratedServerSnapshot
+  );
+
+  const addUserMessage = useCallback((text: string, taskId: string | null) => {
     const msg: ChatMessage = {
       id: crypto.randomUUID(),
       role: "user",
       text,
       timestamp: Date.now(),
+      taskId,
     };
     memory = [...memory, msg];
     saveHistory(memory);
     emitChange();
   }, []);
 
-  const addMascotMessage = useCallback((text: string) => {
+  const addMascotMessage = useCallback((text: string, taskId: string | null) => {
     const msg: ChatMessage = {
       id: crypto.randomUUID(),
       role: "mascot",
       text,
       timestamp: Date.now(),
+      taskId,
     };
     memory = [...memory, msg];
     saveHistory(memory);
@@ -107,6 +139,6 @@ export function useChatHistory() {
     addUserMessage,
     addMascotMessage,
     clearHistory,
-    hydrated: typeof window !== "undefined",
+    hydrated,
   };
 }

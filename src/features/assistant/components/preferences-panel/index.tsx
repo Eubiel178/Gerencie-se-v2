@@ -63,7 +63,7 @@ export function PreferencesPanel({ preferences, mascotName }: PreferencesPanelPr
       </label>
 
       <p className={styles.note}>
-        O assistente observa suas tarefas, hábitos e metas para sugerir o
+        O assistente observa suas tarefas, hábitos e objetivos para sugerir o
         que fazer a seguir — nunca acessa nada fora disso.
       </p>
 

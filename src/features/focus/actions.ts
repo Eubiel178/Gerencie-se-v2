@@ -2,11 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 
-import * as domain from "@/features/focus/domain";
 import { getFocusFetcher, getMascotFetcher } from "@/features/focus/data/get-focus-fetcher";
-import { validationSchema as mascotSchema } from "@/validation/mascot-schema";
-
+import * as domain from "@/features/focus/domain";
 import type { ActionResult } from "@/types/action-result";
+import { validationSchema as mascotSchema } from "@/validation/mascot-schema";
 
 export async function startFocusSessionAction(
   data: domain.StartFocusSession.Params

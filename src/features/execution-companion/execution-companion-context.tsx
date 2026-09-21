@@ -15,19 +15,20 @@ import {
   completeExecutionSessionAction,
   abandonExecutionSessionAction,
 } from "@/features/execution-companion/actions";
+import type { IExecutionSession } from "@/features/execution-companion/domain/types";
 import { useExecutionCompanionStore } from "@/features/execution-companion/execution-companion-store";
 import { emitMascotEvent } from "@/features/mascot-pet";
-import type { IExecutionSession } from "@/features/execution-companion/domain/types";
+import type { ActionResult } from "@/types/action-result";
 
 interface ExecutionCompanionContextValue {
   session: IExecutionSession | null;
   intention: { taskId: string } | null;
 
-  startSession: (taskId: string) => Promise<{ error: string | null }>;
-  pauseSession: () => Promise<{ error: string | null }>;
-  resumeSession: () => Promise<{ error: string | null }>;
-  completeSession: () => Promise<{ error: string | null }>;
-  abandonSession: () => Promise<{ error: string | null }>;
+  startSession: (taskId: string) => Promise<ActionResult & { switched?: boolean; previousTaskId?: string }>;
+  pauseSession: () => Promise<ActionResult>;
+  resumeSession: () => Promise<ActionResult>;
+  completeSession: () => Promise<ActionResult>;
+  abandonSession: () => Promise<ActionResult>;
 }
 
 const ExecutionCompanionContext = createContext<ExecutionCompanionContextValue | null>(null);
@@ -62,23 +63,19 @@ export function ExecutionCompanionProvider({
   const startSession = useCallback(async (taskId: string) => {
     const s = storeRef.current;
 
-    try {
-      const result = await startExecutionSessionAction({ taskId });
+    const result = await startExecutionSessionAction({ taskId });
 
-      if (result.error) {
-        return { error: result.error };
-      }
-
-      if (result.session) {
-        s.setSession(result.session);
-        s.setIntention({ taskId });
-        emitMascotEvent("execution-started");
-      }
-
-      return { error: null };
-    } finally {
-      // no-op
+    if (result.error) {
+      return { error: result.error };
     }
+
+    if (result.session) {
+      s.setSession(result.session);
+      s.setIntention({ taskId });
+      emitMascotEvent("execution-started");
+    }
+
+    return { error: null, switched: result.switched, previousTaskId: result.previousTaskId };
   }, []);
 
   const pauseSession = useCallback(async () => {
@@ -86,11 +83,11 @@ export function ExecutionCompanionProvider({
     const session = s.session;
     if (!session) return { error: "Nenhuma sessão ativa." };
 
-    emitMascotEvent("execution-distracted");
-
     const result = await pauseExecutionSessionAction({ sessionId: session.id });
     if (!result.error) {
-      s.updateSession({ status: "paused", pausedAt: new Date() });
+      const now = new Date();
+      s.updateSession({ status: "paused", pausedAt: now, updatedAt: now });
+      emitMascotEvent("execution-distracted");
     }
     return result;
   }, []);
@@ -102,7 +99,8 @@ export function ExecutionCompanionProvider({
 
     const result = await resumeExecutionSessionAction({ sessionId: session.id });
     if (!result.error) {
-      s.updateSession({ status: "active", pausedAt: null });
+      const now = new Date();
+      s.updateSession({ status: "active", pausedAt: null, resumedAt: now, updatedAt: now });
       emitMascotEvent("execution-resumed");
     }
     return result;
@@ -113,16 +111,12 @@ export function ExecutionCompanionProvider({
     const session = s.session;
     if (!session) return { error: "Nenhuma sessão encontrada." };
 
-    emitMascotEvent("execution-completed");
-
     const result = await completeExecutionSessionAction({ sessionId: session.id });
     if (!result.error) {
       s.updateSession({ status: "completed", completedAt: new Date() });
       s.setIntention(null);
-
-      setTimeout(() => {
-        s.reset();
-      }, 3000);
+      emitMascotEvent("execution-completed");
+      s.reset();
     }
     return result;
   }, []);

@@ -1,18 +1,18 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
+import { eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 import sharp from "sharp";
 
 import { db } from "@/db/client";
 import { users, userPreferences } from "@/db/schema";
 import { requireUserId } from "@/lib/auth";
 import { isFileTooLarge, isAvatarTypeAllowed, formatFileSize, MAX_ATTACHMENT_SIZE_BYTES } from "@/lib/security/upload-limits";
-import { validationSchema } from "@/validation/profile-schema";
-import { changePasswordSchema } from "@/validation/change-password-schema";
-
 import type { ActionResult } from "@/types/action-result";
+import { changePasswordSchema } from "@/validation/change-password-schema";
+import { validationSchema } from "@/validation/profile-schema";
+
 
 // Lado que o avatar normalizado vira, sempre, independente do tamanho
 // enviado — evita guardar um arquivo grande à toa (o avatar nunca é

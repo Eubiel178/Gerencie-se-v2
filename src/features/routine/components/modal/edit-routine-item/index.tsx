@@ -1,15 +1,14 @@
 "use client";
 
-import { validationSchema } from "@/validation/routine-schema";
 
 import { Alert, Form, Modal, ModalHeader, Input, Button, SuggestionChips, CollapsibleSection } from "@/components";
 import { Icon } from "@/components/icon";
 import modalStyles from "@/components/modal/styles.module.css";
-
-import { updateRoutineItemAction } from "@/features/routine/actions";
-import { ShareSelect } from "@/features/connections/components/share-select";
 import { ShareReadOnlyNote } from "@/features/connections/components/share-readonly-note";
+import { ShareSelect } from "@/features/connections/components/share-select";
+import { updateRoutineItemAction } from "@/features/routine/actions";
 import { useFormModal } from "@/hooks/use-form-modal";
+import { validationSchema } from "@/validation/routine-schema";
 
 import { FormData, IEditRoutineItemProps, NO_TASK_VALUE } from "../interfaces";
 

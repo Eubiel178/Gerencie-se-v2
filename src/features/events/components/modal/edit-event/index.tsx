@@ -2,19 +2,17 @@
 
 import dayjs from "dayjs";
 
-import { validationSchema } from "@/validation/event-schema";
 
 import { Alert, Form, Modal, ModalHeader, Input, Button, SuggestionChips, CollapsibleSection } from "@/components";
-import { Icon } from "@/components/icon";
 import inputStyles from "@/components/form/input/styles.module.css";
+import { Icon } from "@/components/icon";
 import modalStyles from "@/components/modal/styles.module.css";
-
 import { updateEventAction } from "@/features/events/actions";
 import { useEventStore } from "@/features/events/event-store";
 import { useFormModal } from "@/hooks/use-form-modal";
+import { validationSchema } from "@/validation/event-schema";
 
 import { FormData, IModalProps } from "./interfaces";
-
 import styles from "./styles.module.css";
 
 const EVENT_COLORS = [

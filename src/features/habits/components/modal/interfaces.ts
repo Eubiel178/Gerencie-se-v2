@@ -1,9 +1,9 @@
 import { z } from "zod";
 
+import { LoadAcceptedConnections } from "@/features/connections/domain";
+import { IHabit } from "@/features/habits/domain";
 import { validationSchema } from "@/validation/habit-schema";
 
-import { IHabit } from "@/features/habits/domain";
-import { LoadAcceptedConnections } from "@/features/connections/domain";
 
 export interface FormData extends z.infer<typeof validationSchema> {}
 

@@ -1,20 +1,20 @@
 import { NextResponse } from "next/server";
 
+
+import { getEventFetcher } from "@/features/events/data/get-event-fetcher";
+import { getFocusFetcher, getMascotFetcher } from "@/features/focus/data/get-focus-fetcher";
+import { getGoalFetcher } from "@/features/goals/data/get-goal-fetcher";
+import { getHabitFetcher } from "@/features/habits/data/get-habit-fetcher";
+import { getHealthFetcher } from "@/features/health/data/get-health-fetcher";
+import { getHydrationFetcher } from "@/features/hydration/data/get-hydration-fetcher";
+import { getCycleFetcher } from "@/features/menstrual-cycle/data/get-cycle-fetcher";
+import { getReadingFetcher } from "@/features/reading/data/get-reading-fetcher";
+import { getRoutineFetcher } from "@/features/routine/data/get-routine-fetcher";
+import { getRunningFetcher } from "@/features/running/data/get-running-fetcher";
+import { getTaskFetcher } from "@/features/tasks/data/get-task-fetcher";
 import { requireUserId } from "@/lib/auth";
 import { toCsv } from "@/lib/export/csv";
 import { toXlsx } from "@/lib/export/xlsx";
-
-import { getTaskFetcher } from "@/features/tasks/data/get-task-fetcher";
-import { getHabitFetcher } from "@/features/habits/data/get-habit-fetcher";
-import { getGoalFetcher } from "@/features/goals/data/get-goal-fetcher";
-import { getRoutineFetcher } from "@/features/routine/data/get-routine-fetcher";
-import { getEventFetcher } from "@/features/events/data/get-event-fetcher";
-import { getFocusFetcher, getMascotFetcher } from "@/features/focus/data/get-focus-fetcher";
-import { getHydrationFetcher } from "@/features/hydration/data/get-hydration-fetcher";
-import { getRunningFetcher } from "@/features/running/data/get-running-fetcher";
-import { getReadingFetcher } from "@/features/reading/data/get-reading-fetcher";
-import { getHealthFetcher } from "@/features/health/data/get-health-fetcher";
-import { getCycleFetcher } from "@/features/menstrual-cycle/data/get-cycle-fetcher";
 
 // "Todo o histórico" pra sessões de foco/corrida, que normalmente são
 // buscadas com limite (últimas 10/30) pro uso comum do app — exportação

@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useSyncExternalStore } from "react";
+
 import { useRouter } from "next/navigation";
 
 import { Button, Modal, ModalHeader } from "@/components";
+
 import { resetGuidedTourAction } from "../../actions";
 import { GUIDED_TOUR_MOBILE_BREAKPOINT_PX } from "../../domain/steps";
 

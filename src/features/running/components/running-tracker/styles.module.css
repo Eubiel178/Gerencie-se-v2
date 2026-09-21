@@ -33,5 +33,7 @@
 .itemMain{color:var(--color-text);font-size:var(--font-size-sm)}
 .sourceTag{color:var(--color-text-muted);font-size:var(--font-size-xs)}
 .inlineMessage{margin:0;font-family:var(--font-sans);color:var(--color-info);font-size:var(--font-size-md)}
-.finishButton{background:var(--color-surface-elevated);border-color:var(--color-border);color:var(--color-danger);box-shadow:0 1px 2px var(--color-shadow)}
+/* "Finalizar corrida" é uma conclusão (ação positiva), não uma exclusão —
+   não deve ter cor de perigo, mesmo sendo o botão que encerra a sessão. */
+.finishButton{background:var(--color-surface-elevated);border-color:var(--color-border);color:var(--color-text);box-shadow:0 1px 2px var(--color-shadow)}
 @media(max-width:420px){.totals,.liveStats{grid-template-columns:1fr;text-align:center}.fieldsRow{flex-direction:column}}

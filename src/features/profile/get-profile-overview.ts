@@ -2,15 +2,14 @@ import "server-only";
 
 import dayjs from "dayjs";
 
-import { getTaskFetcher } from "@/features/tasks/data/get-task-fetcher";
 import { getFocusFetcher } from "@/features/focus/data/get-focus-fetcher";
 import { getHabitFetcher } from "@/features/habits/data/get-habit-fetcher";
-
 import {
   calculateBestHabitStreak,
   calculateTaskStats,
   calculateWeeklyFocusHours,
 } from "@/features/stats/calculations";
+import { getTaskFetcher } from "@/features/tasks/data/get-task-fetcher";
 
 export interface ProfileOverview {
   tasksCompletedThisWeek: number;

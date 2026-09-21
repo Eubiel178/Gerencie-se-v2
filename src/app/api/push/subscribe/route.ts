@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
 import { and, eq } from "drizzle-orm";
+import { NextRequest, NextResponse } from "next/server";
 
 import { db } from "@/db/client";
 import { pushSubscriptions } from "@/db/schema";

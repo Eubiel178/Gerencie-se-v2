@@ -3,10 +3,10 @@ import "server-only";
 import dayjs from "dayjs";
 import { and, eq } from "drizzle-orm";
 
-import * as domain from "@/features/health/domain";
 
 import { db } from "@/db/client";
 import { healthCheckups } from "@/db/schema";
+import * as domain from "@/features/health/domain";
 import { requireUserId } from "@/lib/auth";
 
 export class LocalHealth

@@ -2,20 +2,21 @@
 
 import { useState } from "react";
 
+import { useForm } from "react-hook-form";
+
+import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
-import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+
+import { Alert, Form, Input, Button } from "@/components";
+import { Icon } from "@/components/icon";
+import { registerAction } from "@/features/auth/actions";
 import { validationSchema } from "@/validation/register-schema";
 
 import styles from "../../../auth-page.module.css";
 
-import { Icon } from "@/components/icon";
 
-import { Alert, Form, Input, Button } from "@/components";
-
-import { registerAction } from "@/features/auth/actions";
 
 type FormData = z.input<typeof validationSchema>;
 
@@ -78,6 +79,7 @@ export function Auth() {
             <Input.Wrapper>
               <Input.Field
                 {...register("name")}
+                autoComplete="name"
                 placeholder="Maria Silva"
                 autoFocus
               />
@@ -91,6 +93,8 @@ export function Auth() {
             <Input.Wrapper>
               <Input.Field
                 {...register("email")}
+                type="email"
+                autoComplete="email"
                 placeholder="nome@exemplo.com"
               />
             </Input.Wrapper>
@@ -101,7 +105,7 @@ export function Auth() {
           <Input.Root sharedProps={{ error: errors.password?.message }}>
             <Input.Label htmlFor="password">Senha</Input.Label>
             <Input.Wrapper>
-              <Input.FieldPassword {...register("password")} />
+              <Input.FieldPassword {...register("password")} autoComplete="new-password" />
             </Input.Wrapper>
 
             <Input.HelperText />
@@ -110,7 +114,7 @@ export function Auth() {
           <Input.Root sharedProps={{ error: errors.confirm_password?.message }}>
             <Input.Label htmlFor="confirm_password">Confirmar senha</Input.Label>
             <Input.Wrapper>
-              <Input.FieldPassword {...register("confirm_password")} />
+              <Input.FieldPassword {...register("confirm_password")} autoComplete="new-password" />
             </Input.Wrapper>
 
             <Input.HelperText />

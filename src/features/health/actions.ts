@@ -2,11 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 
-import * as domain from "@/features/health/domain";
 import { getHealthFetcher } from "@/features/health/data/get-health-fetcher";
-import { createHealthCheckupSchema, updateHealthCheckupSchema } from "@/validation/health-schema";
-
+import * as domain from "@/features/health/domain";
 import type { ActionResult } from "@/types/action-result";
+import { createHealthCheckupSchema, updateHealthCheckupSchema } from "@/validation/health-schema";
 
 export async function createHealthCheckupAction(
   data: domain.CreateHealthCheckup.Params
@@ -19,6 +18,7 @@ export async function createHealthCheckupAction(
   try {
     const checkup = await getHealthFetcher().create(parsed.data);
     revalidatePath("/home/health");
+    revalidatePath("/home");
 
     return { error: null, checkup };
   } catch {
@@ -40,6 +40,7 @@ export async function updateHealthCheckupAction(
   try {
     await getHealthFetcher().update({ ...parsed.data, id: data.id });
     revalidatePath("/home/health");
+    revalidatePath("/home");
 
     return { error: null };
   } catch {
@@ -53,6 +54,7 @@ export async function markHealthCheckupDoneAction(
   try {
     const { lastDoneAt } = await getHealthFetcher().markDone(params);
     revalidatePath("/home/health");
+    revalidatePath("/home");
 
     return { error: null, lastDoneAt };
   } catch {
@@ -66,6 +68,7 @@ export async function deleteHealthCheckupAction(
   try {
     await getHealthFetcher().delete(params);
     revalidatePath("/home/health");
+    revalidatePath("/home");
 
     return { error: null };
   } catch {

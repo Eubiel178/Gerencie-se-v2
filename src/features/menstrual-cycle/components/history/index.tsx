@@ -3,9 +3,9 @@
 import { useState } from "react";
 
 import { Button, ConfirmIconButton, EmptyState } from "@/components";
-
 import { deleteCycleEntryAction } from "@/features/menstrual-cycle/actions";
 import { ICycleEntry } from "@/features/menstrual-cycle/domain";
+import { formatDateOnly } from "@/utils/date";
 
 import styles from "./styles.module.css";
 
@@ -32,7 +32,7 @@ export function History({ entries, onRemove }: { entries: ICycleEntry[]; onRemov
       {entries.map((entry) => (
         <li key={entry.id} className={styles.item}>
           <div className={styles.itemInfo}>
-            <span className={styles.itemDate}>{formatDate(entry.startDate)}</span>
+            <span className={styles.itemDate}>{formatDateOnly(entry.startDate)}</span>
             <span className={styles.itemMeta}>
               {entry.periodLengthDays && `${entry.periodLengthDays} dias`}
               {entry.symptoms.length > 0 && ` · ${entry.symptoms.join(", ")}`}
@@ -41,8 +41,9 @@ export function History({ entries, onRemove }: { entries: ICycleEntry[]; onRemov
 
           <ConfirmIconButton
             icon="FaTrash"
-            ariaLabel="Remover registro"
-            confirmText="Remover este registro?"
+            ariaLabel={`Remover registro de ${formatDateOnly(entry.startDate)}`}
+            confirmText={`Remover o registro de ${formatDateOnly(entry.startDate)}?`}
+            confirmLabel="Remover"
             loading={removingId === entry.id}
             onConfirm={() => handleDelete(entry.id)}
           />
@@ -50,9 +51,4 @@ export function History({ entries, onRemove }: { entries: ICycleEntry[]; onRemov
       ))}
     </ul>
   );
-}
-
-function formatDate(date: string): string {
-  const [year, month, day] = date.split("-");
-  return `${day}/${month}/${year}`;
 }

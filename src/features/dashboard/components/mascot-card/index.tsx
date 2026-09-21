@@ -1,5 +1,4 @@
 import { Card } from "@/features/dashboard/components/shared";
-
 import { IMascotState, SPECIES_EMOJI } from "@/features/focus/domain";
 
 import styles from "./styles.module.css";

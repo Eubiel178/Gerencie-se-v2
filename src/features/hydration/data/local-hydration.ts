@@ -3,10 +3,10 @@ import "server-only";
 import dayjs from "dayjs";
 import { and, eq, gte } from "drizzle-orm";
 
-import * as domain from "@/features/hydration/domain";
 
 import { db } from "@/db/client";
 import { hydrationLogs, userPreferences } from "@/db/schema";
+import * as domain from "@/features/hydration/domain";
 import { requireUserId } from "@/lib/auth";
 import { getOrCreateUserPreferencesRow } from "@/lib/shared/get-or-create-user-preferences";
 

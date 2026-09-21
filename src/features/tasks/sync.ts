@@ -1,7 +1,7 @@
 import "server-only";
 
-import { ITask } from "@/features/tasks/domain";
 import { LocalTask } from "@/features/tasks/data";
+import { ITask } from "@/features/tasks/domain";
 import {
   createCalendarEventForTask,
   deleteCalendarEventForTask,

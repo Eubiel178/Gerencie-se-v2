@@ -3,8 +3,8 @@ import test from "node:test";
 
 import dayjs from "dayjs";
 
-import { calculateCycleEstimate } from "./cycle-estimate";
 import { ICycleEntry } from "./cycle-entry";
+import { calculateCycleEstimate } from "./cycle-estimate";
 
 function entry(startDate: string): ICycleEntry {
   return {

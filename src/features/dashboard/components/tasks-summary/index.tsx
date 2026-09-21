@@ -2,7 +2,6 @@ import Link from "next/link";
 
 import { EmptyState } from "@/components";
 import { Badge, Card } from "@/features/dashboard/components/shared";
-
 import { ITask } from "@/features/tasks/domain";
 import { PRIORITY_LABELS } from "@/lib/shared/priority";
 

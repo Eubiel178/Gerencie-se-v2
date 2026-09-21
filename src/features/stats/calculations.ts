@@ -1,9 +1,9 @@
 import dayjs, { Dayjs } from "dayjs";
 
-import { ITask } from "@/features/tasks/domain";
 import { IFocusSession } from "@/features/focus/domain";
 import { IHydrationDay } from "@/features/hydration/domain";
 import { IRunningSession } from "@/features/running/domain";
+import { ITask } from "@/features/tasks/domain";
 
 const STATS_WINDOW_DAYS = 7;
 

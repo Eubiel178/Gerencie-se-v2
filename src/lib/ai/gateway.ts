@@ -1,8 +1,8 @@
 import "server-only";
 
-import type { AIProvider, AIProviderResponse } from "./providers/types";
 import { GeminiProvider } from "./providers/gemini-provider";
 import { GroqProvider } from "./providers/groq-provider";
+import type { AIProvider, AIProviderResponse, HistoryMessage } from "./providers/types";
 import {
   isModelCoolingDown,
   markModelRateLimited,
@@ -38,7 +38,7 @@ function buildProviderModelPairs(providers: AIProvider[]): { provider: AIProvide
 async function attemptWithFailover(
   operation: string,
   method: "generateText" | "generateJSON",
-  params: { prompt: string; systemInstruction: string; operation?: string },
+  params: { prompt: string; systemInstruction: string; operation?: string; history?: HistoryMessage[] },
 ): Promise<{ result: AIProviderResponse | null; provider: string }> {
   const providers = buildProviders();
 
@@ -97,6 +97,7 @@ export async function generateText(params: {
   prompt: string;
   systemInstruction: string;
   operation?: string;
+  history?: HistoryMessage[];
 }): Promise<AIProviderResponse | null> {
   const op = params.operation ?? "unknown";
   const { result } = await attemptWithFailover(op, "generateText", params);

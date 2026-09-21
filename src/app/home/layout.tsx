@@ -1,22 +1,24 @@
 import { redirect } from "next/navigation";
 
-import { auth } from "@/lib/auth";
-import { isEmailVerified } from "@/lib/email/verification";
 
 import { Header } from "@/components";
 import { Assistant } from "@/features/assistant";
-import { TaskReminders } from "@/features/tasks/components/reminder-scheduler";
-import { CommandPalette } from "@/features/search/components/command-palette";
-import { MascotPet, characterIdForSpecies } from "@/features/mascot-pet";
-import { getFocusFetcher, getMascotFetcher } from "@/features/focus/data/get-focus-fetcher";
-import { FocusSessionProvider, FocusMiniWidget } from "@/features/focus";
-import { getGender } from "@/features/profile/get-gender";
-import { GuidedTour } from "@/features/guided-tour/components/guided-tour/lazy";
-import { shouldShowGuidedTour } from "@/features/guided-tour/get-guided-tour-status";
 import {
   ExecutionCompanionProvider,
 } from "@/features/execution-companion";
 import { getExecutionSessionFetcher } from "@/features/execution-companion/data/local-execution-session";
+import { FocusMiniWidget } from "@/features/focus/components/focus-mini-widget";
+import { getFocusFetcher, getMascotFetcher } from "@/features/focus/data/get-focus-fetcher";
+import { FocusSessionProvider } from "@/features/focus/focus-session-context";
+import { GuidedTour } from "@/features/guided-tour/components/guided-tour/lazy";
+import { shouldShowGuidedTour } from "@/features/guided-tour/get-guided-tour-status";
+import { MascotPet, characterIdForSpecies } from "@/features/mascot-pet";
+import { getGender } from "@/features/profile/get-gender";
+import { CommandPalette } from "@/features/search/components/command-palette";
+import { TaskReminders } from "@/features/tasks/components/reminder-scheduler";
+import { auth } from "@/lib/auth";
+import { isEmailVerified } from "@/lib/email";
+
 import styles from "./home-layout.module.css";
 
 export const dynamic = "force-dynamic";

@@ -2,99 +2,123 @@
 
 import { useState } from "react";
 
-import { Button, Input } from "@/components";
+import { useForm } from "react-hook-form";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+
+import { Button, Input } from "@/components";
 import { createCycleEntryAction } from "@/features/menstrual-cycle/actions";
-import { todayForDateInput } from "@/utils";
 import { ICycleEntry } from "@/features/menstrual-cycle/domain";
+import { todayForDateInput } from "@/utils";
 
 import styles from "./styles.module.css";
 
 const COMMON_SYMPTOMS = ["Cólica", "Dor de cabeça", "Inchaço", "Fadiga", "Mudança de humor"];
+
+const addEntrySchema = z.object({
+  startDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Informe uma data válida (AAAA-MM-DD)")
+    .refine((value) => !Number.isNaN(new Date(value).getTime()), "Informe uma data válida"),
+  periodLengthDays: z
+    .number()
+    .int()
+    .positive("Duração deve ser maior que zero")
+    .max(30, "Duração muito alta")
+    .optional()
+    .nullable(),
+  symptoms: z.array(z.string().max(60)).max(30, "Muitos sintomas"),
+});
+
+type AddEntryData = z.infer<typeof addEntrySchema>;
 
 interface AddEntryFormProps {
   onAdd: (entry: ICycleEntry) => void;
 }
 
 export function AddEntryForm({ onAdd }: AddEntryFormProps) {
-  const [startDate, setStartDate] = useState(todayForDateInput);
-  const [periodLengthDays, setPeriodLengthDays] = useState("");
-  const [symptoms, setSymptoms] = useState<string[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const form = useForm<AddEntryData>({
+    mode: "onChange",
+    resolver: zodResolver(addEntrySchema),
+    defaultValues: {
+      startDate: todayForDateInput(),
+      periodLengthDays: null,
+      symptoms: [],
+    },
+  });
+
+  const symptoms = form.watch("symptoms");
 
   function toggleSymptom(symptom: string) {
-    setSymptoms((current) =>
-      current.includes(symptom) ? current.filter((s) => s !== symptom) : [...current, symptom]
+    const current = form.getValues("symptoms");
+    form.setValue(
+      "symptoms",
+      current.includes(symptom) ? current.filter((s) => s !== symptom) : [...current, symptom],
+      { shouldValidate: true }
     );
   }
 
-  async function handleSubmit(event: React.FormEvent) {
-    event.preventDefault();
+  const handleSubmit = form.handleSubmit(async (data) => {
+    setSubmitError(null);
 
-    if (!startDate) {
-      setError("Informe a data de início.");
+    const result = await createCycleEntryAction({
+      ...data,
+      notes: null,
+    });
+
+    if (result.error || !result.id) {
+      setSubmitError(result.error ?? "Não foi possível salvar o registro.");
       return;
     }
 
-    setIsSubmitting(true);
-    setError(null);
-
-    try {
-      const result = await createCycleEntryAction({
-        startDate,
-        periodLengthDays: periodLengthDays ? Number(periodLengthDays) : null,
-        symptoms,
-        notes: null,
-      });
-
-      if (result.error || !result.id) {
-        setError(result.error ?? "Não foi possível salvar o registro.");
-        return;
-      }
-
-      onAdd({
-        id: result.id,
-        userId: "",
-        startDate,
-        periodLengthDays: periodLengthDays ? Number(periodLengthDays) : null,
-        symptoms,
-        notes: null,
-        createdAt: new Date(),
-      });
-      setStartDate(todayForDateInput());
-      setPeriodLengthDays("");
-      setSymptoms([]);
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
+    onAdd({
+      id: result.id,
+      userId: "",
+      startDate: data.startDate,
+      periodLengthDays: data.periodLengthDays ?? null,
+      symptoms: data.symptoms,
+      notes: null,
+      createdAt: new Date(),
+    });
+    form.reset({
+      startDate: todayForDateInput(),
+      periodLengthDays: null,
+      symptoms: [],
+    });
+  });
 
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
-      <Input.Root>
+      <Input.Root sharedProps={{ error: form.formState.errors.startDate?.message }}>
         <Input.Label htmlFor="startDate">Início do ciclo</Input.Label>
         <Input.Wrapper>
           <Input.Field
-            name="startDate"
             type="date"
-            value={startDate}
-            onChange={(event) => setStartDate(event.target.value)}
+            {...form.register("startDate")}
           />
         </Input.Wrapper>
+        <Input.HelperText />
       </Input.Root>
 
-      <Input.Root>
+      <Input.Root sharedProps={{ error: form.formState.errors.periodLengthDays?.message }}>
         <Input.Label htmlFor="periodLengthDays">Duração do período em dias (opcional)</Input.Label>
         <Input.Wrapper>
           <Input.Field
-            name="periodLengthDays"
             type="number"
             min={1}
-            value={periodLengthDays}
-            onChange={(event) => setPeriodLengthDays(event.target.value)}
+            {...form.register("periodLengthDays", {
+              // Campo opcional: `valueAsNumber` transforma "" (vazio) em
+              // NaN, não em null/undefined — e `z.number()` rejeita NaN,
+              // bloqueando o envio sem nenhum aviso quando o campo fica
+              // em branco (que é justamente o caso normal de "opcional").
+              setValueAs: (value) => (value === "" ? null : Number(value)),
+            })}
           />
         </Input.Wrapper>
+        <Input.HelperText />
       </Input.Root>
 
       <div className={styles.symptoms}>
@@ -110,9 +134,9 @@ export function AddEntryForm({ onAdd }: AddEntryFormProps) {
         ))}
       </div>
 
-      {error && <p className={styles.formError}>{error}</p>}
+      {submitError && <p className={styles.formError}>{submitError}</p>}
 
-      <Button.Root type="submit" loading={isSubmitting}>
+      <Button.Root type="submit" loading={form.formState.isSubmitting}>
         Registrar
       </Button.Root>
     </form>

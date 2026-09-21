@@ -4,10 +4,9 @@ import { useRef, useState } from "react";
 
 import { Modal, ModalHeader, Form, Input, Button } from "@/components";
 import { Icon } from "@/components/icon";
-import { useToast } from "@/providers/toast-context";
-
 import { quickCaptureTaskAction } from "@/features/tasks/actions";
 import { useTaskStore } from "@/features/tasks/task-store";
+import { useToast } from "@/providers/toast-context";
 
 import styles from "./styles.module.css";
 

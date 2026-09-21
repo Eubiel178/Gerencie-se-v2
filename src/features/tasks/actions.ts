@@ -2,18 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 
-import * as domain from "@/features/tasks/domain";
-import { getTaskFetcher } from "@/features/tasks/data/get-task-fetcher";
-import { createTaskSchema, updateTaskSchema } from "@/validation/task-schema";
-
-import { requireUserId } from "@/lib/auth";
-import { deleteCalendarEventForTask } from "@/lib/integrations/google-calendar";
-import { getMascotFetcher } from "@/features/focus/data/get-focus-fetcher";
-
 import { db } from "@/db/client";
 import { userPreferences } from "@/db/schema";
-
-import { syncTaskToGoogle } from "./sync";
+import { getMascotFetcher } from "@/features/focus/data/get-focus-fetcher";
+import { getTaskFetcher } from "@/features/tasks/data/get-task-fetcher";
+import * as domain from "@/features/tasks/domain";
+import { requireUserId } from "@/lib/auth";
+import { deleteCalendarEventForTask } from "@/lib/integrations/google-calendar";
 
 /**
  * Server Actions de Task.
@@ -30,6 +25,9 @@ import { syncTaskToGoogle } from "./sync";
  * impede a operação local, só fica registrada em `syncStatus`/`syncError`.
  */
 import type { ActionResult } from "@/types/action-result";
+import { createTaskSchema, updateTaskSchema } from "@/validation/task-schema";
+
+import { syncTaskToGoogle } from "./sync";
 
 export async function createTaskAction(
   data: domain.CreateTask.Params

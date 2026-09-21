@@ -1,13 +1,12 @@
 import { EmptyState } from "@/components";
 import { Card } from "@/features/dashboard/components/shared";
-
 import { IGoal } from "@/features/goals/domain";
 
 import styles from "./styles.module.css";
 
 export function GoalsProgress({ goals }: { goals: IGoal[] }) {
   return (
-    <Card title="Progresso das metas" href="/home/goals" linkLabel="Ver todas">
+    <Card title="Progresso dos objetivos" href="/home/goals" linkLabel="Ver todas">
       {goals.length === 0 ? (
         <EmptyState tone="muted">Defina um objetivo para acompanhar o progresso por aqui.</EmptyState>
       ) : (

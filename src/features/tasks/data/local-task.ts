@@ -2,11 +2,10 @@ import "server-only";
 
 import { and, count, eq, inArray, max, or } from "drizzle-orm";
 
-import * as domain from "@/features/tasks/domain";
-import type { TaskSyncStatus } from "@/features/tasks/domain";
-
 import { db } from "@/db/client";
 import { taskAttachments, taskSteps, tasks, users } from "@/db/schema";
+import * as domain from "@/features/tasks/domain";
+import type { TaskSyncStatus } from "@/features/tasks/domain";
 import { requireUserId } from "@/lib/auth";
 import { assertAcceptedConnection, resolveSharedWithUserIdOnUpdate } from "@/lib/auth/assert-accepted-connection";
 
@@ -449,7 +448,23 @@ export class LocalTask
       .where(and(eq(tasks.id, id), eq(tasks.userId, userId)))
       .limit(1);
 
-    return row ? mapRowToTask(row, userId) : null;
+    if (!row) return null;
+
+    const stepRows = await db
+      .select()
+      .from(taskSteps)
+      .where(eq(taskSteps.taskId, row.id))
+      .orderBy(taskSteps.order);
+
+    const steps: domain.ITaskStep[] = stepRows.map((s) => ({
+      id: s.id,
+      taskId: s.taskId,
+      title: s.title,
+      completed: s.completed,
+      order: s.order,
+    }));
+
+    return mapRowToTask(row, userId, undefined, steps);
   }
 
   /**

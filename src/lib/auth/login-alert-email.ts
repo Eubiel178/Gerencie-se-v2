@@ -1,3 +1,5 @@
+import { renderSpamFolderHint } from "@/lib/email";
+
 // E-mail = HTML "old school": sem CSS externo, sem flexbox/grid (suporte
 // inconsistente entre clientes) — tabela + estilo inline, mesma técnica
 // usada em `src/features/weekly-summary/email-template.ts`. Cores
@@ -58,4 +60,4 @@ export function renderLoginAlertEmail({ name }: LoginAlertEmailParams): string {
   </body>
 </html>`;
 }
-import { renderSpamFolderHint } from "@/lib/email/template-hints";
+

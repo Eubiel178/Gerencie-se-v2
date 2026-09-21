@@ -1,18 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useForm, useWatch } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 
-import { validationSchema } from "@/validation/mascot-schema";
+import { useForm, useWatch } from "react-hook-form";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+
 
 import { Form, Input, Button } from "@/components";
-import { useToast } from "@/providers/toast-context";
-
 import { updateMascotAction } from "@/features/focus/actions";
 import { IMascotState, MascotPersonality, MascotSpecies } from "@/features/focus/domain";
 import { MascotPreview, characterIdForSpecies } from "@/features/mascot-pet";
+import { useToast } from "@/providers/toast-context";
+import { validationSchema } from "@/validation/mascot-schema";
 
 import styles from "./styles.module.css";
 
@@ -57,6 +58,7 @@ export function MascotSettings({ mascot }: { mascot: IMascotState }) {
     handleSubmit,
     register,
     control,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     mode: "onChange",

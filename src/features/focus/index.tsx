@@ -6,17 +6,7 @@ import { getTaskFetcher } from "@/features/tasks/data/get-task-fetcher";
 import { sortTasksByPriority } from "@/features/tasks/sort-tasks";
 
 import { History, Timer } from "./components";
-
 import styles from "./styles.module.css";
-
-// Reexports pra permitir `import { X } from "@/features/focus"` em vez
-// de caminhos profundos.
-export * from "./domain";
-export * from "./actions";
-export { getFocusFetcher, getMascotFetcher } from "./data/get-focus-fetcher";
-export { MascotSettings } from "./components/mascot-settings";
-export { FocusSessionProvider, useFocusSession } from "./focus-session-context";
-export { FocusMiniWidget } from "./components/focus-mini-widget";
 
 interface FocusProps {
   // Vem de `?taskId=...` (ver botão "Focar nesta tarefa" no card de

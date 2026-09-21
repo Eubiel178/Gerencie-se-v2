@@ -2,10 +2,10 @@ import "server-only";
 
 import { and, eq, inArray, max, or } from "drizzle-orm";
 
-import * as domain from "@/features/goals/domain";
 
 import { db } from "@/db/client";
 import { goalSteps, goals, users } from "@/db/schema";
+import * as domain from "@/features/goals/domain";
 import { requireUserId } from "@/lib/auth";
 import { assertAcceptedConnection, resolveSharedWithUserIdOnUpdate } from "@/lib/auth/assert-accepted-connection";
 

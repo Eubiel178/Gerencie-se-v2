@@ -1,21 +1,22 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { Icon, IconName } from "@/components/icon";
 
-import { Button } from "@/components";
-import { getFocusableElements } from "@/components/modal/get-focusable-elements";
+import styles from "@/app/home/home-layout.module.css";
+import { Button, Icon, type IconName } from "@/components";
 import { useMobileNavStore } from "@/components/header/mobile-nav-store";
+import { getFocusableElements } from "@/components/modal/get-focusable-elements";
 import { Gender } from "@/features/profile/get-gender";
 import { usePaletteStore } from "@/features/search/palette-store";
 import { QuickCapture } from "@/features/tasks/components/quick-capture";
-import { useCaptureTimezone } from "@/hooks/use-capture-timezone";
 
-import styles from "@/app/home/home-layout.module.css";
+import { useCaptureTimezone } from "./use-capture-timezone";
+
 
 interface NavLink {
   href: string;
@@ -61,6 +62,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: "Organização",
     links: [
       { href: "/home/event", label: "Calendário", icon: "MdEvent" },
+      { href: "/home/history", label: "Histórico", icon: "FaHistory" },
       { href: "/home/stats", label: "Estatísticas", icon: "FaChartBar" },
     ],
   },

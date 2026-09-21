@@ -1,11 +1,10 @@
 "use client";
 
 import { Alert, Button, Form, Input, Modal, ModalHeader } from "@/components";
-
 import { updateHealthCheckupAction } from "@/features/health/actions";
 import { IHealthCheckup } from "@/features/health/domain";
-import { healthCheckupFormSchema, HealthCheckupFormData } from "@/validation/health-schema";
 import { useFormModal } from "@/hooks/use-form-modal";
+import { healthCheckupFormSchema, HealthCheckupFormData } from "@/validation/health-schema";
 
 interface EditCheckupProps {
   checkup: IHealthCheckup;

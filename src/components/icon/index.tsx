@@ -1,9 +1,9 @@
 import type { IconBaseProps, IconType } from "react-icons";
 
 import * as FaIcons from "react-icons/fa";
-import * as MdIcons from "react-icons/md";
-import * as GoIcons from "react-icons/go";
 import * as FiIcons from "react-icons/fi";
+import * as GoIcons from "react-icons/go";
+import * as MdIcons from "react-icons/md";
 
 const icons = {
   ...FaIcons,

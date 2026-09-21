@@ -1,15 +1,15 @@
 import "server-only";
 
 import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
-import { google, calendar_v3 } from "googleapis";
+import utc from "dayjs/plugin/utc";
 import { eq } from "drizzle-orm";
+import { google, calendar_v3 } from "googleapis";
 
 import { db } from "@/db/client";
 import { googleConnections } from "@/db/schema";
-import { decryptToken, encryptToken } from "@/lib/security/token-encryption";
 import { getUserTimezone } from "@/features/profile/get-user-timezone";
+import { decryptToken, encryptToken } from "@/lib/security/token-encryption";
 
 // Precisa dos plugins `utc`+`timezone` (não vem no dayjs "puro") pra
 // converter um instante absoluto (o que o Google devolve) pro fuso de um

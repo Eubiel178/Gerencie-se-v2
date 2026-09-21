@@ -6,15 +6,14 @@ import dayjs from "dayjs";
 
 import { Button, ConfirmIconButton } from "@/components";
 import { SharedBadge } from "@/features/connections/components/shared-badge";
-
-import { deleteRoutineItemAction, toggleRoutineItemLogAction } from "@/features/routine/actions";
-import { EditRoutineItem } from "../../modal";
-
-import { IRoutineItem } from "@/features/routine/domain";
 import { LoadAcceptedConnections } from "@/features/connections/domain";
+import { emitMascotEvent } from "@/features/mascot-pet";
+import { deleteRoutineItemAction, toggleRoutineItemLogAction } from "@/features/routine/actions";
+import { IRoutineItem } from "@/features/routine/domain";
+
+import { EditRoutineItem } from "../../modal";
 import { TaskOption } from "../../modal/interfaces";
 
-import { emitMascotEvent } from "@/features/mascot-pet";
 
 import styles from "./styles.module.css";
 
@@ -36,7 +35,11 @@ export function RoutineListItem({ item, taskOptions, connections, linkedTaskTitl
 
     try {
       const result = await deleteRoutineItemAction({ id: item.id });
-      if (!result.error) onRemove(item.id);
+      if (result.error) {
+        emitMascotEvent("action-error");
+      } else {
+        onRemove(item.id);
+      }
     } finally {
       setIsRemoving(false);
     }
@@ -95,8 +98,9 @@ export function RoutineListItem({ item, taskOptions, connections, linkedTaskTitl
         {!item.isSharedWithMe && (
           <ConfirmIconButton
             icon="FaTrash"
-            ariaLabel={`Excluir ${item.title} da rotina`}
-            confirmText="Excluir este item da rotina?"
+            ariaLabel={`Remover "${item.title}" da rotina`}
+            confirmText={`Remover "${item.title}" da rotina?`}
+            confirmLabel="Remover"
             loading={isRemoving}
             onConfirm={handleRemove}
           />

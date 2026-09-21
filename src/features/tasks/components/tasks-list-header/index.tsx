@@ -1,19 +1,22 @@
 "use client";
 
 import { useRouter, usePathname } from "next/navigation";
-import { useParamsUrl } from "@/hooks/use-params-url";
+
 
 import { Input } from "@/components";
 import { Icon } from "@/components/icon";
-import { AddTask } from "../modal";
-import { PRIORITY_OPTIONS } from "../modal/interfaces";
 import { LoadAcceptedConnections } from "@/features/connections/domain";
 import { useTaskStore } from "@/features/tasks/task-store";
+
+import { useParamsUrl } from "../../hooks/use-params-url";
+import { AddTask } from "../modal";
+import { PRIORITY_OPTIONS } from "../modal/interfaces";
 import styles from "../shared/styles.module.css";
 
 const STATUS_OPTIONS = [
   { label: "Todas", value: "all" },
   { label: "Pendentes", value: "pending" },
+  { label: "Em andamento", value: "in_progress" },
   { label: "Concluídas", value: "completed" },
   { label: "Atrasadas", value: "overdue" },
 ];

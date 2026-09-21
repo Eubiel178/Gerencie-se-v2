@@ -1,9 +1,9 @@
 import { z } from "zod";
 
+import { LoadAcceptedConnections } from "@/features/connections/domain";
+import { IRoutineItem } from "@/features/routine/domain";
 import { validationSchema } from "@/validation/routine-schema";
 
-import { IRoutineItem } from "@/features/routine/domain";
-import { LoadAcceptedConnections } from "@/features/connections/domain";
 
 export interface FormData extends z.infer<typeof validationSchema> {}
 

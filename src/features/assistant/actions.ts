@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 
 import { getAssistantPreferencesFetcher } from "@/features/assistant/data/get-assistant-preferences-fetcher";
 import { IAssistantPreferences } from "@/features/assistant/domain";
-
 import type { ActionResult } from "@/types/action-result";
 
 export async function updateAssistantPreferencesAction(

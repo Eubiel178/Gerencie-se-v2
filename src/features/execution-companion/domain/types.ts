@@ -7,6 +7,7 @@ export interface IExecutionSession {
   status: ExecutionSessionStatus;
   currentStepIndex: number;
   startedAt: Date;
+  resumedAt: Date;
   pausedAt: Date | null;
   completedAt: Date | null;
   updatedAt: Date;

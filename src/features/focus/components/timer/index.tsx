@@ -3,12 +3,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Button, Input, Modal, ModalHeader } from "@/components";
-
 import { IMascotState, MascotEvent } from "@/features/focus/domain";
+import { EXTEND_PRESETS_MINUTES } from "@/features/focus/extend-presets";
 import { useFocusSession } from "@/features/focus/focus-session-context";
 import { formatClock } from "@/features/focus/format-clock";
-import { EXTEND_PRESETS_MINUTES } from "@/features/focus/extend-presets";
 import { toggleTaskCompleteAction } from "@/features/tasks/actions";
+
 import { Mascot } from "../mascot";
 
 import styles from "./styles.module.css";
@@ -76,6 +76,10 @@ export function Timer({ mascot, task, pendingTasks }: TimerProps) {
   // vez (é sempre uma decisão pontual daquele momento).
   const [showTaskCompleteConfirm, setShowTaskCompleteConfirm] = useState(false);
   const [isMarkingTaskComplete, setIsMarkingTaskComplete] = useState(false);
+  // Cancelar descarta o progresso da sessão sem chance de desfazer — alto
+  // impacto, então pede confirmação (diferente de "Concluir agora", que é
+  // uma ação positiva e não precisa).
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
   const panelRef = useRef<HTMLDivElement>(null);
   const hiddenAtRef = useRef<number | null>(null);
@@ -128,6 +132,8 @@ export function Timer({ mascot, task, pendingTasks }: TimerProps) {
   useEffect(() => {
     if (!session) return;
 
+    let nudgeTimeout: ReturnType<typeof setTimeout> | null = null;
+
     function handleVisibilityChange() {
       if (document.hidden) {
         hiddenAtRef.current = Date.now();
@@ -141,12 +147,16 @@ export function Timer({ mascot, task, pendingTasks }: TimerProps) {
 
       if (awaySeconds >= 5) {
         setAwayNudge(`Bem-vindo de volta — você saiu do foco por ${awaySeconds}s.`);
-        setTimeout(() => setAwayNudge(null), 5000);
+        if (nudgeTimeout) clearTimeout(nudgeTimeout);
+        nudgeTimeout = setTimeout(() => setAwayNudge(null), 5000);
       }
     }
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      if (nudgeTimeout) clearTimeout(nudgeTimeout);
+    };
   }, [session]);
 
   // Modo tela cheia opcional, reduz a visibilidade de outras abas/UI do
@@ -187,10 +197,11 @@ export function Timer({ mascot, task, pendingTasks }: TimerProps) {
     if (result.error) setActionError(result.error);
   }
 
-  async function handleCancel() {
+  async function handleConfirmCancel() {
     setActionError(null);
     const result = await cancel();
     if (result.error) setActionError(result.error);
+    setShowCancelConfirm(false);
   }
 
   async function handleExtend(minutes: number) {
@@ -263,7 +274,7 @@ export function Timer({ mascot, task, pendingTasks }: TimerProps) {
               tone="danger"
               disabled={isBusy}
               loading={pendingAction === "cancel"}
-              onClick={handleCancel}
+              onClick={() => setShowCancelConfirm(true)}
             >
               Cancelar
             </Button.Root>
@@ -305,6 +316,37 @@ export function Timer({ mascot, task, pendingTasks }: TimerProps) {
             Iniciar Foco ({plannedMinutes} min)
           </Button.Root>
         </>
+      )}
+
+      {showCancelConfirm && (
+        <Modal onClose={() => setShowCancelConfirm(false)}>
+          <ModalHeader
+            title={
+              displayTask
+                ? `Encerrar a sessão de "${displayTask.title}"?`
+                : "Encerrar esta sessão de foco?"
+            }
+            onClose={() => setShowCancelConfirm(false)}
+          />
+
+          <p className={styles.taskCompleteText}>
+            O tempo já registrado nesta sessão não é salvo.
+          </p>
+
+          <div className={styles.taskCompleteActions}>
+            <Button.Root type="button" variant="secondary" onClick={() => setShowCancelConfirm(false)}>
+              Continuar foco
+            </Button.Root>
+            <Button.Root
+              type="button"
+              tone="danger"
+              loading={pendingAction === "cancel"}
+              onClick={handleConfirmCancel}
+            >
+              Encerrar
+            </Button.Root>
+          </div>
+        </Modal>
       )}
 
       {showTaskCompleteConfirm && task && (

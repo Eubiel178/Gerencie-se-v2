@@ -5,8 +5,9 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/db/client";
 import { userPreferences } from "@/db/schema";
 import { requireUserId } from "@/lib/auth";
+import type { ActionResult } from "@/types/action-result";
 
-export async function dismissGuidedTourAction(): Promise<{ error: string | null }> {
+export async function dismissGuidedTourAction(): Promise<ActionResult> {
   try {
     const userId = await requireUserId();
 
@@ -25,7 +26,7 @@ export async function dismissGuidedTourAction(): Promise<{ error: string | null 
 }
 
 /** "Rever tour guiado" em Configurações - o inverso de `dismissGuidedTourAction`. */
-export async function resetGuidedTourAction(): Promise<{ error: string | null }> {
+export async function resetGuidedTourAction(): Promise<ActionResult> {
   try {
     const userId = await requireUserId();
 

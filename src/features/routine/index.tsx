@@ -1,16 +1,9 @@
+import { getConnectionFetcher } from "@/features/connections/data/get-connection-fetcher";
 import { getRoutineFetcher } from "@/features/routine/data/get-routine-fetcher";
 import { getTaskFetcher } from "@/features/tasks/data/get-task-fetcher";
-import { getConnectionFetcher } from "@/features/connections/data/get-connection-fetcher";
 
 import { RoutineHeader, RoutineList } from "./components";
-
 import styles from "./styles.module.css";
-
-// Reexports pra permitir `import { X } from "@/features/routine"` em
-// vez de caminhos profundos.
-export * from "./domain";
-export * from "./actions";
-export { getRoutineFetcher } from "./data/get-routine-fetcher";
 
 export async function Routine() {
   const routineFetcher = getRoutineFetcher();

@@ -10,5 +10,9 @@ export interface IReadingItem {
   totalPages?: number | null;
   currentPage?: number | null;
   dailyReadingGoal?: number | null;
+  // Preenchido somente quando o livro é efetivamente concluído (status
+  // "finished") — marca o instante real da conclusão, usada como timestamp
+  // no Histórico. Nulo enquanto o livro não for concluído.
+  finishedAt?: Date | null;
   addedAt: Date;
 }

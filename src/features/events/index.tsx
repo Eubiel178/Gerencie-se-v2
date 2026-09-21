@@ -1,15 +1,7 @@
-import { Calendar, EventList, EventListHeader } from "./components";
-
-import { getEventFetcher } from "./data/get-event-fetcher";
 import styles from "@/styles/workspace.module.css";
 
-// Reexports pra permitir `import { X } from "@/features/events"` em vez
-// de caminhos profundos (`@/features/events/domain`, `.../actions`,
-// etc.) — mesma ideia aplicada a cada feature do app.
-export * from "./domain";
-export * from "./actions";
-export * from "./event-store";
-export { getEventFetcher } from "./data/get-event-fetcher";
+import { Calendar, EventList, EventListHeader } from "./components";
+import { getEventFetcher } from "./data/get-event-fetcher";
 
 export async function Event() {
   const fetcher = getEventFetcher();

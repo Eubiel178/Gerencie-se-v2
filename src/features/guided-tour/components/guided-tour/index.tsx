@@ -1,11 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+
 import { createPortal } from "react-dom";
+
 import { useRouter } from "next/navigation";
 
-import { getFocusableElements } from "@/components/modal/get-focusable-elements";
 import { useMobileNavStore } from "@/components/header/mobile-nav-store";
+import { getFocusableElements } from "@/components/modal/get-focusable-elements";
+
 import { dismissGuidedTourAction } from "../../actions";
 import { buildGuidedTourSteps, GUIDED_TOUR_MOBILE_BREAKPOINT_PX, GuidedTourStep } from "../../domain/steps";
 

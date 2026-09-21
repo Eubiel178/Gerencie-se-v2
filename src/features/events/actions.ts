@@ -2,8 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 
-import * as domain from "@/features/events/domain";
 import { getEventFetcher } from "@/features/events/data/get-event-fetcher";
+import * as domain from "@/features/events/domain";
+import type { ActionResult } from "@/types/action-result";
 import { validationSchema } from "@/validation/event-schema";
 
 /**
@@ -16,7 +17,6 @@ import { validationSchema } from "@/validation/event-schema";
  * e resolvem o usuário dono dos dados a partir da sessão (nunca de um valor
  * vindo do formulário).
  */
-import type { ActionResult } from "@/types/action-result";
 
 export async function createEventAction(
   data: domain.CreateEvent.Params

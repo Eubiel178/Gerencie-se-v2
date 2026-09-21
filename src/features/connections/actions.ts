@@ -3,10 +3,10 @@
 import { revalidatePath } from "next/cache";
 
 import { getConnectionFetcher } from "@/features/connections/data/get-connection-fetcher";
+import type { IConnection } from "@/features/connections/domain";
+import type { ActionResult } from "@/types/action-result";
 import { inviteConnectionSchema } from "@/validation/connection-schema";
 
-import type { ActionResult } from "@/types/action-result";
-import type { IConnection } from "@/features/connections/domain";
 
 export async function inviteConnectionAction(
   data: { email: string }
@@ -26,13 +26,25 @@ export async function inviteConnectionAction(
   }
 }
 
+// Declinar/remover uma conexão pode revogar compartilhamento de tarefas,
+// objetivos, hábitos e itens de rotina (ver `revokeSharingBetween` em
+// `local-connection.ts`) — sem revalidar essas páginas também, quem
+// perdeu acesso ainda veria o item compartilhado até navegar manualmente.
+function revalidateConnectionDependents() {
+  revalidatePath("/home/settings");
+  revalidatePath("/home/tasks");
+  revalidatePath("/home/goals");
+  revalidatePath("/home/habits");
+  revalidatePath("/home/routine");
+}
+
 export async function respondConnectionAction(params: {
   id: string;
   accept: boolean;
 }): Promise<ActionResult> {
   try {
     await getConnectionFetcher().respond(params);
-    revalidatePath("/home/settings");
+    revalidateConnectionDependents();
 
     return { error: null };
   } catch {
@@ -43,7 +55,7 @@ export async function respondConnectionAction(params: {
 export async function deleteConnectionAction(params: { id: string }): Promise<ActionResult> {
   try {
     await getConnectionFetcher().delete(params);
-    revalidatePath("/home/settings");
+    revalidateConnectionDependents();
 
     return { error: null };
   } catch {

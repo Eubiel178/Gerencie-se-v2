@@ -1,18 +1,18 @@
+import akitaFrameRects from "./akita-frames.json";
+import bearFrameRects from "./bear-frames.json";
+import birdFrameRects from "./bird-frames.json";
 import catFrameRects from "./cat-frames.json";
 import dogFrameRects from "./dog-frames.json";
-import birdFrameRects from "./bird-frames.json";
-import bearFrameRects from "./bear-frames.json";
-import foxFrameRects from "./fox-frames.json";
-import pandaFrameRects from "./panda-frames.json";
-import goldenFrameRects from "./golden-frames.json";
-import akitaFrameRects from "./akita-frames.json";
 import dogueAlemaoFrameRects from "./dogue-alemao-frames.json";
-import gatoPretoFrameRects from "./gato-preto-frames.json";
+import foxFrameRects from "./fox-frames.json";
 import gatoAngoraFrameRects from "./gato-angora-frames.json";
-import gatoTabbyFrameRects from "./gato-tabby-frames.json";
 import gatoLaranjaFrameRects from "./gato-laranja-frames.json";
 import gatoLilasFrameRects from "./gato-lilas-frames.json";
+import gatoPretoFrameRects from "./gato-preto-frames.json";
 import gatoSiamesFrameRects from "./gato-siames-frames.json";
+import gatoTabbyFrameRects from "./gato-tabby-frames.json";
+import goldenFrameRects from "./golden-frames.json";
+import pandaFrameRects from "./panda-frames.json";
 import { MascotCharacter, MascotFrameRect, MascotStateName } from "./types";
 
 const FRAME_WIDTH = 110;

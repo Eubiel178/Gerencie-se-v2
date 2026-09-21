@@ -3,13 +3,13 @@
 import { useState } from "react";
 
 import { useForm } from "react-hook-form";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 import { Form, Input, Button } from "@/components";
-import { useToast } from "@/providers/toast-context";
-
 import { changePasswordAction } from "@/features/profile/actions";
+import { useToast } from "@/providers/toast-context";
 import { changePasswordSchema } from "@/validation/change-password-schema";
 
 import styles from "./styles.module.css";

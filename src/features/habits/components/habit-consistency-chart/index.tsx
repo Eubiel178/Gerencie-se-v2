@@ -1,11 +1,12 @@
 "use client";
 
 import { useId, useMemo, useState } from "react";
+
 import dayjs from "dayjs";
 
 import { Button } from "@/components";
-import { buildHabitHeatmap } from "@/features/habits/build-habit-heatmap";
 import { buildHabitConsistencyTrend, ConsistencyWeekPoint } from "@/features/habits/build-habit-consistency-trend";
+import { buildHabitHeatmap } from "@/features/habits/build-habit-heatmap";
 
 import styles from "./styles.module.css";
 

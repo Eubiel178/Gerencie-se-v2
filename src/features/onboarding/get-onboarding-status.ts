@@ -4,13 +4,13 @@ import { eq } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import { userPreferences } from "@/db/schema";
+import { IMascotState } from "@/features/focus/domain";
+import { IGoal } from "@/features/goals/domain";
+import { IHabit } from "@/features/habits/domain";
+import { ITask } from "@/features/tasks/domain";
 import { requireUserId } from "@/lib/auth";
 import { isGoogleCalendarConnected } from "@/lib/integrations/google-calendar";
 
-import { ITask } from "@/features/tasks/domain";
-import { IHabit } from "@/features/habits/domain";
-import { IGoal } from "@/features/goals/domain";
-import { IMascotState } from "@/features/focus/domain";
 
 export interface OnboardingItem {
   id: string;

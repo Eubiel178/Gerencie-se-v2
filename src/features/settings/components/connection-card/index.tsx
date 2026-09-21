@@ -2,13 +2,11 @@
 
 import { useState } from "react";
 
+import { Button, Input, Modal, ModalHeader } from "@/components";
 import {
   disconnectGoogleCalendarAction,
   updateSelectedCalendarAction,
 } from "@/features/google-calendar/actions";
-
-import { Button, Input, Modal, ModalHeader } from "@/components";
-
 import type { GoogleCalendarOption } from "@/lib/integrations/google-calendar";
 
 import styles from "./styles.module.css";

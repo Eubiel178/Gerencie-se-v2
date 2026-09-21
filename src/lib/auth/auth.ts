@@ -1,17 +1,18 @@
 import "server-only";
 
 import NextAuth from "next-auth";
-import Credentials from "next-auth/providers/credentials";
+
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import bcrypt from "bcryptjs";
 import { and, eq } from "drizzle-orm";
+import Credentials from "next-auth/providers/credentials";
 
 import { db } from "@/db/client";
 import { accounts, sessions, users, verificationTokens } from "@/db/schema";
-import { handleFailedLoginAttempt, handleSuccessfulLogin } from "./login-attempt-tracker";
 import { normalizeEmail } from "@/utils/normalize-email";
 
 import authConfig from "./config";
+import { handleFailedLoginAttempt, handleSuccessfulLogin } from "./login-attempt-tracker";
 
 /**
  * Configuração completa do Auth.js — usada nas rotas de API, Server Actions

@@ -8,10 +8,10 @@
  * de demonstração (upsert por e-mail).
  */
 import "dotenv/config";
-import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
-import postgres from "postgres";
+import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 
 import * as schema from "./schema";
 

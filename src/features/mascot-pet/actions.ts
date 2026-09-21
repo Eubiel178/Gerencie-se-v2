@@ -1,12 +1,12 @@
 "use server";
 
-import { askGemini } from "@/lib/ai/gemini";
-import { isAIProviderAvailable } from "@/lib/ai/gateway";
-import { GeminiAssistantProvider } from "@/lib/ai/gemini-provider";
+import { getExecutionSessionFetcher } from "@/features/execution-companion/data/local-execution-session";
 import { getMascotFetcher } from "@/features/focus/data/get-focus-fetcher";
 import { getTaskFetcher } from "@/features/tasks/data/get-task-fetcher";
-import { getExecutionSessionFetcher } from "@/features/execution-companion/data/local-execution-session";
-import { getCompanionAction } from "@/features/execution-companion/domain/actions";
+import { isAIProviderAvailable } from "@/lib/ai/gateway";
+import { askGemini } from "@/lib/ai/gemini";
+import { buildChatSystemPrompt } from "@/lib/ai/prompts/chat-prompt";
+
 import { buildContextualFallback } from "./lib/companion-fallback";
 
 export interface ChatResult {
@@ -35,13 +35,51 @@ const fallbackDeps = {
 };
 
 /**
+ * Monta contexto estruturado da sessão de execução atual.
+ * Inclui: tarefa ativa, passos, status — tudo do DB, não do chat.
+ */
+async function buildExecutionContext(): Promise<string> {
+  try {
+    const session = await getExecutionSessionFetcher().getActiveOrPaused();
+    if (!session) return "";
+
+    const task = await getTaskFetcher().getById(session.taskId);
+    if (!task) return "";
+
+    const completedSteps = task.steps.filter((s) => s.completed);
+
+    const lines: string[] = [];
+    lines.push(`TAREFA ATUAL: "${task.title}"`);
+    if (task.description) lines.push(`Descrição: ${task.description}`);
+    lines.push(`Status da sessão: ${session.status === "active" ? "em execução" : "pausada"}`);
+    lines.push(`Prioridade: ${task.priority}`);
+
+    if (task.steps.length > 0) {
+      lines.push(`Passos (${completedSteps.length}/${task.steps.length} concluídos):`);
+      for (const step of task.steps) {
+        lines.push(`  ${step.completed ? "[x]" : "[ ]"} ${step.title}`);
+      }
+    } else {
+      lines.push("Essa tarefa não tem passos cadastrados.");
+    }
+
+    return lines.join("\n");
+  } catch {
+    return "";
+  }
+}
+
+/**
  * Server action unificada: UMA chamada Gemini por mensagem.
  * 1. Tenta interpretar como ação controlada (se Gemini disponível)
  * 2. Se ação detectada → retorna proposal
- * 3. Se não → gera resposta de chat
+ * 3. Se não → gera resposta de chat com contexto
  * 4. Se Gemini indisponível → fallback context-aware com dados locais
  */
-export async function sendAssistantMessage(message: string): Promise<ChatResult> {
+export async function sendAssistantMessage(
+  message: string,
+  history?: Array<{ role: "user" | "mascot"; text: string }>,
+): Promise<ChatResult> {
   const cleanMessage = message.trim();
 
   if (!cleanMessage) {
@@ -59,42 +97,33 @@ export async function sendAssistantMessage(message: string): Promise<ChatResult>
   }
 
   try {
-    // 1. Tentar interpretar como ação (UMA chamada Gemini)
-    const mascot = await getMascotFetcher().getMascot();
+    // 1. Carregar personalidade + contexto factual em paralelo
+    const [mascot, executionContext] = await Promise.all([
+      getMascotFetcher().getMascot(),
+      buildExecutionContext(),
+    ]);
     const personality = mascot?.personality ?? "zen";
 
-    const gemini = new GeminiAssistantProvider();
-    const interpreted = await gemini.interpretIntention({
-      message: cleanMessage,
-      personality,
-    });
-
-    if (interpreted && interpreted.action && interpreted.confidence >= 0.5) {
-      const actionDef = getCompanionAction(interpreted.action);
-      return {
-        success: true,
-        message: "", // vazio — Widget mostra card de proposta
-        proposal: {
-          action: interpreted.action,
-          params: interpreted.params,
-          confidence: interpreted.confidence,
-          risk: actionDef?.risk ?? "low",
-          requiresConfirmation: actionDef?.requiresConfirmation ?? true,
-        },
-      };
-    }
-
-    // 2. Não é ação → resposta de chat
-    const response = await askGemini(cleanMessage);
+    // 2. Resposta de chat COM contexto (sem interpretIntention — mutations desabilitadas nesta fase)
+    const systemInstruction = buildChatSystemPrompt(personality, executionContext);
+    const chatHistory = history?.map((m) => ({
+      role: m.role === "mascot" ? "assistant" as const : "user" as const,
+      content: m.text,
+    }));
+    const response = await askGemini(cleanMessage, systemInstruction, chatHistory);
     if (response) {
       return { success: true, message: response.text };
     }
-    // Gemini indisponível após interpretIntention → fallback context-aware
+    // Gemini indisponível → fallback context-aware
     const fallback = await buildContextualFallback(cleanMessage, fallbackDeps);
     return { success: true, message: fallback };
   } catch (e) {
     console.error("[sendAssistantMessage] erro inesperado:", e);
-    const fallback = await buildContextualFallback(cleanMessage, fallbackDeps);
-    return { success: true, message: fallback };
+    try {
+      const fallback = await buildContextualFallback(cleanMessage, fallbackDeps);
+      return { success: true, message: fallback };
+    } catch {
+      return { success: true, message: "Tô sem condições de responder agora. Tenta de novo em instantes." };
+    }
   }
 }

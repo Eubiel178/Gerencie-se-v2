@@ -2,15 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 
-import * as domain from "@/features/habits/domain";
 import { getHabitFetcher } from "@/features/habits/data/get-habit-fetcher";
+import * as domain from "@/features/habits/domain";
+import type { ActionResult } from "@/types/action-result";
 import {
   createHabitSchema,
   toggleHabitLogSchema,
   updateHabitSchema,
 } from "@/validation/habit-schema";
-
-import type { ActionResult } from "@/types/action-result";
 
 export async function createHabitAction(
   data: domain.CreateHabit.Params
@@ -23,6 +22,7 @@ export async function createHabitAction(
   try {
     await getHabitFetcher().create(parsed.data);
     revalidatePath("/home/habits");
+    revalidatePath("/home");
 
     return { error: null };
   } catch {
@@ -41,6 +41,7 @@ export async function updateHabitAction(
   try {
     await getHabitFetcher().update(parsed.data);
     revalidatePath("/home/habits");
+    revalidatePath("/home");
 
     return { error: null };
   } catch {
@@ -54,6 +55,7 @@ export async function deleteHabitAction(
   try {
     await getHabitFetcher().delete(params);
     revalidatePath("/home/habits");
+    revalidatePath("/home");
 
     return { error: null };
   } catch {
@@ -72,6 +74,7 @@ export async function toggleHabitLogAction(
   try {
     const result = await getHabitFetcher().toggleLog(parsed.data);
     revalidatePath("/home/habits");
+    revalidatePath("/home");
 
     return { error: null, completed: result.completed };
   } catch {

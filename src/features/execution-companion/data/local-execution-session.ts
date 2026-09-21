@@ -16,6 +16,7 @@ function mapSessionRow(row: typeof executionSessions.$inferSelect): IExecutionSe
     status: row.status as IExecutionSession["status"],
     currentStepIndex: row.currentStepIndex,
     startedAt: row.startedAt,
+    resumedAt: row.resumedAt,
     pausedAt: row.pausedAt,
     completedAt: row.completedAt,
     updatedAt: row.updatedAt,
@@ -97,6 +98,7 @@ export class LocalExecutionSession {
       status: "active",
       currentStepIndex: 0,
       startedAt: now,
+      resumedAt: now,
       updatedAt: now,
     });
 
@@ -132,7 +134,8 @@ export class LocalExecutionSession {
       .where(
         and(
           eq(executionSessions.id, id),
-          eq(executionSessions.userId, userId)
+          eq(executionSessions.userId, userId),
+          eq(executionSessions.status, "active")
         )
       );
   }
@@ -144,12 +147,14 @@ export class LocalExecutionSession {
       .set({
         status: "active",
         pausedAt: null,
+        resumedAt: new Date(),
         updatedAt: new Date(),
       })
       .where(
         and(
           eq(executionSessions.id, id),
-          eq(executionSessions.userId, userId)
+          eq(executionSessions.userId, userId),
+          eq(executionSessions.status, "paused")
         )
       );
   }
@@ -166,7 +171,8 @@ export class LocalExecutionSession {
       .where(
         and(
           eq(executionSessions.id, id),
-          eq(executionSessions.userId, userId)
+          eq(executionSessions.userId, userId),
+          eq(executionSessions.status, "active")
         )
       );
   }
@@ -185,6 +191,45 @@ export class LocalExecutionSession {
           eq(executionSessions.userId, userId)
         )
       );
+  }
+
+  /** Pausa a sessão ativa (se existir) e cria uma nova para a task indicada.
+   *  Operação atômica no nível de application — duas queries sequenciais
+   *  dentro da mesma transação de request do servidor. */
+  async switchToTask(taskId: string): Promise<IExecutionSession> {
+    const userId = await requireUserId();
+    const now = new Date();
+
+    // Pausa qualquer sessão ativa
+    await db
+      .update(executionSessions)
+      .set({
+        status: "paused",
+        pausedAt: now,
+        updatedAt: now,
+      })
+      .where(
+        and(
+          eq(executionSessions.userId, userId),
+          eq(executionSessions.status, "active")
+        )
+      );
+
+    // Cria nova sessão ativa
+    const id = crypto.randomUUID();
+    await db.insert(executionSessions).values({
+      id,
+      userId,
+      taskId,
+      status: "active",
+      currentStepIndex: 0,
+      startedAt: now,
+      resumedAt: now,
+      updatedAt: now,
+    });
+
+    const row = await this.getById(id);
+    return row!;
   }
 }
 

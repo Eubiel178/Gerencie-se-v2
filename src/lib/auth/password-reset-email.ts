@@ -1,3 +1,5 @@
+import { renderSpamFolderHint } from "@/lib/email";
+
 // Mesma técnica de e-mail "old school" de `login-alert-email.ts` (tabela +
 // estilo inline, sem CSS externo).
 const TEXT = "#1b1e24";
@@ -99,4 +101,4 @@ export function renderPasswordResetEmail({ name, resetUrl }: PasswordResetEmailP
   </body>
 </html>`;
 }
-import { renderSpamFolderHint } from "@/lib/email/template-hints";
+

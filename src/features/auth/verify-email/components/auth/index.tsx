@@ -1,16 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-import { signOut } from "next-auth/react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+
 import { zodResolver } from "@hookform/resolvers/zod";
+import { signOut } from "next-auth/react";
+import { z } from "zod";
 
 import { Alert, Form, Input, Button } from "@/components";
-import { useToast } from "@/providers/toast-context";
-
 import { resendVerificationCodeAction, verifyEmailAction } from "@/features/auth/actions";
+import { useToast } from "@/providers/toast-context";
 import { validationSchema } from "@/validation/verify-email-schema";
 
 import styles from "../../../auth-page.module.css";
@@ -38,6 +38,17 @@ export function Auth({ email, deliveryFailed, resumed }: AuthProps) {
   // que o SMTP aceitou o envio. Isso evita a contradição "enviamos" +
   // "não conseguimos enviar" quando o primeiro envio falha no cadastro.
   const [hasDeliveredCode, setHasDeliveredCode] = useState(!deliveryFailed);
+  // Guarda o intervalo pra poder cancelar se o componente desmontar no
+  // meio da contagem (ex.: usuário navega pra fora) — antes o intervalo
+  // só se auto-limpava chegando a 0, então sair da página no meio deixava
+  // ele rodando indefinidamente contra um closure obsoleto.
+  const cooldownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (cooldownIntervalRef.current) clearInterval(cooldownIntervalRef.current);
+    };
+  }, []);
 
   const {
     handleSubmit,
@@ -87,10 +98,12 @@ export function Auth({ email, deliveryFailed, resumed }: AuthProps) {
 
   function startResendCooldown(seconds: number) {
     setCooldown(seconds);
-    const interval = setInterval(() => {
+    if (cooldownIntervalRef.current) clearInterval(cooldownIntervalRef.current);
+    cooldownIntervalRef.current = setInterval(() => {
       setCooldown((current) => {
         if (current <= 1) {
-          clearInterval(interval);
+          if (cooldownIntervalRef.current) clearInterval(cooldownIntervalRef.current);
+          cooldownIntervalRef.current = null;
           return 0;
         }
         return current - 1;

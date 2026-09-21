@@ -2,16 +2,15 @@
 
 import { revalidatePath } from "next/cache";
 
-import * as domain from "@/features/reading/domain";
 import { getReadingFetcher } from "@/features/reading/data/get-reading-fetcher";
+import * as domain from "@/features/reading/domain";
+import type { ActionResult } from "@/types/action-result";
 import {
   createReadingItemSchema,
   updateReadingCurrentPageSchema,
   updateReadingDetailsSchema,
   updateReadingItemSchema,
 } from "@/validation/reading-schema";
-
-import type { ActionResult } from "@/types/action-result";
 
 type ReadingActionResult = ActionResult & { item?: domain.IReadingItem };
 

@@ -14,11 +14,9 @@ import {
   tasks,
   users,
 } from "@/db/schema";
-
 import { calculateMascotLevel } from "@/features/focus/domain";
-import { calculateHabitStats } from "@/features/habits/domain";
 import { calculateGoalProgress } from "@/features/goals/domain";
-
+import { calculateHabitStats } from "@/features/habits/domain";
 import {
   calculateAverageGoalProgress,
   calculateBestHabitStreak,

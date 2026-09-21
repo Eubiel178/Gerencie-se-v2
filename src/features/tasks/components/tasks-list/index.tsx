@@ -4,18 +4,19 @@ import { useEffect } from "react";
 
 import { usePathname, useRouter } from "next/navigation";
 
-import { useFormTags } from "@/features/tasks/hooks/use-form-tags";
-import { useParamsUrl } from "@/hooks/use-params-url";
 
 import { EmptyState } from "@/components";
-import { Card } from "./card";
-
-import { ITask } from "@/features/tasks/domain";
 import { LoadAcceptedConnections } from "@/features/connections/domain";
-import styles from "../shared/styles.module.css";
-import { useTaskStore } from "@/features/tasks/task-store";
+import { ITask } from "@/features/tasks/domain";
 import { filterTasks } from "@/features/tasks/filter-tasks";
+import { useFormTags } from "@/features/tasks/hooks/use-form-tags";
 import { sortTasksByPriority } from "@/features/tasks/sort-tasks";
+import { useTaskStore } from "@/features/tasks/task-store";
+
+import { useParamsUrl } from "../../hooks/use-params-url";
+import styles from "../shared/styles.module.css";
+
+import { Card } from "./card";
 
 interface TasksListProps {
   tasksList: ITask[];
@@ -36,9 +37,22 @@ export function TasksList({ tasksList, isGoogleConnected, connections }: TasksLi
   const router = useRouter();
   const pathname = usePathname();
 
+  // Ressincroniza sempre que o server manda uma lista nova (revalidação,
+  // tarefa compartilhada alterada por outra pessoa etc.) — a versão
+  // antiga só copiava `tasksList` pra store UMA vez (guarda `initializedRef`)
+  // e ignorava pra sempre qualquer prop nova depois disso. A correção NÃO
+  // pode ajustar o estado durante a própria renderização como em
+  // `RoutineList`/`HabitsList` (que usam `useState` local) — `setTasks` é
+  // do Zustand, uma store EXTERNA compartilhada por outros componentes;
+  // chamá-la durante a renderização deste componente pode tentar
+  // atualizar outro componente Zustand-subscrito enquanto ele ainda está
+  // renderizando (confirmado: quebrava a criação de tarefa com "Cannot
+  // update a component while rendering a different component"). Store
+  // externa = sincronizar em efeito é o lugar certo; só remover a guarda
+  // de "uma vez só" já resolve, sem precisar do truque de renderização.
   useEffect(() => {
     setTasks(tasksList);
-  }, [setTasks, tasksList]);
+  }, [tasksList, setTasks]);
 
   const tag = formTags.tagExists(paramsUrl.get("tag") || "");
   const tasksByTag = tag !== "all" ? tasks.filter((task) => task.tag === tag) : tasks;

@@ -2,11 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 
-import * as domain from "@/features/menstrual-cycle/domain";
 import { getCycleFetcher } from "@/features/menstrual-cycle/data/get-cycle-fetcher";
-import { createCycleEntrySchema } from "@/validation/menstrual-cycle-schema";
-
+import * as domain from "@/features/menstrual-cycle/domain";
 import type { ActionResult } from "@/types/action-result";
+import { createCycleEntrySchema } from "@/validation/menstrual-cycle-schema";
 
 export async function createCycleEntryAction(
   data: domain.CreateCycleEntry.Params
@@ -19,6 +18,7 @@ export async function createCycleEntryAction(
   try {
     const { id } = await getCycleFetcher().create(parsed.data);
     revalidatePath("/home/menstrual-cycle");
+    revalidatePath("/home");
 
     return { error: null, id };
   } catch {
@@ -32,6 +32,7 @@ export async function deleteCycleEntryAction(
   try {
     await getCycleFetcher().delete(params);
     revalidatePath("/home/menstrual-cycle");
+    revalidatePath("/home");
 
     return { error: null };
   } catch {

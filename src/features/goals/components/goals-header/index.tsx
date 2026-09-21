@@ -1,5 +1,6 @@
-import { AddGoal } from "../modal";
 import { LoadAcceptedConnections } from "@/features/connections/domain";
+
+import { AddGoal } from "../modal";
 
 import styles from "./styles.module.css";
 

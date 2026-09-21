@@ -2,16 +2,15 @@
 
 import { useState } from "react";
 
-import { Icon } from "@/components/icon";
-
 import { Button, ConfirmIconButton, EmptyState } from "@/components";
-
+import { Icon } from "@/components/icon";
+import { StatusBadge } from "@/components/status-badge";
 import {
   deleteHealthCheckupAction,
   markHealthCheckupDoneAction,
 } from "@/features/health/actions";
-import { IHealthCheckup } from "@/features/health/domain";
-import { computeCheckupDueState } from "@/features/health/domain";
+import { computeCheckupDueState, IHealthCheckup } from "@/features/health/domain";
+import { formatDateOnly } from "@/utils/date";
 
 import { EditCheckup } from "../edit-checkup";
 
@@ -114,21 +113,21 @@ export function List({ checkups }: { checkups: IHealthCheckup[] }) {
                   <p className={styles.itemTitle}>{checkup.title}</p>
 
                   <span className={styles.itemMeta}>
-                    {checkup.lastDoneAt && `Última vez: ${formatDate(checkup.lastDoneAt)}`}
+                    {checkup.lastDoneAt && `Última vez: ${formatDateOnly(checkup.lastDoneAt)}`}
                     {checkup.lastDoneAt && checkup.nextDueDate && " · "}
                     {checkup.nextDueDate &&
                       (checkup.isOverdue
-                        ? `Estimativa: atrasado desde ${formatDate(checkup.nextDueDate)}`
-                        : `Estimativa: próximo em ${formatDate(checkup.nextDueDate)}`)}
+                        ? `Estimativa: atrasado desde ${formatDateOnly(checkup.nextDueDate)}`
+                        : `Estimativa: próximo em ${formatDateOnly(checkup.nextDueDate)}`)}
                   </span>
 
                   {checkup.notes && <p className={styles.itemNotes}>{checkup.notes}</p>}
 
                   {checkup.isOverdue && (
-                    <span className={styles.overdueBadge}>
+                    <StatusBadge tone="danger">
                       <Icon name="FaExclamationTriangle" aria-hidden="true" />
                       Atrasado
-                    </span>
+                    </StatusBadge>
                   )}
                 </div>
 
@@ -146,8 +145,8 @@ export function List({ checkups }: { checkups: IHealthCheckup[] }) {
 
                   <ConfirmIconButton
                     icon="FaTrash"
-                    ariaLabel={`Excluir ${checkup.title}`}
-                    confirmText="Excluir este cuidado?"
+                    ariaLabel={`Excluir "${checkup.title}"`}
+                    confirmText={`Excluir "${checkup.title}"?`}
                     loading={busyId === checkup.id}
                     onConfirm={() => handleDelete(checkup.id)}
                   />
@@ -159,9 +158,4 @@ export function List({ checkups }: { checkups: IHealthCheckup[] }) {
       ))}
     </div>
   );
-}
-
-function formatDate(date: string): string {
-  const [year, month, day] = date.split("-");
-  return `${day}/${month}/${year}`;
 }

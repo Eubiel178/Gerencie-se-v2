@@ -2,11 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 
-import * as domain from "@/features/running/domain";
 import { getRunningFetcher } from "@/features/running/data/get-running-fetcher";
-import { createRunningSessionSchema } from "@/validation/running-schema";
-
+import * as domain from "@/features/running/domain";
 import type { ActionResult } from "@/types/action-result";
+import { createRunningSessionSchema } from "@/validation/running-schema";
 
 export async function createRunningSessionAction(
   data: domain.CreateRunningSession.Params
@@ -19,6 +18,7 @@ export async function createRunningSessionAction(
   try {
     const session = await getRunningFetcher().create(parsed.data);
     revalidatePath("/home/running");
+    revalidatePath("/home");
 
     return { error: null, session };
   } catch {
@@ -32,6 +32,7 @@ export async function deleteRunningSessionAction(
   try {
     await getRunningFetcher().delete(params);
     revalidatePath("/home/running");
+    revalidatePath("/home");
 
     return { error: null };
   } catch {

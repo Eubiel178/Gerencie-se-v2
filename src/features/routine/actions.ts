@@ -2,15 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 
-import * as domain from "@/features/routine/domain";
 import { getRoutineFetcher } from "@/features/routine/data/get-routine-fetcher";
+import * as domain from "@/features/routine/domain";
+import type { ActionResult } from "@/types/action-result";
 import {
   createRoutineItemSchema,
   toggleRoutineItemLogSchema,
   updateRoutineItemSchema,
 } from "@/validation/routine-schema";
-
-import type { ActionResult } from "@/types/action-result";
 
 export async function createRoutineItemAction(
   data: domain.CreateRoutineItem.Params
@@ -23,6 +22,7 @@ export async function createRoutineItemAction(
   try {
     await getRoutineFetcher().create(parsed.data);
     revalidatePath("/home/routine");
+    revalidatePath("/home");
 
     return { error: null };
   } catch {
@@ -41,6 +41,7 @@ export async function updateRoutineItemAction(
   try {
     await getRoutineFetcher().update(parsed.data);
     revalidatePath("/home/routine");
+    revalidatePath("/home");
 
     return { error: null };
   } catch {
@@ -54,6 +55,7 @@ export async function deleteRoutineItemAction(
   try {
     await getRoutineFetcher().delete(params);
     revalidatePath("/home/routine");
+    revalidatePath("/home");
 
     return { error: null };
   } catch {
@@ -72,6 +74,7 @@ export async function toggleRoutineItemLogAction(
   try {
     const result = await getRoutineFetcher().toggleLog(parsed.data);
     revalidatePath("/home/routine");
+    revalidatePath("/home");
 
     return { error: null, completed: result.completed };
   } catch {

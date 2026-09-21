@@ -2,9 +2,9 @@
 
 import { Button } from "@/components";
 import { IMascotState, MascotEvent, getMascotLine } from "@/features/focus/domain";
-import { useSpeak } from "@/lib/speech/speak-text";
 import { MascotPreview, characterIdForSpecies } from "@/features/mascot-pet";
 import { MascotStateName } from "@/features/mascot-pet/domain/types";
+import { useSpeak } from "@/lib/speech/speak-text";
 
 import styles from "./styles.module.css";
 

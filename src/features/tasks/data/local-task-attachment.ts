@@ -2,10 +2,10 @@ import "server-only";
 
 import { and, eq, or } from "drizzle-orm";
 
-import * as domain from "@/features/tasks/domain";
 
 import { db } from "@/db/client";
 import { taskAttachments, tasks } from "@/db/schema";
+import * as domain from "@/features/tasks/domain";
 import { requireUserId } from "@/lib/auth";
 import { MAX_ATTACHMENT_SIZE_BYTES } from "@/lib/security/upload-limits";
 

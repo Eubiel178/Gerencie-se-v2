@@ -6,10 +6,12 @@ import { EmptyState, Input } from "@/components";
 import { Icon } from "@/components/icon";
 import { IReadingItem, ReadingStatus } from "@/features/reading/domain";
 import { filterReadingItems } from "@/features/reading/filter-reading-items";
+
+import styles from "../shared/styles.module.css";
+
 import { AddForm } from "./add-form";
 import { Item } from "./item";
 
-import styles from "../shared/styles.module.css";
 
 type ReadingTab = ReadingStatus | "all";
 
@@ -26,23 +28,27 @@ interface ReadingListProps {
 
 export function ReadingList({ items }: ReadingListProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [statusFilter, setStatusFilter] = useState<ReadingTab>("all");
   const [openedItemId, setOpenedItemId] = useState<string | null>(null);
   const [readingItems, setReadingItems] = useState(items);
 
+  // Ressincroniza sempre que o server manda uma lista nova (revalidação,
+  // livro compartilhado atualizado por outra pessoa etc.) — sem isso, a
+  // tela só refletia a lista original recebida no primeiro render.
+  const [previousItems, setPreviousItems] = useState(items);
+  if (items !== previousItems) {
+    setPreviousItems(items);
+    setReadingItems(items);
+  }
+
   const filteredItems = filterReadingItems(readingItems, {
     searchQuery,
     statusFilter,
   });
-  function clearSearch() {
-    setSearchQuery("");
-  }
 
   function closeSearch() {
     setSearchQuery("");
-    setIsSearchOpen(false);
   }
 
   return (
@@ -69,7 +75,6 @@ export function ReadingList({ items }: ReadingListProps) {
         </div>
       </div>
 
-      {/* {filteredItems?.length > 0 && ( */}
       <div className={styles.searchRow} id="reading-library-search">
         <Input.Root>
           <Input.Wrapper>
@@ -91,7 +96,6 @@ export function ReadingList({ items }: ReadingListProps) {
           Limpar
         </button>
       </div>
-      {/* )} */}
 
       {isAdding && (
         <AddForm
@@ -135,7 +139,7 @@ export function ReadingList({ items }: ReadingListProps) {
           {filteredItems.length === 0 ? (
             <EmptyState
               variant="box"
-              // action={{ label: "Limpar busca", onClick: clearSearch }}
+              action={searchQuery ? { label: "Limpar busca", onClick: closeSearch } : undefined}
             >
               Nenhum livro aparece nesta aba com a busca atual.
             </EmptyState>

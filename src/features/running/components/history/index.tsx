@@ -3,7 +3,6 @@
 import { useState } from "react";
 
 import { Button, ConfirmIconButton, EmptyState } from "@/components";
-
 import { deleteRunningSessionAction } from "@/features/running/actions";
 import { IRunningSession } from "@/features/running/domain";
 
@@ -50,8 +49,8 @@ export function History({ sessions, onRemove }: HistoryProps) {
 
           <ConfirmIconButton
             icon="FaTrash"
-            ariaLabel="Excluir corrida"
-            confirmText="Excluir esta corrida?"
+            ariaLabel={`Excluir corrida de ${formatDate(session.startedAt)}`}
+            confirmText={`Excluir a corrida de ${formatDate(session.startedAt)}?`}
             loading={removingId === session.id}
             onConfirm={() => handleDelete(session.id)}
           />

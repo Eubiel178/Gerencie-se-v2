@@ -1,6 +1,6 @@
 import dayjs, { Dayjs } from "dayjs";
 
-import { IconName } from "@/components/icon";
+import { IconName } from "@/components";
 
 export interface AchievementStats {
   tasksCompletedTotal: number;

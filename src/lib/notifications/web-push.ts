@@ -1,7 +1,7 @@
 import "server-only";
 
-import webpush from "web-push";
 import { eq } from "drizzle-orm";
+import webpush from "web-push";
 
 import { db } from "@/db/client";
 import { pushSubscriptions } from "@/db/schema";

@@ -1,0 +1,32 @@
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.groupLabel {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  min-width: 5.5rem;
+}
+
+@media (max-width: 640px) {
+  .group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .groupLabel {
+    min-width: 0;
+  }
+}

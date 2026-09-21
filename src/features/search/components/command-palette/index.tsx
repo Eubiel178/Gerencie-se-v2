@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+
 import { useRouter } from "next/navigation";
 
-import { Icon } from "@/components/icon";
+import { Icon } from "@/components";
 import { getFocusableElements } from "@/components/modal/get-focusable-elements";
 import { searchEverythingAction, SearchResult } from "@/features/search/actions";
 import { usePaletteStore } from "@/features/search/palette-store";
@@ -167,7 +168,7 @@ export function CommandPalette() {
             ref={inputRef}
             className={styles.input}
             type="text"
-            placeholder="Buscar tarefas, hábitos, metas, eventos, leitura..."
+            placeholder="Buscar tarefas, hábitos, objetivos, eventos, leitura..."
             aria-label="Busca global"
             value={query}
             onChange={(event) => handleQueryChange(event.target.value)}

@@ -1,15 +1,18 @@
 "use client";
 
 import { useState } from "react";
+
 import dayjs from "dayjs";
 
 import { EmptyState, Input } from "@/components";
-import { IHabit } from "@/features/habits/domain";
 import { LoadAcceptedConnections } from "@/features/connections/domain";
-import { GoalOption } from "../modal/interfaces";
+import { IHabit } from "@/features/habits/domain";
 import { filterHabits, HabitFrequencyFilter, HabitStatusFilter } from "@/features/habits/filter-habits";
-import { Card } from "./card";
 
+import { GoalOption } from "../modal/interfaces";
+
+
+import { Card } from "./card";
 import styles from "./styles.module.css";
 
 const STATUS_OPTIONS = [
@@ -35,6 +38,14 @@ export function HabitsList({ habitsList, connections, goalOptions }: HabitsListP
   const [frequencyFilter, setFrequencyFilter] = useState<HabitFrequencyFilter>("all");
   const [statusFilter, setStatusFilter] = useState<HabitStatusFilter>("all");
   const [habits, setHabits] = useState(habitsList);
+
+  // Ressincroniza sempre que o server manda uma lista nova — ver
+  // comentário equivalente em `GoalsList`/`RoutineList`.
+  const [previousHabitsList, setPreviousHabitsList] = useState(habitsList);
+  if (habitsList !== previousHabitsList) {
+    setPreviousHabitsList(habitsList);
+    setHabits(habitsList);
+  }
 
   if (habits.length === 0) {
     return <EmptyState variant="box">Você ainda não tem hábitos. Comece adicionando o primeiro.</EmptyState>;

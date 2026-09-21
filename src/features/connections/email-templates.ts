@@ -1,5 +1,5 @@
+import { renderSpamFolderHint } from "@/lib/email";
 import { appUrl } from "@/lib/shared/app-url";
-import { renderSpamFolderHint } from "@/lib/email/template-hints";
 
 // Realinhado ao mesmo sistema visual dos outros e-mails transacionais
 // (ver `src/lib/password-reset-email.ts`, `src/lib/login-alert-email.ts`,
@@ -41,7 +41,7 @@ export function inviteEmailHtml(params: { inviterName: string; hasAccount: boole
               <td style="padding:16px 28px 4px;">
                 <p style="margin:0;font-size:15px;line-height:1.5;color:${TEXT};">
                   <strong>${escapeHtml(params.inviterName)}</strong> te convidou para colaborar em tarefas,
-                  rotina, hábitos e metas no Gerencie-se.
+                  rotina, hábitos e objetivos no Gerencie-se.
                 </p>
               </td>
             </tr>

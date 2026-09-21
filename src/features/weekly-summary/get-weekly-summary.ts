@@ -1,12 +1,9 @@
 import "server-only";
 
-import { auth } from "@/lib/auth";
-import { getTaskFetcher } from "@/features/tasks/data/get-task-fetcher";
 import { getFocusFetcher, getMascotFetcher } from "@/features/focus/data/get-focus-fetcher";
-import { getHabitFetcher } from "@/features/habits/data/get-habit-fetcher";
 import { getGoalFetcher } from "@/features/goals/data/get-goal-fetcher";
+import { getHabitFetcher } from "@/features/habits/data/get-habit-fetcher";
 import { getRunningFetcher } from "@/features/running/data/get-running-fetcher";
-
 import {
   calculateAverageGoalProgress,
   calculateBestHabitStreak,
@@ -14,6 +11,8 @@ import {
   calculateWeeklyFocusHours,
   calculateWeeklyRunningStats,
 } from "@/features/stats/calculations";
+import { getTaskFetcher } from "@/features/tasks/data/get-task-fetcher";
+import { auth } from "@/lib/auth";
 
 import { WeeklySummary } from "./types";
 

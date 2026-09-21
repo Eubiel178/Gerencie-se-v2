@@ -1,17 +1,7 @@
 import { getReadingFetcher } from "@/features/reading/data/get-reading-fetcher";
 
 import { ReadingList } from "./components";
-
 import styles from "./components/shared/styles.module.css";
-
-// Reexports pra permitir `import { X } from "@/features/reading"` em
-// vez de caminhos profundos.
-export * from "./domain";
-export * from "./actions";
-export * from "./filter-reading-items";
-export * from "./reading-progress";
-export * from "./recommendations";
-export { getReadingFetcher } from "./data/get-reading-fetcher";
 
 export async function Reading() {
   const items = await getReadingFetcher().loadAll();

@@ -1,7 +1,9 @@
 import Link from "next/link";
-import { Icon } from "@/components/icon";
+
+import { Icon } from "@/components";
 import { ThemeToggle } from "@/design-system/theme/theme-toggle";
 import { MascotSwarm } from "@/features/mascot-pet/components/mascot-swarm/lazy";
+
 import styles from "./landing-page.module.css";
 
 const highlights = [

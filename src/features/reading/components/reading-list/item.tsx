@@ -4,7 +4,6 @@ import { useRef, useState } from "react";
 
 import { Button, Input, Modal, ModalHeader } from "@/components";
 import { Icon } from "@/components/icon";
-
 import {
   deleteReadingItemAction,
   updateReadingCurrentPageAction,
@@ -15,6 +14,26 @@ import { IReadingItem, ReadingStatus } from "@/features/reading/domain";
 import { getReadingProgress } from "@/features/reading/reading-progress";
 
 import styles from "../shared/styles.module.css";
+
+type ReadingFormState = {
+  title: string;
+  author: string;
+  status: ReadingStatus;
+  totalPages: string;
+  currentPage: string;
+  dailyGoal: string;
+};
+
+function createReadingForm(item: IReadingItem): ReadingFormState {
+  return {
+    title: item.title,
+    author: item.author ?? "",
+    status: item.status,
+    totalPages: item.totalPages?.toString() ?? "",
+    currentPage: item.currentPage?.toString() ?? "",
+    dailyGoal: item.dailyReadingGoal?.toString() ?? "",
+  };
+}
 
 const STATUS_OPTIONS = [
   { label: "Quero ler", value: "want_to_read" },
@@ -62,17 +81,8 @@ export function Item({
   const [error, setError] = useState<string | null>(null);
   const [pageUpdateSuccess, setPageUpdateSuccess] = useState(false);
   const [isEditingOptions, setIsEditingOptions] = useState(false);
-  const [editTitle, setEditTitle] = useState(item.title);
-  const [editAuthor, setEditAuthor] = useState(item.author ?? "");
-  const [editStatus, setEditStatus] = useState<ReadingStatus>(item.status);
-  const [editTotalPages, setEditTotalPages] = useState(
-    item.totalPages?.toString() ?? "",
-  );
-  const [editCurrentPage, setEditCurrentPage] = useState(
-    item.currentPage?.toString() ?? "",
-  );
-  const [editDailyGoal, setEditDailyGoal] = useState(
-    item.dailyReadingGoal?.toString() ?? "",
+  const [formDraft, setFormDraft] = useState<ReadingFormState>(() =>
+    createReadingForm(item),
   );
 
   const progressRequestIdRef = useRef(0);
@@ -135,11 +145,6 @@ export function Item({
         return;
       }
 
-      setEditStatus(status);
-      if (status === "finished" && item.totalPages != null) {
-        setCurrentPage(item.totalPages.toString());
-        setEditCurrentPage(item.totalPages.toString());
-      }
       if (result.item) onUpdated(result.item);
     } finally {
       setIsSavingStatus(false);
@@ -193,10 +198,6 @@ export function Item({
       }
 
       setPageUpdateSuccess(true);
-      setEditCurrentPage(currentPage);
-      setEditStatus(
-        parsedCurrentPage === item.totalPages ? "finished" : "reading",
-      );
       if (result.item) onUpdated(result.item);
     } finally {
       setIsSavingPage(false);
@@ -207,9 +208,9 @@ export function Item({
     event.preventDefault();
     if (isSavingDetails) return;
 
-    const totalPages = parseOptionalPositiveInteger(editTotalPages);
-    const currentPage = parseOptionalNonNegativeInteger(editCurrentPage);
-    const dailyReadingGoal = parseOptionalPositiveInteger(editDailyGoal);
+    const totalPages = parseOptionalPositiveInteger(formDraft.totalPages);
+    const currentPage = parseOptionalNonNegativeInteger(formDraft.currentPage);
+    const dailyReadingGoal = parseOptionalPositiveInteger(formDraft.dailyGoal);
 
     if (
       totalPages === "invalid" ||
@@ -225,9 +226,9 @@ export function Item({
     try {
       const result = await updateReadingDetailsAction({
         id: item.id,
-        title: editTitle,
-        author: editAuthor.trim() || null,
-        status: editStatus,
+        title: formDraft.title,
+        author: formDraft.author.trim() || null,
+        status: formDraft.status,
         totalPages,
         currentPage,
         dailyReadingGoal,
@@ -377,7 +378,12 @@ export function Item({
                   className={styles.editOptionsButton}
                   type="button"
                   aria-expanded={isEditingOptions}
-                  onClick={() => setIsEditingOptions((isOpen) => !isOpen)}
+                  onClick={() => {
+                    if (!isEditingOptions) {
+                      setFormDraft(createReadingForm(item));
+                    }
+                    setIsEditingOptions((isOpen) => !isOpen);
+                  }}
                 >
                   <Icon name="FiSettings" aria-hidden="true" />
                   Editar
@@ -406,8 +412,13 @@ export function Item({
                     <Input.Wrapper>
                       <Input.Field
                         id={`reading-title-${item.id}`}
-                        value={editTitle}
-                        onChange={(event) => setEditTitle(event.target.value)}
+                        value={formDraft.title}
+                        onChange={(event) =>
+                          setFormDraft((prev) => ({
+                            ...prev,
+                            title: event.target.value,
+                          }))
+                        }
                       />
                     </Input.Wrapper>
                   </Input.Root>
@@ -418,8 +429,13 @@ export function Item({
                     <Input.Wrapper>
                       <Input.Field
                         id={`reading-author-${item.id}`}
-                        value={editAuthor}
-                        onChange={(event) => setEditAuthor(event.target.value)}
+                        value={formDraft.author}
+                        onChange={(event) =>
+                          setFormDraft((prev) => ({
+                            ...prev,
+                            author: event.target.value,
+                          }))
+                        }
                       />
                     </Input.Wrapper>
                   </Input.Root>
@@ -433,9 +449,12 @@ export function Item({
                         type="number"
                         min={1}
                         inputMode="numeric"
-                        value={editTotalPages}
+                        value={formDraft.totalPages}
                         onChange={(event) =>
-                          setEditTotalPages(event.target.value)
+                          setFormDraft((prev) => ({
+                            ...prev,
+                            totalPages: event.target.value,
+                          }))
                         }
                       />
                     </Input.Wrapper>
@@ -451,9 +470,12 @@ export function Item({
                           type="number"
                           min={0}
                           inputMode="numeric"
-                          value={editCurrentPage}
+                          value={formDraft.currentPage}
                           onChange={(event) =>
-                            setEditCurrentPage(event.target.value)
+                            setFormDraft((prev) => ({
+                              ...prev,
+                              currentPage: event.target.value,
+                            }))
                           }
                         />
                       </Input.Wrapper>
@@ -469,9 +491,12 @@ export function Item({
                         type="number"
                         min={1}
                         inputMode="numeric"
-                        value={editDailyGoal}
+                        value={formDraft.dailyGoal}
                         onChange={(event) =>
-                          setEditDailyGoal(event.target.value)
+                          setFormDraft((prev) => ({
+                            ...prev,
+                            dailyGoal: event.target.value,
+                          }))
                         }
                       />
                     </Input.Wrapper>

@@ -1,6 +1,7 @@
+import { LoadAcceptedConnections } from "@/features/connections/domain";
+
 import { AddRoutineItem } from "../modal";
 import { TaskOption } from "../modal/interfaces";
-import { LoadAcceptedConnections } from "@/features/connections/domain";
 
 import styles from "./styles.module.css";
 

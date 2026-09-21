@@ -1,12 +1,12 @@
 import "server-only";
 
 import dayjs from "dayjs";
-import { and, asc, eq, inArray, or } from "drizzle-orm";
+import { and, asc, eq, gte, inArray, or } from "drizzle-orm";
 
-import * as domain from "@/features/routine/domain";
 
 import { db } from "@/db/client";
 import { routineItemLogs, routineItems, users } from "@/db/schema";
+import * as domain from "@/features/routine/domain";
 import { requireUserId } from "@/lib/auth";
 import { assertAcceptedConnection, resolveSharedWithUserIdOnUpdate } from "@/lib/auth/assert-accepted-connection";
 
@@ -28,8 +28,9 @@ export class LocalRoutineItem
     domain.LoadAllRoutineItems,
     domain.UpdateRoutineItem,
     domain.DeleteRoutineItem,
-    domain.ToggleRoutineItemLog
-{
+    domain.ToggleRoutineItemLog,
+    domain.LoadRoutineItemLogsInRange
+  {
   async create(params: domain.CreateRoutineItem.Params) {
     const userId = await requireUserId();
     const id = crypto.randomUUID();
@@ -205,6 +206,42 @@ export class LocalRoutineItem
 
       throw error;
     }
+  }
+
+  /** Ocorrências concluídas de rotina com identidade (título) — usado
+   * pelo Histórico, onde cada dia é uma entrada independente e o nome do
+   * item de rotina é parte do que o usuário precisa ver. O mesmo item
+   * pode aparecer em vários dias, e cada dia é uma entrada independente.
+   * Não é limitado ao dia atual — cobre todo o período solicitado. */
+  async loadRoutineItemLogsInRange(since: Date): Promise<domain.RoutineLogEntry[]> {
+    const userId = await requireUserId();
+
+    const itemRows = await db
+      .select({ id: routineItems.id, title: routineItems.title })
+      .from(routineItems)
+      .where(or(eq(routineItems.userId, userId), eq(routineItems.sharedWithUserId, userId)));
+
+    if (itemRows.length === 0) return [];
+
+    const itemIds = itemRows.map((row) => row.id);
+    const titleById = new Map(itemRows.map((row) => [row.id, row.title]));
+    const sinceDate = dayjs(since).format("YYYY-MM-DD");
+
+    const logRows = await db
+      .select({
+        routineItemId: routineItemLogs.routineItemId,
+        date: routineItemLogs.date,
+        completedAt: routineItemLogs.completedAt,
+      })
+      .from(routineItemLogs)
+      .where(and(inArray(routineItemLogs.routineItemId, itemIds), gte(routineItemLogs.date, sinceDate)));
+
+    return logRows.map((row) => ({
+      routineItemId: row.routineItemId,
+      routineItemTitle: titleById.get(row.routineItemId) ?? "",
+      date: row.date,
+      completedAt: row.completedAt,
+    }));
   }
 }
 

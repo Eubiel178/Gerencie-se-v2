@@ -725,6 +725,11 @@ export const readingItems = pgTable("reading_item", {
   totalPages: integer("total_pages"),
   currentPage: integer("current_page"),
   dailyReadingGoal: integer("daily_reading_goal"),
+  // Preenchido só quando o status muda para "finished" — marca o instante
+  // real da conclusão do livro, usada como timestamp do Histórico. Nulo
+  // enquanto o livro não for concluído (inclui livros que já estavam
+  // concluídos antes desta coluna existir).
+  finishedAt: timestamp("finished_at", { mode: "date" }),
   addedAt: timestamp("added_at", { mode: "date" })
     .notNull()
     .$defaultFn(() => new Date()),
@@ -835,6 +840,14 @@ export const executionSessions = pgTable("execution_session", {
     .default("active"),
   currentStepIndex: integer("current_step_index").notNull().default(0),
   startedAt: timestamp("started_at", { mode: "date" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  // Marca o início do trecho de execução ATUAL — igual a `startedAt` na
+  // criação, mas é atualizado de novo a cada `resume()`. Existe pra não
+  // reaproveitar `updatedAt` (que também muda em `updateStepIndex`, sem
+  // relação com pausar/retomar) como base do tempo "Fazendo agora · X min"
+  // exibido no TaskCard.
+  resumedAt: timestamp("resumed_at", { mode: "date" })
     .notNull()
     .$defaultFn(() => new Date()),
   pausedAt: timestamp("paused_at", { mode: "date" }),

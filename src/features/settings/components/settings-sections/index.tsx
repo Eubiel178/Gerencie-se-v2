@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { Icon, IconName } from "@/components/icon";
+import { Icon, IconName } from "@/components";
 
 import styles from "./styles.module.css";
 

@@ -2,6 +2,8 @@ import "server-only";
 
 import nodemailer from "nodemailer";
 
+import type { ActionResult } from "@/types/action-result";
+
 import { wasSmtpDeliveryAccepted } from "./smtp-delivery";
 
 /**
@@ -40,7 +42,7 @@ export interface SendEmailParams {
 
 export async function sendEmail(
   params: SendEmailParams,
-): Promise<{ error: string | null }> {
+): Promise<ActionResult> {
   if (!transporter || !gmailUser) {
     return {
       error:

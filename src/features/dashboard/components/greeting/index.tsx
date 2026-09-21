@@ -31,7 +31,7 @@ export function Greeting({ text, priorityTaskCount, pendingHabitCount, mainGoal 
         {mainGoal && (
           <>
             {" "}
-            Meta principal: <strong>{mainGoal.title}</strong> ({mainGoal.progressPercent}%).
+            Objetivo principal: <strong>{mainGoal.title}</strong> ({mainGoal.progressPercent}%).
           </>
         )}
       </p>

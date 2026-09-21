@@ -1,9 +1,9 @@
 import { z } from "zod";
 
+import { LoadAcceptedConnections } from "@/features/connections/domain";
+import { IGoal } from "@/features/goals/domain";
 import { validationSchema } from "@/validation/goal-schema";
 
-import { IGoal } from "@/features/goals/domain";
-import { LoadAcceptedConnections } from "@/features/connections/domain";
 
 export { PRIORITY_OPTIONS, PRIORITY_LABELS } from "@/lib/shared/priority";
 

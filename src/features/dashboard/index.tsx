@@ -1,17 +1,16 @@
 import dayjs from "dayjs";
 
-import { auth } from "@/lib/auth";
-
-import { getTaskFetcher } from "@/features/tasks/data/get-task-fetcher";
-import { getRoutineFetcher } from "@/features/routine/data/get-routine-fetcher";
-import { getHabitFetcher } from "@/features/habits/data/get-habit-fetcher";
-import { getGoalFetcher } from "@/features/goals/data/get-goal-fetcher";
-import { getMascotFetcher } from "@/features/focus/data/get-focus-fetcher";
-import { getHydrationFetcher } from "@/features/hydration/data/get-hydration-fetcher";
-import { getOnboardingStatus } from "@/features/onboarding/get-onboarding-status";
-import { OnboardingChecklist } from "@/features/onboarding/components/onboarding-checklist";
-import { getAchievementsStatus } from "@/features/achievements/get-achievements-status";
 import { AchievementToasts } from "@/features/achievements/components/achievement-toasts";
+import { getAchievementsStatus } from "@/features/achievements/get-achievements-status";
+import { getMascotFetcher } from "@/features/focus/data/get-focus-fetcher";
+import { getGoalFetcher } from "@/features/goals/data/get-goal-fetcher";
+import { getHabitFetcher } from "@/features/habits/data/get-habit-fetcher";
+import { getHydrationFetcher } from "@/features/hydration/data/get-hydration-fetcher";
+import { OnboardingChecklist } from "@/features/onboarding/components/onboarding-checklist";
+import { getOnboardingStatus } from "@/features/onboarding/get-onboarding-status";
+import { getRoutineFetcher } from "@/features/routine/data/get-routine-fetcher";
+import { getTaskFetcher } from "@/features/tasks/data/get-task-fetcher";
+import { auth } from "@/lib/auth";
 
 import {
   GoalsProgress,
@@ -22,15 +21,9 @@ import {
   NextAction,
   TasksSummary,
 } from "./components";
-import { buildNextAction } from "./next-action";
 import { greetingForHour } from "./greeting";
-
+import { buildNextAction } from "./next-action";
 import styles from "./styles.module.css";
-
-// Reexports pra permitir `import { X } from "@/features/dashboard"` em
-// vez de caminhos profundos.
-export * from "./components/shared";
-export { buildNextAction } from "./next-action";
 
 const PRIORITY_RANK = { critica: 3, alta: 2, media: 1, baixa: 0 } as const;
 
@@ -62,12 +55,6 @@ export async function Dashboard() {
     .sort((a, b) => a.progressPercent - b.progressPercent)
     .slice(0, 3);
 
-  // Capado no mesmo padrão de `pendingTasks`/`activeGoals` acima — sem
-  // isso, uma lista de hábitos realista (8-15 itens) esticava essa
-  // coluna do grid muito além da coluna ao lado (capada), forçando
-  // scroll vertical na página inteira mesmo com conteúdo cabendo na tela
-  // (achado numa auditoria de layout). Pendente hoje primeiro, é o que
-  // precisa de atenção.
   const dashboardHabits = [...habits]
     .filter((habit) => !habit.archived)
     .sort((a, b) => Number(a.completedToday) - Number(b.completedToday))
@@ -77,23 +64,16 @@ export async function Dashboard() {
   const today = now.format("YYYY-MM-DD");
 
   const priorityTaskCount = tasks.filter(
-    (task) => !task.completed && (task.priority === "alta" || task.priority === "critica")
+    (task) => !task.completed && (task.priority === "alta" || task.priority === "critica"),
   ).length;
   const pendingHabitCount = habits.filter(
-    (habit) => !habit.archived && !habit.completedToday
+    (habit) => !habit.archived && !habit.completedToday,
   ).length;
 
   return (
     <div className={styles.grid}>
       <AchievementToasts items={achievementsStatus.newlyUnlocked} />
 
-      {/* O <h1> da página mora dentro de `Greeting` - precisa vir ANTES de
-          qualquer <h2> no DOM (ex.: o "Primeiros passos" do checklist
-          logo abaixo), senão quem navega por heading no leitor de tela
-          encontra um H2 antes de qualquer H1 existir (ordem de leitura
-          quebrada - achado numa auditoria de acessibilidade). O grid
-          (`styles.module.css`) não tem `order`/`grid-row` próprios -
-          a ordem visual segue exatamente esta ordem do JSX. */}
       <div className={styles.hero}>
         <Greeting
           text={greetingForHour(now.hour(), firstName)}
@@ -101,7 +81,6 @@ export async function Dashboard() {
           pendingHabitCount={pendingHabitCount}
           mainGoal={activeGoals[0] ?? null}
         />
-
         <NextAction action={nextAction} />
       </div>
 

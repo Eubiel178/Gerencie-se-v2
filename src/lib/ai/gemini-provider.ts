@@ -1,19 +1,20 @@
 import "server-only";
 
 import type { MascotPersonality } from "@/features/focus/domain/mascot";
+
 import { generateJSON, isAIProviderAvailable, sanitizeUserContent } from "./gateway";
-import {
-  DecomposeTaskResponseSchema,
-  StuckResponseSchema,
-  ResumeResponseSchema,
-  IntentionResponseSchema,
-} from "./schemas/assistant";
 import {
   getDecomposePrompt,
   getStuckPrompt,
   getResumePrompt,
   getIntentionPrompt,
 } from "./prompts/system-prompt";
+import {
+  DecomposeTaskResponseSchema,
+  StuckResponseSchema,
+  ResumeResponseSchema,
+  IntentionResponseSchema,
+} from "./schemas/assistant";
 
 export class GeminiAssistantProvider {
   async decomposeTask(params: {

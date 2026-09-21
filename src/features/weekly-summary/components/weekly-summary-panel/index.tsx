@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { Alert, Button } from "@/components";
+
 import { updateWeeklySummaryPreferenceAction, sendTestWeeklySummaryAction } from "../../actions";
 
 import styles from "./styles.module.css";
@@ -65,7 +66,7 @@ export function WeeklySummaryPanel({ enabled, email }: WeeklySummaryPanelProps) 
 
       <p className={styles.note}>
         Um e-mail por semana com tarefas concluídas, sequência de hábitos,
-        progresso das metas e o nível do mascote. Desligado por padrão.
+        progresso dos objetivos e o nível do mascote. Desligado por padrão.
       </p>
 
       <Button.Root

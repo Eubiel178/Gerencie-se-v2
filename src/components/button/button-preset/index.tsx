@@ -1,6 +1,6 @@
 import { Button } from "..";
-import { ButtonRootProps } from "../button-root";
 import { ButtonIconProps } from "../button-icon";
+import { ButtonRootProps } from "../button-root";
 import { ButtonTextProps } from "../button-text";
 
 import styles from "./styles.module.css";

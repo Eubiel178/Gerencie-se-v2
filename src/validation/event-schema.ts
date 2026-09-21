@@ -1,5 +1,6 @@
-import { dateIsValid } from "@/utils";
 import { z } from "zod";
+
+import { dateIsValid } from "@/utils";
 
 // Mesmo limite de goal-schema.ts, só por consistência (nenhum motivo
 // pra divergir do tamanho de descrição aceito em outra feature).

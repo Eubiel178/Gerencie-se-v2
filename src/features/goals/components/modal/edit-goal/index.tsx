@@ -1,14 +1,15 @@
 "use client";
 
-import dayjs from "dayjs";
 import { useRef } from "react";
 
-import { validationSchema } from "@/validation/goal-schema";
+import dayjs from "dayjs";
+
 
 import { Alert, Form, Modal, ModalHeader, Input, Button, ChipGroup, SuggestionChips, CollapsibleSection } from "@/components";
 import { Icon } from "@/components/icon";
 import modalStyles from "@/components/modal/styles.module.css";
-
+import { ShareReadOnlyNote } from "@/features/connections/components/share-readonly-note";
+import { ShareSelect } from "@/features/connections/components/share-select";
 import {
   createGoalStepAction,
   deleteGoalStepAction,
@@ -16,14 +17,13 @@ import {
   updateGoalAction,
   updateGoalStepAction,
 } from "@/features/goals/actions";
-import { ShareSelect } from "@/features/connections/components/share-select";
-import { ShareReadOnlyNote } from "@/features/connections/components/share-readonly-note";
 import { calculateGoalProgress } from "@/features/goals/domain";
 import { useGoalStore } from "@/features/goals/goal-store";
 import { useFormModal } from "@/hooks/use-form-modal";
+import { validationSchema } from "@/validation/goal-schema";
 
-import { FormData, IEditGoalProps, PRIORITY_OPTIONS } from "../interfaces";
 import { GoalSteps, GoalStepsDraft } from "../goal-steps";
+import { FormData, IEditGoalProps, PRIORITY_OPTIONS } from "../interfaces";
 
 import styles from "./styles.module.css";
 

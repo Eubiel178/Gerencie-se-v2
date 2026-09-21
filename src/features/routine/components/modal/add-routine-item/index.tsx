@@ -1,15 +1,14 @@
 "use client";
 
-import { validationSchema } from "@/validation/routine-schema";
 
 import { Alert, Form, Input, Modal, ModalHeader, Button, SuggestionChips, CollapsibleSection } from "@/components";
 import { Icon } from "@/components/icon";
 import modalStyles from "@/components/modal/styles.module.css";
-
-import { createRoutineItemAction } from "@/features/routine/actions";
 import { ShareSelect } from "@/features/connections/components/share-select";
-import { nowForTimeInput } from "@/utils";
+import { createRoutineItemAction } from "@/features/routine/actions";
 import { useFormModal } from "@/hooks/use-form-modal";
+import { nowForTimeInput } from "@/utils";
+import { validationSchema } from "@/validation/routine-schema";
 
 import { FormData, IAddRoutineItemProps, NO_TASK_VALUE } from "../interfaces";
 

@@ -12,8 +12,13 @@ export interface ConfirmIconButtonProps {
   icon: IconName;
   /** `aria-label` do botão em repouso — ex. `Excluir tarefa "${title}"`. */
   ariaLabel: string;
-  /** Texto da pergunta de confirmação — ex. "Excluir esta tarefa?". */
+  /** Texto da pergunta de confirmação — ex. `Excluir "${task.title}"?`,
+   *  sempre com o nome real do item quando existir um. */
   confirmText: string;
+  /** Rótulo do botão de confirmação — verbo curto e específico da ação
+   *  ("Excluir", "Remover", "Desconectar", "Encerrar"), nunca "Confirmar"
+   *  genérico. Padrão "Excluir" (caso mais comum nesse componente). */
+  confirmLabel?: string;
   onConfirm: () => void | Promise<void>;
   loading?: boolean;
   disabled?: boolean;
@@ -34,6 +39,7 @@ export function ConfirmIconButton({
   icon,
   ariaLabel,
   confirmText,
+  confirmLabel = "Excluir",
   onConfirm,
   loading,
   disabled,
@@ -76,7 +82,7 @@ export function ConfirmIconButton({
               Cancelar
             </Button.Root>
             <Button.Root type="button" tone="danger" loading={loading} onClick={handleConfirm}>
-              Confirmar
+              {confirmLabel}
             </Button.Root>
           </div>
         </Modal>

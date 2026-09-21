@@ -5,6 +5,11 @@ export interface AIProviderResponse {
   model: string;
 }
 
+export interface HistoryMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
 export interface AIProvider {
   readonly name: string;
   readonly models: readonly string[];
@@ -14,6 +19,7 @@ export interface AIProvider {
     systemInstruction: string;
     model?: string;
     operation?: string;
+    history?: HistoryMessage[];
   }): Promise<AIProviderResponse | null>;
   generateJSON(params: {
     prompt: string;

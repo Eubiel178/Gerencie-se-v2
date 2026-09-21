@@ -1,6 +1,7 @@
 import "server-only";
 
 import Groq from "groq-sdk";
+
 import type { AIProvider, AIProviderResponse } from "./types";
 
 const GROQ_MODELS: readonly string[] = (() => {
@@ -32,18 +33,28 @@ export class GroqProvider implements AIProvider {
     systemInstruction: string;
     model?: string;
     operation?: string;
+    history?: Array<{ role: "user" | "assistant"; content: string }>;
   }): Promise<AIProviderResponse | null> {
     const groq = getClient();
     if (!groq) return null;
 
     const model = params.model ?? GROQ_MODELS[0];
 
+    const messages: Groq.Chat.Completions.ChatCompletionMessageParam[] = [
+      { role: "system", content: params.systemInstruction },
+    ];
+
+    if (params.history) {
+      for (const msg of params.history) {
+        messages.push({ role: msg.role, content: msg.content });
+      }
+    }
+
+    messages.push({ role: "user", content: params.prompt });
+
     const completion = await groq.chat.completions.create({
       model,
-      messages: [
-        { role: "system", content: params.systemInstruction },
-        { role: "user", content: params.prompt },
-      ],
+      messages,
     });
 
     const text = completion.choices[0]?.message?.content?.trim();

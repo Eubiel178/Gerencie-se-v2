@@ -2,13 +2,14 @@ import "server-only";
 
 import { and, eq, inArray, isNull, or } from "drizzle-orm";
 
-import * as domain from "@/features/connections/domain";
 
 import { db } from "@/db/client";
-import { connections, users } from "@/db/schema";
+import { connections, goals, habits, routineItems, tasks, users } from "@/db/schema";
+import * as domain from "@/features/connections/domain";
 import { requireCurrentUser } from "@/lib/auth";
 import { sendEmail } from "@/lib/email";
 import { normalizeEmail } from "@/utils/normalize-email";
+
 import { inviteEmailHtml } from "../email-templates";
 
 /**
@@ -159,31 +160,108 @@ export class LocalConnection
   async respond(params: domain.RespondConnection.Params): Promise<void> {
     const me = await requireCurrentUser();
 
-    await db
-      .update(connections)
-      .set({
-        status: params.accept ? "accepted" : "declined",
-        respondedAt: new Date(),
-      })
+    const [row] = await db
+      .select({ requesterId: connections.requesterId })
+      .from(connections)
       .where(
         and(
           eq(connections.id, params.id),
           eq(connections.addresseeId, me.id),
           eq(connections.status, "pending")
         )
-      );
+      )
+      .limit(1);
+
+    if (!row) return;
+
+    await db
+      .update(connections)
+      .set({
+        status: params.accept ? "accepted" : "declined",
+        respondedAt: new Date(),
+      })
+      .where(eq(connections.id, params.id));
+
+    // Recusar não deixa vínculo nenhum — revoga qualquer compartilhamento
+    // que já existisse entre as duas pessoas (só é possível ter existido
+    // se elas já tivessem se conectado antes e essa for uma nova
+    // solicitação; ver comentário em `revokeSharingBetween`).
+    if (!params.accept) {
+      await revokeSharingBetween(me.id, row.requesterId);
+    }
   }
 
   async delete(params: domain.DeleteConnection.Params): Promise<void> {
     const me = await requireCurrentUser();
 
-    await db
-      .delete(connections)
+    const [row] = await db
+      .select({ requesterId: connections.requesterId, addresseeId: connections.addresseeId })
+      .from(connections)
       .where(
         and(
           eq(connections.id, params.id),
           or(eq(connections.requesterId, me.id), eq(connections.addresseeId, me.id))
         )
-      );
+      )
+      .limit(1);
+
+    if (!row) return;
+
+    const otherPersonId = row.requesterId === me.id ? row.addresseeId : row.requesterId;
+
+    await db.delete(connections).where(eq(connections.id, params.id));
+
+    // Remover a conexão precisa revogar acesso a QUALQUER coisa já
+    // compartilhada entre as duas pessoas em qualquer direção — sem isso,
+    // tarefa/objetivo/hábito/item de rotina compartilhado antes continua
+    // visível pra sempre pro outro lado, mesmo sem conexão nenhuma.
+    if (otherPersonId) {
+      await revokeSharingBetween(me.id, otherPersonId);
+    }
   }
+}
+
+/** Zera `sharedWithUserId` nas duas direções entre duas pessoas, em todo
+ *  domínio que suporta compartilhamento — chamado sempre que a conexão
+ *  entre elas deixa de existir (recusada ou removida), pra nenhum item já
+ *  compartilhado continuar visível pro outro lado sem vínculo ativo. */
+async function revokeSharingBetween(userIdA: string, userIdB: string): Promise<void> {
+  await Promise.all([
+    db
+      .update(tasks)
+      .set({ sharedWithUserId: null })
+      .where(
+        or(
+          and(eq(tasks.userId, userIdA), eq(tasks.sharedWithUserId, userIdB)),
+          and(eq(tasks.userId, userIdB), eq(tasks.sharedWithUserId, userIdA))
+        )
+      ),
+    db
+      .update(goals)
+      .set({ sharedWithUserId: null })
+      .where(
+        or(
+          and(eq(goals.userId, userIdA), eq(goals.sharedWithUserId, userIdB)),
+          and(eq(goals.userId, userIdB), eq(goals.sharedWithUserId, userIdA))
+        )
+      ),
+    db
+      .update(habits)
+      .set({ sharedWithUserId: null })
+      .where(
+        or(
+          and(eq(habits.userId, userIdA), eq(habits.sharedWithUserId, userIdB)),
+          and(eq(habits.userId, userIdB), eq(habits.sharedWithUserId, userIdA))
+        )
+      ),
+    db
+      .update(routineItems)
+      .set({ sharedWithUserId: null })
+      .where(
+        or(
+          and(eq(routineItems.userId, userIdA), eq(routineItems.sharedWithUserId, userIdB)),
+          and(eq(routineItems.userId, userIdB), eq(routineItems.sharedWithUserId, userIdA))
+        )
+      ),
+  ]);
 }

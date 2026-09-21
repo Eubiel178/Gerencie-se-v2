@@ -182,8 +182,9 @@ export function AttachmentsField({ taskId }: AttachmentsFieldProps) {
 
               <ConfirmIconButton
                 icon="FaTrash"
-                ariaLabel={`Remover ${attachment.fileName}`}
-                confirmText="Remover este anexo?"
+                ariaLabel={`Remover "${attachment.fileName}"`}
+                confirmText={`Remover "${attachment.fileName}"?`}
+                confirmLabel="Remover"
                 loading={deletingId === attachment.id}
                 onConfirm={() => handleDelete(attachment.id)}
               />

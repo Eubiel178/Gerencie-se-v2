@@ -23,7 +23,12 @@ export function filterTasks(tasks: ITask[], filters: TaskFilters, now: Dayjs = d
     if (filters.priorityFilter !== "all" && task.priority !== filters.priorityFilter) return false;
     if (filters.lowEnergyMode && (task.priority === "alta" || task.priority === "critica")) return false;
 
+    // "all" = tarefas NÃO concluídas
+    if (filters.statusFilter === "all" && task.completed) return false;
     if (filters.statusFilter === "pending" && task.completed) return false;
+    if (filters.statusFilter === "pending" && task.startedAt) return false;
+    if (filters.statusFilter === "in_progress" && task.completed) return false;
+    if (filters.statusFilter === "in_progress" && !task.startedAt) return false;
     if (filters.statusFilter === "completed" && !task.completed) return false;
     if (filters.statusFilter === "overdue") {
       const isOverdue = !task.completed && !!task.scheduledAt && dayjs(task.scheduledAt).isBefore(now);

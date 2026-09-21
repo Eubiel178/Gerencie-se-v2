@@ -26,3 +26,8 @@ export { Alert } from "./alert";
 export type { AlertVariant } from "./alert";
 export { EmptyState } from "./empty-state";
 export type { EmptyStateProps } from "./empty-state";
+export { Icon } from "./icon";
+export type { IconName } from "./icon";
+export { StepsEditor } from "./steps-editor";
+export type { StepLike, StepsDraft } from "./steps-editor/types";
+export { StatusBadge } from "./status-badge";

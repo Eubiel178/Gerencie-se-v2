@@ -2,18 +2,17 @@
 
 import { useState } from "react";
 
+import { Button, ConfirmIconButton } from "@/components";
 import { Icon } from "@/components/icon";
-
 import { deleteEventAction } from "@/features/events/actions";
+import { IEvent } from "@/features/events/domain";
+import { useEventStore } from "@/features/events/event-store";
+import styles from "@/styles/workspace.module.css";
 import { dateFormatedToFront } from "@/utils";
 
-import { Button, ConfirmIconButton } from "@/components";
 
 import { EditEvent } from "../../modal";
 
-import { IEvent } from "@/features/events/domain";
-import styles from "@/styles/workspace.module.css";
-import { useEventStore } from "@/features/events/event-store";
 
 export function Card(event: IEvent) {
   const [isRemoving, setIsRemoving] = useState(false);
@@ -43,8 +42,8 @@ export function Card(event: IEvent) {
           <div className={styles.eventCardActions}>
             <ConfirmIconButton
               icon="FaTrash"
-              ariaLabel={`Excluir evento ${event.title}`}
-              confirmText="Excluir este evento?"
+              ariaLabel={`Excluir evento "${event.title}"`}
+              confirmText={`Excluir "${event.title}"?`}
               loading={isRemoving}
               onConfirm={handleRemoveEvent}
             />

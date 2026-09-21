@@ -2,10 +2,10 @@ import "server-only";
 
 import { and, desc, eq, gte } from "drizzle-orm";
 
-import * as domain from "@/features/running/domain";
 
 import { db } from "@/db/client";
 import { runningSessions } from "@/db/schema";
+import * as domain from "@/features/running/domain";
 import { requireUserId } from "@/lib/auth";
 
 export class LocalRunning

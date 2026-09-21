@@ -4,7 +4,6 @@ import { useState } from "react";
 
 import { EmptyState } from "@/components";
 import { Card } from "@/features/dashboard/components/shared";
-
 import { toggleHabitLogAction } from "@/features/habits/actions";
 import { IHabit } from "@/features/habits/domain";
 

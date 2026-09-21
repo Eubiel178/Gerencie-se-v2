@@ -4,21 +4,22 @@ import { useState } from "react";
 
 import { ConfirmIconButton } from "@/components";
 import { Icon } from "@/components/icon";
+import { StatusBadge } from "@/components/status-badge";
 import { SharedBadge } from "@/features/connections/components/shared-badge";
-
+import { LoadAcceptedConnections } from "@/features/connections/domain";
 import {
   deleteGoalAction,
   setGoalCompletionAction,
   updateGoalStepAction,
 } from "@/features/goals/actions";
+import { IGoal, calculateGoalProgress } from "@/features/goals/domain";
+import { useGoalStore } from "@/features/goals/goal-store";
+import { emitMascotEvent } from "@/features/mascot-pet";
+import { formatDateOnly } from "@/utils/date";
+
 import { EditGoal } from "../../modal";
 import { PRIORITY_LABELS } from "../../modal/interfaces";
 
-import { IGoal, calculateGoalProgress } from "@/features/goals/domain";
-import { LoadAcceptedConnections } from "@/features/connections/domain";
-
-import { emitMascotEvent } from "@/features/mascot-pet";
-import { useGoalStore } from "@/features/goals/goal-store";
 
 import styles from "./styles.module.css";
 
@@ -46,18 +47,14 @@ export function Card({ goal, connections }: CardProps) {
         const stepsAfterToggle = goal.steps.map((step) =>
           step.id === stepId ? { ...step, completed } : step,
         );
-        const wasComplete = goal.progressPercent >= 100;
-        const wasGoalCompleted = goal.completionOverride ?? wasComplete;
+        const wasGoalCompleted = goal.completionOverride ?? (goal.progressPercent >= 100);
         const isNowComplete = calculateGoalProgress(stepsAfterToggle) >= 100;
         if (isNowComplete && !wasGoalCompleted)
           emitMascotEvent("goal-completed");
-        const steps = goal.steps.map((step) =>
-          step.id === stepId ? { ...step, completed } : step,
-        );
         replaceGoal({
           ...goal,
-          steps,
-          progressPercent: calculateGoalProgress(steps),
+          steps: stepsAfterToggle,
+          progressPercent: calculateGoalProgress(stepsAfterToggle),
           ...(isNowComplete
             ? { completionOverride: null, completedAt: null }
             : {}),
@@ -139,14 +136,14 @@ export function Card({ goal, connections }: CardProps) {
 
             {goal.deadline && (
               <span className={styles.deadline}>
-                Prazo: {formatDeadline(goal.deadline)}
+                Prazo: {formatDateOnly(goal.deadline)}
               </span>
             )}
 
             {isCompleted && (
-              <span className={styles.completedBadge}>
+              <StatusBadge tone="completed">
                 <Icon name="FaCheck" aria-hidden="true" size={10} /> Concluído
-              </span>
+              </StatusBadge>
             )}
           </div>
         </div>
@@ -157,8 +154,8 @@ export function Card({ goal, connections }: CardProps) {
           {!goal.isSharedWithMe && (
             <ConfirmIconButton
               icon="FaTrash"
-              ariaLabel={`Excluir objetivo ${goal.title}`}
-              confirmText="Excluir este objetivo?"
+              ariaLabel={`Excluir objetivo "${goal.title}"`}
+              confirmText={`Excluir "${goal.title}"?`}
               loading={isRemoving}
               onConfirm={handleRemoveGoal}
             />
@@ -226,9 +223,4 @@ export function Card({ goal, connections }: CardProps) {
 
 function capitalize(value: string) {
   return value.charAt(0).toUpperCase() + value.slice(1);
-}
-
-function formatDeadline(deadline: string) {
-  const [year, month, day] = deadline.split("-");
-  return `${day}/${month}/${year}`;
 }

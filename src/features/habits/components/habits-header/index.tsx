@@ -1,5 +1,6 @@
-import { AddHabit } from "../modal";
 import { LoadAcceptedConnections } from "@/features/connections/domain";
+
+import { AddHabit } from "../modal";
 import { GoalOption } from "../modal/interfaces";
 
 import styles from "./styles.module.css";

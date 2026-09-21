@@ -3,7 +3,6 @@
 import { useState } from "react";
 
 import { Alert, Button, ConfirmIconButton, EmptyState, Input } from "@/components";
-
 import {
   deleteConnectionAction,
   inviteConnectionAction,
@@ -117,7 +116,7 @@ export function PeoplePanel({ connections }: { connections: IConnection[] }) {
       {visibleConnections.length === 0 ? (
         <EmptyState tone="muted">
           Ninguém conectado ainda. Convide alguém pra compartilhar tarefas,
-          rotina, hábitos ou metas.
+          rotina, hábitos ou objetivos.
         </EmptyState>
       ) : (
         <ul className={styles.list}>
@@ -160,6 +159,7 @@ export function PeoplePanel({ connections }: { connections: IConnection[] }) {
                     icon="FaTrash"
                     ariaLabel={`Remover conexão com ${connection.otherPersonEmail}`}
                     confirmText={`Remover a conexão com ${connection.otherPersonName || connection.otherPersonEmail}?`}
+                    confirmLabel="Remover"
                     className={styles.smallButton}
                     loading={pendingId === connection.id}
                     onConfirm={() => handleRemove(connection.id)}

@@ -2,10 +2,10 @@ import "server-only";
 
 import { and, desc, eq } from "drizzle-orm";
 
-import * as domain from "@/features/menstrual-cycle/domain";
 
 import { db } from "@/db/client";
 import { menstrualCycleEntries } from "@/db/schema";
+import * as domain from "@/features/menstrual-cycle/domain";
 import { requireUserId } from "@/lib/auth";
 
 export class LocalCycle

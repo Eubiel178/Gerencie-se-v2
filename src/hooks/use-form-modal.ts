@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 
-import { useRouter } from "next/navigation";
 
 import { useForm, type DefaultValues, type FieldValues } from "react-hook-form";
+
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import type { ZodType } from "zod";
 
 import type { ActionResult } from "@/types/action-result";
@@ -58,7 +59,7 @@ export function useFormModal<
   function closeModal() {
     setIsOpen(false);
     setSubmitError(null);
-    form.reset();
+    form.reset(defaultValues);
   }
 
   const handleFormSubmit = form.handleSubmit(async (data) => {

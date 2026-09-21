@@ -1,21 +1,14 @@
 import dayjs from "dayjs";
 
-import { getTaskFetcher } from "@/features/tasks/data/get-task-fetcher";
+import { AchievementsGrid } from "@/features/achievements/components/achievements-grid";
+import { listAchievements } from "@/features/achievements/get-achievements-status";
+import { Card } from "@/features/dashboard/components/shared";
 import { getFocusFetcher } from "@/features/focus/data/get-focus-fetcher";
-import { getHabitFetcher } from "@/features/habits/data/get-habit-fetcher";
 import { getGoalFetcher } from "@/features/goals/data/get-goal-fetcher";
+import { getHabitFetcher } from "@/features/habits/data/get-habit-fetcher";
 import { getHydrationFetcher } from "@/features/hydration/data/get-hydration-fetcher";
 import { getRunningFetcher } from "@/features/running/data/get-running-fetcher";
-import { listAchievements } from "@/features/achievements/get-achievements-status";
-import { AchievementsGrid } from "@/features/achievements/components/achievements-grid";
-
-import { Card } from "@/features/dashboard/components/shared";
-
-import { FocusWeeksChart } from "./focus-weeks-chart";
-import { HydrationWeeksChart } from "./hydration-weeks-chart";
-import { RunningWeeksChart } from "./running-weeks-chart";
-import { HabitsWeeksChart } from "./habits-weeks-chart";
-import { TopTasksByFocusTime } from "./top-tasks-by-focus-time";
+import { getTaskFetcher } from "@/features/tasks/data/get-task-fetcher";
 
 import {
   calculateAverageGoalProgress,
@@ -26,12 +19,12 @@ import {
   calculateWeeklyFocusHours,
   calculateWeeklyRunningStats,
 } from "./calculations";
-
+import { FocusWeeksChart } from "./focus-weeks-chart";
+import { HabitsWeeksChart } from "./habits-weeks-chart";
+import { HydrationWeeksChart } from "./hydration-weeks-chart";
+import { RunningWeeksChart } from "./running-weeks-chart";
 import styles from "./styles.module.css";
-
-// Reexports pra permitir `import { X } from "@/features/stats"` em vez
-// de caminhos profundos.
-export * from "./calculations";
+import { TopTasksByFocusTime } from "./top-tasks-by-focus-time";
 
 // 28 dias por página de gráfico (4 semanas) × 7 páginas pra trás — dá pra
 // navegar até ~6 meses de histórico sem precisar buscar tudo de uma vez.
@@ -121,7 +114,7 @@ export async function Stats() {
           />
         </Card>
 
-        <Card title="Progresso médio das metas ativas">
+        <Card title="Progresso médio dos objetivos ativos">
           <p className={styles.bigNumber}>{avgGoalProgress}%</p>
         </Card>
 

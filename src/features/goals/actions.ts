@@ -2,16 +2,15 @@
 
 import { revalidatePath } from "next/cache";
 
-import * as domain from "@/features/goals/domain";
 import { getGoalFetcher } from "@/features/goals/data/get-goal-fetcher";
+import * as domain from "@/features/goals/domain";
+import type { ActionResult } from "@/types/action-result";
 import {
   createGoalSchema,
   createGoalStepSchema,
   updateGoalSchema,
   updateGoalStepSchema,
 } from "@/validation/goal-schema";
-
-import type { ActionResult } from "@/types/action-result";
 
 export async function createGoalAction(
   data: domain.CreateGoal.Params
@@ -24,6 +23,7 @@ export async function createGoalAction(
   try {
     const { goal } = await getGoalFetcher().create(parsed.data);
     revalidatePath("/home/goals");
+    revalidatePath("/home");
 
     return { error: null, goal };
   } catch {
@@ -42,6 +42,7 @@ export async function updateGoalAction(
   try {
     await getGoalFetcher().update(parsed.data);
     revalidatePath("/home/goals");
+    revalidatePath("/home");
 
     return { error: null };
   } catch {
@@ -55,6 +56,7 @@ export async function deleteGoalAction(
   try {
     await getGoalFetcher().delete(params);
     revalidatePath("/home/goals");
+    revalidatePath("/home");
 
     return { error: null };
   } catch {
@@ -68,6 +70,7 @@ export async function setGoalCompletionAction(
   try {
     const result = await getGoalFetcher().setCompletion(params);
     revalidatePath("/home/goals");
+    revalidatePath("/home");
     return { error: null, ...result };
   } catch {
     return { error: "Não foi possível atualizar a conclusão do objetivo. Tente novamente." };
@@ -85,6 +88,7 @@ export async function createGoalStepAction(
   try {
     const { id } = await getGoalFetcher().createStep(parsed.data);
     revalidatePath("/home/goals");
+    revalidatePath("/home");
 
     return { error: null, id };
   } catch {
@@ -103,6 +107,7 @@ export async function updateGoalStepAction(
   try {
     await getGoalFetcher().updateStep(parsed.data);
     revalidatePath("/home/goals");
+    revalidatePath("/home");
 
     return { error: null };
   } catch {
@@ -116,6 +121,7 @@ export async function deleteGoalStepAction(
   try {
     await getGoalFetcher().deleteStep(params);
     revalidatePath("/home/goals");
+    revalidatePath("/home");
 
     return { error: null };
   } catch {
@@ -129,6 +135,7 @@ export async function reorderGoalStepsAction(
   try {
     await getGoalFetcher().reorderSteps(params);
     revalidatePath("/home/goals");
+    revalidatePath("/home");
     return { error: null };
   } catch {
     return { error: "Não foi possível reordenar as etapas. Tente novamente." };

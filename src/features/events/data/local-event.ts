@@ -2,10 +2,10 @@ import "server-only";
 
 import { and, eq } from "drizzle-orm";
 
-import * as domain from "@/features/events/domain";
 
 import { db } from "@/db/client";
 import { events } from "@/db/schema";
+import * as domain from "@/features/events/domain";
 import { requireUserId } from "@/lib/auth";
 
 /**

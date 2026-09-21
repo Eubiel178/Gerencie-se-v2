@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 
-import { CalendarStatusBanner } from "./calendar-status-banner";
+import { CalendarStatusBanner } from "../calendar-status-banner";
 
 /**
  * Lê `?google_calendar_connected=`/`?google_calendar_error=` no CLIENTE

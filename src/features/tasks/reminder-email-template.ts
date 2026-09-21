@@ -1,3 +1,5 @@
+import { renderSpamFolderHint } from "@/lib/email";
+
 // Mesma técnica/paleta do resumo semanal (`weekly-summary/email-template.ts`)
 // — tabela + estilo inline, cor de destaque copiada de --color-highlight
 // porque tokens CSS não chegam a um cliente de e-mail.
@@ -37,4 +39,4 @@ export function renderTaskReminderEmail(taskTitle: string, label: string): strin
   </body>
 </html>`;
 }
-import { renderSpamFolderHint } from "@/lib/email/template-hints";
+

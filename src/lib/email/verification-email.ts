@@ -1,3 +1,5 @@
+import { renderSpamFolderHint } from "./template-hints";
+
 // Mesmo sistema visual dos outros e-mails transacionais (ver
 // `password-reset-email.ts`, `login-alert-email.ts`) - tabela + estilo
 // inline, sem CSS externo, mesma paleta.
@@ -55,4 +57,4 @@ export function renderVerificationCodeEmail({ code }: VerificationCodeEmailParam
   </body>
 </html>`;
 }
-import { renderSpamFolderHint } from "./template-hints";
+

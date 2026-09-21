@@ -1,11 +1,11 @@
-import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
+import { NextResponse } from "next/server";
 
 import { db } from "@/db/client";
 import { userPreferences } from "@/db/schema";
-import { isValidCronSecret } from "@/lib/integrations/cron-auth";
 import { getWeeklySummaryForUser } from "@/features/weekly-summary/get-weekly-summary-for-user";
 import { sendWeeklySummaryEmail } from "@/features/weekly-summary/send-weekly-summary";
+import { isValidCronSecret } from "@/lib/integrations/cron-auth";
 
 /**
  * Disparo do resumo semanal pra todo mundo que ativou em Configurações —

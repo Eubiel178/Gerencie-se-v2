@@ -3,15 +3,14 @@
 import { useState } from "react";
 
 import { Alert, Button, ConfirmIconButton, Input } from "@/components";
-
 import {
   deleteHydrationLogAction,
   logWaterAction,
   updateHydrationGoalAction,
 } from "@/features/hydration/actions";
 import { IHydrationDay, IHydrationSummary, calculateHydrationGoalPercent } from "@/features/hydration/domain";
-
 import { emitMascotEvent } from "@/features/mascot-pet";
+import { formatTimeOnly } from "@/utils/date";
 
 import styles from "./styles.module.css";
 
@@ -31,6 +30,14 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
   const [goalInput, setGoalInput] = useState(String(today.goalMl));
   const [actionError, setActionError] = useState<string | null>(null);
   const [deletingLogId, setDeletingLogId] = useState<string | null>(null);
+
+  // Sincronizar goalInput com a prop quando ela muda (após save) —
+  // só quando não está editando pra não sobrescrever digitação em curso.
+  const [previousGoalMl, setPreviousGoalMl] = useState(today.goalMl);
+  if (today.goalMl !== previousGoalMl && !isEditingGoal) {
+    setPreviousGoalMl(today.goalMl);
+    setGoalInput(String(today.goalMl));
+  }
 
   async function handleLog(amountMl: number, control: string) {
     if (amountMl <= 0) return;
@@ -195,15 +202,13 @@ export function HydrationTracker({ today, week }: HydrationTrackerProps) {
           {currentToday.logs.map((log) => (
             <li key={log.id} className={styles.logItem}>
               <span>
-                {log.amountMl} ml às{" "}
-                {new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit" }).format(
-                  log.loggedAt
-                )}
+                {log.amountMl} ml às {formatTimeOnly(log.loggedAt)}
               </span>
               <ConfirmIconButton
                 icon="FaTrash"
-                ariaLabel="Remover registro"
+                ariaLabel={`Remover registro de ${log.amountMl} ml`}
                 confirmText={`Remover o registro de ${log.amountMl} ml?`}
+                confirmLabel="Remover"
                 className={styles.smallButton}
                 loading={deletingLogId === log.id}
                 onConfirm={() => handleDelete(log.id)}

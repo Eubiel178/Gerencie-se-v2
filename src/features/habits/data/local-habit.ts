@@ -3,10 +3,10 @@ import "server-only";
 import dayjs from "dayjs";
 import { and, eq, gte, inArray, or } from "drizzle-orm";
 
-import * as domain from "@/features/habits/domain";
 
 import { db } from "@/db/client";
 import { habitLogs, habits, users } from "@/db/schema";
+import * as domain from "@/features/habits/domain";
 import { requireUserId } from "@/lib/auth";
 import { assertAcceptedConnection, resolveSharedWithUserIdOnUpdate } from "@/lib/auth/assert-accepted-connection";
 
@@ -34,8 +34,9 @@ export class LocalHabit
     domain.UpdateHabit,
     domain.DeleteHabit,
     domain.ToggleHabitLog,
-    domain.LoadHabitCompletionsInRange
-{
+    domain.LoadHabitCompletionsInRange,
+    domain.LoadHabitCompletionsWithIdentity
+  {
   async create(params: domain.CreateHabit.Params) {
     const userId = await requireUserId();
     const id = crypto.randomUUID();
@@ -254,6 +255,45 @@ export class LocalHabit
       .where(and(inArray(habitLogs.habitId, habitIds), gte(habitLogs.date, sinceDate)));
 
     return logRows.map((row) => row.date);
+  }
+
+  /** Ocorrências concluídas de hábitos com identidade (título) — usado
+   * pelo Histórico, onde cada dia é uma entrada independente e o nome do
+   * hábito é parte do que o usuário precisa ver. */
+  async loadHabitCompletionsInRange(since: Date): Promise<domain.HabitCompletionEntry[]> {
+    const userId = await requireUserId();
+
+    const habitRows = await db
+      .select({ id: habits.id, title: habits.title })
+      .from(habits)
+      .where(
+        and(
+          or(eq(habits.userId, userId), eq(habits.sharedWithUserId, userId)),
+          eq(habits.archived, false)
+        )
+      );
+
+    if (habitRows.length === 0) return [];
+
+    const habitIds = habitRows.map((row) => row.id);
+    const habitTitleById = new Map(habitRows.map((row) => [row.id, row.title]));
+    const sinceDate = dayjs(since).format("YYYY-MM-DD");
+
+    const logRows = await db
+      .select({
+        habitId: habitLogs.habitId,
+        date: habitLogs.date,
+        completedAt: habitLogs.completedAt,
+      })
+      .from(habitLogs)
+      .where(and(inArray(habitLogs.habitId, habitIds), gte(habitLogs.date, sinceDate)));
+
+    return logRows.map((row) => ({
+      habitId: row.habitId,
+      habitTitle: habitTitleById.get(row.habitId) ?? "",
+      date: row.date,
+      completedAt: row.completedAt,
+    }));
   }
 }
 

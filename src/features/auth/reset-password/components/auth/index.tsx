@@ -2,16 +2,16 @@
 
 import { useState } from "react";
 
+import { useForm } from "react-hook-form";
+
+import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Alert, Form, Input, Button } from "@/components";
-import { useToast } from "@/providers/toast-context";
-
 import { resetPasswordAction } from "@/features/auth/actions";
+import { useToast } from "@/providers/toast-context";
 import { validationSchema } from "@/validation/reset-password-schema";
 
 import styles from "../../../auth-page.module.css";
@@ -81,6 +81,7 @@ export function Auth() {
               <Input.FieldPassword
                 {...register("password")}
                 id="password"
+                autoComplete="new-password"
                 autoFocus
               />
             </Input.Wrapper>
@@ -93,6 +94,7 @@ export function Auth() {
               <Input.FieldPassword
                 {...register("confirm_password")}
                 id="confirm_password"
+                autoComplete="new-password"
               />
             </Input.Wrapper>
             <Input.HelperText />

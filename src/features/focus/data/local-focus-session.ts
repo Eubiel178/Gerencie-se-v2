@@ -2,10 +2,10 @@ import "server-only";
 
 import { and, desc, eq, gte, ne, sql } from "drizzle-orm";
 
-import * as domain from "@/features/focus/domain";
 
 import { db } from "@/db/client";
 import { focusSessions } from "@/db/schema";
+import * as domain from "@/features/focus/domain";
 import { requireUserId } from "@/lib/auth";
 
 // 1 XP por minuto focado, arredondado pra baixo — sessões com menos de um

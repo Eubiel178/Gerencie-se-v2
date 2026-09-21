@@ -1,8 +1,9 @@
 import { Suspense } from "react";
 
-import { Auth } from "./components";
-import { Figure, Main } from "../components";
 import styles from "../auth-page.module.css";
+import { Figure, Main } from "../components";
+
+import { Auth } from "./components";
 
 export function Login() {
   return (

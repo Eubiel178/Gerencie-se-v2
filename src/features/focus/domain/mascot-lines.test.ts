@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getMascotLine } from "./mascot-lines";
 import { IMascotState } from "./mascot";
+import { getMascotLine } from "./mascot-lines";
 
 function buildMascot(overrides: Partial<IMascotState> = {}): IMascotState {
   return {

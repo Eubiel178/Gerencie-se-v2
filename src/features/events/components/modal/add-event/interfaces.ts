@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import { validationSchema } from "@/validation/event-schema";
 
 export interface IModalProps {

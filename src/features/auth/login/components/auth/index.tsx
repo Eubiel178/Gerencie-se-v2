@@ -2,22 +2,23 @@
 
 import { useState } from "react";
 
-import Link from "next/link";
-import { signIn } from "next-auth/react";
-import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { signIn } from "next-auth/react";
+import { z } from "zod";
+
+import { Alert, Form, Input, Button } from "@/components";
+import { Icon } from "@/components/icon";
+import { loginAction } from "@/features/auth/actions";
+import { authErrorMessage } from "@/lib/auth/error-messages";
 import { validationSchema } from "@/validation/login-schema";
 
 import styles from "../../../auth-page.module.css";
 
-import { Icon } from "@/components/icon";
 
-import { Alert, Form, Input, Button } from "@/components";
-
-import { loginAction } from "@/features/auth/actions";
-import { authErrorMessage } from "@/lib/auth/error-messages";
 
 type FormData = z.infer<typeof validationSchema>;
 
@@ -89,6 +90,8 @@ export function Auth() {
             <Input.Wrapper>
               <Input.Field
                 {...register("email")}
+                type="email"
+                autoComplete="email"
                 placeholder="nome@exemplo.com"
                 autoFocus
               />
@@ -100,7 +103,7 @@ export function Auth() {
           <Input.Root sharedProps={{ error: errors.password?.message }}>
             <Input.Label htmlFor="password">Senha</Input.Label>
             <Input.Wrapper>
-              <Input.FieldPassword {...register("password")} />
+              <Input.FieldPassword {...register("password")} autoComplete="current-password" />
             </Input.Wrapper>
 
             <Input.HelperText />

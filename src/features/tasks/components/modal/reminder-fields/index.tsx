@@ -3,9 +3,9 @@
 import type { UseFormRegister, UseFormSetValue } from "react-hook-form";
 
 import { Input } from "@/components";
+import { REMINDER_OPTIONS } from "@/validation/task-schema";
 
 import { FormData } from "../interfaces";
-import { REMINDER_OPTIONS } from "@/validation/task-schema";
 
 import styles from "./styles.module.css";
 

@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 
-import Link from "next/link";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
+import { z } from "zod";
 
 import { Alert, Form, Input, Button } from "@/components";
-
 import { requestPasswordResetAction } from "@/features/auth/actions";
 import { RESET_REQUEST_SENT_MESSAGE } from "@/features/auth/reset-request-message";
 import { validationSchema } from "@/validation/forgot-password-schema";
@@ -76,6 +76,8 @@ export function Auth() {
               <Input.Field
                 {...register("email")}
                 id="email"
+                type="email"
+                autoComplete="email"
                 placeholder="nome@exemplo.com"
                 autoFocus
               />

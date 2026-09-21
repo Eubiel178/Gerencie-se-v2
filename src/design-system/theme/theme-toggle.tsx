@@ -1,8 +1,8 @@
 "use client";
 
+import styles from "./styles.module.css";
 import { ThemePreference, useTheme } from "./use-theme";
 
-import styles from "./styles.module.css";
 
 const OPTIONS: { value: ThemePreference; label: string }[] = [
   { value: "system", label: "Sistema" },

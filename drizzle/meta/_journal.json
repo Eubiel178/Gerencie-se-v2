@@ -260,6 +260,20 @@
       "when": 1789800000000,
       "tag": "0036_simplify_execution_session",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1790002829740,
+      "tag": "0037_nice_snowbird",
+      "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1790002888634,
+      "tag": "0038_zippy_steel_serpent",
+      "breakpoints": true
     }
   ]
 }

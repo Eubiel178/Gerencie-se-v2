@@ -1,4 +1,5 @@
 import { ICycleEstimate } from "@/features/menstrual-cycle/domain";
+import { formatDateOnly } from "@/utils/date";
 
 import styles from "./styles.module.css";
 
@@ -12,7 +13,7 @@ export function EstimatePanel({ estimate }: { estimate: ICycleEstimate }) {
 
       {estimate.nextEstimatedStartDate && (
         <>
-          <span className={styles.estimateValue}>{formatDate(estimate.nextEstimatedStartDate)}</span>
+          <span className={styles.estimateValue}>{formatDateOnly(estimate.nextEstimatedStartDate)}</span>
           <span className={styles.estimateLabel}>
             próximo início estimado
             {estimate.averageCycleLengthDays && ` · ciclo médio de ${estimate.averageCycleLengthDays} dias`}
@@ -21,9 +22,4 @@ export function EstimatePanel({ estimate }: { estimate: ICycleEstimate }) {
       )}
     </div>
   );
-}
-
-function formatDate(date: string): string {
-  const [year, month, day] = date.split("-");
-  return `${day}/${month}/${year}`;
 }

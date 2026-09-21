@@ -3,11 +3,12 @@
 import { useState } from "react";
 
 import { EmptyState } from "@/components";
-import { IRoutineItem } from "@/features/routine/domain";
 import { LoadAcceptedConnections } from "@/features/connections/domain";
-import { TaskOption } from "../modal/interfaces";
-import { RoutineListItem } from "./item";
+import { IRoutineItem } from "@/features/routine/domain";
 
+import { TaskOption } from "../modal/interfaces";
+
+import { RoutineListItem } from "./item";
 import styles from "./styles.module.css";
 
 interface RoutineListProps {

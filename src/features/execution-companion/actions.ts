@@ -2,22 +2,21 @@
 
 import { revalidatePath } from "next/cache";
 
-import { getTaskFetcher } from "@/features/tasks/data/get-task-fetcher";
 import { getMascotFetcher } from "@/features/focus/data/get-focus-fetcher";
-
-import { getExecutionSessionFetcher } from "./data/local-execution-session";
+import { getTaskFetcher } from "@/features/tasks/data/get-task-fetcher";
+import type { ActionResult } from "@/types/action-result";
 import {
   startExecutionSessionSchema,
   executionActionSchema,
 } from "@/validation/execution-session-schema";
-import type { ActionResult } from "@/types/action-result";
 
+import { getExecutionSessionFetcher } from "./data/local-execution-session";
 import type { IExecutionSession } from "./domain/types";
-import { emitMascotEvent } from "@/features/mascot-pet";
+
 
 export async function startExecutionSessionAction(
   data: { taskId: string }
-): Promise<ActionResult & { session?: IExecutionSession }> {
+): Promise<ActionResult & { session?: IExecutionSession; switched?: boolean; previousTaskId?: string }> {
   const parsed = startExecutionSessionSchema.safeParse(data);
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Dados inválidos." };
@@ -33,13 +32,24 @@ export async function startExecutionSessionAction(
     }
 
     const existing = await repo.getActive();
-    if (existing) {
-      return { error: "Você já tem uma sessão de execução ativa. Termine ou pause ela primeiro." };
-    }
 
-    const session = await repo.create({
-      taskId: data.taskId,
-    });
+    let session: IExecutionSession;
+    let switched = false;
+    let previousTaskId: string | undefined;
+
+    if (existing) {
+      if (existing.taskId === data.taskId) {
+        return { error: "Essa tarefa já está em andamento." };
+      }
+      previousTaskId = existing.taskId;
+      // Switch atômico: pausa sessão A, cria sessão B
+      session = await repo.switchToTask(data.taskId);
+      // Atualiza workStatus da task antiga para paused
+      await taskFetcher.setWorkStatus({ id: existing.taskId, workStatus: "paused" });
+      switched = true;
+    } else {
+      session = await repo.create({ taskId: data.taskId });
+    }
 
     await getMascotFetcher().addXp(5);
 
@@ -49,6 +59,8 @@ export async function startExecutionSessionAction(
     return {
       error: null,
       session,
+      switched,
+      previousTaskId,
     };
   } catch {
     return { error: "Não foi possível criar a sessão de execução. Tente novamente." };
@@ -110,7 +122,6 @@ export async function completeExecutionSessionAction(
     await repo.complete(data.sessionId);
 
     await getMascotFetcher().addXp(15);
-    emitMascotEvent("task-completed");
 
     revalidatePath("/home");
     revalidatePath("/home/tasks");

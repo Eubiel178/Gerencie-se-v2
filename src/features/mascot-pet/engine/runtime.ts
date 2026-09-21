@@ -1,7 +1,7 @@
 import { AnimatedSprite, Application, Assets, Rectangle, Texture, Ticker } from "pixi.js";
 
-import { MascotCharacter, MascotStateName, MascotVector2 } from "../domain/types";
 import { emitMascotEvent, subscribeMascotEvent } from "../domain/events";
+import { MascotCharacter, MascotStateName, MascotVector2 } from "../domain/types";
 
 import { MascotBehavior, WALK_SPEED_PX_PER_S } from "./behavior";
 import { watchUserIdle } from "./idle-watcher";

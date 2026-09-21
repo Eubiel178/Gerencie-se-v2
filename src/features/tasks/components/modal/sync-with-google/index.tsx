@@ -1,7 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import type { UseFormRegister, UseFormSetValue } from "react-hook-form";
+
+import { useRouter } from "next/navigation";
 
 import { Button, Input } from "@/components";
 

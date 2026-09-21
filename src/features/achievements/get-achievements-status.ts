@@ -2,17 +2,16 @@ import "server-only";
 
 import { eq } from "drizzle-orm";
 
+import { IconName } from "@/components";
 import { db } from "@/db/client";
 import { achievementUnlocks } from "@/db/schema";
-import { requireUserId } from "@/lib/auth";
 import { getMascotFetcher } from "@/features/focus/data/get-focus-fetcher";
-
-import { ITask } from "@/features/tasks/domain";
-import { IHabit } from "@/features/habits/domain";
 import { IGoal } from "@/features/goals/domain";
+import { IHabit } from "@/features/habits/domain";
 import { calculateBestHabitStreak } from "@/features/stats/calculations";
+import { ITask } from "@/features/tasks/domain";
+import { requireUserId } from "@/lib/auth";
 
-import { IconName } from "@/components/icon";
 
 import { ACHIEVEMENTS, AchievementStats, calculateHasFullWeek } from "./definitions";
 

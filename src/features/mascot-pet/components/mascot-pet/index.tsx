@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+
 import { usePathname } from "next/navigation";
 
 import {
@@ -74,7 +75,7 @@ export function MascotPet({ characterId }: MascotPetProps) {
 
   return (
     <div className={styles.stage} aria-hidden="true">
-      ss <div ref={wrapperRef} className={styles.wrapper} />
+      <div ref={wrapperRef} className={styles.wrapper} />
     </div>
   );
 }

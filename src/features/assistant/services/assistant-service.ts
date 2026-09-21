@@ -2,17 +2,16 @@ import "server-only";
 
 import dayjs from "dayjs";
 
-import { IAssistantMessage } from "@/features/assistant/domain";
 import { getAssistantPreferencesFetcher } from "@/features/assistant/data/get-assistant-preferences-fetcher";
-
-import { getTaskFetcher } from "@/features/tasks/data/get-task-fetcher";
-import { getHabitFetcher } from "@/features/habits/data/get-habit-fetcher";
-import { getGoalFetcher } from "@/features/goals/data/get-goal-fetcher";
-import { getRoutineFetcher } from "@/features/routine/data/get-routine-fetcher";
-import { getMascotFetcher } from "@/features/focus/data/get-focus-fetcher";
-import { IMascotState } from "@/features/focus/domain";
+import { IAssistantMessage } from "@/features/assistant/domain";
 import { getExecutionSessionFetcher } from "@/features/execution-companion/data/local-execution-session";
 import type { IExecutionSession } from "@/features/execution-companion/domain/types";
+import { getMascotFetcher } from "@/features/focus/data/get-focus-fetcher";
+import { IMascotState } from "@/features/focus/domain";
+import { getGoalFetcher } from "@/features/goals/data/get-goal-fetcher";
+import { getHabitFetcher } from "@/features/habits/data/get-habit-fetcher";
+import { getRoutineFetcher } from "@/features/routine/data/get-routine-fetcher";
+import { getTaskFetcher } from "@/features/tasks/data/get-task-fetcher";
 
 import { pickTopMessage, RuleBasedAssistantProvider } from "./insight-provider";
 

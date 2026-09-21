@@ -2,11 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import { Button, Input } from "@/components";
-
+import { Button } from "@/components";
 import { createRunningSessionAction } from "@/features/running/actions";
 import { calculatePaceMinPerKm, haversineMeters, IRunningSession } from "@/features/running/domain";
 
+import { ManualEntry } from "./manual-entry";
 import styles from "./styles.module.css";
 
 type Tab = "manual" | "gps";
@@ -85,90 +85,6 @@ export function RunningTracker({ onSessionCreated }: { onSessionCreated: (sessio
         )}
       </div>
     </section>
-  );
-}
-
-function ManualEntry({ onSaved }: { onSaved: (session: IRunningSession) => void }) {
-  const [distanceKm, setDistanceKm] = useState("");
-  const [minutes, setMinutes] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function handleSubmit(event: React.FormEvent) {
-    event.preventDefault();
-    setError(null);
-
-    const distance = Number(distanceKm);
-    const durationMinutes = Number(minutes);
-
-    if (!Number.isFinite(distance) || distance <= 0) {
-      setError("Informe uma distância válida.");
-      return;
-    }
-
-    if (!Number.isFinite(durationMinutes) || durationMinutes <= 0) {
-      setError("Informe um tempo válido.");
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      const result = await createRunningSessionAction({
-        distanceMeters: Math.round(distance * 1000),
-        durationSeconds: Math.round(durationMinutes * 60),
-        source: "manual",
-      });
-
-      if (result.error) {
-        setError(result.error);
-        return;
-      }
-
-      setDistanceKm("");
-      setMinutes("");
-      if (result.session) onSaved(result.session);
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
-
-  return (
-    <form className={styles.panel} onSubmit={handleSubmit}>
-      <div className={styles.fieldsRow}>
-        <Input.Root>
-          <Input.Label htmlFor="distanceKm">Distância (km)</Input.Label>
-          <Input.Wrapper>
-            <Input.Field
-              name="distanceKm"
-              type="number"
-              step="0.01"
-              min={0}
-              value={distanceKm}
-              onChange={(event) => setDistanceKm(event.target.value)}
-            />
-          </Input.Wrapper>
-        </Input.Root>
-
-        <Input.Root>
-          <Input.Label htmlFor="minutes">Tempo (minutos)</Input.Label>
-          <Input.Wrapper>
-            <Input.Field
-              name="minutes"
-              type="number"
-              step="0.1"
-              min={0}
-              value={minutes}
-              onChange={(event) => setMinutes(event.target.value)}
-            />
-          </Input.Wrapper>
-        </Input.Root>
-      </div>
-
-      {error && <p className={styles.inlineMessage}>{error}</p>}
-
-      <Button.Root loading={isSubmitting}>Salvar corrida</Button.Root>
-    </form>
   );
 }
 

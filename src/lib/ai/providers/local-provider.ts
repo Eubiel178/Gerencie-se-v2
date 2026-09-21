@@ -1,5 +1,3 @@
-import "server-only";
-
 import type { MascotPersonality } from "@/features/focus/domain/mascot";
 
 function pick<T>(arr: T[]): T {

@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useId, useRef, useSyncExternalStore } from "react";
+
 import { createPortal } from "react-dom";
 
-import { ModalContextProvider } from "./modal-context";
 import { getFocusableElements } from "./get-focusable-elements";
-
+import { ModalContextProvider } from "./modal-context";
 import styles from "./styles.module.css";
 
 type ModalProps = React.ComponentProps<"div"> & {

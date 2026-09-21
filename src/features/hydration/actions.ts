@@ -2,11 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 
-import * as domain from "@/features/hydration/domain";
 import { getHydrationFetcher } from "@/features/hydration/data/get-hydration-fetcher";
-import { logWaterSchema, updateGoalSchema } from "@/validation/hydration-schema";
-
+import * as domain from "@/features/hydration/domain";
 import type { ActionResult } from "@/types/action-result";
+import { logWaterSchema, updateGoalSchema } from "@/validation/hydration-schema";
 
 export async function logWaterAction(data: domain.LogWater.Params): Promise<ActionResult & { id?: string }> {
   const parsed = logWaterSchema.safeParse(data);
@@ -17,6 +16,7 @@ export async function logWaterAction(data: domain.LogWater.Params): Promise<Acti
   try {
     const { id } = await getHydrationFetcher().logWater(parsed.data);
     revalidatePath("/home/hydration");
+    revalidatePath("/home");
 
     return { error: null, id };
   } catch {
@@ -30,6 +30,7 @@ export async function deleteHydrationLogAction(
   try {
     await getHydrationFetcher().deleteLog(params);
     revalidatePath("/home/hydration");
+    revalidatePath("/home");
 
     return { error: null };
   } catch {
@@ -46,6 +47,7 @@ export async function updateHydrationGoalAction(dailyGoalMl: number): Promise<Ac
   try {
     await getHydrationFetcher().updateGoal(parsed.data);
     revalidatePath("/home/hydration");
+    revalidatePath("/home");
 
     return { error: null };
   } catch {

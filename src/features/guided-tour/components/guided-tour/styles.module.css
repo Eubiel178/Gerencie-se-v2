@@ -10,7 +10,7 @@
 .backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(10, 12, 20, 0.62);
+  background: var(--color-overlay);
 }
 
 /* Realce visual em volta do elemento apontado - não é um "buraco" de

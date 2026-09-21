@@ -9,6 +9,7 @@ import {
   startFocusSessionAction,
 } from "@/features/focus/actions";
 import { IFocusSession } from "@/features/focus/domain";
+import type { ActionResult } from "@/types/action-result";
 
 interface StartParams {
   plannedDurationSeconds: number;
@@ -29,10 +30,10 @@ interface FocusSessionContextValue {
   // `clearLastCompletion`, pra não reagir de novo à mesma conclusão se
   // o componente re-renderizar por outro motivo.
   lastCompletion: { xpEarned: number; taskId: string | null } | null;
-  start: (params: StartParams) => Promise<{ error: string | null }>;
-  complete: () => Promise<{ error: string | null; xpEarned?: number }>;
-  cancel: () => Promise<{ error: string | null }>;
-  extend: (additionalSeconds: number) => Promise<{ error: string | null }>;
+  start: (params: StartParams) => Promise<ActionResult>;
+  complete: () => Promise<ActionResult & { xpEarned?: number }>;
+  cancel: () => Promise<ActionResult>;
+  extend: (additionalSeconds: number) => Promise<ActionResult>;
   clearLastCompletion: () => void;
 }
 
@@ -105,7 +106,7 @@ export function FocusSessionProvider({ initialSession, userId, children }: Focus
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [session]);
 
-  const complete = useCallback(async (): Promise<{ error: string | null; xpEarned?: number }> => {
+  const complete = useCallback(async (): Promise<ActionResult & { xpEarned?: number }> => {
     if (!session || isCompletingRef.current) return { error: null };
 
     isCompletingRef.current = true;
@@ -157,7 +158,7 @@ export function FocusSessionProvider({ initialSession, userId, children }: Focus
   }, [remaining, session, complete]);
 
   const start = useCallback(
-    async (params: StartParams): Promise<{ error: string | null }> => {
+    async (params: StartParams): Promise<ActionResult> => {
       setIsBusy(true);
       setPendingAction("start");
 
@@ -194,7 +195,7 @@ export function FocusSessionProvider({ initialSession, userId, children }: Focus
     [userId]
   );
 
-  const cancel = useCallback(async (): Promise<{ error: string | null }> => {
+  const cancel = useCallback(async (): Promise<ActionResult> => {
     if (!session) return { error: null };
 
     setIsBusy(true);
@@ -215,7 +216,7 @@ export function FocusSessionProvider({ initialSession, userId, children }: Focus
   }, [session]);
 
   const extend = useCallback(
-    async (additionalSeconds: number): Promise<{ error: string | null }> => {
+    async (additionalSeconds: number): Promise<ActionResult> => {
       if (!session) return { error: null };
 
       setIsBusy(true);

@@ -2,22 +2,20 @@
 
 import { useState } from "react";
 
-import { Icon } from "@/components/icon";
-
 import { Button, ConfirmIconButton } from "@/components";
+import { Icon } from "@/components/icon";
 import { SharedBadge } from "@/features/connections/components/shared-badge";
-
+import { LoadAcceptedConnections } from "@/features/connections/domain";
 import {
   deleteHabitAction,
   toggleHabitLogAction,
 } from "@/features/habits/actions";
-import { EditHabit } from "../../modal";
-
 import { IHabit } from "@/features/habits/domain";
-import { LoadAcceptedConnections } from "@/features/connections/domain";
+import { emitMascotEvent } from "@/features/mascot-pet";
+
+import { EditHabit } from "../../modal";
 import { GoalOption } from "../../modal/interfaces";
 
-import { emitMascotEvent } from "@/features/mascot-pet";
 
 import styles from "./styles.module.css";
 
@@ -48,7 +46,11 @@ export function Card({
 
     try {
       const result = await deleteHabitAction({ id: habit.id });
-      if (!result.error) onRemove(habit.id);
+      if (result.error) {
+        emitMascotEvent("action-error");
+      } else {
+        onRemove(habit.id);
+      }
     } finally {
       setIsRemoving(false);
     }
@@ -91,8 +93,8 @@ export function Card({
           {!habit.isSharedWithMe && (
             <ConfirmIconButton
               icon="FaTrash"
-              ariaLabel={`Excluir hábito ${habit.title}`}
-              confirmText="Excluir este hábito?"
+              ariaLabel={`Excluir hábito "${habit.title}"`}
+              confirmText={`Excluir "${habit.title}"?`}
               loading={isRemoving}
               onConfirm={handleRemove}
             />

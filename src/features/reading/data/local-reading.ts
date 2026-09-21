@@ -2,11 +2,26 @@ import "server-only";
 
 import { and, eq } from "drizzle-orm";
 
-import * as domain from "@/features/reading/domain";
-
 import { db } from "@/db/client";
 import { readingItems } from "@/db/schema";
+import * as domain from "@/features/reading/domain";
 import { requireUserId } from "@/lib/auth";
+
+/**
+ * Decide o valor de `finishedAt` a persistir com base no status resultante
+ * e no finishedAt já existente. Sempre é idempotente: marcar como
+ * "finished" duas vezes seguidas não altera o timestamp original; desmarcar
+ * e remarcar mantém o instante da primeira conclusão real.
+ */
+function resolveFinishedAt(params: {
+  status: domain.ReadingStatus;
+  existingFinishedAt: Date | null;
+  nextFinishedAt?: Date | null;
+}): Date | null {
+  if (params.status !== "finished") return null;
+  if (params.nextFinishedAt !== undefined) return params.nextFinishedAt;
+  return params.existingFinishedAt ?? new Date();
+}
 
 export class LocalReading
   implements
@@ -20,6 +35,13 @@ export class LocalReading
     const userId = await requireUserId();
     const id = crypto.randomUUID();
 
+    const status =
+      params.totalPages != null && params.currentPage != null && params.currentPage === params.totalPages
+        ? "finished"
+        : params.totalPages != null && params.currentPage != null && params.currentPage > 0
+          ? "reading"
+        : "want_to_read";
+
     const [row] = await db.insert(readingItems).values({
       id,
       userId,
@@ -28,12 +50,8 @@ export class LocalReading
       totalPages: params.totalPages ?? null,
       currentPage: params.currentPage ?? null,
       dailyReadingGoal: params.dailyReadingGoal ?? null,
-      status:
-        params.totalPages != null && params.currentPage != null && params.currentPage === params.totalPages
-          ? "finished"
-          : params.totalPages != null && params.currentPage != null && params.currentPage > 0
-            ? "reading"
-          : "want_to_read",
+      status,
+      finishedAt: status === "finished" ? new Date() : null,
     }).returning();
 
     return mapRowToReadingItem(row);
@@ -42,7 +60,11 @@ export class LocalReading
   async update(params: domain.UpdateReadingItem.Params) {
     const userId = await requireUserId();
     const [item] = await db
-      .select({ totalPages: readingItems.totalPages, currentPage: readingItems.currentPage })
+      .select({
+        totalPages: readingItems.totalPages,
+        currentPage: readingItems.currentPage,
+        finishedAt: readingItems.finishedAt,
+      })
       .from(readingItems)
       .where(and(eq(readingItems.id, params.id), eq(readingItems.userId, userId)));
 
@@ -54,6 +76,10 @@ export class LocalReading
         status: params.status,
         progressPercent: params.progressPercent,
         currentPage: completingTrackedItem ? item.totalPages : undefined,
+        finishedAt: resolveFinishedAt({
+          status: params.status,
+          existingFinishedAt: item?.finishedAt ?? null,
+        }),
       })
       .where(and(eq(readingItems.id, params.id), eq(readingItems.userId, userId)))
       .returning();
@@ -64,7 +90,10 @@ export class LocalReading
   async updateDetails(params: domain.UpdateReadingDetails.Params) {
     const userId = await requireUserId();
     const [existing] = await db
-      .select({ progressPercent: readingItems.progressPercent })
+      .select({
+        progressPercent: readingItems.progressPercent,
+        finishedAt: readingItems.finishedAt,
+      })
       .from(readingItems)
       .where(and(eq(readingItems.id, params.id), eq(readingItems.userId, userId)));
 
@@ -95,6 +124,10 @@ export class LocalReading
         currentPage: params.totalPages == null ? null : currentPage ?? 0,
         dailyReadingGoal: params.dailyReadingGoal ?? null,
         progressPercent,
+        finishedAt: resolveFinishedAt({
+          status: derivedStatus,
+          existingFinishedAt: existing.finishedAt ?? null,
+        }),
       })
       .where(and(eq(readingItems.id, params.id), eq(readingItems.userId, userId)))
       .returning();
@@ -107,7 +140,10 @@ export class LocalReading
   ): Promise<domain.UpdateReadingCurrentPage.Result> {
     const userId = await requireUserId();
     const [item] = await db
-      .select({ totalPages: readingItems.totalPages })
+      .select({
+        totalPages: readingItems.totalPages,
+        finishedAt: readingItems.finishedAt,
+      })
       .from(readingItems)
       .where(and(eq(readingItems.id, params.id), eq(readingItems.userId, userId)));
 
@@ -115,11 +151,17 @@ export class LocalReading
     if (item.totalPages == null) return { status: "total-pages-required" };
     if (params.currentPage > item.totalPages) return { status: "page-exceeds-total" };
 
+    const isFinished = params.currentPage === item.totalPages;
+
     const [row] = await db
       .update(readingItems)
       .set({
         currentPage: params.currentPage,
-        status: params.currentPage === item.totalPages ? "finished" : "reading",
+        status: isFinished ? "finished" : "reading",
+        finishedAt: resolveFinishedAt({
+          status: isFinished ? "finished" : "reading",
+          existingFinishedAt: item.finishedAt ?? null,
+        }),
       })
       .where(and(eq(readingItems.id, params.id), eq(readingItems.userId, userId)))
       .returning();
@@ -158,6 +200,7 @@ function mapRowToReadingItem(row: typeof readingItems.$inferSelect): domain.IRea
     totalPages: row.totalPages,
     currentPage: row.currentPage,
     dailyReadingGoal: row.dailyReadingGoal,
+    finishedAt: row.finishedAt,
     addedAt: row.addedAt,
   };
 }

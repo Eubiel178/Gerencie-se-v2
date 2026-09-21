@@ -1,16 +1,14 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { AuthError } from "next-auth";
+
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
+import { redirect } from "next/navigation";
 
 import { db } from "@/db/client";
 import { users } from "@/db/schema";
-import { signIn } from "@/lib/auth";
-import { appUrl } from "@/lib/shared/app-url";
-import { sendEmail } from "@/lib/email";
-import { requireUserId } from "@/lib/auth";
+import { requireUserId, signIn } from "@/lib/auth";
 import {
   createPasswordResetToken,
   consumePasswordResetToken,
@@ -22,18 +20,20 @@ import {
 import {
   createEmailVerificationCode,
   getEmailVerificationSendAvailability,
+  renderVerificationCodeEmail,
   restorePreviousEmailVerificationCode,
+  sendEmail,
   verifyEmailVerificationCode,
-} from "@/lib/email/verification";
-import { renderVerificationCodeEmail } from "@/lib/email/verification-email";
+} from "@/lib/email";
+import { appUrl } from "@/lib/shared/app-url";
+import type { ActionResult } from "@/types/action-result";
+import { normalizeEmail } from "@/utils/normalize-email";
+import { validationSchema as forgotPasswordSchema } from "@/validation/forgot-password-schema";
 import { validationSchema as loginSchema } from "@/validation/login-schema";
 import { validationSchema as registerSchema } from "@/validation/register-schema";
-import { validationSchema as forgotPasswordSchema } from "@/validation/forgot-password-schema";
 import { validationSchema as resetPasswordSchema } from "@/validation/reset-password-schema";
 import { validationSchema as verifyEmailSchema } from "@/validation/verify-email-schema";
-import { normalizeEmail } from "@/utils/normalize-email";
 
-import type { ActionResult } from "@/types/action-result";
 
 export type AuthActionState = {
   error: string | null;

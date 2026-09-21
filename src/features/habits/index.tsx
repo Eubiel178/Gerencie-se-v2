@@ -1,21 +1,12 @@
 import dayjs from "dayjs";
 
-import { getHabitFetcher } from "@/features/habits/data/get-habit-fetcher";
-import { getGoalFetcher } from "@/features/goals/data/get-goal-fetcher";
 import { getConnectionFetcher } from "@/features/connections/data/get-connection-fetcher";
-import { HabitConsistencyChart } from "./components/habit-consistency-chart";
+import { getGoalFetcher } from "@/features/goals/data/get-goal-fetcher";
+import { getHabitFetcher } from "@/features/habits/data/get-habit-fetcher";
 
 import { HabitsHeader, HabitsList } from "./components";
-
+import { HabitConsistencyChart } from "./components/habit-consistency-chart";
 import styles from "./styles.module.css";
-
-// Reexports pra permitir `import { X } from "@/features/habits"` em vez
-// de caminhos profundos.
-export * from "./domain";
-export * from "./actions";
-export * from "./filter-habits";
-export * from "./build-habit-heatmap";
-export { getHabitFetcher } from "./data/get-habit-fetcher";
 
 // 52 semanas = ~1 ano de histórico, em 2 páginas de 26 semanas (6 meses)
 // cada no mapa de calor.

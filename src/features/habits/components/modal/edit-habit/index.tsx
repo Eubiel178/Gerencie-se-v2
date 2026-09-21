@@ -2,16 +2,15 @@
 
 import { useWatch } from "react-hook-form";
 
-import { validationSchema } from "@/validation/habit-schema";
 
 import { Alert, Form, Modal, ModalHeader, Input, Button, ChipGroup, SuggestionChips, CollapsibleSection } from "@/components";
 import { Icon } from "@/components/icon";
 import modalStyles from "@/components/modal/styles.module.css";
-
-import { updateHabitAction } from "@/features/habits/actions";
-import { ShareSelect } from "@/features/connections/components/share-select";
 import { ShareReadOnlyNote } from "@/features/connections/components/share-readonly-note";
+import { ShareSelect } from "@/features/connections/components/share-select";
+import { updateHabitAction } from "@/features/habits/actions";
 import { useFormModal } from "@/hooks/use-form-modal";
+import { validationSchema } from "@/validation/habit-schema";
 
 import { FormData, IEditHabitProps, NO_GOAL_VALUE } from "../interfaces";
 

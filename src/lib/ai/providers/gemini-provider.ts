@@ -5,7 +5,8 @@ import {
   callGeminiJSON,
   isGeminiAvailable,
 } from "../gemini-client";
-import type { AIProvider, AIProviderResponse } from "./types";
+
+import type { AIProvider, AIProviderResponse, HistoryMessage } from "./types";
 
 const GEMINI_MODELS = ["gemini-3.6-flash", "gemini-3.5-flash-lite"] as const;
 
@@ -22,12 +23,14 @@ export class GeminiProvider implements AIProvider {
     systemInstruction: string;
     model?: string;
     operation?: string;
+    history?: HistoryMessage[];
   }): Promise<AIProviderResponse | null> {
     return callGemini({
       prompt: params.prompt,
       systemInstruction: params.systemInstruction,
       model: params.model,
       operation: params.operation,
+      history: params.history,
     });
   }
 

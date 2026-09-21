@@ -7,5 +7,9 @@ import styles from "./styles.module.css";
 export const InputHelperText = () => {
   const { sharedProps } = useInputRootContext();
 
-  return <p className={styles.helperText}>{sharedProps?.error}</p>;
+  return (
+    <p className={styles.helperText} aria-live="polite">
+      {sharedProps?.error}
+    </p>
+  );
 };

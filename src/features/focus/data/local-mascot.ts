@@ -2,10 +2,10 @@ import "server-only";
 
 import { eq, sql } from "drizzle-orm";
 
-import * as domain from "@/features/focus/domain";
 
 import { db } from "@/db/client";
 import { mascotStates } from "@/db/schema";
+import * as domain from "@/features/focus/domain";
 import { requireUserId } from "@/lib/auth";
 
 export class LocalMascot implements domain.GetMascotState, domain.AddMascotXp, domain.UpdateMascot {

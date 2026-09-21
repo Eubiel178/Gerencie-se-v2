@@ -1,5 +1,6 @@
+import { renderSpamFolderHint } from "@/lib/email";
+
 import { WeeklySummary } from "./types";
-import { renderSpamFolderHint } from "@/lib/email/template-hints";
 
 // E-mail = HTML "old school": sem CSS externo, sem flexbox/grid (suporte
 // inconsistente entre clientes) — tabela + estilo inline, mesma técnica
@@ -57,7 +58,7 @@ export function renderWeeklySummaryEmail(summary: WeeklySummary): string {
                   ${statRow("Horas de foco", `${summary.focusHours}h`)}
                   ${statRow("Hábitos registrados", `${summary.habitCompletionsThisWeek} em ${summary.activeHabits}`)}
                   ${statRow("Melhor sequência de hábito", `${summary.bestHabitStreak} dia(s)`)}
-                  ${statRow("Progresso médio das metas", `${summary.avgGoalProgress}% em ${summary.activeGoals}`)}
+                  ${statRow("Progresso médio dos objetivos", `${summary.avgGoalProgress}% em ${summary.activeGoals}`)}
                   ${statRow("Corrida", `${summary.runningKm} km`)}
                 </table>
               </td>

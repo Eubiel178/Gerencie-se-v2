@@ -1,9 +1,9 @@
 import { z } from "zod";
 
+import { LoadAcceptedConnections } from "@/features/connections/domain";
+import { ITask } from "@/features/tasks/domain";
 import { validationSchema } from "@/validation/task-schema";
 
-import { ITask } from "@/features/tasks/domain";
-import { LoadAcceptedConnections } from "@/features/connections/domain";
 
 export { PRIORITY_OPTIONS, PRIORITY_LABELS } from "@/lib/shared/priority";
 

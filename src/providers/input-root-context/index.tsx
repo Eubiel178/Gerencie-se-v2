@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext } from "react";
+
 import { ProviderProps } from "../provider-props";
 
 type SharedProps = {

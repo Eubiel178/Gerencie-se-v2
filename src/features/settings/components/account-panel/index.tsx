@@ -1,17 +1,19 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+
 import { useForm } from "react-hook-form";
+
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 
 import { Alert, Button, Form, Input } from "@/components";
-import { formatFileSize, MAX_ATTACHMENT_SIZE_BYTES } from "@/lib/security/upload-limits";
-import { validationSchema } from "@/validation/profile-schema";
 import { updateAvatarAction, updateProfileAction } from "@/features/profile/actions";
-import { ProfileOverview } from "@/features/profile/get-profile-overview";
 import { Gender } from "@/features/profile/get-gender";
+import { ProfileOverview } from "@/features/profile/get-profile-overview";
+import { formatFileSize, MAX_ATTACHMENT_SIZE_BYTES } from "@/lib/security/upload-limits";
 import { useToast } from "@/providers/toast-context";
+import { validationSchema } from "@/validation/profile-schema";
 
 import styles from "./styles.module.css";
 
@@ -89,12 +91,22 @@ export function AccountPanel({ user, gender, overview }: AccountPanelProps) {
   const {
     handleSubmit,
     register,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     mode: "onChange",
     resolver: zodResolver(validationSchema),
     defaultValues: { name: user.name ?? "", gender },
   });
+
+  // Sincronizar form com user atualizado (após save/revalidação) —
+  // "adjust state during render" em vez de useEffect, pra evitar o flash
+  // de valores antigos entre o router.refresh() e o effect executar.
+  const [previousFormProps, setPreviousFormProps] = useState({ name: user.name, gender });
+  if (user.name !== previousFormProps.name || gender !== previousFormProps.gender) {
+    setPreviousFormProps({ name: user.name, gender });
+    reset({ name: user.name ?? "", gender });
+  }
 
   async function handleFormSubmit(data: FormData) {
     setSubmitError(null);

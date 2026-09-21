@@ -1,16 +1,16 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 
 import { db } from "@/db/client";
 import { userPreferences } from "@/db/schema";
 import { requireUserId } from "@/lib/auth";
+import type { ActionResult } from "@/types/action-result";
 
 import { getWeeklySummaryForCurrentUser } from "./get-weekly-summary";
 import { sendWeeklySummaryEmail } from "./send-weekly-summary";
 
-import type { ActionResult } from "@/types/action-result";
 
 export async function updateWeeklySummaryPreferenceAction(enabled: boolean): Promise<ActionResult> {
   try {

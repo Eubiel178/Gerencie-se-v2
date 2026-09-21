@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 
-import { MascotCharacter, MascotFrameRect, MascotStateName } from "@/features/mascot-pet/domain/types";
 import { MASCOT_CHARACTERS } from "@/features/mascot-pet/domain/characters";
+import { MascotCharacter, MascotFrameRect, MascotStateName } from "@/features/mascot-pet/domain/types";
 
 import styles from "./styles.module.css";
 

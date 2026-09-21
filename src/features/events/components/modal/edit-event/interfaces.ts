@@ -1,8 +1,8 @@
 import { z } from "zod";
 
+import { IEvent } from "@/features/events/domain";
 import { validationSchema } from "@/validation/event-schema";
 
-import { IEvent } from "@/features/events/domain";
 
 export interface IModalProps {
   eventBeingEdited: IEvent;

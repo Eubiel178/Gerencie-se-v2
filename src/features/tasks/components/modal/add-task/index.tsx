@@ -1,10 +1,8 @@
 "use client";
 
 import { useRef } from "react";
-import { useWatch } from "react-hook-form";
-import { useFormTags } from "@/features/tasks/hooks/use-form-tags";
 
-import { validationSchema } from "@/validation/task-schema";
+import { useWatch } from "react-hook-form";
 
 import {
   Alert,
@@ -17,23 +15,24 @@ import {
   CollapsibleSection,
 } from "@/components";
 import { Icon } from "@/components/icon";
-
+import modalStyles from "@/components/modal/styles.module.css";
+import { ShareSelect } from "@/features/connections/components/share-select";
 import {
   createTaskAction,
   createTaskStepsAction,
 } from "@/features/tasks/actions";
+import { useFormTags } from "@/features/tasks/hooks/use-form-tags";
 import { isVagueTaskTitle } from "@/features/tasks/is-vague-title";
 import { useTaskStore } from "@/features/tasks/task-store";
-
-import { ShareSelect } from "@/features/connections/components/share-select";
 import { useFormModal } from "@/hooks/use-form-modal";
+import { validationSchema } from "@/validation/task-schema";
 
-import { SyncWithGoogle } from "../sync-with-google";
-import { ReminderFields } from "../reminder-fields";
 import { TaskSteps, TaskStepsDraft } from "../../task-steps";
 import { FormData, IAddTaskProps, PRIORITY_OPTIONS } from "../interfaces";
+import { ReminderFields } from "../reminder-fields";
+import { SyncWithGoogle } from "../sync-with-google";
 
-import modalStyles from "@/components/modal/styles.module.css";
+
 import styles from "./styles.module.css";
 
 export function AddTask({

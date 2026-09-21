@@ -1,10 +1,11 @@
 import "server-only";
 
-import { getCompanionAction, type CompanionAction } from "../domain/actions";
-import { getTaskFetcher } from "@/features/tasks/data/get-task-fetcher";
 import { getMascotFetcher } from "@/features/focus/data/get-focus-fetcher";
+import { getTaskFetcher } from "@/features/tasks/data/get-task-fetcher";
 import { requireUserId } from "@/lib/auth";
 import type { ActionResult } from "@/types/action-result";
+
+import { getCompanionAction, type CompanionAction } from "../domain/actions";
 
 function auditLog(params: {
   userId: string;

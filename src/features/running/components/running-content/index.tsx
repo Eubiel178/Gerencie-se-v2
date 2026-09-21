@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 
+import { IRunningSession } from "@/features/running/domain";
+
 import { History } from "../history";
 import { RunningTracker } from "../running-tracker";
 import { Totals } from "../totals";
-import { IRunningSession } from "@/features/running/domain";
 
 import styles from "./styles.module.css";
 

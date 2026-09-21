@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+
 import { SessionProvider } from "next-auth/react";
 
 import "@/design-system/tokens/tokens.css";

@@ -4,7 +4,7 @@ import { create } from "zustand";
 
 import type { ITask, TaskPriority } from "@/features/tasks/domain";
 
-export type TaskStatusFilter = "all" | "pending" | "completed" | "overdue";
+export type TaskStatusFilter = "all" | "pending" | "in_progress" | "completed" | "overdue";
 
 interface TaskStore {
   tasks: ITask[];

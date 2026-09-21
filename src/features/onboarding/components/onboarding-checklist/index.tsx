@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+
 import Link from "next/link";
 
-import { Icon } from "@/components/icon";
+import { Icon } from "@/components";
+
 import { dismissOnboardingAction } from "../../actions";
 import { OnboardingItem } from "../../get-onboarding-status";
 

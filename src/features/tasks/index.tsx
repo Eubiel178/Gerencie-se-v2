@@ -1,26 +1,10 @@
+import { getConnectionFetcher } from "@/features/connections/data/get-connection-fetcher";
+import { syncTasksFromGoogle } from "@/features/tasks/sync";
 import { requireUserId } from "@/lib/auth";
 import { isGoogleCalendarConnected } from "@/lib/integrations/google-calendar";
-import { syncTasksFromGoogle } from "@/features/tasks/sync";
-import { getConnectionFetcher } from "@/features/connections/data/get-connection-fetcher";
-
-import { getTaskFetcher } from "./data/get-task-fetcher";
 
 import { Section, TasksList, TasksListHeader } from "./components";
-
-// Reexports pra permitir `import { X } from "@/features/tasks"` em vez
-// de caminhos profundos.
-export * from "./domain";
-export * from "./actions";
-export * from "./filter-tasks";
-export * from "./sort-tasks";
-export * from "./is-vague-title";
-export * from "./task-store";
-export * from "./sync";
-export { getTaskFetcher } from "./data/get-task-fetcher";
-export { useFormTags } from "./hooks/use-form-tags";
-export { TaskReminders } from "./components/reminder-scheduler";
-export { NotificationsToggle } from "./components/reminder-scheduler/notifications-toggle";
-export { AttachmentsField } from "./components/attachments-field";
+import { getTaskFetcher } from "./data/get-task-fetcher";
 
 export async function Home() {
   const fetcher = getTaskFetcher();

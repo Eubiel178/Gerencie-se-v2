@@ -2,9 +2,9 @@
 
 import { useEffect, useRef } from "react";
 
-import { useToast } from "@/providers/toast-context";
 import { AchievementView } from "@/features/achievements/get-achievements-status";
 import { emitMascotEvent } from "@/features/mascot-pet";
+import { useToast } from "@/providers/toast-context";
 
 /** Dispara um toast pra cada conquista que acabou de ser desbloqueada
  * nesta carga do Dashboard. `hasFiredRef` evita disparar de novo num
