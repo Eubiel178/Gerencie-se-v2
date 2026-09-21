@@ -75,6 +75,7 @@ export function useTaskMutations(task: ITask) {
       if (result.error) {
         emitMascotEvent("action-error");
       } else if (result.completed) {
+        emitMascotEvent("task-completed");
         // Completa a sessão de execução se existir
         if (executionSession?.taskId === task.id && executionSession.status === "active") {
           await completeSession();

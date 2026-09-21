@@ -29,7 +29,8 @@ export function AddRoutineItem({ buttonText, taskOptions, connections }: IAddRou
     formState: { errors, isSubmitting },
     isOpen,
     openModal: openModalBase,
-    closeModal,
+    requestClose,
+    discardConfirmDialog,
     submitError,
     handleFormSubmit,
   } = useFormModal<FormData>({
@@ -58,8 +59,8 @@ export function AddRoutineItem({ buttonText, taskOptions, connections }: IAddRou
       </Button.Root>
 
       {isOpen && (
-        <Modal onClose={closeModal} className={modalStyles.medium}>
-          <ModalHeader title="Novo Item de Rotina" onClose={closeModal} />
+        <Modal onClose={requestClose} className={modalStyles.medium}>
+          <ModalHeader title="Novo Item de Rotina" onClose={requestClose} />
 
           <Form.Root onSubmit={handleFormSubmit}>
             <Form.Wrapper>
@@ -78,7 +79,7 @@ export function AddRoutineItem({ buttonText, taskOptions, connections }: IAddRou
                 <SuggestionChips
                   label="Sugestões"
                   suggestions={TITLE_SUGGESTIONS}
-                  onSelect={(value) => setValue("title", value, { shouldValidate: true })}
+                  onSelect={(value) => setValue("title", value, { shouldValidate: true, shouldDirty: true })}
                 />
 
                 <Input.HelperText />
@@ -96,7 +97,7 @@ export function AddRoutineItem({ buttonText, taskOptions, connections }: IAddRou
                 <SuggestionChips
                   label="Horários comuns"
                   suggestions={TIME_SUGGESTIONS}
-                  onSelect={(value) => setValue("time", value, { shouldValidate: true })}
+                  onSelect={(value) => setValue("time", value, { shouldValidate: true, shouldDirty: true })}
                 />
 
                 <Input.HelperText />
@@ -140,6 +141,8 @@ export function AddRoutineItem({ buttonText, taskOptions, connections }: IAddRou
           </Form.Root>
         </Modal>
       )}
+
+      {discardConfirmDialog}
     </>
   );
 }

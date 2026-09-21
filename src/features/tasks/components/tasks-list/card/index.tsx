@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Button, ConfirmIconButton } from "@/components";
+import { Button, ConfirmCheckbox, ConfirmIconButton } from "@/components";
 import { Icon } from "@/components/icon";
 import { SharedBadge } from "@/features/connections/components/shared-badge";
 import { LoadAcceptedConnections } from "@/features/connections/domain";
@@ -79,17 +79,19 @@ export function Card({
     <li key={task.id} className={styles.taskCard} data-priority={task.priority}>
       {/* Header: checkbox + menu */}
       <div className={styles.taskCardHeader}>
-        <button
-          type="button"
+        <ConfirmCheckbox
           className={styles.completeCheckbox}
-          data-checked={task.completed}
-          aria-pressed={task.completed}
-          aria-label={`Marcar tarefa "${task.title}" como ${task.completed ? "não concluída" : "concluída"}`}
-          disabled={isToggling}
-          onClick={handleToggleComplete}
-        >
-          {task.completed && <Icon name="FaCheck" aria-hidden="true" />}
-        </button>
+          checked={task.completed}
+          ariaLabel={`Marcar tarefa "${task.title}" como ${task.completed ? "não concluída" : "concluída"}`}
+          confirmText={
+            task.completed
+              ? `Marcar a tarefa "${task.title}" como não concluída?`
+              : `Concluir a tarefa "${task.title}"?`
+          }
+          confirmLabel={task.completed ? "Reabrir" : "Concluir"}
+          loading={isToggling}
+          onConfirm={handleToggleComplete}
+        />
 
         <div className={styles.actions}>
           <details className={styles.overflowMenu}>

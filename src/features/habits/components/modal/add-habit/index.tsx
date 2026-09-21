@@ -30,7 +30,8 @@ export function AddHabit({ buttonText, connections, goalOptions }: IAddHabitProp
     formState: { errors, isSubmitting },
     isOpen,
     openModal,
-    closeModal,
+    requestClose,
+    discardConfirmDialog,
     submitError,
     handleFormSubmit,
   } = useFormModal<FormData>({
@@ -61,8 +62,8 @@ export function AddHabit({ buttonText, connections, goalOptions }: IAddHabitProp
       </Button.Root>
 
       {isOpen && (
-        <Modal onClose={closeModal} className={modalStyles.medium}>
-          <ModalHeader title="Novo Hábito" onClose={closeModal} />
+        <Modal onClose={requestClose} className={modalStyles.medium}>
+          <ModalHeader title="Novo Hábito" onClose={requestClose} />
 
           <Form.Root onSubmit={handleFormSubmit}>
             <Form.Wrapper>
@@ -81,7 +82,7 @@ export function AddHabit({ buttonText, connections, goalOptions }: IAddHabitProp
                 <SuggestionChips
                   label="Sugestões"
                   suggestions={TITLE_SUGGESTIONS}
-                  onSelect={(value) => setValue("title", value, { shouldValidate: true })}
+                  onSelect={(value) => setValue("title", value, { shouldValidate: true, shouldDirty: true })}
                 />
 
                 <Input.HelperText />
@@ -96,7 +97,7 @@ export function AddHabit({ buttonText, connections, goalOptions }: IAddHabitProp
                   aria-label="Frequência"
                   options={FREQUENCY_OPTIONS}
                   value={frequency}
-                  onChange={(value) => setValue("frequency", value as FormData["frequency"], { shouldValidate: true })}
+                  onChange={(value) => setValue("frequency", value as FormData["frequency"], { shouldValidate: true, shouldDirty: true })}
                 />
 
                 <Input.HelperText />
@@ -154,6 +155,8 @@ export function AddHabit({ buttonText, connections, goalOptions }: IAddHabitProp
           </Form.Root>
         </Modal>
       )}
+
+      {discardConfirmDialog}
     </>
   );
 }

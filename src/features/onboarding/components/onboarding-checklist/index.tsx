@@ -5,6 +5,7 @@ import { useState } from "react";
 import Link from "next/link";
 
 import { Icon } from "@/components";
+import { emitMascotEvent } from "@/features/mascot-pet";
 
 import { dismissOnboardingAction } from "../../actions";
 import { OnboardingItem } from "../../get-onboarding-status";
@@ -27,7 +28,11 @@ export function OnboardingChecklist({ items }: OnboardingChecklistProps) {
 
     setIsDismissing(true);
     const result = await dismissOnboardingAction();
-    if (!result.error) setIsDismissed(true);
+    if (result.error) {
+      emitMascotEvent("action-error");
+    } else {
+      setIsDismissed(true);
+    }
     setIsDismissing(false);
   }
 

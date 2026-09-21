@@ -47,11 +47,13 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
     formState: { errors, isSubmitting },
     isOpen,
     openModal,
-    closeModal,
+    requestClose,
+    discardConfirmDialog,
     submitError,
     handleFormSubmit,
   } = useFormModal<FormData>({
     schema: validationSchema,
+    discardConfirmLabel: goalBeingEdited.title,
     defaultValues: {
       title: goalBeingEdited.title,
       description: goalBeingEdited.description,
@@ -144,8 +146,8 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
       />
 
       {isOpen && (
-        <Modal onClose={closeModal} className={modalStyles.wide}>
-          <ModalHeader title="Editar Objetivo" onClose={closeModal} />
+        <Modal onClose={requestClose} className={modalStyles.wide}>
+          <ModalHeader title="Editar Objetivo" onClose={requestClose} />
 
           <Form.Root onSubmit={handleFormSubmit}>
             <Form.Wrapper>
@@ -193,7 +195,7 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
                   suggestions={DEADLINE_SHORTCUTS.map((shortcut) => shortcut.label)}
                   onSelect={(label) => {
                     const shortcut = DEADLINE_SHORTCUTS.find((option) => option.label === label);
-                    if (shortcut) setValue("deadline", shortcut.value(), { shouldValidate: true });
+                    if (shortcut) setValue("deadline", shortcut.value(), { shouldValidate: true, shouldDirty: true });
                   }}
                 />
 
@@ -209,7 +211,7 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
                   aria-label="Prioridade"
                   options={PRIORITY_OPTIONS}
                   value={priority}
-                  onChange={(value) => setValue("priority", value as FormData["priority"], { shouldValidate: true })}
+                  onChange={(value) => setValue("priority", value as FormData["priority"], { shouldValidate: true, shouldDirty: true })}
                 />
 
                 <Input.HelperText />
@@ -254,6 +256,8 @@ export function EditGoal({ goalBeingEdited, connections }: IEditGoalProps) {
           </Form.Root>
         </Modal>
       )}
+
+      {discardConfirmDialog}
     </>
   );
 }

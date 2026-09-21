@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import { usePathname, useRouter } from "next/navigation";
 
@@ -48,14 +48,28 @@ export function TasksList({ tasksList, isGoogleConnected, connections }: TasksLi
   // atualizar outro componente Zustand-subscrito enquanto ele ainda está
   // renderizando (confirmado: quebrava a criação de tarefa com "Cannot
   // update a component while rendering a different component"). Store
-  // externa = sincronizar em efeito é o lugar certo; só remover a guarda
-  // de "uma vez só" já resolve, sem precisar do truque de renderização.
+  // externa = sincronizar em efeito é o lugar certo.
+  //
+  // Mas um `useEffect` só roda DEPOIS do primeiro paint — até lá, a store
+  // começa vazia (`tasks: []`, valor padrão do Zustand), e nada preenche
+  // ela a tempo do primeiro render. Sem essa ref, esse primeiro render
+  // (SSR + hidratação) mostrava "lista vazia" mesmo com tarefas reais
+  // vindas do servidor — um "flash" que, dependendo da velocidade de
+  // recompilação/rede, ficava perceptível ou até parecia permanente
+  // (regressão real: tarefas/objetivos "sumindo"). Enquanto o efeito
+  // ainda não rodou nem uma vez, usa a prop `tasksList` direto (idêntica
+  // ao que o servidor já mandou, sem esperar a store) — depois que a
+  // store é hidratada, ela vira a fonte de verdade de novo (mutações
+  // otimistas, novas revalidações).
+  const hasHydratedRef = useRef(false);
   useEffect(() => {
+    hasHydratedRef.current = true;
     setTasks(tasksList);
   }, [tasksList, setTasks]);
+  const effectiveTasks = hasHydratedRef.current ? tasks : tasksList;
 
   const tag = formTags.tagExists(paramsUrl.get("tag") || "");
-  const tasksByTag = tag !== "all" ? tasks.filter((task) => task.tag === tag) : tasks;
+  const tasksByTag = tag !== "all" ? effectiveTasks.filter((task) => task.tag === tag) : effectiveTasks;
   const tasksFiltred = filterTasks(tasksByTag, { searchQuery, statusFilter, priorityFilter, lowEnergyMode });
   // Prioridade primeiro, e dentro de cada prioridade quem ainda não
   // concluiu vem antes de quem já concluiu — dois `.sort()` estáveis

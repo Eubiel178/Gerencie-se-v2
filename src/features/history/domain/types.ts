@@ -33,7 +33,7 @@ export interface HistoryEntryMetadata {
 
 export type HistoryFilter = "all" | HistoryEntryType;
 
-export type HistoryPeriod = "7d" | "30d";
+export type HistoryPeriod = "7d" | "30d" | "all";
 
 export interface HistoryQuery {
   period: HistoryPeriod;

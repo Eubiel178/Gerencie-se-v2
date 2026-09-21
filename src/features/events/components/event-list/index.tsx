@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import { EmptyState } from "@/components";
 import { IEvent } from "@/features/events/domain";
@@ -22,14 +22,23 @@ export function EventList({ eventsList }: { eventsList: IEvent[] }) {
   // quebrando a criação de tarefa quando o mesmo padrão foi usado em
   // `TasksList`). O `useEffect` já só reroda quando `eventsList` muda de
   // referência de verdade, então não precisa de guarda nenhuma além disso.
+  //
+  // Mas o efeito só roda DEPOIS do primeiro paint — até lá, a store
+  // começa vazia, e o primeiro render (SSR + hidratação) mostrava "nenhum
+  // compromisso" mesmo com eventos reais vindos do servidor (mesma
+  // regressão de `TasksList`/`GoalsList`). Enquanto o efeito ainda não
+  // rodou, usa `eventsList` (a prop) direto.
+  const hasHydratedRef = useRef(false);
   useEffect(() => {
+    hasHydratedRef.current = true;
     setEvents(eventsList);
   }, [eventsList, setEvents]);
+  const effectiveEvents = hasHydratedRef.current ? events : eventsList;
 
-  // `events` (da store) tem TODOS os eventos — o Calendário ao lado
-  // precisa deles assim. Esta lista, rotulada "Próximos eventos", mostra
-  // só os que ainda não passaram, em ordem cronológica.
-  const upcomingEvents = selectUpcomingEvents(events);
+  // `events`/`effectiveEvents` tem TODOS os eventos — o Calendário ao
+  // lado precisa deles assim. Esta lista, rotulada "Próximos eventos",
+  // mostra só os que ainda não passaram, em ordem cronológica.
+  const upcomingEvents = selectUpcomingEvents(effectiveEvents);
   const thereAreEvents = upcomingEvents.length > 0;
 
   return (

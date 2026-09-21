@@ -24,11 +24,13 @@ export function EditRoutineItem({ itemBeingEdited, taskOptions, connections }: I
     formState: { errors, isSubmitting },
     isOpen,
     openModal,
-    closeModal,
+    requestClose,
+    discardConfirmDialog,
     submitError,
     handleFormSubmit,
   } = useFormModal<FormData>({
     schema: validationSchema,
+    discardConfirmLabel: itemBeingEdited.title,
     defaultValues: {
       time: itemBeingEdited.time,
       title: itemBeingEdited.title,
@@ -57,8 +59,8 @@ export function EditRoutineItem({ itemBeingEdited, taskOptions, connections }: I
       />
 
       {isOpen && (
-        <Modal onClose={closeModal} className={modalStyles.medium}>
-          <ModalHeader title="Editar Item de Rotina" onClose={closeModal} />
+        <Modal onClose={requestClose} className={modalStyles.medium}>
+          <ModalHeader title="Editar Item de Rotina" onClose={requestClose} />
 
           <Form.Root onSubmit={handleFormSubmit}>
             <Form.Wrapper>
@@ -77,7 +79,7 @@ export function EditRoutineItem({ itemBeingEdited, taskOptions, connections }: I
                 <SuggestionChips
                   label="Sugestões"
                   suggestions={TITLE_SUGGESTIONS}
-                  onSelect={(value) => setValue("title", value, { shouldValidate: true })}
+                  onSelect={(value) => setValue("title", value, { shouldValidate: true, shouldDirty: true })}
                 />
 
                 <Input.HelperText />
@@ -95,7 +97,7 @@ export function EditRoutineItem({ itemBeingEdited, taskOptions, connections }: I
                 <SuggestionChips
                   label="Horários comuns"
                   suggestions={TIME_SUGGESTIONS}
-                  onSelect={(value) => setValue("time", value, { shouldValidate: true })}
+                  onSelect={(value) => setValue("time", value, { shouldValidate: true, shouldDirty: true })}
                 />
 
                 <Input.HelperText />
@@ -147,6 +149,8 @@ export function EditRoutineItem({ itemBeingEdited, taskOptions, connections }: I
           </Form.Root>
         </Modal>
       )}
+
+      {discardConfirmDialog}
     </>
   );
 }

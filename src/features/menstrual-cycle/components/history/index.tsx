@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { Button, ConfirmIconButton, EmptyState } from "@/components";
+import { emitMascotEvent } from "@/features/mascot-pet";
 import { deleteCycleEntryAction } from "@/features/menstrual-cycle/actions";
 import { ICycleEntry } from "@/features/menstrual-cycle/domain";
 import { formatDateOnly } from "@/utils/date";
@@ -17,7 +18,11 @@ export function History({ entries, onRemove }: { entries: ICycleEntry[]; onRemov
 
     try {
       const result = await deleteCycleEntryAction({ id });
-      if (!result.error) onRemove(id);
+      if (result.error) {
+        emitMascotEvent("action-error");
+      } else {
+        onRemove(id);
+      }
     } finally {
       setRemovingId(null);
     }

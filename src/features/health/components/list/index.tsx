@@ -10,6 +10,7 @@ import {
   markHealthCheckupDoneAction,
 } from "@/features/health/actions";
 import { computeCheckupDueState, IHealthCheckup } from "@/features/health/domain";
+import { emitMascotEvent } from "@/features/mascot-pet";
 import { formatDateOnly } from "@/utils/date";
 
 import { EditCheckup } from "../edit-checkup";
@@ -68,7 +69,9 @@ export function List({ checkups }: { checkups: IHealthCheckup[] }) {
 
     try {
       const result = await markHealthCheckupDoneAction({ id });
-      if (!result.error && result.lastDoneAt) {
+      if (result.error) {
+        emitMascotEvent("action-error");
+      } else if (result.lastDoneAt) {
         setVisibleCheckups((current) => current.map((checkup) => {
           if (checkup.id !== id) return checkup;
           const dueState = computeCheckupDueState(result.lastDoneAt, checkup.intervalDays);
@@ -85,7 +88,11 @@ export function List({ checkups }: { checkups: IHealthCheckup[] }) {
 
     try {
       const result = await deleteHealthCheckupAction({ id });
-      if (!result.error) setVisibleCheckups((current) => current.filter((checkup) => checkup.id !== id));
+      if (result.error) {
+        emitMascotEvent("action-error");
+      } else {
+        setVisibleCheckups((current) => current.filter((checkup) => checkup.id !== id));
+      }
     } finally {
       setBusyId(null);
     }

@@ -71,7 +71,7 @@ export function SyncWithGoogle({
               type="button"
               variant="ghost"
               className={styles.smallButton}
-              onClick={() => setValue("syncEnabled", false)}
+              onClick={() => setValue("syncEnabled", false, { shouldDirty: true })}
             >
               Continuar sem sincronizar
             </Button.Root>

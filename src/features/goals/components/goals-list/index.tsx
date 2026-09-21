@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import { EmptyState } from "@/components";
 import { LoadAcceptedConnections } from "@/features/connections/domain";
@@ -28,13 +28,23 @@ export function GoalsList({ goalsList, connections }: GoalsListProps) {
   // Zustand-subscrito enquanto ele ainda renderiza (confirmado: esse
   // exato padrão quebrava a criação de tarefa em `TasksList` com "Cannot
   // update a component while rendering a different component"). Store
-  // externa sincroniza em efeito; só remover a guarda de "uma vez só" já
-  // resolve, sem precisar do truque de ajustar estado durante a renderização.
+  // externa sincroniza em efeito.
+  //
+  // Mas o efeito só roda DEPOIS do primeiro paint — até lá, a store
+  // começa vazia (padrão do Zustand), e nada preenche ela a tempo do
+  // primeiro render. Sem essa ref, esse primeiro render (SSR + hidratação)
+  // mostrava "sem objetivos" mesmo com objetivos reais vindos do servidor
+  // — regressão real (objetivos existentes "sumindo" da tela). Enquanto o
+  // efeito ainda não rodou, usa `goalsList` (a prop) direto; depois, a
+  // store volta a ser a fonte de verdade (mutações otimistas).
+  const hasHydratedRef = useRef(false);
   useEffect(() => {
+    hasHydratedRef.current = true;
     setGoals(goalsList);
   }, [goalsList, setGoals]);
+  const effectiveGoals = hasHydratedRef.current ? goals : goalsList;
 
-  if (goals.length === 0) {
+  if (effectiveGoals.length === 0) {
     return (
       <EmptyState variant="box">Você ainda não tem objetivos. Crie o primeiro e divida em etapas pequenas.</EmptyState>
     );
@@ -42,7 +52,7 @@ export function GoalsList({ goalsList, connections }: GoalsListProps) {
 
   return (
     <ul className={styles.grid}>
-      {goals.map((goal) => (
+      {effectiveGoals.map((goal) => (
         <Card key={goal.id} goal={goal} connections={connections} />
       ))}
     </ul>

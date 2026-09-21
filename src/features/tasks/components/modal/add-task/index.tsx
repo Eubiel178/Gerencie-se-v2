@@ -54,7 +54,8 @@ export function AddTask({
     formState: { errors, isSubmitting },
     isOpen,
     openModal,
-    closeModal,
+    requestClose,
+    discardConfirmDialog,
     submitError,
     handleFormSubmit,
   } = useFormModal<FormData, Awaited<ReturnType<typeof createTaskAction>>>({
@@ -122,8 +123,8 @@ export function AddTask({
       </Button.Root>
 
       {isOpen && (
-        <Modal onClose={closeModal} className={modalStyles.wide}>
-          <ModalHeader title="Nova Tarefa" onClose={closeModal} />
+        <Modal onClose={requestClose} className={modalStyles.wide}>
+          <ModalHeader title="Nova Tarefa" onClose={requestClose} />
 
           <Form.Root onSubmit={handleFormSubmit}>
             <Form.Wrapper>
@@ -161,6 +162,7 @@ export function AddTask({
                   onChange={(value) =>
                     setValue("priority", value as FormData["priority"], {
                       shouldValidate: true,
+                      shouldDirty: true,
                     })
                   }
                 />
@@ -251,6 +253,8 @@ export function AddTask({
           </Form.Root>
         </Modal>
       )}
+
+      {discardConfirmDialog}
     </>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { ConfirmIconButton } from "@/components";
+import { ConfirmCheckbox, ConfirmIconButton } from "@/components";
 import { Icon } from "@/components/icon";
 import { StatusBadge } from "@/components/status-badge";
 import { SharedBadge } from "@/features/connections/components/shared-badge";
@@ -113,17 +113,19 @@ export function Card({ goal, connections }: CardProps) {
       <div className={styles.cardHeader}>
         <div className={styles.cardTitleGroup}>
           <div className={styles.titleLine}>
-            <button
-              type="button"
+            <ConfirmCheckbox
               className={styles.completeCheckbox}
-              data-checked={isCompleted}
-              aria-pressed={isCompleted}
-              aria-label={`Marcar objetivo \"${goal.title}\" como ${isCompleted ? "não concluído" : "concluído"}`}
-              disabled={isTogglingCompletion}
-              onClick={handleToggleManualCompletion}
-            >
-              {isCompleted && <Icon name="FaCheck" aria-hidden="true" />}
-            </button>
+              checked={isCompleted}
+              ariaLabel={`Marcar objetivo "${goal.title}" como ${isCompleted ? "não concluído" : "concluído"}`}
+              confirmText={
+                isCompleted
+                  ? `Marcar o objetivo "${goal.title}" como não concluído?`
+                  : `Concluir o objetivo "${goal.title}"?`
+              }
+              confirmLabel={isCompleted ? "Reabrir" : "Concluir"}
+              loading={isTogglingCompletion}
+              onConfirm={handleToggleManualCompletion}
+            />
             <h3 className={styles.cardTitle}>{goal.title}</h3>
           </div>
 

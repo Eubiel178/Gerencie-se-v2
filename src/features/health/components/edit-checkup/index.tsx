@@ -19,11 +19,13 @@ export function EditCheckup({ checkup }: EditCheckupProps) {
     formState: { errors, isSubmitting },
     isOpen,
     openModal,
-    closeModal,
+    requestClose,
+    discardConfirmDialog,
     submitError,
     handleFormSubmit,
   } = useFormModal<HealthCheckupFormData>({
     schema: healthCheckupFormSchema,
+    discardConfirmLabel: checkup.title,
     defaultValues: {
       title: checkup.title,
       category: checkup.category,
@@ -48,8 +50,8 @@ export function EditCheckup({ checkup }: EditCheckupProps) {
       />
 
       {isOpen && (
-        <Modal onClose={closeModal}>
-          <ModalHeader title="Editar cuidado" onClose={closeModal} />
+        <Modal onClose={requestClose}>
+          <ModalHeader title="Editar cuidado" onClose={requestClose} />
 
           <Form.Root onSubmit={handleFormSubmit}>
             <Form.Wrapper>
@@ -92,6 +94,8 @@ export function EditCheckup({ checkup }: EditCheckupProps) {
           </Form.Root>
         </Modal>
       )}
+
+      {discardConfirmDialog}
     </>
   );
 }

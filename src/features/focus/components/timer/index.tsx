@@ -352,11 +352,9 @@ export function Timer({ mascot, task, pendingTasks }: TimerProps) {
       {showTaskCompleteConfirm && task && (
         <Modal onClose={() => setShowTaskCompleteConfirm(false)}>
           <ModalHeader
-            title="Marcar tarefa como concluída?"
+            title={`Concluir a tarefa "${task.title}"?`}
             onClose={() => setShowTaskCompleteConfirm(false)}
           />
-
-          <p className={styles.taskCompleteText}>{task.title}</p>
 
           <div className={styles.taskCompleteActions}>
             <Button.Root
@@ -371,7 +369,7 @@ export function Timer({ mascot, task, pendingTasks }: TimerProps) {
               loading={isMarkingTaskComplete}
               onClick={handleConfirmTaskComplete}
             >
-              Marcar como concluída
+              Concluir
             </Button.Root>
           </div>
         </Modal>

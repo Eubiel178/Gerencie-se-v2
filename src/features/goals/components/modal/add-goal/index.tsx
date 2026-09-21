@@ -38,7 +38,8 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
     formState: { errors, isSubmitting },
     isOpen,
     openModal,
-    closeModal,
+    requestClose,
+    discardConfirmDialog,
     submitError,
     handleFormSubmit,
   } = useFormModal<FormData, Awaited<ReturnType<typeof createGoalAction>>>({
@@ -93,8 +94,8 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
       </Button.Root>
 
       {isOpen && (
-        <Modal onClose={closeModal} className={modalStyles.wide}>
-          <ModalHeader title="Novo Objetivo" onClose={closeModal} />
+        <Modal onClose={requestClose} className={modalStyles.wide}>
+          <ModalHeader title="Novo Objetivo" onClose={requestClose} />
 
           <Form.Root onSubmit={handleFormSubmit}>
             <Form.Wrapper>
@@ -142,7 +143,7 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
                   suggestions={DEADLINE_SHORTCUTS.map((shortcut) => shortcut.label)}
                   onSelect={(label) => {
                     const shortcut = DEADLINE_SHORTCUTS.find((option) => option.label === label);
-                    if (shortcut) setValue("deadline", shortcut.value(), { shouldValidate: true });
+                    if (shortcut) setValue("deadline", shortcut.value(), { shouldValidate: true, shouldDirty: true });
                   }}
                 />
 
@@ -158,7 +159,7 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
                   aria-label="Prioridade"
                   options={PRIORITY_OPTIONS}
                   value={priority}
-                  onChange={(value) => setValue("priority", value as FormData["priority"], { shouldValidate: true })}
+                  onChange={(value) => setValue("priority", value as FormData["priority"], { shouldValidate: true, shouldDirty: true })}
                 />
 
                 <Input.HelperText />
@@ -195,6 +196,8 @@ export function AddGoal({ buttonText, connections }: IAddGoalProps) {
           </Form.Root>
         </Modal>
       )}
+
+      {discardConfirmDialog}
     </>
   );
 }

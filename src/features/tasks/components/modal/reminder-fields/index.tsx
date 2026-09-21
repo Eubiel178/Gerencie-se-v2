@@ -42,7 +42,7 @@ export function ReminderFields({ register, setValue, scheduledAtError, hasSchedu
           <Input.Field
             {...register("scheduledAt", {
               onChange: (event) => {
-                if (!event.target.value) setValue("reminderOffsetsMinutes", []);
+                if (!event.target.value) setValue("reminderOffsetsMinutes", [], { shouldDirty: true });
               },
             })}
             type="datetime-local"

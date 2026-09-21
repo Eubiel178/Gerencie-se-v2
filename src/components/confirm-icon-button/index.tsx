@@ -19,6 +19,12 @@ export interface ConfirmIconButtonProps {
    *  ("Excluir", "Remover", "Desconectar", "Encerrar"), nunca "Confirmar"
    *  genérico. Padrão "Excluir" (caso mais comum nesse componente). */
   confirmLabel?: string;
+  /** "danger" (padrão) pra ações destrutivas de verdade (excluir,
+   *  remover, desconectar) — ícone, botão de repouso e botão de confirmar
+   *  em vermelho. "neutral" pra ações relevantes mas NÃO destrutivas que
+   *  ainda merecem confirmação (ex.: reabrir uma tarefa já concluída) —
+   *  mesma estrutura de popup, sem a cor de perigo. */
+  severity?: "danger" | "neutral";
   onConfirm: () => void | Promise<void>;
   loading?: boolean;
   disabled?: boolean;
@@ -28,24 +34,28 @@ export interface ConfirmIconButtonProps {
 }
 
 /**
- * Botão de ação destrutiva (excluir) com confirmação num popup de
- * verdade (reaproveita `Modal` — mesmo componente usado em todo o resto
- * do app, com fundo escurecido, cancelar no Escape/clique fora, e trava
- * de foco) — antes cada lista (tarefas, hábitos, metas, rotina, eventos,
- * leitura, corrida, saúde, ciclo, anexos, passos) excluía direto no
- * clique, sem chance de desfazer um toque acidental.
+ * Botão de ação com confirmação num popup de verdade (reaproveita `Modal`
+ * — mesmo componente usado em todo o resto do app, com fundo escurecido,
+ * cancelar no Escape/clique fora, e trava de foco) — antes cada lista
+ * (tarefas, hábitos, metas, rotina, eventos, leitura, corrida, saúde,
+ * ciclo, anexos, passos) excluía direto no clique, sem chance de desfazer
+ * um toque acidental. `severity="danger"` (padrão) é o caso mais comum
+ * (excluir/remover); `severity="neutral"` existe pras poucas ações não
+ * destrutivas que ainda merecem uma confirmação explícita.
  */
 export function ConfirmIconButton({
   icon,
   ariaLabel,
   confirmText,
   confirmLabel = "Excluir",
+  severity = "danger",
   onConfirm,
   loading,
   disabled,
   className,
 }: ConfirmIconButtonProps) {
   const [isConfirming, setIsConfirming] = useState(false);
+  const tone = severity === "danger" ? "danger" : "highlight";
 
   async function handleConfirm() {
     await onConfirm();
@@ -58,7 +68,7 @@ export function ConfirmIconButton({
         icon={{ name: icon }}
         root={{
           type: "button",
-          tone: "danger",
+          tone,
           className,
           "aria-label": ariaLabel,
           disabled,
@@ -68,20 +78,22 @@ export function ConfirmIconButton({
 
       {isConfirming && (
         <Modal onClose={() => setIsConfirming(false)}>
-          <ModalHeader title="Confirmar" onClose={() => setIsConfirming(false)} />
+          <ModalHeader title={confirmText} onClose={() => setIsConfirming(false)} />
 
           <div className={styles.body}>
-            <span className={styles.icon} aria-hidden="true">
+            <span
+              className={`${styles.icon} ${severity === "neutral" ? styles.iconNeutral : ""}`}
+              aria-hidden="true"
+            >
               <Icon name={icon} />
             </span>
-            <p className={styles.text}>{confirmText}</p>
           </div>
 
           <div className={styles.actions}>
             <Button.Root type="button" variant="secondary" onClick={() => setIsConfirming(false)}>
               Cancelar
             </Button.Root>
-            <Button.Root type="button" tone="danger" loading={loading} onClick={handleConfirm}>
+            <Button.Root type="button" tone={tone} loading={loading} onClick={handleConfirm}>
               {confirmLabel}
             </Button.Root>
           </div>

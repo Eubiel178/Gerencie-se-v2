@@ -11,7 +11,7 @@ import styles from "./history-page.module.css";
 
 interface HistoryPageProps {
   initialEntries: HistoryEntry[];
-  initialPeriod: "7d" | "30d";
+  initialPeriod: "7d" | "30d" | "all";
   initialType: "all" | "task" | "goal" | "habit" | "routine" | "reading";
 }
 
@@ -21,7 +21,7 @@ export function HistoryPage({
   initialType,
 }: HistoryPageProps) {
   const [entries, setEntries] = useState<HistoryEntry[]>(initialEntries);
-  const [period, setPeriod] = useState<"7d" | "30d">(initialPeriod);
+  const [period, setPeriod] = useState<"7d" | "30d" | "all">(initialPeriod);
   const [type, setType] = useState<
     "all" | "task" | "goal" | "habit" | "routine" | "reading"
   >(initialType);

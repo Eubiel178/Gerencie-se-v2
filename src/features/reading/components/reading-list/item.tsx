@@ -522,7 +522,7 @@ export function Item({
       {isDeleteConfirming && (
         <Modal onClose={() => setIsDeleteConfirming(false)}>
           <ModalHeader
-            title="Excluir livro"
+            title={`Excluir "${item.title}"?`}
             onClose={() => setIsDeleteConfirming(false)}
           />
           <div className={styles.deleteConfirmation}>
@@ -552,7 +552,7 @@ export function Item({
               loading={isRemoving}
               onClick={handleDeleteConfirm}
             >
-              Excluir livro
+              Excluir
             </Button.Root>
           </div>
         </Modal>

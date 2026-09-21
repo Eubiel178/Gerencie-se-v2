@@ -22,6 +22,7 @@ export type { ChipOption } from "./chip-group";
 export { SuggestionChips } from "./suggestion-chips";
 export { CollapsibleSection } from "./collapsible-section";
 export { ConfirmIconButton } from "./confirm-icon-button";
+export { ConfirmCheckbox } from "./confirm-checkbox";
 export { Alert } from "./alert";
 export type { AlertVariant } from "./alert";
 export { EmptyState } from "./empty-state";

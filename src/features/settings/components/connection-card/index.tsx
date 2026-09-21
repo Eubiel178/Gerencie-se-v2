@@ -126,11 +126,11 @@ export function ConnectionCard({
 
       {isConfirmingDisconnect && (
         <Modal onClose={() => setIsConfirmingDisconnect(false)}>
-          <ModalHeader title="Confirmar" onClose={() => setIsConfirmingDisconnect(false)} />
+          <ModalHeader title="Desconectar o Google Agenda?" onClose={() => setIsConfirmingDisconnect(false)} />
 
           <p className={styles.confirmText}>
-            Desconectar o Google Agenda? Suas tarefas marcadas para sincronizar
-            deixam de aparecer no calendário até você conectar novamente.
+            Suas tarefas marcadas para sincronizar deixam de aparecer no
+            calendário até você conectar novamente.
           </p>
 
           <div className={styles.confirmActions}>
@@ -138,7 +138,7 @@ export function ConnectionCard({
               Cancelar
             </Button.Root>
             <Button.Root type="button" tone="danger" loading={isDisconnecting} onClick={handleDisconnect}>
-              Confirmar
+              Desconectar
             </Button.Root>
           </div>
         </Modal>

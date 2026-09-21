@@ -9,8 +9,10 @@ const MAX_HISTORY_ENTRIES = 100;
 /**
  * Converte um período ("7d" ou "30d") em Date de início do intervalo.
  * Sempre em UTC para manter consistência entre servidor e cliente.
+ * `"all"` retorna `null` — sem limite inferior, lista o período inteiro.
  */
-function periodToDate(period: HistoryPeriod): Date {
+function periodToDate(period: HistoryPeriod): Date | null {
+  if (period === "all") return null;
   const days = period === "7d" ? 7 : 30;
   const date = new Date();
   date.setUTCDate(date.getUTCDate() - days);
@@ -54,7 +56,11 @@ function normalizeGoal(goal: IGoal): HistoryEntry | null {
     type: "goal",
     title: goal.title,
     completedAt: goal.completedAt,
-    metadata: { goalProgress: goal.progressPercent },
+    // Só mostra a porcentagem quando o objetivo tem etapas de verdade —
+    // um objetivo concluído manualmente (sem etapas) sempre tem
+    // `progressPercent === 0` por definição (nada pra calcular), então
+    // mostrar "0%" ao lado de um item já concluído seria enganoso.
+    metadata: goal.steps.length > 0 ? { goalProgress: goal.progressPercent } : undefined,
   };
 }
 
@@ -97,29 +103,48 @@ export function createHistoryFetcher(deps: {
   return {
     async loadEntries(query) {
       const since = periodToDate(query.period);
+      // Fetchers de hábito/rotina exigem uma data — sem limite ("all"),
+      // usa a época Unix, que na prática cobre todo o histórico real.
+      const rangeSince = since ?? new Date(0);
       const [tasks, goals, reading, habits, routines] = await Promise.all([
         deps.loadCompletedTasks(),
         deps.loadCompletedGoals(),
         deps.loadFinishedReading(),
-        deps.loadHabitCompletionsInRange(since),
-        deps.loadRoutineCompletionsInRange(since),
+        deps.loadHabitCompletionsInRange(rangeSince),
+        deps.loadRoutineCompletionsInRange(rangeSince),
       ]);
 
       const entries: HistoryEntry[] = [];
+      const isWithinPeriod = (date: Date) => !since || date >= since;
 
       for (const task of tasks) {
         const entry = normalizeTask(task);
-        if (entry && (query.type === "all" || query.type === "task")) entries.push(entry);
+        if (
+          entry &&
+          (query.type === "all" || query.type === "task") &&
+          isWithinPeriod(entry.completedAt)
+        )
+          entries.push(entry);
       }
 
       for (const goal of goals) {
         const entry = normalizeGoal(goal);
-        if (entry && (query.type === "all" || query.type === "goal")) entries.push(entry);
+        if (
+          entry &&
+          (query.type === "all" || query.type === "goal") &&
+          isWithinPeriod(entry.completedAt)
+        )
+          entries.push(entry);
       }
 
       for (const item of reading) {
         const entry = normalizeReading(item);
-        if (entry && (query.type === "all" || query.type === "reading")) entries.push(entry);
+        if (
+          entry &&
+          (query.type === "all" || query.type === "reading") &&
+          isWithinPeriod(entry.completedAt)
+        )
+          entries.push(entry);
       }
 
       if (query.type === "all" || query.type === "habit") {

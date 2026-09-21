@@ -1,37 +1,43 @@
 .item {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
+  gap: var(--space-4);
+  padding: var(--space-4);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-surface);
+  /* Mesma sombra de card usada em Tarefas/Rotina/Hábitos/Objetivos — sem
+     ela, a linha fica achatada e parece uma linha de banco de dados em
+     vez de um item do mesmo produto. Sem `:hover`/transform de elevação
+     de propósito: ao contrário dos cards de origem, o item do Histórico
+     não é clicável, então uma animação de hover seria enganosa. */
+  box-shadow: 0 0.5rem 1.25rem var(--color-shadow);
 }
 
 .icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 2rem;
+  height: 2rem;
   border-radius: var(--radius-full);
   background: var(--color-highlight-soft);
   color: var(--color-highlight);
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   flex-shrink: 0;
 }
 
 .content {
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
+  gap: 0.2rem;
   min-width: 0;
   flex: 1;
 }
 
 .title {
   font-family: var(--font-sans);
-  font-size: var(--font-size-sm);
+  font-size: 1rem;
   font-weight: 600;
   color: var(--color-text);
   overflow: hidden;
@@ -42,7 +48,7 @@
 .meta {
   display: flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: 0.35rem;
   font-family: var(--font-sans);
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
@@ -75,7 +81,7 @@
   font-family: var(--font-sans);
   font-size: var(--font-size-xs);
   font-weight: 600;
-  padding: 0.125rem var(--space-2);
+  padding: 0.2rem var(--space-2);
   border-radius: var(--radius-full);
   background: var(--color-highlight-soft);
   color: var(--color-highlight);
@@ -83,6 +89,10 @@
 }
 
 @media (max-width: 640px) {
+  .item {
+    padding: var(--space-3);
+  }
+
   .metadata {
     display: none;
   }

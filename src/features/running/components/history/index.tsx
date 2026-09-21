@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { Button, ConfirmIconButton, EmptyState } from "@/components";
+import { emitMascotEvent } from "@/features/mascot-pet";
 import { deleteRunningSessionAction } from "@/features/running/actions";
 import { IRunningSession } from "@/features/running/domain";
 
@@ -21,7 +22,11 @@ export function History({ sessions, onRemove }: HistoryProps) {
 
     try {
       const result = await deleteRunningSessionAction({ id });
-      if (!result.error) onRemove(id);
+      if (result.error) {
+        emitMascotEvent("action-error");
+      } else {
+        onRemove(id);
+      }
     } finally {
       setRemovingId(null);
     }

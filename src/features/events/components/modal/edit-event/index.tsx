@@ -41,11 +41,13 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
     watch,
     isOpen,
     openModal,
-    closeModal,
+    requestClose,
+    discardConfirmDialog,
     submitError,
     handleFormSubmit,
   } = useFormModal<FormData>({
     schema: validationSchema,
+    discardConfirmLabel: eventBeingEdited.title,
     defaultValues: {
       title: eventBeingEdited.title,
       description: eventBeingEdited.description,
@@ -92,8 +94,8 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
       />
 
       {isOpen && (
-        <Modal onClose={closeModal} className={modalStyles.wide}>
-          <ModalHeader title="Editar Evento" onClose={closeModal} />
+        <Modal onClose={requestClose} className={modalStyles.wide}>
+          <ModalHeader title="Editar Evento" onClose={requestClose} />
 
           <Form.Root onSubmit={handleFormSubmit}>
             <Form.Wrapper>
@@ -144,7 +146,7 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
                     setValue(
                       "end",
                       dayjs(start).add(shortcut.minutes, "minute").format("YYYY-MM-DDTHH:mm"),
-                      { shouldValidate: true }
+                      { shouldValidate: true, shouldDirty: true }
                     );
                   }}
                 />
@@ -168,7 +170,7 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
                       data-selected={backgroundColor === color}
                       style={{ backgroundColor: color }}
                       aria-label={`Usar a cor ${color}`}
-                      onClick={() => setValue("backgroundColor", color, { shouldValidate: true })}
+                      onClick={() => setValue("backgroundColor", color, { shouldValidate: true, shouldDirty: true })}
                     />
                   ))}
 
@@ -219,6 +221,8 @@ export const EditEvent = ({ eventBeingEdited }: IModalProps) => {
           </Form.Root>
         </Modal>
       )}
+
+      {discardConfirmDialog}
     </>
   );
 };

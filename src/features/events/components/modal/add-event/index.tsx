@@ -51,7 +51,8 @@ export const AddEvent = ({ buttonText }: IModalProps) => {
     watch,
     isOpen,
     openModal: openModalBase,
-    closeModal,
+    requestClose,
+    discardConfirmDialog,
     submitError,
     handleFormSubmit,
   } = useFormModal<FormData>({
@@ -75,8 +76,8 @@ export const AddEvent = ({ buttonText }: IModalProps) => {
       <Button.Root onClick={openModal}>{buttonText}</Button.Root>
 
       {isOpen && (
-        <Modal onClose={closeModal} className={modalStyles.wide}>
-          <ModalHeader title="Novo Evento" onClose={closeModal} />
+        <Modal onClose={requestClose} className={modalStyles.wide}>
+          <ModalHeader title="Novo Evento" onClose={requestClose} />
 
           <Form.Root onSubmit={handleFormSubmit}>
             <Form.Wrapper className={styles.formWrapper}>
@@ -127,7 +128,7 @@ export const AddEvent = ({ buttonText }: IModalProps) => {
                     setValue(
                       "end",
                       dayjs(start).add(shortcut.minutes, "minute").format("YYYY-MM-DDTHH:mm"),
-                      { shouldValidate: true }
+                      { shouldValidate: true, shouldDirty: true }
                     );
                   }}
                 />
@@ -151,7 +152,7 @@ export const AddEvent = ({ buttonText }: IModalProps) => {
                       data-selected={backgroundColor === color}
                       style={{ backgroundColor: color }}
                       aria-label={`Usar a cor ${color}`}
-                      onClick={() => setValue("backgroundColor", color, { shouldValidate: true })}
+                      onClick={() => setValue("backgroundColor", color, { shouldValidate: true, shouldDirty: true })}
                     />
                   ))}
 
@@ -202,6 +203,8 @@ export const AddEvent = ({ buttonText }: IModalProps) => {
           </Form.Root>
         </Modal>
       )}
+
+      {discardConfirmDialog}
     </>
   );
 };

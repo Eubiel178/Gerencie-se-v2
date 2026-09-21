@@ -7,6 +7,7 @@ import { Icon } from "@/components/icon";
 import { deleteEventAction } from "@/features/events/actions";
 import { IEvent } from "@/features/events/domain";
 import { useEventStore } from "@/features/events/event-store";
+import { emitMascotEvent } from "@/features/mascot-pet";
 import styles from "@/styles/workspace.module.css";
 import { dateFormatedToFront } from "@/utils";
 
@@ -23,7 +24,11 @@ export function Card(event: IEvent) {
 
     try {
       const result = await deleteEventAction({ id: event.id });
-      if (!result.error) removeEvent(event.id);
+      if (result.error) {
+        emitMascotEvent("action-error");
+      } else {
+        removeEvent(event.id);
+      }
     } finally {
       setIsRemoving(false);
     }

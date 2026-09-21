@@ -47,11 +47,13 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
     formState: { errors, isSubmitting },
     isOpen,
     openModal,
-    closeModal,
+    requestClose,
+    discardConfirmDialog,
     submitError,
     handleFormSubmit,
   } = useFormModal<FormData>({
     schema: validationSchema,
+    discardConfirmLabel: taskBeingEdited.title,
     defaultValues: {
       tag: taskBeingEdited.tag,
       title: taskBeingEdited.title,
@@ -141,8 +143,8 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
       />
 
       {isOpen && (
-        <Modal onClose={closeModal} className={modalStyles.wide}>
-          <ModalHeader title="Editar Tarefa" onClose={closeModal} />
+        <Modal onClose={requestClose} className={modalStyles.wide}>
+          <ModalHeader title="Editar Tarefa" onClose={requestClose} />
 
           <Form.Root onSubmit={handleFormSubmit}>
             <Form.Wrapper>
@@ -177,7 +179,7 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
                   aria-label="Prioridade"
                   options={PRIORITY_OPTIONS}
                   value={priority}
-                  onChange={(value) => setValue("priority", value as FormData["priority"], { shouldValidate: true })}
+                  onChange={(value) => setValue("priority", value as FormData["priority"], { shouldValidate: true, shouldDirty: true })}
                 />
 
                 <Input.HelperText />
@@ -282,6 +284,8 @@ export function EditTask({ taskBeingEdited, isGoogleConnected, connections }: IE
           </Form.Root>
         </Modal>
       )}
+
+      {discardConfirmDialog}
     </>
   );
 }
