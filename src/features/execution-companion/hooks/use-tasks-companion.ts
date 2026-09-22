@@ -16,7 +16,7 @@ import { useTaskStore } from "@/features/tasks/task-store";
 import type { CompanionInteractionContext } from "@/lib/ai/prompts/companion-context-prompt";
 import { PRIORITY_LABELS } from "@/lib/shared/priority";
 import { isAudioUnlocked } from "@/lib/speech/audio-unlock";
-import { useSpeak } from "@/lib/speech/speak-text";
+import { stopSpeaking, useSpeak } from "@/lib/speech/speak-text";
 
 import { resolveCompanionMessageAction, setCompanionQuietAction } from "../actions";
 import { isFactStillValid } from "../domain/companion-fact-validity";
@@ -100,6 +100,17 @@ const isDev = process.env.NODE_ENV === "development";
 function devLog(intent: string, decision: "speak" | "silent", reason?: string) {
   if (!isDev) return;
   console.log(`[Companion:client] intent=${intent} decision=${decision}${reason ? ` reason=${reason}` : ""}`);
+}
+
+/** Só dev - diagnóstico específico do ciclo de visibilidade/ausência
+ * (pedido explícito: entender por que uma volta de ausência falou ou
+ * ficou calada). Nunca chega em produção (mesmo gate de `devLog`). */
+function devLogVisibility(event: string, details: Record<string, unknown>) {
+  if (!isDev) return;
+  const parts = Object.entries(details)
+    .map(([k, v]) => `${k}=${v}`)
+    .join(" ");
+  console.log(`[Companion:visibility] event=${event} ${parts}`);
 }
 
 /**
@@ -203,11 +214,33 @@ export function useTasksCompanion(
   const lastHelpAcceptedRef = useRef<{ taskTitle: string | null; at: number } | null>(null);
   const lastCelebrationRef = useRef<{ taskTitle: string | null; at: number } | null>(null);
 
+  // Ciclo de vida da interação vs. visibilidade da aba (ver `handleVisibilityChange`
+  // mais abaixo): o FATO original por trás da mensagem ATIVA agora - nunca
+  // limpo por "esquecimento", só quando a mensagem deixa de estar ativa
+  // (`dismiss`/auto-fechamento) - é o que permite REVALIDAR uma mensagem
+  // que já estava visível quando a aba escondeu, na volta.
+  const activeFactRef = useRef<CompanionFact | null>(null);
+  // Uma interação que terminou de ser resolvida com a aba ESCONDIDA nunca
+  // chega a aparecer/falar - fica esperando aqui até a aba voltar (nunca
+  // consumida "no escuro"). Só um slot: a mais nova sempre vence (mesmo
+  // raciocínio de `generationRef` do fluxo visível).
+  const pendingMessageRef = useRef<{ message: ActiveCompanionMessage; fact: CompanionFact; myGeneration: number } | null>(
+    null
+  );
+  const isSpeakingRef = useRef(false);
+  // A fala foi CORTADA no meio (aba escondeu enquanto tocava) - só nesse
+  // caso a volta repete a fala do início; se a pessoa já tinha ouvido tudo
+  // antes de esconder a aba, voltar não deveria repetir o áudio sozinho.
+  const ttsInterruptedRef = useRef(false);
+
   useEffect(() => {
     activeRef.current = active;
   });
   useEffect(() => {
     chatMessagesRef.current = chatMessages;
+  });
+  useEffect(() => {
+    isSpeakingRef.current = isSpeaking;
   });
 
   function clearDismissTimer() {
@@ -221,7 +254,10 @@ export function useTasksCompanion(
     clearDismissTimer();
     dismissDeadlineRef.current = Date.now() + ms;
     dismissTimerRef.current = setTimeout(() => {
-      if (myGeneration === generationRef.current) setActive(null);
+      if (myGeneration === generationRef.current) {
+        activeFactRef.current = null;
+        setActive(null);
+      }
     }, ms);
   }
 
@@ -253,6 +289,20 @@ export function useTasksCompanion(
     }
     clearDismissTimer();
     pausedRemainingMsRef.current = null;
+    activeFactRef.current = null;
+    ttsInterruptedRef.current = false;
+    setActive(null);
+  }
+
+  /** Descarta a mensagem ATIVA por ela ter ficado velha durante uma
+   * ausência (revalidação falhou na volta) - mesmo efeito de `dismiss()`,
+   * mas NUNCA conta como fechamento manual (a pessoa não fechou nada,
+   * o contexto real que mudou enquanto ela estava fora). */
+  function discardStaleActive() {
+    clearDismissTimer();
+    pausedRemainingMsRef.current = null;
+    activeFactRef.current = null;
+    ttsInterruptedRef.current = false;
     setActive(null);
   }
 
@@ -305,7 +355,14 @@ export function useTasksCompanion(
   async function tryShow(fact: CompanionFact, task: ITask | null) {
     const config = INTENT_CONFIG[fact.kind];
 
-    if (!shouldReplaceInteraction(activeRef.current, config.priority)) {
+    // Enquanto a aba está escondida, `activeRef` fica null de propósito
+    // (nunca se mostra nada "no escuro") - mas uma interação já
+    // PENDENTE (esperando a aba voltar) precisa valer pra essa checagem
+    // do mesmo jeito que uma ativa valeria, senão um sinal casual
+    // qualquer sobrescreveria em silêncio um meaningful que já estava
+    // esperando pra ser mostrado.
+    const currentForPriority = activeRef.current ?? pendingMessageRef.current?.message ?? null;
+    if (!shouldReplaceInteraction(currentForPriority, config.priority)) {
       devLog(fact.kind, "silent", "priority_blocked");
       return;
     }
@@ -365,7 +422,6 @@ export function useTasksCompanion(
     const phrase = result.phrase;
     const move = result.move;
     const actions = result.actions ?? [];
-    devLog(fact.kind, "speak", `${result.source}:${move}`);
     recentTextsRef.current = [...recentTextsRef.current, phrase.written].slice(-MAX_RECENT_TEXTS);
     if (move === "comemorar") {
       lastCelebrationRef.current = { taskTitle: freshTask?.title ?? null, at: Date.now() };
@@ -382,11 +438,25 @@ export function useTasksCompanion(
       actions,
     };
 
+    // Aba escondida agora: NUNCA consome o ciclo de vida da interação "no
+    // escuro" - nada de balão, nada de TTS, nada de contagem de
+    // auto-fechamento correndo sem ninguém pra ver/ouvir. Fica pendente
+    // até `handleVisibilityChange` revalidar e mostrar na volta (ver mais
+    // abaixo). Só um slot: uma pendência mais nova sempre substitui uma
+    // mais velha (mesmo raciocínio de `generationRef`).
+    if (document.hidden) {
+      pendingMessageRef.current = { message, fact, myGeneration };
+      devLog(fact.kind, "silent", "queued_tab_hidden");
+      return;
+    }
+
+    activeFactRef.current = fact;
     setActive(message);
     scheduleAutoDismiss(
       myGeneration,
       computeBubbleDisplayMs(phrase.written, { hasActions: actions.length > 0, priority: config.priority })
     );
+    devLog(fact.kind, "speak", `${result.source}:${move}`);
 
     if (autoSpeechEnabled && isAudioUnlocked()) {
       await triggerSpeak(phrase.spoken);
@@ -472,7 +542,17 @@ export function useTasksCompanion(
   }
 
   useEffect(() => {
-    if (!isTasksPage || !enabled) return;
+    if (!isTasksPage || !enabled) {
+      // TODA a lógica proativa (visibilitychange, checagem periódica de
+      // sessão longa/prazo/progresso, return-after-absence) só existe
+      // DENTRO deste efeito - fora de `/home/tasks` (ou com o Companion
+      // desligado), nada disso é sequer registrado. Achado real: é a
+      // causa mais provável de "fiquei 30min com o app aberto e nada
+      // aconteceu" quando a aba não estava especificamente em Tarefas.
+      devLogVisibility("companion_inactive", { isTasksPage, enabled, pathname });
+      return;
+    }
+    devLogVisibility("companion_active", { pathname });
 
     // Saudação de presença: UMA vez por sessão de navegador (nunca a cada
     // navegação/refresh) - `sessionStorage` é o mesmo padrão já usado pelo
@@ -565,20 +645,117 @@ export function useTasksCompanion(
       }
     });
 
-    // Volta de ausência: aba escondida por tempo suficiente (nunca 20s de
-    // troca rápida) com uma tarefa em andamento.
+    /**
+     * Tempo escondido nunca deveria consumir a OPORTUNIDADE de ver/ouvir
+     * uma interação proativa - nem uma que terminou de ser resolvida com
+     * a aba escondida (fica pendente, nunca mostrada/falada "no escuro"),
+     * nem uma que já estava visível quando a aba escondeu (a contagem de
+     * auto-fechamento pausa, a fala em andamento é cortada e só repetida
+     * na volta, nunca terminada sozinha em segundo plano).
+     *
+     * Mensagens manuais do chat (usuário digitou) NUNCA passam por aqui -
+     * isso é só sobre interações que o PRÓPRIO Companion inicia.
+     */
     function handleVisibilityChange() {
       if (document.hidden) {
         hiddenAtRef.current = Date.now();
+        devLogVisibility("hidden", {
+          hadActiveMessage: !!activeRef.current,
+          wasSpeaking: isSpeakingRef.current,
+        });
+
+        if (activeRef.current) {
+          pauseAutoDismiss();
+          if (isSpeakingRef.current) {
+            stopSpeaking();
+            ttsInterruptedRef.current = true;
+          }
+        }
         return;
       }
 
+      // Snapshot completo ANTES de qualquer decisão - pedido explícito
+      // pra diagnosticar exatamente por que uma volta falou ou ficou
+      // calada (sessão real, status, duração da ausência computada).
+      const debugSession = useExecutionCompanionStore.getState().session;
+      const debugHiddenAt = hiddenAtRef.current;
+      devLogVisibility("visible", {
+        absenceMs: debugHiddenAt ? Date.now() - debugHiddenAt : "n/a (não estava hidden)",
+        absenceThresholdMs: ABSENCE_THRESHOLD_MS,
+        hasPending: !!pendingMessageRef.current,
+        hasPausedActive: !!activeRef.current && pausedRemainingMsRef.current !== null,
+        hasSession: !!debugSession,
+        sessionStatus: debugSession?.status ?? "n/a",
+        sessionTaskId: debugSession?.taskId ?? "n/a",
+      });
+
+      // 1) Uma interação nasceu com a aba escondida e ficou esperando -
+      // revalida contra o estado FRESCO (pode ter ficado velha durante a
+      // ausência) antes de mostrar/falar pela primeira vez.
+      const pending = pendingMessageRef.current;
+      if (pending) {
+        pendingMessageRef.current = null;
+        if (pending.myGeneration === generationRef.current) {
+          const freshTask = pending.message.taskId ? getTask(pending.message.taskId) : null;
+          if (isFactStillValid(pending.fact, freshTask)) {
+            activeFactRef.current = pending.fact;
+            setActive(pending.message);
+            scheduleAutoDismiss(
+              pending.myGeneration,
+              computeBubbleDisplayMs(pending.message.phrase.written, {
+                hasActions: pending.message.actions.length > 0,
+                priority: pending.message.priority,
+              })
+            );
+            devLog(pending.message.situation, "speak", "resumed_after_hidden");
+            if (autoSpeechEnabled && isAudioUnlocked()) triggerSpeak(pending.message.phrase.spoken);
+          } else {
+            devLog(pending.message.situation, "silent", "stale_after_hidden");
+          }
+        }
+        hiddenAtRef.current = null;
+        return;
+      }
+
+      // 2) Uma interação já estava visível quando a aba escondeu (timer
+      // pausado em `pauseAutoDismiss`) - revalida antes de retomar a
+      // contagem; se ficou velha durante a ausência, descarta em vez de
+      // continuar mostrando informação desatualizada.
+      if (activeRef.current && pausedRemainingMsRef.current !== null) {
+        const current = activeRef.current;
+        const freshTask = current.taskId ? getTask(current.taskId) : null;
+        const stillValid = activeFactRef.current ? isFactStillValid(activeFactRef.current, freshTask) : false;
+
+        if (stillValid) {
+          resumeAutoDismiss();
+          if (ttsInterruptedRef.current) {
+            ttsInterruptedRef.current = false;
+            if (autoSpeechEnabled && isAudioUnlocked()) triggerSpeak(current.phrase.spoken);
+          }
+        } else {
+          devLog(current.situation, "silent", "stale_after_hidden");
+          discardStaleActive();
+        }
+        hiddenAtRef.current = null;
+        return;
+      }
+
+      // 3) Nada pendente nem pausado - checagem normal de "volta de
+      // ausência de verdade" (nunca 20s de troca rápida de aba).
       const hiddenAt = hiddenAtRef.current;
       hiddenAtRef.current = null;
-      if (!hiddenAt || Date.now() - hiddenAt < ABSENCE_THRESHOLD_MS) return;
+      if (!hiddenAt || Date.now() - hiddenAt < ABSENCE_THRESHOLD_MS) {
+        devLogVisibility("return_after_absence_skipped", {
+          reason: !hiddenAt ? "not_hidden_before" : "absence_below_threshold",
+        });
+        return;
+      }
 
       const session = useExecutionCompanionStore.getState().session;
-      if (!session) return;
+      if (!session) {
+        devLogVisibility("return_after_absence_skipped", { reason: "no_execution_session" });
+        return;
+      }
       const task = getTask(session.taskId);
 
       tryShow(

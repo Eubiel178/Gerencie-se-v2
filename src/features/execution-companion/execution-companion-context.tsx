@@ -54,9 +54,15 @@ export function ExecutionCompanionProvider({
     if (restoredRef.current) return;
     restoredRef.current = true;
 
+    // `storeRef.current` (nunca `store` direto) - o objeto que `store`
+    // aponta muda de referência a cada render (hook do Zustand sem
+    // seletor), o que forçaria incluir `store` nas deps e reconsiderar
+    // este efeito em todo render (inofensivo aqui, já que `restoredRef`
+    // bloqueia reexecução, mas desnecessário) - o ref já é mantido em dia
+    // pelo efeito logo acima, sem precisar entrar no array de deps.
     if (initialSession) {
-      store.setSession(initialSession);
-      store.setIntention(initialIntention);
+      storeRef.current.setSession(initialSession);
+      storeRef.current.setIntention(initialIntention);
     }
   }, [initialSession, initialIntention]);
 

@@ -901,7 +901,20 @@ export const executionSessions = pgTable("execution_session", {
     .notNull()
     .default("active"),
   currentStepIndex: integer("current_step_index").notNull().default(0),
-  startedAt: timestamp("started_at", { mode: "date" })
+  // `withTimezone: true` em TODAS as colunas abaixo - mesmo bug real já
+  // corrigido em `focus_session.startedAt/endedAt` e
+  // `user_preference.assistant_companion_quiet_until` (ver comentário
+  // lá): sem essa flag, uma coluna `timestamp` grava/lê certo via SQL cru
+  // mas o valor round-tripando por Drizzle → Server Component props →
+  // JSON → `new Date()` no client perde o "Z" (UTC) e é reinterpretado no
+  // fuso LOCAL de quem lê, deslocando sistematicamente o resultado pelo
+  // offset UTC daquele lado. Achado real (não teórico): testado ao vivo
+  // com uma sessão criada há ~1 minuto, `resumedAt` calculava um tempo
+  // decorrido de ~211 minutos no client - é exatamente o dado que decide
+  // "sessão longa" (`elapsedMinutes` em `use-tasks-companion.ts`), então
+  // esse deslocamento podia tanto disparar "long-session" cedo demais
+  // quanto (dependendo da direção do offset em produção) nunca disparar.
+  startedAt: timestamp("started_at", { mode: "date", withTimezone: true })
     .notNull()
     .$defaultFn(() => new Date()),
   // Marca o início do trecho de execução ATUAL — igual a `startedAt` na
@@ -909,16 +922,16 @@ export const executionSessions = pgTable("execution_session", {
   // reaproveitar `updatedAt` (que também muda em `updateStepIndex`, sem
   // relação com pausar/retomar) como base do tempo "Fazendo agora · X min"
   // exibido no TaskCard.
-  resumedAt: timestamp("resumed_at", { mode: "date" })
+  resumedAt: timestamp("resumed_at", { mode: "date", withTimezone: true })
     .notNull()
     .$defaultFn(() => new Date()),
-  pausedAt: timestamp("paused_at", { mode: "date" }),
-  completedAt: timestamp("completed_at", { mode: "date" }),
-  updatedAt: timestamp("updated_at", { mode: "date" })
+  pausedAt: timestamp("paused_at", { mode: "date", withTimezone: true }),
+  completedAt: timestamp("completed_at", { mode: "date", withTimezone: true }),
+  updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true })
     .notNull()
     .$defaultFn(() => new Date()),
   // Último check-in push enviado pra esta sessão (evita spam do cron).
-  lastCheckinSentAt: timestamp("last_checkin_sent_at", { mode: "date" }),
+  lastCheckinSentAt: timestamp("last_checkin_sent_at", { mode: "date", withTimezone: true }),
 });
 
 export const executionSessionsRelations = relations(executionSessions, ({ one }) => ({
