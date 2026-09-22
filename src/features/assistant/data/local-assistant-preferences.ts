@@ -35,7 +35,8 @@ export class LocalAssistantPreferences
     domain.UpdateAssistantPreferences,
     domain.RegisterInsightShown,
     domain.CheckCompanionBudget,
-    domain.RegisterCompanionMessageShown
+    domain.RegisterCompanionMessageShown,
+    domain.CompanionBoundary
 {
   async getPreferences(): Promise<domain.IAssistantPreferences> {
     const userId = await requireUserId();
@@ -187,5 +188,32 @@ export class LocalAssistantPreferences
       });
 
     return { allowed: true };
+  }
+
+  async getCompanionQuietUntil(): Promise<Date | null> {
+    const userId = await requireUserId();
+
+    const [row] = await db
+      .select({ quietUntil: userPreferences.assistantCompanionQuietUntil })
+      .from(userPreferences)
+      .where(eq(userPreferences.userId, userId))
+      .limit(1);
+
+    if (!row?.quietUntil) return null;
+    // Um valor no passado é o mesmo que nenhum limite ativo - quem chama
+    // nunca precisa saber disso, só recebe `null` de volta.
+    return row.quietUntil.getTime() > Date.now() ? row.quietUntil : null;
+  }
+
+  async setCompanionQuietUntil(quietUntil: Date): Promise<void> {
+    const userId = await requireUserId();
+
+    await db
+      .insert(userPreferences)
+      .values({ userId, assistantCompanionQuietUntil: quietUntil })
+      .onConflictDoUpdate({
+        target: userPreferences.userId,
+        set: { assistantCompanionQuietUntil: quietUntil },
+      });
   }
 }

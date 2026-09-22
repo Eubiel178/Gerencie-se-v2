@@ -309,6 +309,20 @@
       "when": 1790037677402,
       "tag": "0043_gorgeous_turbo",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1790045781802,
+      "tag": "0044_white_frightful_four",
+      "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1790048635729,
+      "tag": "0045_freezing_the_liberteens",
+      "breakpoints": true
     }
   ]
 }

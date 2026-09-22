@@ -37,4 +37,12 @@ export const INTENT_CONFIG: Record<
   "long-session": { priority: "casual", aiEligible: true, label: "observação de sessão longa" },
   "execution-idle-nudge": { priority: "casual", aiEligible: false, label: "check-in de ociosidade" },
   "return-after-absence": { priority: "casual", aiEligible: false, label: "reconhecimento de retorno" },
+  "task-switching": { priority: "casual", aiEligible: true, label: "observação de troca de tarefa" },
+  "quiet-win": { priority: "meaningful", aiEligible: true, label: "reconhecimento de conclusão discreta" },
+  "repeated-reopen": { priority: "meaningful", aiEligible: true, label: "oferta de ajuda pra tarefa recorrente" },
+  // Pergunta sobre o próprio limite de espaço - sempre determinística
+  // (nunca via IA, ver `companion-phrasing.ts`) e sempre casual: se a
+  // cota casual já estourou, o silêncio resultante já resolve sozinho o
+  // "fale menos" sem precisar nem perguntar.
+  "ask-quiet-check": { priority: "casual", aiEligible: false, label: "pergunta sobre limite de espaço" },
 };

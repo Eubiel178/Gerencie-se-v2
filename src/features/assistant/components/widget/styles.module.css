@@ -25,14 +25,52 @@
   overflow: hidden;
 }
 
+/* `justify-content: space-between` só faz sentido entre DOIS grupos - com
+   três filhos soltos (avatar, nome, ações) ele reparte o espaço livre
+   entre TODOS os pares vizinhos, inclusive avatar↔nome, que deveria ficar
+   sempre colado e pequeno (achado: gap de ~86px em vez de 8px). Por isso
+   avatar+nome vivem juntos dentro de `.bubbleHeaderIdentity` - só ela e
+   `.bubbleHeaderActions` são filhas diretas daqui, então só existe UM
+   espaço pra distribuir (entre identidade e ações), exatamente o que se
+   quer: nome colado no avatar, ações empurradas pro canto oposto. */
 .bubbleHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--space-2);
   padding: var(--space-2) 0;
   border-bottom: 1px solid var(--color-border);
   flex-shrink: 0;
   min-width: 0;
+}
+.bubbleHeaderIdentity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+/* As imagens de origem já vêm como um "adesivo" circular com uma borda
+   branca grossa desenhada dentro do próprio PNG — reduzida a 1.5-2rem,
+   essa borda dominava o círculo e sobrava pouquíssimo espaço pro
+   personagem em si (achado visual: "foto muito pequena, borda zoada
+   branca"). A moldura (`overflow: hidden` + `border-radius`) recorta um
+   círculo LIMPO do tamanho certo; o `transform: scale()` na imagem por
+   dentro dela dá zoom o suficiente pra cortar fora o anel branco do
+   adesivo, sem precisar gerar os PNGs de novo. */
+.headerAvatarFrame {
+  display: block;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.headerAvatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.28);
+  image-rendering: pixelated;
 }
 .bubbleTitleGroup {
   display: flex;
@@ -140,6 +178,54 @@
   overflow-wrap: anywhere;
 }
 
+.msgRow {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.msgRow[data-role="user"] {
+  justify-content: flex-end;
+}
+.msgRow[data-role="mascot"] {
+  justify-content: flex-start;
+}
+.msgRow[data-role="error"] {
+  justify-content: flex-start;
+}
+
+.msgAvatarSlot {
+  width: 1.5rem;
+  height: 1.5rem;
+  flex-shrink: 0;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+.msgAvatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* Zoom pra cortar fora o anel branco de "adesivo" já desenhado dentro do
+   PNG de origem do mascote (ver `.headerAvatarFrame` acima pro raciocínio
+   completo) — a foto de perfil REAL da pessoa (Google) nunca passa por
+   isso: já vem sem esse anel, e nunca deveria ficar quadriculada
+   (`pixelated`) ao ser reduzida, só a arte pixel art do mascote. */
+.msgAvatar[data-kind="mascot"] {
+  transform: scale(1.28);
+  image-rendering: pixelated;
+}
+.userAvatarFallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: var(--radius-full);
+  background: var(--color-highlight);
+  color: var(--color-text-inverse);
+  flex-shrink: 0;
+}
+
 .chatMsg p {
   margin: 0;
 }
@@ -154,21 +240,18 @@
 }
 
 .chatMsg[data-role="user"] {
-  align-self: flex-end;
   background: var(--color-highlight);
   color: var(--color-text-inverse);
   border-bottom-right-radius: var(--radius-xs);
 }
 
 .chatMsg[data-role="mascot"] {
-  align-self: flex-start;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-bottom-left-radius: var(--radius-xs);
 }
 
 .chatMsg[data-role="error"] {
-  align-self: flex-start;
   background: color-mix(in srgb, var(--color-danger) 8%, var(--color-surface));
   border: 1px solid color-mix(in srgb, var(--color-danger) 25%, var(--color-border));
   border-bottom-left-radius: var(--radius-xs);
@@ -430,6 +513,19 @@
     transform: scale(1.4);
     opacity: 0.6;
   }
+}
+
+.confirmClearText {
+  margin: 0 0 var(--space-3);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-base);
+}
+
+.confirmClearActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
 }
 
 @media (max-width: 640px) {

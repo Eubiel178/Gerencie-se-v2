@@ -166,7 +166,7 @@ export class GeminiAssistantProvider {
   async generateCompanionInteraction(
     context: CompanionInteractionContext,
     personality: MascotPersonality
-  ): Promise<{ written: string; spoken: string } | null> {
+  ): Promise<{ written: string; spoken: string; move: string } | null> {
     if (!isAIProviderAvailable()) return null;
 
     const result = await generateJSON({
@@ -181,7 +181,17 @@ export class GeminiAssistantProvider {
       const parsed = JSON.parse(result.text);
       const validated = CompanionInteractionResponseSchema.safeParse(parsed);
       if (validated.success) {
-        console.log(`[Companion] source=ai model=${result.model} intent=${context.intent}`);
+        // A IA só pode ESCOLHER dentro do que já era elegível pra esta
+        // chamada - um `move` fora de `context.eligibleMoves` (modelo
+        // "inventando" uma opção que não foi oferecida) nunca é
+        // confiado, mesmo passando na validação genérica do enum acima.
+        if (!context.eligibleMoves.includes(validated.data.move)) {
+          console.log(
+            `[Companion] source=ai model=${result.model} intent=${context.intent} move_clamped=${validated.data.move}->${context.eligibleMoves[0]}`
+          );
+          return { ...validated.data, move: context.eligibleMoves[0] };
+        }
+        console.log(`[Companion] source=ai model=${result.model} intent=${context.intent} move=${validated.data.move}`);
         return validated.data;
       }
     } catch {

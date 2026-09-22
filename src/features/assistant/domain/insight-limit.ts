@@ -21,6 +21,17 @@ export type CheckCompanionBudget = {
   hasCompanionBudget: (priority: CompanionInteractionPriority) => Promise<boolean>;
 };
 
+export type CompanionBoundary = {
+  /** `null` = sem limite de espaço ativo. Um valor no passado equivale a
+   * `null` na prática (já expirou) - quem chama nunca precisa comparar
+   * com `Date.now()` sozinho, `hasActiveQuiet` já faz isso. */
+  getCompanionQuietUntil: () => Promise<Date | null>;
+  /** Só nasce de uma resposta explícita à pergunta do próprio Companion
+   * (`ask-quiet-check`) - nunca inferido de fechamentos manuais do
+   * balão. Não existe "cancelar antes da hora": expira sozinho. */
+  setCompanionQuietUntil: (quietUntil: Date) => Promise<void>;
+};
+
 export type RegisterCompanionMessageShown = {
   /** Mesma ideia de `registerInsightShown`, mas com cota PRÓPRIA — ver
    * `assistantCompanionDailyCount`/`assistantCompanionMeaningfulCount`

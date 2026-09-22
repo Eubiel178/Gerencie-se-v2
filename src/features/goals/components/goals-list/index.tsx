@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 
 import { EmptyState } from "@/components";
 import { LoadAcceptedConnections } from "@/features/connections/domain";
@@ -32,17 +32,25 @@ export function GoalsList({ goalsList, connections }: GoalsListProps) {
   //
   // Mas o efeito só roda DEPOIS do primeiro paint — até lá, a store
   // começa vazia (padrão do Zustand), e nada preenche ela a tempo do
-  // primeiro render. Sem essa ref, esse primeiro render (SSR + hidratação)
-  // mostrava "sem objetivos" mesmo com objetivos reais vindos do servidor
-  // — regressão real (objetivos existentes "sumindo" da tela). Enquanto o
-  // efeito ainda não rodou, usa `goalsList` (a prop) direto; depois, a
-  // store volta a ser a fonte de verdade (mutações otimistas).
-  const hasHydratedRef = useRef(false);
+  // primeiro render. Sem esse sinal, esse primeiro render (SSR +
+  // hidratação) mostrava "sem objetivos" mesmo com objetivos reais vindos
+  // do servidor — regressão real (objetivos existentes "sumindo" da
+  // tela). Enquanto o efeito ainda não rodou, usa `goalsList` (a prop)
+  // direto; depois, a store volta a ser a fonte de verdade (mutações
+  // otimistas).
+  //
+  // `useState` (nunca uma ref lida durante o render, regra
+  // `react-hooks/refs`) setado DENTRO do MESMO efeito que sincroniza a
+  // store - no mesmo tick que `setGoals`, nunca um sinal de hidratação
+  // genérico e separado (que poderia, em tese, virar `true` antes deste
+  // efeito específico rodar, reabrindo a mesma janela de "sem objetivos").
+  const [hasHydrated, setHasHydrated] = useState(false);
   useEffect(() => {
-    hasHydratedRef.current = true;
     setGoals(goalsList);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setHasHydrated(true);
   }, [goalsList, setGoals]);
-  const effectiveGoals = hasHydratedRef.current ? goals : goalsList;
+  const effectiveGoals = hasHydrated ? goals : goalsList;
 
   if (effectiveGoals.length === 0) {
     return (

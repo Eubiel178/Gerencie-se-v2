@@ -50,6 +50,12 @@ export interface MascotRuntimeOptions {
    * fazer com a posição (ex.: escrever `style.transform` num ref próprio
    * diretamente). */
   onPositionChange?: (position: MascotVector2) => void;
+  /** Chamado só quando o ponteiro sobe/solta DENTRO da tolerância de
+   * clique (`CLICK_TOLERANCE_PX`) - nunca depois de um arraste de
+   * verdade. Usado pra abrir o cartão de estado do Companion (ver
+   * `companion-status-card`) sem nenhum risco de disparar sozinho
+   * enquanto a pessoa só está reposicionando o bichinho pela tela. */
+  onClick?: () => void;
 }
 
 /** Uma instância ativa por CHAVE (não uma só pra sempre) - ver
@@ -67,6 +73,7 @@ export class MascotRuntime {
   private readonly instanceGroup: string;
   private readonly boundsProvider: (displayWidth: number, displayHeight: number) => MascotBounds;
   private readonly onPositionChange?: (position: MascotVector2) => void;
+  private readonly onClick?: () => void;
 
   private app: Application | null = null;
   private sprite: AnimatedSprite | null = null;
@@ -108,6 +115,7 @@ export class MascotRuntime {
     this.instanceGroup = options.instanceGroup ?? "global-pet";
     this.boundsProvider = options.boundsProvider ?? computeViewportBounds;
     this.onPositionChange = options.onPositionChange;
+    this.onClick = options.onClick;
 
     this.mobile = isMobileViewport();
     this.bounds = this.boundsProvider(this.displayWidth, this.displayHeight);
@@ -394,7 +402,10 @@ export class MascotRuntime {
     );
     const wasClick = distanceMoved <= CLICK_TOLERANCE_PX;
 
-    if (wasClick) playMascotSound(this.character.id);
+    if (wasClick) {
+      playMascotSound(this.character.id);
+      this.onClick?.();
+    }
 
     this.behavior.endDrag(wasClick);
   };

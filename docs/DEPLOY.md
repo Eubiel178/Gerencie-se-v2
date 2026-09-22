@@ -76,6 +76,8 @@ valores de produção:
 | `TOKEN_ENCRYPTION_KEY` | Gere um valor novo (`openssl rand -base64 32`) — protege os tokens do Google Agenda salvos no banco. **Nunca reaproveite o valor do seu `.env` local nem troque depois de definido em produção**: trocar invalida todas as conexões já feitas, forçando todo mundo a reconectar o Google Agenda |
 | `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | Chave pública das notificações push (ver seção 7) — opcional; sem ela, o botão "Ativar notificações neste aparelho" some sozinho e o resto do app funciona normal |
 | `VAPID_PRIVATE_KEY` | Chave privada do mesmo par — **nunca** com o prefixo `NEXT_PUBLIC_`, essa não pode ir pro navegador |
+| `GROQ_API_KEY` | Chave da API do Groq ([console.groq.com/keys](https://console.groq.com/keys), grátis) — provedor de IA PRIMÁRIO usado pelo Companion (mascote) para gerar as interações espontâneas e o chat (ver `src/lib/ai/gateway.ts`). Opcional; sem ela nem `GEMINI_API_KEY`, o Companion continua funcionando 100% com o fraseado local determinístico (ver `EXECUTION_COMPANION.md`) — nunca quebra, só perde a variação gerada por IA |
+| `GEMINI_API_KEY` | Chave da API do Gemini ([aistudio.google.com/apikey](https://aistudio.google.com/apikey), grátis) — provedor de IA de *fallback*, usado automaticamente quando o Groq falha, está indisponível ou em cooldown. Opcional, mesmo raciocínio do Groq acima |
 
 Na Vercel: **Project Settings → Environment Variables**. Em outro host,
 procure por "Environment Variables" ou "Config Vars" no painel.
@@ -256,7 +258,9 @@ atrasado.
    + `GMAIL_USER`/`GMAIL_APP_PASSWORD`/`NEXT_PUBLIC_APP_URL`/
    `CRON_SECRET`/`TOKEN_ENCRYPTION_KEY`, ver `EMAIL_SETUP.md`;
    opcionalmente também `NEXT_PUBLIC_VAPID_PUBLIC_KEY`/`VAPID_PRIVATE_KEY`
-   para notificação push, ver seção 7b).
+   para notificação push, ver seção 7b; e `GROQ_API_KEY`/`GEMINI_API_KEY`
+   para o Companion falar com variação gerada por IA — sem elas ele
+   continua funcionando com fraseado local).
 5. Rodar `npm run db:migrate` apontando para o banco de produção.
 6. Deploy (push para o GitHub + importar na Vercel, ou equivalente).
 7. Configurar um cron externo (cron-job.org ou similar) chamando

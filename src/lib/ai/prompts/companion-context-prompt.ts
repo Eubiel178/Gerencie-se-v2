@@ -18,9 +18,22 @@ export interface CompanionInteractionContext {
   /** Tipo de interação em português, o que realmente guia o modelo (ex.:
    * "reconhecimento de progresso", "lembrete gentil"). */
   intentLabel: string;
-  taskTitle: string;
+  /** `null` só pra interações que não são sobre nenhuma tarefa (ex.:
+   * `ask-quiet-check`) - essas nunca chegam a ser elegíveis pra IA (ver
+   * `companion-interaction-config.ts`), mas o tipo cobre o caso mesmo
+   * assim. */
+  taskTitle: string | null;
   taskDescription?: string | null;
   priority?: string | null;
+  /** Movimentos elegíveis PRA ESTA chamada específica (já filtrados por
+   * personalidade/limite de espaço/cota - ver `computeCandidateMoves`).
+   * A IA PRECISA escolher um valor de dentro desta lista pro campo
+   * `move` da resposta - nunca inventar um movimento fora dela. */
+  eligibleMoves: string[];
+  /** Se falso, a resposta não pode soar bem-humorada mesmo que a
+   * personalidade goste de humor - algumas situações (atraso,
+   * reabertura repetida) nunca são gancho de piada. */
+  humorEligible: boolean;
   /** Já formatado em texto (ex.: "vence em 2 dias, 24/09") - a REGRA de
    * quando algo conta como "perto"/"atrasado" mora em
    * `use-tasks-companion.ts`, nunca aqui. */
@@ -40,7 +53,9 @@ export function buildCompanionContextPrompt(ctx: CompanionInteractionContext): s
 
   lines.push("CONTEXTO:");
   lines.push(`Tipo de interação: ${ctx.intentLabel}`);
-  lines.push(fenceUserData("Tarefa", ctx.taskTitle));
+  if (ctx.taskTitle) {
+    lines.push(fenceUserData("Tarefa", ctx.taskTitle));
+  }
 
   if (ctx.taskDescription) {
     lines.push(fenceUserData("Descrição da tarefa", ctx.taskDescription));
@@ -69,6 +84,9 @@ export function buildCompanionContextPrompt(ctx: CompanionInteractionContext): s
       lines.push(fenceUserData("- Mensagem recente", text));
     }
   }
+
+  lines.push(`Movimentos elegíveis agora (escolha UM destes pro campo "move"): ${ctx.eligibleMoves.join(", ")}`);
+  lines.push(`Humor permitido nesta situação: ${ctx.humorEligible ? "sim" : "não"}`);
 
   return lines.join("\n");
 }

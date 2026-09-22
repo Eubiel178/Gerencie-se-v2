@@ -26,7 +26,10 @@ function handleGesture() {
 
 if (typeof window !== "undefined") {
   for (const eventName of UNLOCK_EVENTS) {
-    window.addEventListener(eventName, handleGesture, { passive: true, once: false });
+    window.addEventListener(eventName, handleGesture, {
+      passive: true,
+      once: false,
+    });
   }
 }
 

@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 
 import { useChatHistory } from "@/features/assistant/hooks/use-chat-history";
+import { requestWidgetOpenWithMessage } from "@/features/assistant/hooks/use-widget-open-request";
 import { MascotPersonality } from "@/features/focus/domain";
 import { computeBubbleDisplayMs } from "@/features/mascot-pet/domain/bubble-timing";
 import { subscribeMascotEvent } from "@/features/mascot-pet/domain/events";
@@ -17,9 +18,14 @@ import { PRIORITY_LABELS } from "@/lib/shared/priority";
 import { isAudioUnlocked } from "@/lib/speech/audio-unlock";
 import { useSpeak } from "@/lib/speech/speak-text";
 
-import { resolveCompanionMessageAction } from "../actions";
+import { resolveCompanionMessageAction, setCompanionQuietAction } from "../actions";
+import { isFactStillValid } from "../domain/companion-fact-validity";
 import { INTENT_CONFIG } from "../domain/companion-interaction-config";
+import { computeCandidateMoves } from "../domain/companion-move-selection";
+import { type CompanionActionOption, type CompanionMove, NEVER_HUMOR_SITUATIONS } from "../domain/companion-moves";
+import { getPersonalityBehavior } from "../domain/companion-personality-profile";
 import { CompanionFact, CompanionPhrase, phraseCompanion } from "../domain/companion-phrasing";
+import { computeCompanionStatus, type CompanionStatusSnapshot } from "../domain/companion-status";
 import { useExecutionCompanionStore } from "../execution-companion-store";
 
 // Só conta como "ausência" de verdade a partir desse tempo com a aba
@@ -35,9 +41,9 @@ const LONG_SESSION_THRESHOLD_MIN = 30;
 // Prazo real (`task.scheduledAt`) dentro desta janela conta como "perto".
 const DEADLINE_WARNING_MINUTES = 60;
 
-// Checa sessão longa/prazo/progresso a cada minuto - não precisa de mais
-// frequência que isso pra sinais que são sobre "faz tempo"/"prazo
-// chegando", nunca sobre segundos.
+// Checa sessão longa/prazo/progresso/troca de tarefa a cada minuto - não
+// precisa de mais frequência que isso pra sinais que são sobre "faz
+// tempo"/"prazo chegando", nunca sobre segundos.
 const PERIODIC_CHECK_MS = 60 * 1000;
 
 // Nome próprio some na maioria das mensagens (pedido explícito: "não em
@@ -50,16 +56,9 @@ const NAME_USAGE_EVERY_N = 3;
 // pra evitar repetir a mesma forma/estrutura de novo.
 const MAX_RECENT_TEXTS = 4;
 
-// Quantas vezes a pessoa precisa FECHAR manualmente um balão (não deixar
-// sumir sozinho) antes do Companion parar de iniciar interações CASUAIS
-// no resto desta sessão de aba - eventos MEANINGFUL nunca são afetados
-// por isso (começar/concluir tarefa, prazo, continuam aparecendo).
-const CASUAL_DISMISS_THRESHOLD = 2;
-
 // Se o usuário mandou mensagem no chat do Widget há pouco tempo, ele está
-// ENGAJADO de verdade com o Companion agora - isso anula o freio de
-// dismissals acima pro resto dessa janela (conversa ativa não deveria
-// ser tratada como "está me ignorando").
+// ENGAJADO de verdade com o Companion agora - isso evita perguntar se
+// deve falar menos (conversa ativa não é "está me ignorando").
 const ENGAGEMENT_WINDOW_MS = 10 * 60 * 1000;
 
 // Quantos passos precisam ser concluídos DESDE A ÚLTIMA checagem pra
@@ -67,21 +66,60 @@ const ENGAGEMENT_WINDOW_MS = 10 * 60 * 1000;
 // isolado - "vários passos" foi o pedido).
 const PROGRESS_MILESTONE_STEP_JUMP = 2;
 
+// Janela padrão de recuo depois de um "agora não"/"não, obrigado" antes
+// de voltar a candidatar oferecer-ajuda/sugerir/iniciar - multiplicada
+// pelo perfil de cada personalidade (ver `companion-personality-profile.ts`).
+const BASE_RECOVERY_MS = 20 * 60 * 1000;
+
+// Trocar de tarefa ativa este tanto de vezes numa janela curta é o que
+// conta como "troca de tarefa com frequência" (não duas trocas normais
+// ao longo do dia).
+const TASK_SWITCH_WINDOW_MS = 20 * 60 * 1000;
+const TASK_SWITCH_THRESHOLD = 3;
+
+// Espelha `QUIET_DURATION_MS` do servidor (`execution-companion/actions.ts`)
+// só pra saber, LOCALMENTE e sem round-trip, que "sim" acabou de ser
+// respondido a `ask-quiet-check` - usado só pelo cartão de estado do
+// clique no mascote (ver `getStatusSnapshot`); a aplicação de verdade do
+// limite (silenciar interações) continua 100% do lado do servidor.
+const QUIET_DURATION_MS_LOCAL_MIRROR = 60 * 60 * 1000;
+// Janelas de "ainda recente" só pro cartão de estado do clique - não têm
+// nenhum efeito sobre quando o Companion FALA, só sobre o que ele conta
+// quando é CLICADO.
+const HELP_ACCEPTED_STATUS_WINDOW_MS = 30 * 60 * 1000;
+const CELEBRATION_STATUS_WINDOW_MS = 2 * 60 * 60 * 1000;
+
 const isDev = process.env.NODE_ENV === "development";
 
 /** Observabilidade só de desenvolvimento - nunca chega no usuário final
  * (é só `console.log`, nunca renderizado). Cobre a METADE da decisão que
- * acontece aqui no cliente (política de prioridade/cooldown/engajamento);
- * a outra metade (cota, local vs IA, provider/model) é logada
- * server-side em `resolveCompanionMessageAction`/`generateCompanionInteraction`. */
+ * acontece aqui no cliente (política de prioridade/cooldown/engajamento/
+ * movimento candidato); a outra metade (cota, limite de espaço, local vs
+ * IA, provider/model, movimento final) é logada server-side em
+ * `resolveCompanionMessageAction`/`generateCompanionInteraction`. */
 function devLog(intent: string, decision: "speak" | "silent", reason?: string) {
   if (!isDev) return;
   console.log(`[Companion:client] intent=${intent} decision=${decision}${reason ? ` reason=${reason}` : ""}`);
 }
 
-interface ActiveMessage {
-  phrase: CompanionPhrase;
+/**
+ * Identidade completa de UMA interação mostrada - nasce inteira numa
+ * única chamada de `tryShow` e nunca é reconstruída depois a partir do
+ * que estiver "ativo agora" (task/sessão atual). O balão sempre renderiza
+ * A PARTIR DESTE OBJETO, nunca voltando a consultar "qual é a tarefa
+ * ativa" - é isso que impede uma interação sobre a Tarefa A ser mostrada
+ * (ou pior, reescrita) como se fosse sobre a Tarefa B só porque B virou
+ * a tarefa ativa entre a geração e a exibição.
+ */
+export interface ActiveCompanionMessage {
+  id: string;
+  situation: CompanionFact["kind"];
+  move: CompanionMove;
+  taskId: string | null;
+  taskTitle: string | null;
   priority: "meaningful" | "casual";
+  phrase: CompanionPhrase;
+  actions: CompanionActionOption[];
 }
 
 function getTask(taskId: string): ITask | null {
@@ -106,22 +144,26 @@ export interface TasksCompanionUserContext {
 
 /**
  * Decide QUANDO o Companion tem algo que vale a pena dizer na página de
- * Tarefas, a partir de eventos/estado REAIS (nunca um timer solto), e
- * monta o CONTEXTO real que vai tanto pro fallback local
- * (`companion-phrasing.ts`) quanto pra geração via IA
- * (`resolveCompanionMessageAction` → `generateCompanionInteraction`).
+ * Tarefas, a partir de eventos/estado REAIS (nunca um timer solto), monta
+ * o CONTEXTO real e escolhe (junto com o servidor) COMO se comportar -
+ * ver `companion-moves.ts`/`companion-move-selection.ts` pro modelo de
+ * "situação → movimentos candidatos → movimento escolhido".
  *
  * Pipeline: evento/contexto real → política de prioridade/cooldown/
- * engajamento (aqui) → fato → servidor decide cota + local-ou-IA → UMA
- * mensagem {written, spoken} → balão/TTS.
+ * engajamento/recuo (aqui) → fato + movimentos candidatos → servidor
+ * decide limite de espaço + cota + local-ou-IA + movimento final → UMA
+ * mensagem com identidade própria → balão/TTS.
  *
  * Corretude do ciclo de vida da mensagem (bug corrigido): cada chamada de
  * `tryShow` tem uma geração própria (`generationRef`) - se uma chamada
  * mais nova começar antes de uma mais velha terminar de resolver (rede),
  * a mais velha é descartada por completo assim que percebe que não é
- * mais a mais recente. Combinado com `speak()` sendo um singleton global
- * com cancelamento (`lib/speech/speak-text.ts`), o balão e a fala SEMPRE
- * vêm do MESMO objeto de mensagem.
+ * mais a mais recente, e a tarefa/situação são revalidadas (`isFactStillValid`)
+ * bem no fim, contra o estado FRESCO na hora de exibir - nunca o estado
+ * que era verdade quando a chamada começou. Combinado com `speak()` sendo
+ * um singleton global com cancelamento (`lib/speech/speak-text.ts`), o
+ * balão e a fala SEMPRE vêm do MESMO objeto de mensagem, sobre a MESMA
+ * tarefa.
  */
 export function useTasksCompanion(
   personality: MascotPersonality,
@@ -133,12 +175,14 @@ export function useTasksCompanion(
   const isTasksPage = pathname?.startsWith("/home/tasks") ?? false;
   const { messages: chatMessages } = useChatHistory();
 
-  const [active, setActive] = useState<ActiveMessage | null>(null);
+  const [active, setActive] = useState<ActiveCompanionMessage | null>(null);
   const { isSpeaking, speak: triggerSpeak } = useSpeak();
 
   const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dismissDeadlineRef = useRef(0);
+  const pausedRemainingMsRef = useRef<number | null>(null);
   const generationRef = useRef(0);
-  const activeRef = useRef<ActiveMessage | null>(null);
+  const activeRef = useRef<ActiveCompanionMessage | null>(null);
   const chatMessagesRef = useRef(chatMessages);
   const idleNudgeShownForSessionRef = useRef<string | null>(null);
   const longSessionShownForSessionRef = useRef<string | null>(null);
@@ -147,10 +191,17 @@ export function useTasksCompanion(
   const progressTrackedTaskIdRef = useRef<string | null>(null);
   const lastSeenCompletedStepsRef = useRef<number | null>(null);
   const lastSeenTaskCompletedRef = useRef<boolean | null>(null);
+  const reopenCountByTaskRef = useRef<Map<string, number>>(new Map());
   const hiddenAtRef = useRef<number | null>(null);
   const nameUsageCounterRef = useRef(0);
   const recentTextsRef = useRef<string[]>([]);
   const manualDismissCountRef = useRef(0);
+  const askedQuietThisSessionRef = useRef(false);
+  const recoveryUntilRef = useRef(0);
+  const recentTaskStartsRef = useRef<Array<{ taskId: string; at: number }>>([]);
+  const quietUntilLocalRef = useRef(0);
+  const lastHelpAcceptedRef = useRef<{ taskTitle: string | null; at: number } | null>(null);
+  const lastCelebrationRef = useRef<{ taskTitle: string | null; at: number } | null>(null);
 
   useEffect(() => {
     activeRef.current = active;
@@ -166,12 +217,42 @@ export function useTasksCompanion(
     }
   }
 
-  /** Fechar MANUALMENTE (botão X do balão) - diferente do auto-dismiss
-   * por tempo, que nunca chama isto (ver `tryShow`). Fechar de propósito
-   * é o sinal mais forte de "não queria ver isso agora". */
-  function dismiss() {
-    manualDismissCountRef.current += 1;
+  function scheduleAutoDismiss(myGeneration: number, ms: number) {
     clearDismissTimer();
+    dismissDeadlineRef.current = Date.now() + ms;
+    dismissTimerRef.current = setTimeout(() => {
+      if (myGeneration === generationRef.current) setActive(null);
+    }, ms);
+  }
+
+  /** Passar o mouse/foco no balão pausa o auto-fechamento - nunca some
+   * enquanto a pessoa está de fato olhando/lendo. Retomado só quando o
+   * mouse sai / o foco muda de verdade (ver `resumeAutoDismiss`). */
+  function pauseAutoDismiss() {
+    if (!dismissTimerRef.current) return;
+    pausedRemainingMsRef.current = Math.max(0, dismissDeadlineRef.current - Date.now());
+    clearDismissTimer();
+  }
+
+  function resumeAutoDismiss() {
+    const remaining = pausedRemainingMsRef.current;
+    if (remaining === null) return;
+    pausedRemainingMsRef.current = null;
+    scheduleAutoDismiss(generationRef.current, remaining);
+  }
+
+  /** Fechar MANUALMENTE (botão X do balão) - diferente do auto-dismiss
+   * por tempo, que nunca chama isto. Fechar significa SÓ "fechar esta
+   * mensagem" (pedido explícito) - nunca "fale menos comigo", que tem seu
+   * próprio caminho explícito (`ask-quiet-check` → `respondToAction`).
+   * Só alimenta a CONTAGEM que decide quando vale perguntar sobre isso -
+   * nunca throttla sozinho. */
+  function dismiss() {
+    if (activeRef.current?.priority === "casual") {
+      manualDismissCountRef.current += 1;
+    }
+    clearDismissTimer();
+    pausedRemainingMsRef.current = null;
     setActive(null);
   }
 
@@ -186,11 +267,11 @@ export function useTasksCompanion(
     return chatMessagesRef.current.some((m) => m.role === "user" && m.timestamp >= cutoff);
   }
 
-  function isCasualThrottled(): boolean {
-    return manualDismissCountRef.current >= CASUAL_DISMISS_THRESHOLD && !isEngagedViaChat();
-  }
-
-  function buildContext(fact: CompanionFact, task: ITask | null, firstName: string | null): CompanionInteractionContext {
+  function buildContext(
+    fact: CompanionFact,
+    task: ITask | null,
+    firstName: string | null
+  ): Omit<CompanionInteractionContext, "eligibleMoves" | "humorEligible"> {
     let deadlineInfo: string | null = null;
     if (task?.scheduledAt && !task.completed) {
       const diffMin = Math.round((new Date(task.scheduledAt).getTime() - Date.now()) / 60000);
@@ -204,10 +285,12 @@ export function useTasksCompanion(
       progressInfo = `${done} de ${task.steps.length} passos concluídos (${Math.round((done / task.steps.length) * 100)}%)`;
     }
 
+    const taskTitle = "taskTitle" in fact ? fact.taskTitle : null;
+
     return {
       intent: fact.kind,
       intentLabel: INTENT_CONFIG[fact.kind].label,
-      taskTitle: fact.taskTitle ?? "sua tarefa",
+      taskTitle,
       taskDescription: task?.description || null,
       priority: task ? PRIORITY_LABELS[task.priority] : null,
       deadlineInfo,
@@ -226,8 +309,18 @@ export function useTasksCompanion(
       devLog(fact.kind, "silent", "priority_blocked");
       return;
     }
-    if (config.priority === "casual" && isCasualThrottled()) {
-      devLog(fact.kind, "silent", "casual_throttled_by_dismissals");
+
+    const inRecovery = Date.now() < recoveryUntilRef.current;
+    const candidateMoves = computeCandidateMoves({
+      situation: fact.kind,
+      personality,
+      isQuiet: false, // o servidor é quem sabe de verdade o `quietUntil` - ver `resolveCompanionMessageAction`.
+      isMeaningful: config.priority === "meaningful",
+      inRecoveryWindow: inRecovery,
+    });
+
+    if (candidateMoves.length === 0) {
+      devLog(fact.kind, "silent", "no_candidate_move");
       return;
     }
 
@@ -235,6 +328,8 @@ export function useTasksCompanion(
     const localFallback = phraseCompanion(fact, personality);
     const firstName = nextNameOrNull();
     const context = buildContext(fact, task, firstName);
+    const humorEligible = getPersonalityBehavior(personality).humorEligible && !NEVER_HUMOR_SITUATIONS.includes(fact.kind);
+    const taskId = task?.id ?? null;
 
     const result = await resolveCompanionMessageAction({
       intent: fact.kind,
@@ -242,34 +337,138 @@ export function useTasksCompanion(
       aiEligible: config.aiEligible,
       personality,
       context,
+      candidateMoves,
+      humorEligible,
       localFallback,
     });
 
     // Uma chamada mais nova já assumiu enquanto esperávamos o servidor -
     // descarta esta por completo, nunca mostra nem fala o que já é velho.
     if (myGeneration !== generationRef.current) return;
-    if (!result.allowed || !result.phrase) {
+    if (!result.allowed || !result.phrase || !result.move) {
       devLog(fact.kind, "silent", "budget_or_error");
       return;
     }
 
-    const phrase = result.phrase;
-    devLog(fact.kind, "speak", result.source);
-    recentTextsRef.current = [...recentTextsRef.current, phrase.written].slice(-MAX_RECENT_TEXTS);
+    // Revalidação final: o estado pode ter mudado durante a chamada de
+    // rede (ou enquanto a aba esteve escondida) - reconsulta a MESMA
+    // tarefa (por id, nunca "a atual") com dados frescos antes de exibir.
+    // Uma interação sobre uma tarefa que já não faz mais sentido (foi
+    // concluída/reaberta/apagada nesse meio-tempo) é descartada em
+    // silêncio, nunca mostrada com informação velha.
+    const freshTask = taskId ? getTask(taskId) : null;
+    if (!isFactStillValid(fact, freshTask)) {
+      devLog(fact.kind, "silent", "stale_context");
+      return;
+    }
 
-    clearDismissTimer();
-    setActive({ phrase, priority: config.priority });
-    dismissTimerRef.current = setTimeout(() => {
-      if (myGeneration === generationRef.current) setActive(null);
-    }, computeBubbleDisplayMs(phrase.written));
+    const phrase = result.phrase;
+    const move = result.move;
+    const actions = result.actions ?? [];
+    devLog(fact.kind, "speak", `${result.source}:${move}`);
+    recentTextsRef.current = [...recentTextsRef.current, phrase.written].slice(-MAX_RECENT_TEXTS);
+    if (move === "comemorar") {
+      lastCelebrationRef.current = { taskTitle: freshTask?.title ?? null, at: Date.now() };
+    }
+
+    const message: ActiveCompanionMessage = {
+      id: crypto.randomUUID(),
+      situation: fact.kind,
+      move,
+      taskId,
+      taskTitle: freshTask?.title ?? ("taskTitle" in fact ? fact.taskTitle : null),
+      priority: config.priority,
+      phrase,
+      actions,
+    };
+
+    setActive(message);
+    scheduleAutoDismiss(
+      myGeneration,
+      computeBubbleDisplayMs(phrase.written, { hasActions: actions.length > 0, priority: config.priority })
+    );
 
     if (autoSpeechEnabled && isAudioUnlocked()) {
       await triggerSpeak(phrase.spoken);
     }
   }
 
+  /** Depois de perceber fechamentos casuais repetidos, o Companion
+   * PERGUNTA (uma vez por sessão de aba) se deve falar menos - nunca
+   * infere isso sozinho a partir das contagens. */
+  function maybeAskToQuietDown() {
+    if (askedQuietThisSessionRef.current) return;
+    if (isEngagedViaChat()) return;
+    const threshold = getPersonalityBehavior(personality).dismissThresholdBeforeAsking;
+    if (manualDismissCountRef.current < threshold) return;
+
+    askedQuietThisSessionRef.current = true;
+    tryShow({ kind: "ask-quiet-check" }, null);
+  }
+
+  /** Resposta a uma das ações rápidas do balão ATUAL - nunca muta
+   * nenhuma tarefa sozinha. "Aceitar ajuda" abre/continua a conversa do
+   * Assistant com o contexto real (ver `use-widget-open-request.ts`);
+   * "recusar" só inicia a janela de recuo desta personalidade; a
+   * pergunta de limite de espaço é a ÚNICA que persiste algo (`quietUntil`,
+   * e só com resposta explícita "sim"). */
+  function respondToAction(actionId: string) {
+    const message = activeRef.current;
+    if (!message) return;
+
+    if (actionId === "accept-help" || actionId === "accept-suggestion") {
+      const taskTitle = message.taskTitle ?? "essa tarefa";
+      lastHelpAcceptedRef.current = { taskTitle: message.taskTitle, at: Date.now() };
+      requestWidgetOpenWithMessage(`Pode me ajudar com "${taskTitle}"?`, message.taskId);
+    } else if (actionId === "decline-help" || actionId === "decline-suggestion") {
+      recoveryUntilRef.current = Date.now() + BASE_RECOVERY_MS * getPersonalityBehavior(personality).recoveryMultiplier;
+    } else if (actionId === "confirm-quiet") {
+      quietUntilLocalRef.current = Date.now() + QUIET_DURATION_MS_LOCAL_MIRROR;
+      setCompanionQuietAction().catch(() => {
+        // Falhou silenciosamente do lado do servidor - pior caso, o
+        // Companion continua no volume normal; sem erro visível pro
+        // usuário por causa de uma preferência de conforto.
+      });
+    } else if (actionId === "decline-quiet") {
+      // Só reseta a contagem (não pergunta de novo imediatamente) -
+      // `askedQuietThisSessionRef` já impede perguntar de novo nesta
+      // mesma sessão de aba de qualquer forma.
+      manualDismissCountRef.current = 0;
+    }
+
+    dismiss();
+  }
+
   function listen() {
     if (active) triggerSpeak(active.phrase.spoken);
+  }
+
+  /** Cálculo puro a partir de refs/store já existentes - chamado só no
+   * MOMENTO do clique no mascote (ver `mascot-pet/index.tsx`), nunca
+   * reativo. Sem chamada de IA, sem chamada de rede: o mesmo clique
+   * repetido sem nenhum evento real no meio sempre devolve a mesma
+   * categoria (continuidade de graça, ver `companion-status.ts`). */
+  function getStatusSnapshot(): CompanionStatusSnapshot {
+    const now = Date.now();
+    const session = useExecutionCompanionStore.getState().session;
+    const activeTask = session ? { title: getTaskTitle(session.taskId) } : null;
+
+    const acceptedRecently =
+      lastHelpAcceptedRef.current && now - lastHelpAcceptedRef.current.at < HELP_ACCEPTED_STATUS_WINDOW_MS
+        ? { taskTitle: lastHelpAcceptedRef.current.taskTitle }
+        : null;
+    const recentCelebration =
+      lastCelebrationRef.current && now - lastCelebrationRef.current.at < CELEBRATION_STATUS_WINDOW_MS
+        ? { taskTitle: lastCelebrationRef.current.taskTitle }
+        : null;
+
+    return computeCompanionStatus({
+      isQuiet: now < quietUntilLocalRef.current,
+      declinedRecently: now < recoveryUntilRef.current,
+      acceptedRecently,
+      recentCelebration,
+      activeTask,
+    });
   }
 
   useEffect(() => {
@@ -299,8 +498,19 @@ export function useTasksCompanion(
       // saudação de presença nesta aba, mas o resto do Companion continua.
     }
 
-    const unsubscribeEvent = subscribeMascotEvent((type) => {
+    const unsubscribeEvent = subscribeMascotEvent((type, payload) => {
       const session = useExecutionCompanionStore.getState().session;
+
+      if (type === "task-completed") {
+        // "Vitória silenciosa": concluída pelo checkbox sem NUNCA ter
+        // tido uma sessão de execução rastreada - a conclusão ACOMPANHADA
+        // já tem seu próprio evento/fato (`execution-completed` abaixo),
+        // então aqui só interessa o caso sem sessão.
+        if (payload?.hadExecutionSession || !payload?.taskId) return;
+        tryShow({ kind: "quiet-win", taskTitle: getTaskTitle(payload.taskId) }, getTask(payload.taskId));
+        return;
+      }
+
       if (!session) return;
       const task = getTask(session.taskId);
 
@@ -310,6 +520,24 @@ export function useTasksCompanion(
         deadlineWarnedForTaskRef.current = null;
         overdueWarnedForTaskRef.current = null;
         progressTrackedTaskIdRef.current = null;
+
+        // Detector de troca de tarefa frequente - conta tarefas DISTINTAS
+        // iniciadas numa janela curta; ao atingir o limite, comenta uma
+        // vez e reinicia a contagem (detecção é oportunidade, não
+        // obrigação: não fica repetindo o comentário a cada troca extra).
+        const now = Date.now();
+        const cutoff = now - TASK_SWITCH_WINDOW_MS;
+        recentTaskStartsRef.current = [
+          ...recentTaskStartsRef.current.filter((e) => e.at >= cutoff),
+          { taskId: session.taskId, at: now },
+        ];
+        const distinctTasks = new Set(recentTaskStartsRef.current.map((e) => e.taskId));
+        if (distinctTasks.size >= TASK_SWITCH_THRESHOLD) {
+          recentTaskStartsRef.current = [];
+          tryShow({ kind: "task-switching", taskTitle: task?.title ?? getTaskTitle(session.taskId) }, task);
+          return;
+        }
+
         tryShow({ kind: "execution-started", taskTitle: task?.title ?? getTaskTitle(session.taskId) }, task);
       } else if (type === "execution-resumed") {
         // Retomar libera um novo cutucão de ociosidade/sessão longa pro
@@ -363,10 +591,14 @@ export function useTasksCompanion(
     // Prazo/atraso/progresso/reabertura/sessão longa - checagem periódica
     // leve (1x/min), nunca chamada de IA nem trabalho pesado por tick (a
     // IA só entra DEPOIS, dentro de `tryShow` → `resolveCompanionMessageAction`,
-    // e só se um sinal real foi identificado aqui). No máximo UM sinal por
-    // tick, em ordem de importância.
+        // e só se um sinal real foi identificado aqui). No máximo UM sinal por
+    // tick, em ordem de importância. Detectar um padrão aqui é uma
+    // OPORTUNIDADE de interação, nunca uma obrigação - o resto do
+    // pipeline (prioridade/recuo/limite de espaço/cota) ainda decide se
+    // vale a pena mesmo assim.
     const periodicCheck = setInterval(() => {
       const session = useExecutionCompanionStore.getState().session;
+      if (session) maybeAskToQuietDown();
       if (!session) return;
       const task = getTask(session.taskId);
 
@@ -405,7 +637,14 @@ export function useTasksCompanion(
         } else {
           if (lastSeenTaskCompletedRef.current === true && task.completed === false) {
             lastSeenTaskCompletedRef.current = false;
-            tryShow({ kind: "reopened-task", taskTitle: task.title }, task);
+            const reopenCount = (reopenCountByTaskRef.current.get(task.id) ?? 0) + 1;
+            reopenCountByTaskRef.current.set(task.id, reopenCount);
+
+            if (reopenCount >= 2) {
+              tryShow({ kind: "repeated-reopen", taskTitle: task.title, reopenCount }, task);
+            } else {
+              tryShow({ kind: "reopened-task", taskTitle: task.title }, task);
+            }
             return;
           }
           lastSeenTaskCompletedRef.current = task.completed;
@@ -453,7 +692,16 @@ export function useTasksCompanion(
   // desligado - o valor devolvido já nasce nulo nesses casos, sem
   // precisar de um efeito separado só pra limpar estado (evita setState
   // dentro de um efeito de limpeza).
-  const message = isTasksPage && enabled ? active?.phrase ?? null : null;
+  const message = isTasksPage && enabled ? active : null;
 
-  return { message, isSpeaking, listen, dismiss };
+  return {
+    message,
+    isSpeaking,
+    listen,
+    dismiss,
+    respondToAction,
+    pauseAutoDismiss,
+    resumeAutoDismiss,
+    getStatusSnapshot,
+  };
 }

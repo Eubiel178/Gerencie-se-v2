@@ -75,11 +75,18 @@ export function useTaskMutations(task: ITask) {
       if (result.error) {
         emitMascotEvent("action-error");
       } else if (result.completed) {
-        emitMascotEvent("task-completed");
+        const hadExecutionSession = executionSession?.taskId === task.id;
         // Completa a sessão de execução se existir
-        if (executionSession?.taskId === task.id && executionSession.status === "active") {
+        if (hadExecutionSession && executionSession.status === "active") {
           await completeSession();
         }
+        // "task-completed" carrega o `taskId` pra distinguir uma conclusão
+        // ACOMPANHADA (já vira `execution-completed` acima, o Companion
+        // ignora este evento pra essa mesma tarefa) de uma "vitória
+        // silenciosa" - concluída pelo checkbox sem nunca ter tido uma
+        // sessão de execução rastreada (ver `quiet-win` em
+        // `use-tasks-companion.ts`).
+        emitMascotEvent("task-completed", { taskId: task.id, hadExecutionSession });
       }
       if (!result.error)
         replaceTask({

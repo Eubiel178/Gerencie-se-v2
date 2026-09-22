@@ -1,0 +1,1 @@
+ALTER TABLE "user_preference" ALTER COLUMN "assistant_companion_quiet_until" SET DATA TYPE timestamp with time zone;

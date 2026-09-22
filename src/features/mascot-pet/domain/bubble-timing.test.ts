@@ -20,3 +20,22 @@ test("computeBubbleDisplayMs: nunca ultrapassa um teto máximo mesmo pra texto m
   const ms = computeBubbleDisplayMs("a".repeat(1000));
   assert.ok(ms <= 12000);
 });
+
+test("computeBubbleDisplayMs: com ações (decisão pendente) dura mais que o mesmo texto sem ações", () => {
+  const text = "Quer ajuda com essa tarefa?";
+  const withoutActions = computeBubbleDisplayMs(text);
+  const withActions = computeBubbleDisplayMs(text, { hasActions: true });
+  assert.ok(withActions > withoutActions);
+});
+
+test("computeBubbleDisplayMs: prioridade meaningful dura mais que casual pro mesmo texto", () => {
+  const text = "Tarefa concluída.";
+  const casual = computeBubbleDisplayMs(text, { priority: "casual" });
+  const meaningful = computeBubbleDisplayMs(text, { priority: "meaningful" });
+  assert.ok(meaningful > casual);
+});
+
+test("computeBubbleDisplayMs: com ações, o teto máximo é mais alto (nunca some antes de dar tempo de clicar)", () => {
+  const ms = computeBubbleDisplayMs("a".repeat(1000), { hasActions: true });
+  assert.ok(ms > 12000);
+});

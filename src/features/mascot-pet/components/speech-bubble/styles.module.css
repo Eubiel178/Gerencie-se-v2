@@ -30,6 +30,48 @@
   font-weight: 500;
 }
 
+/* Legenda discreta da tarefa real por trás da mensagem - clareza sobre
+   QUAL tarefa sem precisar repetir o título dentro da frase toda vez. */
+.taskTag {
+  margin: 0 0 4px;
+  padding-right: 14px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.actionButton {
+  padding: 6px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--easing-standard);
+}
+.actionButton:hover {
+  background: var(--color-border);
+}
+.actionButton[data-kind="accept"],
+.actionButton[data-kind="confirm"] {
+  border-color: var(--color-highlight);
+  color: var(--color-highlight);
+}
+
 .closeButton {
   position: absolute;
   top: 6px;

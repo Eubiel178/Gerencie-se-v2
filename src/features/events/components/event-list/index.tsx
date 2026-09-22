@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 
 import { EmptyState } from "@/components";
 import { IEvent } from "@/features/events/domain";
@@ -28,12 +28,20 @@ export function EventList({ eventsList }: { eventsList: IEvent[] }) {
   // compromisso" mesmo com eventos reais vindos do servidor (mesma
   // regressão de `TasksList`/`GoalsList`). Enquanto o efeito ainda não
   // rodou, usa `eventsList` (a prop) direto.
-  const hasHydratedRef = useRef(false);
+  //
+  // `useState` (nunca uma ref lida durante o render, regra
+  // `react-hooks/refs`) setado DENTRO do MESMO efeito que sincroniza a
+  // store - no mesmo tick que `setEvents`, nunca um sinal de hidratação
+  // genérico e separado (que poderia, em tese, virar `true` antes deste
+  // efeito específico rodar, reabrindo a mesma janela de "nenhum
+  // compromisso").
+  const [hasHydrated, setHasHydrated] = useState(false);
   useEffect(() => {
-    hasHydratedRef.current = true;
     setEvents(eventsList);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setHasHydrated(true);
   }, [eventsList, setEvents]);
-  const effectiveEvents = hasHydratedRef.current ? events : eventsList;
+  const effectiveEvents = hasHydrated ? events : eventsList;
 
   // `events`/`effectiveEvents` tem TODOS os eventos — o Calendário ao
   // lado precisa deles assim. Esta lista, rotulada "Próximos eventos",

@@ -41,7 +41,26 @@ export type CompanionFact =
   // Uma tarefa que já estava concluída foi reaberta - reconhecimento
   // neutro, nunca "você desistiu"/"voltou atrás" (mesma regra de
   // linguagem neutra de `return-after-absence`).
-  | { kind: "reopened-task"; taskTitle: string };
+  | { kind: "reopened-task"; taskTitle: string }
+  // Trocou de tarefa ativa mais de uma vez numa janela curta - um
+  // COMENTÁRIO sobre o padrão (nunca acusatório de "falta de foco"),
+  // não um alarme a cada troca isolada.
+  | { kind: "task-switching"; taskTitle: string }
+  // Tarefa marcada concluída SEM nunca ter tido uma sessão de execução
+  // rastreada - uma "vitória silenciosa": aconteceu sem alarde, o
+  // Companion nota isso mesmo assim, só que num tom mais discreto do
+  // que uma conclusão "acompanhada" (`execution-completed`).
+  | { kind: "quiet-win"; taskTitle: string }
+  // A MESMA tarefa foi reaberta mais de uma vez nesta sessão de
+  // navegador - diferente de uma reabertura isolada (`reopened-task`),
+  // aqui há espaço real pra oferecer ajuda/sugerir, nunca julgamento.
+  | { kind: "repeated-reopen"; taskTitle: string; reopenCount: number }
+  // Não é sobre nenhuma tarefa - o próprio Companion pergunta se deve
+  // falar menos por um tempo, depois de fechamentos casuais repetidos
+  // (ver `use-tasks-companion.ts`). Fraseado 100% determinístico de
+  // propósito (nunca via IA) - uma pergunta sobre limite pessoal precisa
+  // ser sempre previsível.
+  | { kind: "ask-quiet-check" };
 
 /**
  * Um fato sempre vira DOIS textos, nunca um só:
@@ -147,6 +166,31 @@ const PHRASERS: Record<MascotPersonality, Record<CompanionFact["kind"], Phraser>
         spoken: `Essa tarefa voltou pra lista de novo. Tudo bem, a gente segue nela juntos.`,
       };
     },
+    "task-switching": (f) => {
+      const fact = f as Extract<CompanionFact, { kind: "task-switching" }>;
+      return {
+        written: `Andou trocando de tarefa. "${fact.taskTitle}" também merece um pouco de atenção.`,
+        spoken: `Percebi que você andou trocando de tarefa algumas vezes. Sem problema, só lembrando que essa aqui também tá esperando.`,
+      };
+    },
+    "quiet-win": (f) => {
+      const fact = f as Extract<CompanionFact, { kind: "quiet-win" }>;
+      return {
+        written: `"${fact.taskTitle}" concluída, bem discretamente. Notei sim.`,
+        spoken: `Você terminou essa tarefa bem quietinho, sem alarde nenhum. Mas eu notei, viu.`,
+      };
+    },
+    "repeated-reopen": (f) => {
+      const fact = f as Extract<CompanionFact, { kind: "repeated-reopen" }>;
+      return {
+        written: `"${fact.taskTitle}" voltou de novo. Quer ajuda pra fechar essa de vez?`,
+        spoken: `Essa tarefa já voltou pra lista mais de uma vez. Quer uma mãozinha pra fechar ela de vez?`,
+      };
+    },
+    "ask-quiet-check": () => ({
+      written: `Quer que eu fale menos por um tempo?`,
+      spoken: `Posso perguntar uma coisa? Quer que eu fale menos por um tempo?`,
+    }),
   },
 
   sarcastico: {
@@ -226,6 +270,31 @@ const PHRASERS: Record<MascotPersonality, Record<CompanionFact["kind"], Phraser>
         spoken: `Essa tarefa voltou pra lista, vei. Achou mesmo que ia se livrar dela assim fácil?`,
       };
     },
+    "task-switching": (f) => {
+      const fact = f as Extract<CompanionFact, { kind: "task-switching" }>;
+      return {
+        written: `Pulando de tarefa em tarefa, hein. "${fact.taskTitle}" também tá na fila.`,
+        spoken: `Vish, você tá pulando de tarefa em tarefa. Essa aqui também tá na fila, viu.`,
+      };
+    },
+    "quiet-win": (f) => {
+      const fact = f as Extract<CompanionFact, { kind: "quiet-win" }>;
+      return {
+        written: `"${fact.taskTitle}" concluída no silêncio. Nem avisou, hein.`,
+        spoken: `Terminou essa tarefa no maior silêncio, nem me avisou. Mas tá valendo.`,
+      };
+    },
+    "repeated-reopen": (f) => {
+      const fact = f as Extract<CompanionFact, { kind: "repeated-reopen" }>;
+      return {
+        written: `"${fact.taskTitle}" voltou de novo. Isso já é rotina, hein.`,
+        spoken: `Essa tarefa já voltou mais de uma vez, tá virando rotina. Quer que eu ajude a resolver isso de vez?`,
+      };
+    },
+    "ask-quiet-check": () => ({
+      written: `Quer que eu fale menos por um tempo?`,
+      spoken: `Deixa eu perguntar uma coisa, quer que eu fale menos por um tempo?`,
+    }),
   },
 
   engracado: {
@@ -305,6 +374,31 @@ const PHRASERS: Record<MascotPersonality, Record<CompanionFact["kind"], Phraser>
         spoken: `Essa tarefa voltou pro jogo. Round dois, vamos ver como termina.`,
       };
     },
+    "task-switching": (f) => {
+      const fact = f as Extract<CompanionFact, { kind: "task-switching" }>;
+      return {
+        written: `Tá pulando de galho em galho hoje. "${fact.taskTitle}" também quer um cafuné.`,
+        spoken: `Tá pulando de galho em galho hoje, hein. Essa tarefa aqui também quer atenção.`,
+      };
+    },
+    "quiet-win": (f) => {
+      const fact = f as Extract<CompanionFact, { kind: "quiet-win" }>;
+      return {
+        written: `"${fact.taskTitle}" concluída sem fanfarra nenhuma. Ninja mode.`,
+        spoken: `Terminou essa tarefa sem fanfarra nenhuma. Modo ninja ativado.`,
+      };
+    },
+    "repeated-reopen": (f) => {
+      const fact = f as Extract<CompanionFact, { kind: "repeated-reopen" }>;
+      return {
+        written: `"${fact.taskTitle}" voltou de novo. Ela e você viraram dupla fixa, hein.`,
+        spoken: `Essa tarefa já voltou mais de uma vez, vocês dois viraram dupla fixa. Bora resolver isso juntos?`,
+      };
+    },
+    "ask-quiet-check": () => ({
+      written: `Quer que eu fale menos por um tempo?`,
+      spoken: `Posso perguntar? Quer que eu fale menos por um tempo?`,
+    }),
   },
 
   motivador: {
@@ -384,6 +478,31 @@ const PHRASERS: Record<MascotPersonality, Record<CompanionFact["kind"], Phraser>
         spoken: `Essa tarefa voltou pra lista. Segunda tentativa também conta como avanço.`,
       };
     },
+    "task-switching": (f) => {
+      const fact = f as Extract<CompanionFact, { kind: "task-switching" }>;
+      return {
+        written: `Trocou de tarefa algumas vezes. "${fact.taskTitle}" também merece um empurrão.`,
+        spoken: `Notei que você trocou de tarefa algumas vezes. Essa aqui também merece seu empurrão quando puder.`,
+      };
+    },
+    "quiet-win": (f) => {
+      const fact = f as Extract<CompanionFact, { kind: "quiet-win" }>;
+      return {
+        written: `"${fact.taskTitle}" concluída sem alarde. Ainda assim é vitória.`,
+        spoken: `Você terminou essa tarefa sem alarde nenhum. Ainda assim é uma vitória sua.`,
+      };
+    },
+    "repeated-reopen": (f) => {
+      const fact = f as Extract<CompanionFact, { kind: "repeated-reopen" }>;
+      return {
+        written: `"${fact.taskTitle}" voltou de novo. Bora fechar essa dessa vez?`,
+        spoken: `Essa tarefa já voltou mais de uma vez. Bora fechar ela dessa vez, com meu apoio?`,
+      };
+    },
+    "ask-quiet-check": () => ({
+      written: `Quer que eu fale menos por um tempo?`,
+      spoken: `Deixa eu perguntar, quer que eu fale menos por um tempo?`,
+    }),
   },
 
   zen: {
@@ -463,6 +582,31 @@ const PHRASERS: Record<MascotPersonality, Record<CompanionFact["kind"], Phraser>
         spoken: `Essa tarefa voltou pra lista. Tudo bem, sem pressa nenhuma pra retomar.`,
       };
     },
+    "task-switching": (f) => {
+      const fact = f as Extract<CompanionFact, { kind: "task-switching" }>;
+      return {
+        written: `Andou circulando entre tarefas. "${fact.taskTitle}" continua esperando, sem pressa.`,
+        spoken: `Percebi que você andou circulando entre tarefas. Essa aqui continua esperando, sem pressa nenhuma.`,
+      };
+    },
+    "quiet-win": (f) => {
+      const fact = f as Extract<CompanionFact, { kind: "quiet-win" }>;
+      return {
+        written: `"${fact.taskTitle}" concluída em silêncio. Também conta.`,
+        spoken: `Você terminou essa tarefa em silêncio, sem precisar de barulho nenhum. Também conta.`,
+      };
+    },
+    "repeated-reopen": (f) => {
+      const fact = f as Extract<CompanionFact, { kind: "repeated-reopen" }>;
+      return {
+        written: `"${fact.taskTitle}" voltou mais uma vez. Sem julgamento, só presença.`,
+        spoken: `Essa tarefa voltou mais uma vez. Sem julgamento nenhum, só continuo por perto se precisar.`,
+      };
+    },
+    "ask-quiet-check": () => ({
+      written: `Quer que eu fale menos por um tempo?`,
+      spoken: `Posso perguntar com calma, quer que eu fale menos por um tempo?`,
+    }),
   },
 };
 

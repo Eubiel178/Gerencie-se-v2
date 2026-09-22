@@ -19,7 +19,16 @@ import {
 } from "@/validation/execution-session-schema";
 
 import { getExecutionSessionFetcher } from "./data/local-execution-session";
+import { type CompanionActionOption, type CompanionMove, QUIET_SAFE_MOVES, getActionsForMove } from "./domain/companion-moves";
 import type { IExecutionSession } from "./domain/types";
+
+// Duração fixa do limite de espaço, contada a partir da resposta
+// EXPLÍCITA "sim" à pergunta do próprio Companion (`ask-quiet-check`) -
+// nunca inferida de fechamentos manuais. Fixa de propósito (não varia
+// por personalidade): é um limite de verdade, não uma questão de tom -
+// ver `companion-personality-profile.ts` pro que VARIA por personalidade
+// (a recuperação depois de um "não", que é sobre insistência, não limite).
+const QUIET_DURATION_MS = 60 * 60 * 1000;
 
 const taskOwnershipFilter = (userId: string) =>
   or(eq(tasks.userId, userId), eq(tasks.sharedWithUserId, userId));
@@ -296,11 +305,43 @@ export async function resolveCompanionMessageAction(params: {
   priority: "meaningful" | "casual";
   aiEligible: boolean;
   personality: MascotPersonality;
-  context: CompanionInteractionContext;
+  context: Omit<CompanionInteractionContext, "eligibleMoves" | "humorEligible">;
+  /** Movimentos candidatos já filtrados por SITUAÇÃO + PERSONALIDADE +
+   * janela de recuo (ver `computeCandidateMoves`, calculado no cliente -
+   * puro, sem precisar de DB). Este servidor ainda aplica o único filtro
+   * que só ele conhece (o limite de espaço persistido) por cima disso -
+   * a IA nunca vê nem escolhe fora do resultado final. */
+  candidateMoves: CompanionMove[];
+  humorEligible: boolean;
   localFallback: { written: string; spoken: string };
-}): Promise<{ allowed: boolean; phrase?: { written: string; spoken: string }; source?: "local" | "ai" }> {
+}): Promise<{
+  allowed: boolean;
+  phrase?: { written: string; spoken: string };
+  source?: "local" | "ai";
+  move?: CompanionMove;
+  actions?: CompanionActionOption[];
+}> {
   try {
     const prefs = getAssistantPreferencesFetcher();
+
+    // Limite de espaço: casual fica mudo por completo; meaningful só
+    // pode usar os movimentos mais discretos (ver QUIET_SAFE_MOVES) -
+    // aplicado ANTES de qualquer chamada de IA, então o modelo nunca
+    // sequer VÊ um movimento fora do que o limite permite agora.
+    const quietUntil = await prefs.getCompanionQuietUntil();
+    let eligibleMoves = params.candidateMoves;
+    if (quietUntil) {
+      if (params.priority === "casual") {
+        console.log(`[Companion] intent=${params.intent} decision=silent reason=quiet_boundary priority=casual`);
+        return { allowed: false };
+      }
+      eligibleMoves = eligibleMoves.filter((m) => QUIET_SAFE_MOVES.includes(m));
+    }
+
+    if (eligibleMoves.length === 0) {
+      console.log(`[Companion] intent=${params.intent} decision=silent reason=no_eligible_move`);
+      return { allowed: false };
+    }
 
     // Checagem só de leitura ANTES de gastar uma chamada de IA cara -
     // sem sentido gerar uma interação se a cota já estourou mesmo.
@@ -310,15 +351,20 @@ export async function resolveCompanionMessageAction(params: {
       return { allowed: false };
     }
 
-    let phrase = params.localFallback;
+    let phrase: { written: string; spoken: string } = params.localFallback;
     let source: "local" | "ai" = "local";
+    let move: CompanionMove = eligibleMoves[0];
 
     if (params.aiEligible) {
       const ai = new GeminiAssistantProvider();
-      const generated = await ai.generateCompanionInteraction(params.context, params.personality);
+      const generated = await ai.generateCompanionInteraction(
+        { ...params.context, eligibleMoves, humorEligible: params.humorEligible },
+        params.personality
+      );
       if (generated) {
-        phrase = generated;
+        phrase = { written: generated.written, spoken: generated.spoken };
         source = "ai";
+        move = generated.move as CompanionMove;
       }
     }
 
@@ -326,17 +372,33 @@ export async function resolveCompanionMessageAction(params: {
 
     console.log(
       `[Companion] intent=${params.intent} decision=${allowed ? "speak" : "silent"} ` +
-        `${allowed ? `source=${source} ` : ""}priority=${params.priority} taskTitle="${params.context.taskTitle}"` +
+        `${allowed ? `source=${source} move=${move} ` : ""}priority=${params.priority} taskTitle="${params.context.taskTitle}"` +
         `${allowed ? "" : " reason=budget_exhausted_after_generation"}`
     );
 
     if (!allowed) return { allowed: false };
-    return { allowed: true, phrase, source };
+    return { allowed: true, phrase, source, move, actions: getActionsForMove(move, params.personality) };
   } catch (error) {
     console.error("[Companion] erro ao resolver interação:", error);
     // Falha fechada (silêncio) - mesmo padrão do resto do app: um erro
     // do servidor nunca deveria arriscar mostrar mais coisa do que o
     // planejado, só menos.
     return { allowed: false };
+  }
+}
+
+/**
+ * Só chamada depois que o próprio usuário responde "sim" à pergunta do
+ * Companion (`ask-quiet-check`) - nunca automaticamente. Duração fixa
+ * (`QUIET_DURATION_MS`), sem forma de cancelar antes da hora: expira
+ * sozinho (pedido explícito - "deixar expirar naturalmente").
+ */
+export async function setCompanionQuietAction(): Promise<ActionResult> {
+  try {
+    const prefs = getAssistantPreferencesFetcher();
+    await prefs.setCompanionQuietUntil(new Date(Date.now() + QUIET_DURATION_MS));
+    return { error: null };
+  } catch {
+    return { error: "Não foi possível registrar a preferência agora." };
   }
 }

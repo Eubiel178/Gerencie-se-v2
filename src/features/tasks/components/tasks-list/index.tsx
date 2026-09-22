@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 
 import { usePathname, useRouter } from "next/navigation";
-
 
 import { EmptyState } from "@/components";
 import { LoadAcceptedConnections } from "@/features/connections/domain";
@@ -52,21 +51,30 @@ export function TasksList({ tasksList, isGoogleConnected, connections }: TasksLi
   //
   // Mas um `useEffect` só roda DEPOIS do primeiro paint — até lá, a store
   // começa vazia (`tasks: []`, valor padrão do Zustand), e nada preenche
-  // ela a tempo do primeiro render. Sem essa ref, esse primeiro render
-  // (SSR + hidratação) mostrava "lista vazia" mesmo com tarefas reais
-  // vindas do servidor — um "flash" que, dependendo da velocidade de
-  // recompilação/rede, ficava perceptível ou até parecia permanente
-  // (regressão real: tarefas/objetivos "sumindo"). Enquanto o efeito
-  // ainda não rodou nem uma vez, usa a prop `tasksList` direto (idêntica
-  // ao que o servidor já mandou, sem esperar a store) — depois que a
-  // store é hidratada, ela vira a fonte de verdade de novo (mutações
-  // otimistas, novas revalidações).
-  const hasHydratedRef = useRef(false);
+  // ela a tempo do primeiro render. Sem esse sinal de hidratação, esse
+  // primeiro render (SSR + hidratação) mostrava "lista vazia" mesmo com
+  // tarefas reais vindas do servidor — um "flash" que, dependendo da
+  // velocidade de recompilação/rede, ficava perceptível ou até parecia
+  // permanente (regressão real: tarefas/objetivos "sumindo"). Enquanto o
+  // efeito ainda não rodou nem uma vez, usa a prop `tasksList` direto
+  // (idêntica ao que o servidor já mandou, sem esperar a store) — depois
+  // que a store é hidratada, ela vira a fonte de verdade de novo
+  // (mutações otimistas, novas revalidações).
+  //
+  // `useState` (nunca uma ref lida durante o render, regra
+  // `react-hooks/refs`) setado DENTRO do MESMO efeito que sincroniza a
+  // store - de propósito no mesmo tick que `setTasks`, nunca um sinal de
+  // hidratação genérico e separado: um `useSyncExternalStore` desacoplado
+  // poderia, em tese, virar "hidratado" ANTES deste efeito específico
+  // rodar, reabrindo a mesma janela de "lista vazia" que este código
+  // existe pra evitar.
+  const [hasHydrated, setHasHydrated] = useState(false);
   useEffect(() => {
-    hasHydratedRef.current = true;
     setTasks(tasksList);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setHasHydrated(true);
   }, [tasksList, setTasks]);
-  const effectiveTasks = hasHydratedRef.current ? tasks : tasksList;
+  const effectiveTasks = hasHydrated ? tasks : tasksList;
 
   const tag = formTags.tagExists(paramsUrl.get("tag") || "");
   const tasksByTag = tag !== "all" ? effectiveTasks.filter((task) => task.tag === tag) : effectiveTasks;

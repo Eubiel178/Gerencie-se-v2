@@ -72,7 +72,7 @@ export function ExecutionCompanionProvider({
     if (result.session) {
       s.setSession(result.session);
       s.setIntention({ taskId });
-      emitMascotEvent("execution-started");
+      emitMascotEvent("execution-started", { taskId });
     }
 
     return { error: null, switched: result.switched, previousTaskId: result.previousTaskId };
@@ -90,7 +90,7 @@ export function ExecutionCompanionProvider({
     if (!result.error) {
       const now = new Date();
       s.updateSession({ status: "paused", pausedAt: now, updatedAt: now });
-      emitMascotEvent("execution-distracted");
+      emitMascotEvent("execution-distracted", { taskId: session.taskId });
     }
     return result;
   }, []);
@@ -104,7 +104,7 @@ export function ExecutionCompanionProvider({
     if (!result.error) {
       const now = new Date();
       s.updateSession({ status: "active", pausedAt: null, resumedAt: now, updatedAt: now });
-      emitMascotEvent("execution-resumed");
+      emitMascotEvent("execution-resumed", { taskId: session.taskId });
     }
     return result;
   }, []);
@@ -118,7 +118,7 @@ export function ExecutionCompanionProvider({
     if (!result.error) {
       s.updateSession({ status: "completed", completedAt: new Date() });
       s.setIntention(null);
-      emitMascotEvent("execution-completed");
+      emitMascotEvent("execution-completed", { taskId: session.taskId });
       s.reset();
     }
     return result;

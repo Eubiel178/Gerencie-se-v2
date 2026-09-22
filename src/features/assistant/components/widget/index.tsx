@@ -4,18 +4,20 @@ import { useState, useEffect, useMemo, useRef, useSyncExternalStore, useCallback
 
 import { usePathname } from "next/navigation";
 
-import { Button } from "@/components";
+import { Button, Modal, ModalHeader } from "@/components";
 import { Icon } from "@/components/icon";
 import { IAssistantMessage } from "@/features/assistant/domain";
 import { confirmAndExecuteAction } from "@/features/execution-companion/actions/propose-action";
 import type { IExecutionSession } from "@/features/execution-companion/domain/types";
 import type { ActionProposal } from "@/features/execution-companion/services/action-executor";
 import { IMascotState } from "@/features/focus/domain";
+import { mascotAvatarUrl } from "@/features/mascot-pet";
 import { sendAssistantMessage } from "@/features/mascot-pet/actions";
 import { useSpeak } from "@/lib/speech/speak-text";
 import { formatTimeOnly } from "@/utils/date";
 
 import { useChatHistory } from "../../hooks/use-chat-history";
+import { useWidgetSeedRequest } from "../../hooks/use-widget-open-request";
 import { playMessageReceivedSound, playMessageSentSound } from "../../lib/chat-sound";
 
 import { groupMessagesByDay } from "./group-messages-by-day";
@@ -59,6 +61,7 @@ interface WidgetProps {
   mascot: IMascotState;
   executionSession: IExecutionSession | null;
   executionTaskTitle: string | null;
+  userImage: string | null;
 }
 
 const DISMISSED_KEY = "assistant-dismissed-message";
@@ -137,8 +140,9 @@ export function Widget({
   mascot,
   executionSession,
   executionTaskTitle,
+  userImage,
 }: WidgetProps) {
-  const pathname = usePathname();
+const pathname = usePathname();
   const [message, setMessage] = useState(initialMessage);
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
@@ -147,6 +151,7 @@ export function Widget({
     null,
   );
   const [proposalLoading, setProposalLoading] = useState(false);
+  const [isConfirmingClear, setIsConfirmingClear] = useState(false);
   const { isSpeaking, speak: handleSpeak } = useSpeak();
   const { messages, addUserMessage, addMascotMessage, clearHistory, hydrated } =
     useChatHistory();
@@ -191,6 +196,8 @@ export function Widget({
     !isMobile;
   const isOpen = manuallyToggled ?? autoOpen;
   const mood = moodFor(message, hasExecution);
+
+  const mascotAvatar = mascotAvatarUrl(mascot.species);
 
   const groupedMessages = useMemo(() => groupMessagesByDay(messages), [messages]);
 
@@ -317,6 +324,30 @@ export function Widget({
     }
   }
 
+  // Pedido de fora do Widget (ver `use-widget-open-request.ts`) pra abrir
+  // e mandar uma mensagem com contexto real - hoje só usado por "Me
+  // ajuda" numa oferta espontânea do Companion. Reaproveita o MESMO
+  // `sendToAssistant` do envio normal (nunca duplica a lógica de rede/
+  // timeout), então o comportamento (erro, retry, timeout) é idêntico a
+  // digitar a mensagem à mão.
+  const seedRequest = useWidgetSeedRequest();
+  const handledSeedIdRef = useRef(0);
+  useEffect(() => {
+    if (!seedRequest || seedRequest.id <= handledSeedIdRef.current) return;
+    handledSeedIdRef.current = seedRequest.id;
+
+    setHasManuallyClosed(false);
+    try {
+      sessionStorage.removeItem(WAS_CLOSED_KEY);
+    } catch {}
+    setManuallyToggled(true);
+
+    addUserMessage(seedRequest.text, seedRequest.taskId);
+    playMessageSentSound();
+    sendToAssistant(seedRequest.text, seedRequest.taskId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seedRequest]);
+
   async function handleSendChat() {
     const text = chatInput.trim();
     if (!text || chatLoading) return;
@@ -382,20 +413,27 @@ export function Widget({
       {isOpen && (
         <div className={styles.bubble}>
           <div className={styles.bubbleHeader}>
-            <div className={styles.bubbleTitleGroup}>
-              <p className={styles.bubbleName}>{mascot.name}</p>
-              {executionTaskTitle && (
-                <p className={styles.bubbleContext}>
-                  Acompanhando: {executionTaskTitle}
-                </p>
+            <div className={styles.bubbleHeaderIdentity}>
+              {mascotAvatar && (
+                <span className={styles.headerAvatarFrame}>
+                  <img src={mascotAvatar} alt="" width={28} height={28} className={styles.headerAvatar} />
+                </span>
               )}
+              <div className={styles.bubbleTitleGroup}>
+                <p className={styles.bubbleName}>{mascot.name}</p>
+                {executionTaskTitle && (
+                  <p className={styles.bubbleContext}>
+                    Acompanhando: {executionTaskTitle}
+                  </p>
+                )}
+              </div>
             </div>
             <div className={styles.bubbleHeaderActions}>
               {hasChatHistory && (
                 <button
                   type="button"
                   className={styles.headerAction}
-                  onClick={clearHistory}
+                  onClick={() => setIsConfirmingClear(true)}
                   aria-label="Limpar conversa"
                 >
                   <Icon name="FaTrash" aria-hidden="true" size={10} />
@@ -414,8 +452,15 @@ export function Widget({
 
           <div className={styles.chatArea} aria-live="polite">
             {!hasChatHistory && initialText && (
-              <div className={styles.chatMsg} data-role="mascot">
-                <p>{initialText}</p>
+              <div className={styles.msgRow} data-role="mascot">
+                <div className={styles.msgAvatarSlot}>
+                  {mascotAvatar && (
+                    <img src={mascotAvatar} alt="" width={24} height={24} data-kind="mascot" className={styles.msgAvatar} />
+                  )}
+                </div>
+                <div className={styles.chatMsg} data-role="mascot">
+                  <p>{initialText}</p>
+                </div>
               </div>
             )}
 
@@ -425,37 +470,63 @@ export function Widget({
                   <span>{group.dayLabel}</span>
                 </div>
 
-                {group.entries.map(({ message: msg, index }) => {
+                {group.entries.map(({ message: msg, index }, entryIdx) => {
                   const isError = msg.text.startsWith("__ERROR__:");
                   const text = isError
                     ? msg.text.replace("__ERROR__:", "")
                     : msg.text;
-                  // Mensagem do usuário que gerou esse erro — "Tentar
-                  // novamente" reenvia ELA, não o campo de texto (que já foi
-                  // limpo assim que a mensagem original foi enviada).
                   const failedUserMessage = isError
                     ? [...messages.slice(0, index)].reverse().find((m) => m.role === "user")
                     : null;
+
+                  const effectiveRole = isError ? "error" : msg.role;
+                  const prevEntry = entryIdx > 0 ? group.entries[entryIdx - 1] : null;
+                  const prevRole = prevEntry ? (prevEntry.message.text.startsWith("__ERROR__:") ? "error" : prevEntry.message.role) : null;
+                  const showAvatar = effectiveRole !== "error" && effectiveRole !== prevRole;
+
                   return (
                     <div
                       key={msg.id}
-                      className={styles.chatMsg}
-                      data-role={isError ? "error" : msg.role}
+                      className={styles.msgRow}
+                      data-role={effectiveRole}
                     >
-                      <p>{text}</p>
-                      <span className={styles.msgTime}>{formatTimeOnly(new Date(msg.timestamp))}</span>
-                      {isError && failedUserMessage && (
-                        <button
-                          type="button"
-                          className={styles.retryBtn}
-                          disabled={chatLoading}
-                          onClick={() =>
-                            handleRetry(failedUserMessage.text, failedUserMessage.taskId)
-                          }
-                          aria-label="Tentar novamente"
-                        >
-                          Tentar novamente
-                        </button>
+                      {effectiveRole === "mascot" && (
+                        <div className={styles.msgAvatarSlot}>
+                          {showAvatar && mascotAvatar ? (
+                            <img src={mascotAvatar} alt="" width={24} height={24} data-kind="mascot" className={styles.msgAvatar} />
+                          ) : null}
+                        </div>
+                      )}
+                      <div
+                        className={styles.chatMsg}
+                        data-role={effectiveRole}
+                      >
+                        <p>{text}</p>
+                        <span className={styles.msgTime}>{formatTimeOnly(new Date(msg.timestamp))}</span>
+                        {isError && failedUserMessage && (
+                          <button
+                            type="button"
+                            className={styles.retryBtn}
+                            disabled={chatLoading}
+                            onClick={() =>
+                              handleRetry(failedUserMessage.text, failedUserMessage.taskId)
+                            }
+                            aria-label="Tentar novamente"
+                          >
+                            Tentar novamente
+                          </button>
+                        )}
+                      </div>
+                      {effectiveRole === "user" && (
+                        <div className={styles.msgAvatarSlot}>
+                          {showAvatar && userImage ? (
+                            <img src={userImage} alt="" width={24} height={24} className={styles.msgAvatar} />
+                          ) : showAvatar ? (
+                            <span className={styles.userAvatarFallback}>
+                              <Icon name="FaUser" aria-hidden="true" size={11} />
+                            </span>
+                          ) : null}
+                        </div>
                       )}
                     </div>
                   );
@@ -500,15 +571,22 @@ export function Widget({
             )}
 
             {chatLoading && !pendingProposal && (
-              <div className={styles.chatMsg} data-role="mascot">
-                <p className={styles.typing}>
-                  {mascot.name} está pensando
-                  <span className={styles.typingDots} aria-hidden="true">
-                    <span>.</span>
-                    <span>.</span>
-                    <span>.</span>
-                  </span>
-                </p>
+              <div className={styles.msgRow} data-role="mascot">
+                <div className={styles.msgAvatarSlot}>
+                  {mascotAvatar && (
+                    <img src={mascotAvatar} alt="" width={24} height={24} data-kind="mascot" className={styles.msgAvatar} />
+                  )}
+                </div>
+                <div className={styles.chatMsg} data-role="mascot">
+                  <p className={styles.typing}>
+                    {mascot.name} está pensando
+                    <span className={styles.typingDots} aria-hidden="true">
+                      <span>.</span>
+                      <span>.</span>
+                      <span>.</span>
+                    </span>
+                  </p>
+                </div>
               </div>
             )}
 
@@ -553,6 +631,30 @@ export function Widget({
             />
           </div>
         </div>
+      )}
+
+      {isConfirmingClear && (
+        <Modal onClose={() => setIsConfirmingClear(false)}>
+          <ModalHeader title="Limpar toda a conversa?" onClose={() => setIsConfirmingClear(false)} />
+          <p className={styles.confirmClearText}>
+            As mensagens somem pra sempre. Não dá pra desfazer.
+          </p>
+          <div className={styles.confirmClearActions}>
+            <Button.Root type="button" variant="secondary" onClick={() => setIsConfirmingClear(false)}>
+              Cancelar
+            </Button.Root>
+            <Button.Root
+              type="button"
+              tone="danger"
+              onClick={() => {
+                clearHistory();
+                setIsConfirmingClear(false);
+              }}
+            >
+              Limpar
+            </Button.Root>
+          </div>
+        </Modal>
       )}
 
       <button

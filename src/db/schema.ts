@@ -697,6 +697,22 @@ export const userPreferences = pgTable("user_preference", {
   assistantCompanionMeaningfulCount: integer("assistant_companion_meaningful_count").notNull().default(0),
   assistantCompanionMeaningfulDate: text("assistant_companion_meaningful_date"),
   assistantCompanionLastText: text("assistant_companion_last_text"),
+  // Limite explícito de espaço ("fique quieto por um tempo") — diferente
+  // das cotas acima (que só reduzem VOLUME). Enquanto `now < quietUntil`,
+  // interações CASUAIS ficam totalmente suprimidas e as MEANINGFUL só
+  // saem no tom mais discreto disponível (ver `companion-moves.ts`).
+  // Nasce SÓ de uma resposta explícita a uma pergunta do próprio
+  // Companion ("quer que eu fale menos por um tempo?") — nunca inferido
+  // silenciosamente a partir de fechamentos manuais do balão (fechar
+  // continua significando só "fechar esta mensagem", ver
+  // `use-tasks-companion.ts`). Expira sozinho, sem botão de cancelar.
+  // Representa um INSTANTE real comparado direto contra `Date.now()`
+  // (nunca um horário "solto") — `withTimezone` obrigatório aqui, mesmo
+  // raciocínio de `focusSession.startedAt/endedAt` acima: sem isso, o
+  // valor grava/lê usando o fuso LOCAL do processo Node como se fosse
+  // UTC, deslocando o instante real pelo offset da máquina (bug real
+  // encontrado em teste: expirava/comparava errado por causa disso).
+  assistantCompanionQuietUntil: timestamp("assistant_companion_quiet_until", { mode: "date", withTimezone: true }),
 });
 
 export const hydrationLogs = pgTable("hydration_log", {

@@ -2,6 +2,8 @@ import "server-only";
 
 import { z } from "zod";
 
+import { ALL_COMPANION_MOVES } from "@/features/execution-companion/domain/companion-moves";
+
 export const DecomposeTaskResponseSchema = z.object({
   steps: z.array(z.object({
     title: z.string(),
@@ -28,6 +30,13 @@ export const ResumeResponseSchema = z.object({
 export const CompanionInteractionResponseSchema = z.object({
   written: z.string().min(1).max(160),
   spoken: z.string().min(1).max(220),
+  // A IA ESCOLHE dentro do conjunto de movimentos elegíveis passado no
+  // prompt (`eligibleMoves`) — nunca decide sozinha se algo é elegível
+  // ou não. Quem chama (`resolveCompanionMessageAction`) ainda valida
+  // que o valor devolvido pertence à lista elegível DESTA chamada
+  // específica (o enum aqui só garante que é um movimento válido em
+  // geral, não que era permitido agora).
+  move: z.enum(ALL_COMPANION_MOVES as [string, ...string[]]),
 });
 
 export const IntentionResponseSchema = z.object({

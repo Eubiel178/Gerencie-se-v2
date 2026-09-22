@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 
 import { updateAssistantPreferencesAction } from "@/features/assistant/actions";
+import { phraseCompanionStatus } from "@/features/execution-companion/domain/companion-status-phrasing";
 import { useTasksCompanion } from "@/features/execution-companion/hooks/use-tasks-companion";
 import { IMascotState } from "@/features/focus/domain";
 import {
@@ -15,10 +16,15 @@ import { isQuietModeRoute } from "@/features/mascot-pet/engine/quiet-mode-routes
 import { MascotRuntime } from "@/features/mascot-pet/engine/runtime";
 import type { Gender } from "@/features/profile/get-gender";
 
+import { CompanionStatusCard } from "../companion-status-card";
 import { SpeechBubble } from "../speech-bubble";
 import { VoiceControl } from "../voice-control";
 
 import styles from "./styles.module.css";
+
+// Duração fixa do cartão de estado (clicar no mascote) - não precisa da
+// lógica adaptativa do balão espontâneo (sem ações, texto sempre curto).
+const STATUS_CARD_DISPLAY_MS = 7000;
 
 interface MascotPetProps {
   /** Id de personagem (ver `MASCOT_CHARACTERS`) - normalmente calculado a
@@ -88,12 +94,46 @@ export function MascotPet({
   const [autoSpeechEnabled, setAutoSpeechEnabled] = useState(autoSpeechEnabledInitial);
   const [promptShown, setPromptShown] = useState(autoSpeechPromptShownInitial);
 
-  const { message, dismiss } = useTasksCompanion(
+  const { message, dismiss, respondToAction, pauseAutoDismiss, resumeAutoDismiss, getStatusSnapshot } = useTasksCompanion(
     mascot?.personality ?? "afetuoso",
     autoSpeechEnabled,
     assistantEnabled,
     { firstName: userFirstName, gender: userGender }
   );
+
+  // Cartão de estado (clicar no mascote, sem arrastar - ver `onClick` em
+  // `engine/runtime.ts`) - estado PRÓPRIO, independente do balão de fala
+  // espontâneo acima: um clique deliberado da pessoa nunca deveria
+  // disputar limite de espaço/cota com as interações que o Companion
+  // inicia sozinho, nem ser cancelado por uma delas chegando no meio.
+  const [statusCard, setStatusCard] = useState<string | null>(null);
+  const statusCardTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Ref sempre atualizado com o handler mais recente - o runtime do
+  // PixiJS só é recriado quando `character` muda (ver efeito abaixo),
+  // então o `onClick` passado a ele precisa indireção pra nunca ficar
+  // preso a uma personalidade/estado antigos.
+  const handleMascotClickRef = useRef<() => void>(() => {});
+  useEffect(() => {
+    handleMascotClickRef.current = () => {
+      if (statusCardTimerRef.current) clearTimeout(statusCardTimerRef.current);
+      const snapshot = getStatusSnapshot();
+      const text = phraseCompanionStatus(snapshot, mascot?.personality ?? "afetuoso");
+      setStatusCard(text);
+      statusCardTimerRef.current = setTimeout(() => setStatusCard(null), STATUS_CARD_DISPLAY_MS);
+    };
+  });
+
+  function dismissStatusCard() {
+    if (statusCardTimerRef.current) clearTimeout(statusCardTimerRef.current);
+    setStatusCard(null);
+  }
+
+  useEffect(() => {
+    return () => {
+      if (statusCardTimerRef.current) clearTimeout(statusCardTimerRef.current);
+    };
+  }, []);
 
   // Convite único de voz: só faz sentido perguntar depois que o Companion
   // já mostrou algo de verdade (a primeira mensagem É a "interação real"
@@ -136,6 +176,7 @@ export function MascotPet({
         const centerX = position.x + (character.displayWidth ?? character.frameWidth) / 2;
         anchor.style.transform = `translate(${Math.round(centerX)}px, ${Math.round(position.y)}px)`;
       },
+      onClick: () => handleMascotClickRef.current(),
     });
     runtimeRef.current = runtime;
     let cancelled = false;
@@ -173,11 +214,30 @@ export function MascotPet({
         <div ref={wrapperRef} className={styles.wrapper} />
       </div>
 
-      {/* Fora do `aria-hidden` do palco decorativo acima - o balão carrega
-          texto de verdade (`role="status"` no `SpeechBubble`), então
-          precisa continuar anunciável por leitor de tela. */}
+      {/* Fora do `aria-hidden` do palco decorativo acima - o conteúdo
+          carrega texto de verdade (`role="status"`), então precisa
+          continuar anunciável por leitor de tela. Um clique deliberado
+          (cartão de estado) tem prioridade visual sobre uma fala
+          espontânea que porventura já estivesse no ar - a interação que
+          a PESSOA acabou de pedir vence a que o Companion iniciou
+          sozinho; a fala espontânea, se ainda não tiver expirado, volta a
+          aparecer sozinha quando o cartão fechar. */}
       <div ref={bubbleAnchorRef} className={styles.bubbleAnchor}>
-        {message && <SpeechBubble text={message.written} onDismiss={dismiss} />}
+        {statusCard ? (
+          <CompanionStatusCard text={statusCard} onDismiss={dismissStatusCard} />
+        ) : (
+          message && (
+            <SpeechBubble
+              text={message.phrase.written}
+              taskTitle={message.taskTitle}
+              actions={message.actions}
+              onDismiss={dismiss}
+              onAction={respondToAction}
+              onPauseAutoDismiss={pauseAutoDismiss}
+              onResumeAutoDismiss={resumeAutoDismiss}
+            />
+          )
+        )}
       </div>
 
       {assistantEnabled && (
