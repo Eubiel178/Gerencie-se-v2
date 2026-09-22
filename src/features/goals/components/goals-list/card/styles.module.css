@@ -1,20 +1,26 @@
+/* Mesma gramática visual do TaskCard (`tasks/.../card/styles.module.css`)
+   - borda esquerda por prioridade, meta compacta acima do título, seção
+   de passos recolhível, menu de mais-ações - só as classes que fazem
+   sentido pra um Objetivo estão aqui (sem footer de ação primária: um
+   objetivo não tem "Começar/Pausar" como uma tarefa, só concluir, que já
+   mora no checkbox do header, igual à tarefa). */
 .card {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  padding: var(--space-4);
+  padding: var(--space-4) var(--space-5);
   border: 1px solid var(--color-border);
   border-left: 0.3rem solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-surface);
   box-shadow: 0 0.5rem 1.25rem var(--color-shadow);
   transition:
-    transform var(--duration-base) var(--easing-standard),
+    opacity var(--duration-base) var(--easing-standard),
     box-shadow var(--duration-base) var(--easing-standard);
 }
 .card:hover {
-  transform: translateY(-0.25rem);
-  box-shadow: 0 1rem 2rem var(--color-shadow);
+  opacity: 0.96;
+  box-shadow: 0 0.75rem 1.5rem var(--color-shadow);
 }
 .card[data-priority="baixa"] {
   border-left-color: var(--color-success);
@@ -28,24 +34,199 @@
 .card[data-priority="critica"] {
   border-left-color: var(--color-danger);
 }
+
+/* Header */
 .cardHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
-}
-.cardTitleGroup {
-  display: flex;
   min-width: 0;
+  color: var(--color-text);
+}
+.cardTitle {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 1.05rem;
+  line-height: 1.35;
+  letter-spacing: -0.025em;
+  overflow-wrap: anywhere;
+}
+.cardTitle[data-completed="true"] {
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+}
+
+/* Metadados compactos */
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem var(--space-3);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  padding-top: 0.1rem;
+}
+.priorityText {
+  margin: 0;
+  padding: 0;
+  font-weight: 600;
+  font-size: var(--font-size-xs);
+  white-space: nowrap;
+}
+.card[data-priority="baixa"] .priorityText {
+  color: var(--color-success);
+}
+.card[data-priority="media"] .priorityText {
+  color: var(--color-warning);
+}
+.card[data-priority="alta"] .priorityText {
+  color: var(--color-priority-high);
+}
+.card[data-priority="critica"] .priorityText {
+  color: var(--color-danger);
+}
+.metaSep {
+  color: var(--color-border);
+  user-select: none;
+  font-size: 0.65rem;
+  line-height: 1;
+}
+.metaGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  white-space: nowrap;
+}
+.deadline {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  white-space: nowrap;
+}
+.deadline[data-overdue="true"] {
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+/* Status row (só aparece quando concluído - pendente não precisa de
+   selo, o mesmo raciocínio do TaskCard escondendo o badge no "idle") */
+.statusRow {
+  display: flex;
+  align-items: center;
+  padding-top: 0.05rem;
+}
+
+/* Descrição — estilo secundário, sem competir com o título */
+.description {
+  margin: 0;
+  padding-top: var(--space-1);
+  color: var(--color-text-muted);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-base);
+  min-width: 0;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Passos compactos */
+.stepsCompact {
+  display: flex;
   flex-direction: column;
-  gap: var(--space-1);
-}
-.titleLine {
-  display: flex;
+  gap: var(--space-2);
+  margin: 0;
+  padding-top: var(--space-2);
   min-width: 0;
+  font-family: var(--font-sans);
+}
+.stepsCompactSummary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+.stepsCompactSummary button {
+  appearance: none;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--color-highlight);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity var(--duration-fast) var(--easing-standard);
+}
+.stepsCompactSummary button:hover {
+  opacity: 0.7;
+}
+.stepsCompactSummary button:focus-visible {
+  outline: 2px solid var(--color-highlight);
+  outline-offset: 2px;
+}
+.stepsBar {
+  width: 100%;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: var(--color-border);
+  overflow: hidden;
+}
+.stepsBarFill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--color-highlight);
+  transition: width var(--duration-base) var(--easing-standard);
+}
+.stepsExpanded {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.stepsExpanded li {
+  display: flex;
   align-items: center;
   gap: var(--space-2);
+  padding: 0.1rem 0;
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
 }
+.stepsExpanded input {
+  inline-size: 1rem;
+  block-size: 1rem;
+  margin: 0;
+  accent-color: var(--color-highlight);
+}
+.stepsExpanded li[data-completed="true"] {
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+}
+
+.sharedBadge {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--color-info);
+  font-size: var(--font-size-xs);
+}
+
+/* Corpo */
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: var(--space-3);
+}
+
+/* Checkbox */
 .completeCheckbox {
   display: flex;
   align-items: center;
@@ -73,119 +254,73 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
-.cardTitle {
-  margin: 0;
-  color: var(--color-text);
-  font-size: 1.1rem;
-  line-height: 1.35;
-  letter-spacing: -0.025em;
-  overflow-wrap: anywhere;
-}
-.meta {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  flex-wrap: wrap;
-}
-.deadline {
-  color: var(--color-text-muted);
-  font-size: var(--font-size-xs);
-}
-.priorityBadge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.15rem 0.55rem;
-  border-radius: var(--radius-full);
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-}
-.priorityBaixa {
-  background: var(--color-success);
-  color: var(--color-on-success);
-}
-.priorityMedia {
-  background: var(--color-warning);
-  color: var(--color-on-warning);
-}
-.priorityAlta {
-  background: var(--color-priority-high);
-  color: var(--color-on-priority-high);
-}
-.priorityCritica {
-  background: var(--color-danger);
-  color: var(--color-on-danger);
-}
+
+/* Menu de mais-ações (editar/excluir) */
 .actions {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
   gap: var(--space-1);
-  flex-shrink: 0;
-  min-width: max-content;
-}
-.description {
-  margin: 0;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-}
-.progressRow {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-.progressTrack {
-  flex: 1;
-  height: 0.5rem;
-  border-radius: var(--radius-full);
-  background: var(--color-border);
-  overflow: hidden;
-}
-.progressFill {
-  height: 100%;
-  background: var(--color-highlight);
-  border-radius: var(--radius-full);
-  transition: width var(--duration-base) var(--easing-standard);
-}
-.progressLabel {
   color: var(--color-text);
-  font-weight: 600;
-  font-size: var(--font-size-sm);
+}
+.overflowMenu {
+  position: relative;
   flex-shrink: 0;
 }
-.progressHint {
-  margin: 0;
-  font-size: var(--font-size-xs);
+.overflowMenu summary {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: transparent;
   color: var(--color-text-muted);
-}
-.steps {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  padding: 0;
-  margin: 0;
+  cursor: pointer;
   list-style: none;
+  transition:
+    opacity var(--duration-fast) var(--easing-standard),
+    border-color var(--duration-fast) var(--easing-standard);
 }
-.step {
+.overflowMenu summary:hover {
+  opacity: 0.72;
+  border-color: color-mix(in srgb, var(--color-border) 70%, var(--color-highlight));
+}
+.overflowMenu summary::-webkit-details-marker {
+  display: none;
+}
+.overflowMenu summary:focus-visible {
+  outline: 2px solid var(--color-highlight);
+  outline-offset: 2px;
+}
+.overflowMenuContent {
+  position: absolute;
+  z-index: 2;
+  right: 0;
+  top: calc(100% + var(--space-1));
   display: flex;
-  align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-1);
+  padding: 0.2rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-elevated);
+  box-shadow: 0 0.5rem 1.25rem var(--color-shadow);
 }
-.stepTitle {
-  flex: 1;
-  font-size: var(--font-size-sm);
-  color: var(--color-text);
+.overflowMenuContent :global(button) {
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  opacity: 0.85;
 }
-.stepTitleDone {
-  text-decoration: line-through;
-  color: var(--color-text-muted);
+.overflowMenuContent :global(button:hover) {
+  opacity: 0.65;
 }
 
-.sharedBadge {
-  margin: 0;
-  font-family: var(--font-sans);
-  color: var(--color-info);
-  font-size: var(--font-size-xs);
-}
-.smallButton {
-  padding: 0.45rem var(--space-3);
-  font-size: var(--font-size-sm);
+@media (max-width: 640px) {
+  .card {
+    padding: var(--space-3) var(--space-4);
+  }
+  .meta {
+    gap: 0.25rem var(--space-2);
+  }
 }
