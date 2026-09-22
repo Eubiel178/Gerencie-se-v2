@@ -1,5 +1,48 @@
 # Guia de Deploy — Gerencie-se
 
+## Reexibir o tour guiado pra TODOS os usuários já existentes
+
+O tour guiado (balões apontando pra navegação/busca/checklist/mascote no
+Dashboard) só aparece sozinho na primeira vez — depois disso,
+`user_preference.guided_tour_dismissed` fica `true` pra sempre (mesmo
+raciocínio do checklist de onboarding). Cada pessoa também pode rever o
+tour sozinha a qualquer momento em **Configurações → Rever tour guiado**
+(`resetGuidedTourAction`), mas isso é por conta própria — não força
+ninguém a ver de novo.
+
+Se o tour mudou (novo passo, texto atualizado) e você quer que **toda a
+base já existente** volte a ver ele sozinha no próximo acesso, rode uma
+única query direto no Postgres de produção (sem afetar nenhum outro dado
+da conta):
+
+```sql
+UPDATE user_preference SET guided_tour_dismissed = false;
+```
+
+Como rodar (usando a mesma connection string de produção da seção 1
+abaixo):
+
+```bash
+psql "sua-connection-string-de-producao" -c "UPDATE user_preference SET guided_tour_dismissed = false;"
+```
+
+Ou, se preferir sem instalar o `psql`, cole a mesma query no editor SQL
+do painel do seu Postgres hospedado (Neon/Supabase têm um "SQL Editor"
+na própria interface web).
+
+Sem `WHERE`, isso afeta literalmente toda linha da tabela — cada conta
+volta a ver o tour na próxima vez que abrir o Dashboard, exatamente como
+uma conta nova veria. Não mexe em nenhum outro dado (tarefas, hábitos,
+etc.) nem reseta o checklist de onboarding (`onboarding_dismissed`),
+que é uma coluna separada — inclua ela na mesma query só se também
+quiser reexibir o checklist:
+
+```sql
+UPDATE user_preference SET guided_tour_dismissed = false, onboarding_dismissed = false;
+```
+
+---
+
 Passo a passo para publicar o projeto (hoje ele só roda local, com Postgres
 na sua máquina). Cobre banco de dados, variáveis de ambiente e o deploy em
 si. Assume Vercel como host (é o mais direto para Next.js, feito pela
