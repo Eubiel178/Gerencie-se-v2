@@ -63,4 +63,8 @@ export interface MascotCharacter {
   animations: Record<MascotStateName, string[]>;
   /** Frames por segundo ao tocar qualquer animação deste personagem. */
   frameRate: number;
+  /** URL do avatar (imagem redonda/perfil) deste mascote — usado no
+   * Companion header e ao lado das mensagens. Derivado do frame Idle_0
+   * do atlas (mesma arte), nunca desenho separado. */
+  avatarImageUrl?: string;
 }

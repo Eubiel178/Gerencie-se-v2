@@ -64,6 +64,7 @@ function buildCharacter(
     id,
     label,
     atlasImageUrl: `/mascot/pet/${id}.png`,
+    avatarImageUrl: `/mascot/avatars/${id}.png`,
     frameWidth: options?.frameWidth ?? FRAME_WIDTH,
     frameHeight: options?.frameHeight ?? FRAME_HEIGHT,
     displayWidth: options?.displayWidth,
@@ -332,4 +333,15 @@ const SPECIES_TO_CHARACTER_ID: Record<string, string> = {
 
 export function characterIdForSpecies(species: string): string | null {
   return SPECIES_TO_CHARACTER_ID[species] ?? null;
+}
+
+/** URL do avatar (imagem de perfil) do mascote a partir do seu estado.
+ * Derivada do `species` -> `characterId` -> `MASCOT_CHARACTERS[id].avatarImageUrl`.
+ * Nunca hardcodeada no chat: trocar de mascote em Configurações atualiza
+ * automaticamente tudo que consome isso. */
+export function mascotAvatarUrl(species: string): string | null {
+  const characterId = characterIdForSpecies(species);
+  if (!characterId) return null;
+  const character = MASCOT_CHARACTERS[characterId];
+  return character?.avatarImageUrl ?? null;
 }
