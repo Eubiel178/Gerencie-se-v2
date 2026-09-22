@@ -213,3 +213,18 @@ test("regressão 8: nenhuma regra do bloco de contexto está duplicada verbatim 
     1
   );
 });
+
+test("comunicação: proíbe narrar/descrever a conversa pro usuário (meta-comentário)", () => {
+  // Achado real: "parece que a vibe tá boa", "percebo que você..." - o
+  // Companion narrando a própria leitura da conversa em vez de
+  // participar dela. Trava a regra que corrige isso.
+  const prompt = buildChatSystemPrompt("sarcastico", MOCK_EXECUTION_CONTEXT);
+  assert.ok(prompt.includes("PARTICIPA da conversa, nunca a descreve"));
+  assert.ok(prompt.includes("nunca um comentário que você faz em voz alta sobre a própria conversa"));
+});
+
+test("comunicação: emoji é permitido, não mais banido globalmente", () => {
+  const prompt = buildChatSystemPrompt("sarcastico", MOCK_EXECUTION_CONTEXT);
+  assert.ok(prompt.includes("Emoji é PERMITIDO"));
+  assert.ok(!prompt.includes("Sem emoji."));
+});

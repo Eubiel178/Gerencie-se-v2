@@ -280,7 +280,7 @@ const pathname = usePathname();
     setChatLoading(true);
 
     try {
-      const recentHistory = buildRecentHistory(messages, taskId);
+      const recentHistory = buildRecentHistory(messages);
 
       // UMA chamada server-side — gera resposta com contexto. Limitada no
       // cliente pra nunca deixar o loading preso indefinidamente, mesmo se
