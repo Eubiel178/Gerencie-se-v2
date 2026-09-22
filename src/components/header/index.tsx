@@ -11,6 +11,7 @@ import styles from "@/app/home/home-layout.module.css";
 import { Button, Icon, type IconName } from "@/components";
 import { useMobileNavStore } from "@/components/header/mobile-nav-store";
 import { getFocusableElements } from "@/components/modal/get-focusable-elements";
+import { useEffectiveTheme } from "@/design-system/theme/use-effective-theme";
 import { ThemePreference, useTheme } from "@/design-system/theme/use-theme";
 import { Gender } from "@/features/profile/get-gender";
 import { usePaletteStore } from "@/features/search/palette-store";
@@ -70,21 +71,21 @@ const NAV_GROUPS: NavGroup[] = [
   { label: null, links: [{ href: "/home/settings", label: "Configurações", icon: "MdSettings" }] },
 ];
 
-// Ciclo curto (1 clique = 1 passo), nunca um menu à parte só pra 3
-// opções - "Sistema" já é o padrão pra quem nunca mexeu, então o ciclo
-// começa por ele.
-const NEXT_THEME_PREFERENCE: Record<ThemePreference, ThemePreference> = {
-  system: "light",
+// O cabeçalho alterna só entre claro/escuro (pedido explícito) - "Sistema"
+// continua existindo, mas só como opção em Configurações (`ThemeToggle`,
+// que mostra as 3). Ver `useEffectiveTheme` - quando a preferência salva
+// é "system", o botão precisa saber qual dos dois está de fato NA TELA
+// agora (nunca "o oposto de system", que não quer dizer nada) pra
+// alternar pro tema explícito oposto.
+const NEXT_EXPLICIT_THEME: Record<"light" | "dark", ThemePreference> = {
   light: "dark",
-  dark: "system",
+  dark: "light",
 };
-const THEME_PREFERENCE_ICON: Record<ThemePreference, IconName> = {
-  system: "MdBrightnessAuto",
+const EFFECTIVE_THEME_ICON: Record<"light" | "dark", IconName> = {
   light: "MdLightMode",
   dark: "MdDarkMode",
 };
-const THEME_PREFERENCE_LABEL: Record<ThemePreference, string> = {
-  system: "Tema: automático",
+const EFFECTIVE_THEME_LABEL: Record<"light" | "dark", string> = {
   light: "Tema: claro",
   dark: "Tema: escuro",
 };
@@ -121,7 +122,8 @@ function initials(name: string | null): string {
 export const Header = ({ user }: HeaderProps) => {
   useCaptureTimezone();
 
-  const { preference: themePreference, setPreference: setThemePreference } = useTheme();
+  const { setPreference: setThemePreference } = useTheme();
+  const effectiveTheme = useEffectiveTheme();
   const pathname = usePathname();
   const openPalette = usePaletteStore((state) => state.open);
   const [isConfirmingSignOut, setIsConfirmingSignOut] = useState(false);
@@ -271,11 +273,11 @@ export const Header = ({ user }: HeaderProps) => {
           <button
             type="button"
             className={styles.themeIconButton}
-            aria-label={THEME_PREFERENCE_LABEL[themePreference]}
-            title={THEME_PREFERENCE_LABEL[themePreference]}
-            onClick={() => setThemePreference(NEXT_THEME_PREFERENCE[themePreference])}
+            aria-label={EFFECTIVE_THEME_LABEL[effectiveTheme]}
+            title={EFFECTIVE_THEME_LABEL[effectiveTheme]}
+            onClick={() => setThemePreference(NEXT_EXPLICIT_THEME[effectiveTheme])}
           >
-            <Icon name={THEME_PREFERENCE_ICON[themePreference]} aria-hidden="true" />
+            <Icon name={EFFECTIVE_THEME_ICON[effectiveTheme]} aria-hidden="true" />
           </button>
           <button
             type="button"
@@ -374,11 +376,11 @@ export const Header = ({ user }: HeaderProps) => {
           <button
             type="button"
             className={styles.themeIconButton}
-            aria-label={THEME_PREFERENCE_LABEL[themePreference]}
-            title={THEME_PREFERENCE_LABEL[themePreference]}
-            onClick={() => setThemePreference(NEXT_THEME_PREFERENCE[themePreference])}
+            aria-label={EFFECTIVE_THEME_LABEL[effectiveTheme]}
+            title={EFFECTIVE_THEME_LABEL[effectiveTheme]}
+            onClick={() => setThemePreference(NEXT_EXPLICIT_THEME[effectiveTheme])}
           >
-            <Icon name={THEME_PREFERENCE_ICON[themePreference]} aria-hidden="true" />
+            <Icon name={EFFECTIVE_THEME_ICON[effectiveTheme]} aria-hidden="true" />
           </button>
         </div>
 

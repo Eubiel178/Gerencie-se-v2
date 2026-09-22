@@ -5,8 +5,9 @@ import { getMascotFetcher } from "@/features/focus/data/get-focus-fetcher";
 import { getTaskFetcher } from "@/features/tasks/data/get-task-fetcher";
 import { isAIProviderAvailable } from "@/lib/ai/gateway";
 import { askGemini } from "@/lib/ai/gemini";
-import { buildChatSystemPrompt } from "@/lib/ai/prompts/chat-prompt";
+import { buildChatSystemPrompt, TASKS_TOOL_MARKER } from "@/lib/ai/prompts/chat-prompt";
 
+import { buildTasksOverviewContext } from "./lib/build-tasks-overview-context";
 import { buildContextualFallback } from "./lib/companion-fallback";
 import { splitIntoConversationBeats } from "./lib/split-conversation-beats";
 
@@ -97,11 +98,36 @@ async function buildExecutionContext(): Promise<string> {
 }
 
 /**
- * Server action unificada: UMA chamada Gemini por mensagem.
+ * "Ferramenta" de consulta de tarefas, chamada SÓ quando o modelo pede
+ * (ver `TASKS_TOOL_MARKER`) - nunca em toda mensagem. Reaproveita
+ * `getTaskFetcher()` (a MESMA fonte que a página de Tarefas/Dashboard já
+ * usam, escopada ao usuário autenticado via `requireUserId()` internamente
+ * - nunca um parâmetro de userId vindo de fora, nunca uma segunda fonte de
+ * dado). A IA nunca toca o banco diretamente - só recebe o texto já
+ * formatado e cercado que esta função devolve.
+ */
+async function fetchTasksOverviewForTool(): Promise<string> {
+  const [tasks, session] = await Promise.all([
+    getTaskFetcher().loadAll(),
+    getExecutionSessionFetcher().getActiveOrPaused(),
+  ]);
+
+  return buildTasksOverviewContext(tasks, session?.taskId ?? null);
+}
+
+/**
+ * Server action unificada.
  * 1. Tenta interpretar como ação controlada (se Gemini disponível)
  * 2. Se ação detectada → retorna proposal
  * 3. Se não → gera resposta de chat com contexto
  * 4. Se Gemini indisponível → fallback context-aware com dados locais
+ *
+ * Normalmente UMA chamada de modelo por mensagem. Uma SEGUNDA chamada só
+ * acontece quando a primeira pede a ferramenta de consulta de tarefas
+ * (`TASKS_TOOL_MARKER`) - nunca em conversa casual, nunca sem motivo real
+ * (ver `chat-prompt.ts`). Isso é diferente do multi-bubble (`%%%`), que
+ * continua sendo SEMPRE uma única chamada — aqui a segunda chamada é
+ * genuinamente necessária porque a primeira não tinha o dado ainda.
  */
 export async function sendAssistantMessage(
   message: string,
@@ -139,6 +165,25 @@ export async function sendAssistantMessage(
     }));
     const response = await askGemini(cleanMessage, systemInstruction, chatHistory);
     if (response) {
+      // O modelo pediu a ferramenta de tarefas - busca os dados reais e dá
+      // UMA segunda (e última) chance de responder com eles em mãos. Nunca
+      // recursivo: a segunda chamada já vem com a instrução de responder,
+      // não de pedir de novo (ver `chat-prompt.ts`).
+      if (response.text.includes(TASKS_TOOL_MARKER)) {
+        const tasksOverview = await fetchTasksOverviewForTool();
+        const systemInstructionWithTasks = buildChatSystemPrompt(personality, executionContext, tasksOverview);
+        const followUp = await askGemini(cleanMessage, systemInstructionWithTasks, chatHistory);
+
+        if (followUp) {
+          const beats = splitIntoConversationBeats(followUp.text);
+          return { success: true, message: beats[0], messages: beats, source: "ai" };
+        }
+        // Segunda chamada falhou (provider caiu no meio do caminho) →
+        // mesmo fallback context-aware de qualquer outra falha.
+        const fallback = await buildContextualFallback(cleanMessage, fallbackDeps);
+        return { success: true, message: fallback, messages: [fallback], source: "fallback" };
+      }
+
       const beats = splitIntoConversationBeats(response.text);
       return { success: true, message: beats[0], messages: beats, source: "ai" };
     }

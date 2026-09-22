@@ -13,14 +13,9 @@ const { auth } = NextAuth(authConfig);
 export default auth((req) => {
   const isLoggedIn = !!req.auth;
   // `/verify-email` exige estar logado (precisa saber PRA QUEM verificar
-  // o código - ver `requireUserId()` em `VerifyEmail`), mas nunca deveria
-  // aparecer em `isOnAuthPage` abaixo: lá embaixo, "logado" bounces pra
-  // /home - aqui é o oposto, só chega logado mesmo.
+  // o código - ver `requireUserId()` em `VerifyEmail`).
   const isOnProtectedArea =
     req.nextUrl.pathname.startsWith("/home") || req.nextUrl.pathname.startsWith("/verify-email");
-  const isOnAuthPage =
-    req.nextUrl.pathname.startsWith("/login") ||
-    req.nextUrl.pathname.startsWith("/register");
 
   if (isOnProtectedArea && !isLoggedIn) {
     const loginUrl = new URL("/login", req.nextUrl);
@@ -29,10 +24,19 @@ export default auth((req) => {
     return NextResponse.redirect(loginUrl);
   }
 
-  if (isOnAuthPage && isLoggedIn) {
-    return NextResponse.redirect(new URL("/home", req.nextUrl));
-  }
-
+  // Bug real corrigido: isto ANTES redirecionava QUALQUER sessão logada
+  // pra fora de /login e /register direto pra /home - mas o middleware
+  // roda no Edge Runtime (ver comentário no import de `authConfig` acima),
+  // que não pode consultar o banco pra saber se o e-mail já foi
+  // verificado. O JWT sozinho não sabe distinguir "logado e verificado"
+  // de "logado com cadastro pendente" - então uma sessão pendente (comum:
+  // alguém que começou um cadastro e nunca confirmou o código) ficava
+  // presa, incapaz de alcançar /login OU /register, sempre caindo em
+  // /verify-email não importa o que clicasse (achado relatado: "Entrar
+  // levou pra verificação de e-mail"). A checagem de "já autenticado E
+  // verificado, não faz sentido mostrar login de novo" agora vive nas
+  // próprias páginas (`Login`/`Register`, Server Components com acesso
+  // real ao banco via `auth()`/`isEmailVerified()`), não aqui.
   return NextResponse.next();
 });
 

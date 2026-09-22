@@ -9,23 +9,33 @@ import { getTaskFetcher } from "./data/get-task-fetcher";
 export async function Home() {
   const fetcher = getTaskFetcher();
 
+  // Independente de tudo abaixo (nunca depende de tarefas/sincronização
+  // Google) - dispara em paralelo em vez de só começar depois que o resto
+  // termina. Achado real: essa cadeia inteira, serializada, era a causa
+  // do lag percebido navegando pra esta página (ex.: passo do tour que
+  // aponta pra "Nova Tarefa") - `getConnectionFetcher().loadAccepted()`
+  // não precisava esperar a volta e meia de rede do Google Agenda pra
+  // sequer começar.
+  const connectionsPromise = getConnectionFetcher().loadAccepted();
+
   const userId = await requireUserId();
   const isGoogleConnected = await isGoogleCalendarConnected(userId);
+
+  let tasksList = await fetcher.loadAll();
 
   // Sincronização Google→App: feita aqui, a cada carregamento da Home,
   // porque o app roda localmente sem domínio público pra receber webhooks
   // do Google (decisão de polling já aprovada no plano). Só tarefas com
   // vínculo prévio (`googleEventId`) são checadas — nunca importamos a
-  // agenda inteira do usuário.
+  // agenda inteira do usuário. Só recarrega a lista quando há de fato uma
+  // sincronização a considerar (nunca uma segunda consulta à toa pra
+  // quem não conectou o Google Agenda).
   if (isGoogleConnected) {
-    const tasksBeforeSync = await fetcher.loadAll();
-    await syncTasksFromGoogle(tasksBeforeSync, fetcher);
+    await syncTasksFromGoogle(tasksList, fetcher);
+    tasksList = await fetcher.loadAll();
   }
 
-  const [tasksList, connections] = await Promise.all([
-    fetcher.loadAll(),
-    getConnectionFetcher().loadAccepted(),
-  ]);
+  const connections = await connectionsPromise;
 
   return (
     <Section>

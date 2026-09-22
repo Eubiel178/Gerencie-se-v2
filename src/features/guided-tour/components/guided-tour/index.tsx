@@ -8,10 +8,13 @@ import { usePathname, useRouter } from "next/navigation";
 
 import { useMobileNavStore } from "@/components/header/mobile-nav-store";
 import { getFocusableElements } from "@/components/modal/get-focusable-elements";
+import { updateAssistantPreferencesAction } from "@/features/assistant/actions";
 import type { MascotPersonality } from "@/features/focus/domain";
+import { isAudioUnlocked } from "@/lib/speech/audio-unlock";
+import { speak, stopSpeaking } from "@/lib/speech/speak-text";
 
 import { dismissGuidedTourAction } from "../../actions";
-import { buildGuidedTourSteps, GUIDED_TOUR_MOBILE_BREAKPOINT_PX, GuidedTourStep } from "../../domain/steps";
+import { buildGuidedTourSteps, GUIDED_TOUR_MOBILE_BREAKPOINT_PX, GuidedTourStep, MASCOT_STEP_INTRO } from "../../domain/steps";
 import { useGuidedTourStore } from "../../guided-tour-store";
 
 import styles from "./styles.module.css";
@@ -98,6 +101,11 @@ interface GuidedTourProps {
    * do mascote (`speaksAsCompanion`), como "remetente" do balão. `null` =
    * espécie ainda sem avatar próprio, o passo cai pro layout sem imagem. */
   mascotAvatar: string | null;
+  /** Preferência JÁ existente de fala automática (`user_preference.
+   * assistant_auto_speech_enabled`, mesma fonte que `MascotPet`/`VoiceControl`
+   * usam) - usada como valor inicial da escolha "Com voz"/"Sem voz" no
+   * passo do mascote. Nunca uma preferência paralela nova. */
+  autoSpeechEnabled: boolean;
   userId: string;
 }
 
@@ -257,9 +265,22 @@ async function computeInitialStepsAwaitingTargets(
   return available.length > 0 ? available : null;
 }
 
-export function GuidedTour({ active, mascotName, mascotPersonality, mascotAvatar, userId }: GuidedTourProps) {
+export function GuidedTour({
+  active,
+  mascotName,
+  mascotPersonality,
+  mascotAvatar,
+  autoSpeechEnabled,
+  userId,
+}: GuidedTourProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const [voiceEnabled, setVoiceEnabled] = useState(autoSpeechEnabled);
+  // Garante que a fala automática do passo do mascote toque só UMA vez
+  // por visita a ele (nunca de novo por causa de um re-render qualquer,
+  // ex. resize) - reseta quando o passo atual deixa de ser o do mascote,
+  // então voltar pra ele depois (via "Voltar") fala de novo, de propósito.
+  const spokenMascotStepRef = useRef(false);
   // Ref (não outro useState) só pra não rodar `computeInitialSteps` -
   // que filtra passos e faz `document.querySelector` por passo - duas
   // vezes na mesma montagem só porque `steps` e `stepIndex` precisam do
@@ -369,6 +390,43 @@ export function GuidedTour({ active, mascotName, mascotPersonality, mascotAvatar
 
   const step = steps?.[stepIndex] ?? null;
   const [rect, setRect] = useState<Rect | null>(null);
+
+  // Fala automática da introdução do mascote (mesmo sistema de TTS já
+  // usado pelo resto do Companion, ver `speak-text.ts`) - só quando a
+  // preferência atual está ligada E já existe um gesto do usuário na aba
+  // (`isAudioUnlocked`, sempre verdade a essa altura do tour - chegar até
+  // aqui já exigiu clicar em "Próximo" algumas vezes). "Sem voz" nunca
+  // desliga o Companion nem o texto do balão, só o áudio.
+  useEffect(() => {
+    if (step?.id !== "mascot") {
+      spokenMascotStepRef.current = false;
+      return;
+    }
+    if (spokenMascotStepRef.current) return;
+    spokenMascotStepRef.current = true;
+
+    if (voiceEnabled && isAudioUnlocked()) {
+      speak(MASCOT_STEP_INTRO[mascotPersonality].spoken);
+    }
+  }, [step?.id, voiceEnabled, mascotPersonality]);
+
+  function chooseVoice(enabled: boolean) {
+    setVoiceEnabled(enabled);
+    // Mesma preferência que `MascotPet`/`VoiceControl` já usam - nunca uma
+    // segunda fonte de verdade. `autoSpeechPromptShown: true` evita que o
+    // convite avulso "quer que eu fale às vezes?" pergunte de novo depois,
+    // já que o tour acabou de oferecer a mesma escolha.
+    updateAssistantPreferencesAction({ autoSpeechEnabled: enabled, autoSpeechPromptShown: true }).catch(() => {
+      // Falhou silenciosamente - pior caso, a preferência não persiste
+      // desta vez; nunca trava o tour por causa disso.
+    });
+
+    if (enabled) {
+      if (isAudioUnlocked()) speak(MASCOT_STEP_INTRO[mascotPersonality].spoken);
+    } else {
+      stopSpeaking();
+    }
+  }
 
   // Navega (se o passo pedir uma rota diferente da atual) e só então
   // mede o alvo - com retentativa, porque depois de navegar o conteúdo
@@ -568,6 +626,27 @@ export function GuidedTour({ active, mascotName, mascotPersonality, mascotAvatar
           </>
         )}
         <p className={step.speaksAsCompanion ? `${styles.body} ${styles.companionBody}` : styles.body}>{step.body}</p>
+
+        {step.speaksAsCompanion && (
+          <div className={styles.voiceChoice} role="group" aria-label="Fala automática do Companion">
+            <button
+              type="button"
+              className={voiceEnabled ? `${styles.voiceOption} ${styles.voiceOptionActive}` : styles.voiceOption}
+              aria-pressed={voiceEnabled}
+              onClick={() => chooseVoice(true)}
+            >
+              Com voz
+            </button>
+            <button
+              type="button"
+              className={!voiceEnabled ? `${styles.voiceOption} ${styles.voiceOptionActive}` : styles.voiceOption}
+              aria-pressed={!voiceEnabled}
+              onClick={() => chooseVoice(false)}
+            >
+              Sem voz
+            </button>
+          </div>
+        )}
 
         <div className={styles.actions}>
           <button type="button" className={styles.skip} onClick={finish}>

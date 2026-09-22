@@ -22,6 +22,7 @@ import { useChatHistory } from "../../hooks/use-chat-history";
 import { useWidgetSeedRequest } from "../../hooks/use-widget-open-request";
 import { playMessageReceivedSound, playMessageSentSound } from "../../lib/chat-sound";
 
+import { CompanionMarkdown } from "./companion-markdown";
 import { groupMessagesByDay } from "./group-messages-by-day";
 import styles from "./styles.module.css";
 
@@ -510,7 +511,7 @@ const pathname = usePathname();
                         className={styles.chatMsg}
                         data-role={effectiveRole}
                       >
-                        <p>{text}</p>
+                        <CompanionMarkdown text={text} />
                         <span className={styles.msgTime}>{formatTimeOnly(new Date(msg.timestamp))}</span>
                         {isError && failedUserMessage && (
                           <button

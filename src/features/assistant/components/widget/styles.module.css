@@ -233,6 +233,21 @@
 .chatMsg p {
   margin: 0;
 }
+.chatMsg p + p,
+.chatMsg ul,
+.chatMsg ol {
+  margin: var(--space-1) 0 0;
+}
+.chatMsg ul,
+.chatMsg ol {
+  padding-left: 1.1rem;
+}
+.chatMsg li + li {
+  margin-top: 0.15rem;
+}
+.chatMsg strong {
+  font-weight: 700;
+}
 
 .msgTime {
   display: block;

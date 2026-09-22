@@ -40,13 +40,33 @@ export interface GuidedTourStep {
 // não duplicar o tour inteiro por personalidade, só deixar a arquitetura
 // já existente influenciar naturalmente ONDE ela já se aplicaria de
 // qualquer forma - o Companion se apresentando é exatamente isso). Texto
-// curto e em primeira pessoa, nunca um manual de funcionalidades.
-const MASCOT_STEP_INTRO: Record<MascotPersonality, string> = {
-  afetuoso: "Oi, eu sou seu companheiro por aqui! Ando pela tela, comemoro junto quando você termina algo, e fico do seu lado quando você começa a executar uma tarefa de verdade. Pode trocar meu nome, espécie e jeito de ser quando quiser, em Configurações.",
-  sarcastico: "Sou eu, seu companheiro. Ando por aqui, solto um comentário quando você termina algo e fico de olho quando você começa uma tarefa pra valer. Se meu jeito não for a sua praia, dá pra trocar - nome, espécie, personalidade - em Configurações.",
-  engracado: "Opa! Eu sou seu companheiro por aqui - ando pela tela, comemoro com você quando termina algo e fico por perto quando você parte pra uma tarefa de verdade. Nome, espécie e personalidade dá pra trocar em Configurações, se bater vontade de bagunçar tudo.",
-  motivador: "Eu sou seu companheiro nessa jornada! Ando pela tela, celebro cada conquista sua e fico com você quando começa a executar uma tarefa de verdade. Pode ajustar meu nome, espécie e personalidade em Configurações quando quiser.",
-  zen: "Eu sou seu companheiro por aqui. Ando devagar pela tela, reconheço suas conquistas no seu tempo e fico por perto quando você começa a executar uma tarefa. Nome, espécie e personalidade dá pra ajustar em Configurações.",
+// curto e em primeira pessoa, nunca um manual de funcionalidades - mas
+// cobre os 3 pontos pedidos: fica durante a execução, reage ao que
+// acontece, aparece se a pessoa travar/se distrair. `spoken` é a MESMA
+// intenção reescrita pra soar natural em voz alta (mesmo padrão de
+// `companion-phrasing.ts`) - usada só se a fala automática estiver
+// ligada (ver `GuidedTour`), nunca lida ao pé da letra do `written`.
+export const MASCOT_STEP_INTRO: Record<MascotPersonality, { written: string; spoken: string }> = {
+  afetuoso: {
+    written: "Oi! Eu sou seu companheiro por aqui — fico com você quando começa uma tarefa de verdade, reajo ao que rola durante a execução, e apareço se você travar ou se distrair. Pode trocar meu nome, espécie e jeito de ser quando quiser, em Configurações.",
+    spoken: "Oi! Eu sou seu companheiro por aqui. Fico com você quando você começa uma tarefa de verdade, reajo ao que rola enquanto você executa, e apareço se você travar ou se distrair um pouco. Pode trocar meu nome, minha espécie e meu jeito de ser quando quiser, lá em Configurações.",
+  },
+  sarcastico: {
+    written: "Sou eu, seu companheiro. Fico de olho quando você começa uma tarefa pra valer, comento o que rola durante a execução, e apareço se você travar ou sumir no meio do caminho. Nome, espécie e personalidade dá pra trocar em Configurações, se meu jeito não for a sua praia.",
+    spoken: "Sou eu, seu companheiro. Fico de olho quando você começa uma tarefa pra valer, comento o que rola enquanto você executa, e apareço se você travar ou sumir no meio do caminho. Nome, espécie e personalidade dá pra trocar lá em Configurações, se meu jeito não for a sua praia.",
+  },
+  engracado: {
+    written: "Opa! Eu sou seu companheiro por aqui — fico com você quando começa uma tarefa de verdade, reajo junto durante a execução, e apareço se você travar ou se distrair. Nome, espécie e personalidade dá pra trocar em Configurações, se bater vontade de bagunçar tudo.",
+    spoken: "Opa! Eu sou seu companheiro por aqui. Fico com você quando você começa uma tarefa de verdade, reajo junto enquanto você executa, e apareço se você travar ou se distrair um pouco. Nome, espécie e personalidade dá pra trocar lá em Configurações, se bater vontade de bagunçar tudo.",
+  },
+  motivador: {
+    written: "Eu sou seu companheiro nessa jornada! Fico com você quando começa uma tarefa de verdade, celebro o progresso durante a execução, e apareço se você travar ou se distrair. Pode ajustar meu nome, espécie e personalidade em Configurações quando quiser.",
+    spoken: "Eu sou seu companheiro nessa jornada! Fico com você quando você começa uma tarefa de verdade, celebro o progresso enquanto você executa, e apareço se você travar ou se distrair um pouco. Pode ajustar meu nome, minha espécie e minha personalidade lá em Configurações, quando quiser.",
+  },
+  zen: {
+    written: "Eu sou seu companheiro por aqui. Fico com você quando começa uma tarefa de verdade, acompanho o ritmo durante a execução, e apareço com calma se você travar ou se distrair. Nome, espécie e personalidade dá pra ajustar em Configurações.",
+    spoken: "Eu sou seu companheiro por aqui. Fico com você quando você começa uma tarefa de verdade, acompanho o ritmo enquanto você executa, e apareço com calma se você travar ou se distrair um pouco. Nome, espécie e personalidade dá pra ajustar lá em Configurações.",
+  },
 };
 
 export function buildGuidedTourSteps(mascotName: string, mascotPersonality: MascotPersonality): GuidedTourStep[] {
@@ -74,7 +94,7 @@ export function buildGuidedTourSteps(mascotName: string, mascotPersonality: Masc
       id: "mascot",
       target: '[data-tour="mascot"]',
       title: mascotName,
-      body: MASCOT_STEP_INTRO[mascotPersonality],
+      body: MASCOT_STEP_INTRO[mascotPersonality].written,
       speaksAsCompanion: true,
     },
     {

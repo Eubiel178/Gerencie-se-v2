@@ -86,6 +86,7 @@ const HomeLayout = async ({ children }: { children: React.ReactNode }) => {
             mascotName={mascot.name}
             mascotPersonality={mascot.personality}
             mascotAvatar={mascotAvatarUrl(mascot.species)}
+            autoSpeechEnabled={assistantPreferences.autoSpeechEnabled}
             userId={session?.user?.id ?? ""}
           />
           <FocusMiniWidget />

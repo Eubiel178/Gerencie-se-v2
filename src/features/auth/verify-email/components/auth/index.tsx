@@ -112,7 +112,13 @@ export function Auth({ email, deliveryFailed, resumed }: AuthProps) {
   }
 
   function handleSignOut() {
-    signOut({ callbackUrl: "/register" });
+    // `/login` (não `/register`) - quem clica aqui normalmente já TEM uma
+    // conta (a errada, ou uma diferente já verificada) e quer entrar com
+    // ela; `/login` também tem o link "Cadastre-se" pra quem realmente
+    // precisa recomeçar do zero. Enviar direto pra Cadastro era o único
+    // jeito de sair desta tela, e não existia nenhum caminho de volta pra
+    // Login (achado relatado).
+    signOut({ callbackUrl: "/login" });
   }
 
   return (
