@@ -12,6 +12,19 @@ export interface ChatMessage {
    *  histórico, uma troca de mensagens que era sobre outra tarefa. Ver
    *  `Widget.handleSendChat`. */
   taskId: string | null;
+  /** De onde essa mensagem do MASCOTE veio de verdade - `undefined`/`role
+   *  "user"` não se aplica. "ai" = geração real do provider, a única que
+   *  volta a entrar como histórico numa chamada futura. "fallback" = texto
+   *  fixo local (`buildContextualFallback`, providers indisponíveis) e
+   *  "error" = falha de rede/timeout do lado do cliente - nenhum dos dois
+   *  é uma fala real do Companion, então NUNCA deveriam ser mandados de
+   *  volta pro modelo como se fossem um turno anterior dele (achado real:
+   *  antes disso existir, um erro técnico ou um fallback genérico virava
+   *  "histórico" e contaminava o tom das respostas seguintes - ver
+   *  `Widget.sendToAssistant`). Mensagens antigas gravadas antes deste
+   *  campo existir vêm como `undefined` - tratadas como "ai" por
+   *  compatibilidade (não dá pra saber a origem retroativamente). */
+  kind?: "ai" | "fallback" | "error";
 }
 
 const STORAGE_KEY = "assistant-chat-history";
@@ -111,13 +124,14 @@ export function useChatHistory() {
     emitChange();
   }, []);
 
-  const addMascotMessage = useCallback((text: string, taskId: string | null) => {
+  const addMascotMessage = useCallback((text: string, taskId: string | null, kind: ChatMessage["kind"] = "ai") => {
     const msg: ChatMessage = {
       id: crypto.randomUUID(),
       role: "mascot",
       text,
       timestamp: Date.now(),
       taskId,
+      kind,
     };
     memory = [...memory, msg];
     saveHistory(memory);

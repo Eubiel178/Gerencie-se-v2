@@ -17,6 +17,7 @@ import { sendAssistantMessage } from "@/features/mascot-pet/actions";
 import { useSpeak } from "@/lib/speech/speak-text";
 import { formatTimeOnly } from "@/utils/date";
 
+import { buildRecentHistory } from "../../hooks/build-recent-history";
 import { useChatHistory } from "../../hooks/use-chat-history";
 import { useWidgetSeedRequest } from "../../hooks/use-widget-open-request";
 import { playMessageReceivedSound, playMessageSentSound } from "../../lib/chat-sound";
@@ -279,18 +280,7 @@ const pathname = usePathname();
     setChatLoading(true);
 
     try {
-      // Só entra como histórico o que foi trocado sobre a MESMA tarefa que
-      // está ativa agora — do contrário o modelo recebe, no mesmo prompt,
-      // tanto o contexto factual correto (via `buildExecutionContext` no
-      // server) quanto trechos de conversa sobre uma tarefa diferente, e
-      // pode responder com base na conversa antiga em vez do fato atual.
-      const recentHistory = messages
-        .filter((m) => m.taskId === taskId)
-        .slice(-10)
-        .map((m) => ({
-          role: m.role as "user" | "mascot",
-          text: m.text,
-        }));
+      const recentHistory = buildRecentHistory(messages, taskId);
 
       // UMA chamada server-side — gera resposta com contexto. Limitada no
       // cliente pra nunca deixar o loading preso indefinidamente, mesmo se
@@ -314,8 +304,10 @@ const pathname = usePathname();
         // `splitIntoConversationBeats` em `mascot-pet/actions.ts`). Cada
         // uma vira sua própria `ChatMessage` no histórico - persiste e
         // reabre exatamente como foi mostrada, sem juntar tudo numa só.
+        // `kind` acompanha `result.source` (marca fallback como tal, nunca
+        // como "ai" - ver o filtro de `recentHistory` acima).
         for (const beat of result.messages) {
-          addMascotMessage(beat, taskId);
+          addMascotMessage(beat, taskId, result.source ?? "fallback");
         }
         setMessage(null);
       }
@@ -323,8 +315,9 @@ const pathname = usePathname();
       if (chatRequestIdRef.current !== requestId) return;
       const isTimeout = error instanceof Error && error.message === TIMEOUT_ERROR_MESSAGE;
       addMascotMessage(
-        `__ERROR__:${isTimeout ? "Isso tá demorando mais que o esperado." : "Algo deu errado."} Tenta de novo.`,
-        taskId
+        `${isTimeout ? "Isso tá demorando mais que o esperado." : "Algo deu errado."} Tenta de novo.`,
+        taskId,
+        "error"
       );
     } finally {
       if (chatRequestIdRef.current === requestId) setChatLoading(false);
@@ -385,15 +378,18 @@ const pathname = usePathname();
         params: pendingProposal.params,
       });
 
+      // Confirmações de ação executada são texto fixo local, não geração
+      // de IA - mesmo raciocínio de `result.source` em `sendToAssistant`:
+      // nunca deveriam voltar como "histórico" numa chamada futura.
       if (result.error) {
-        addMascotMessage(`Não consegui: ${result.error}`, currentTaskId);
+        addMascotMessage(`Não consegui: ${result.error}`, currentTaskId, "fallback");
       } else {
         const label =
           ACTION_LABELS[pendingProposal.action] ?? pendingProposal.action;
-        addMascotMessage(`${label} feito!`, currentTaskId);
+        addMascotMessage(`${label} feito!`, currentTaskId, "fallback");
       }
     } catch {
-      addMascotMessage("Algo deu errado ao executar. Tenta de novo.", currentTaskId);
+      addMascotMessage("Algo deu errado ao executar. Tenta de novo.", currentTaskId, "error");
     } finally {
       setPendingProposal(null);
       setProposalLoading(false);
@@ -403,7 +399,7 @@ const pathname = usePathname();
 
   function handleRejectAction() {
     setPendingProposal(null);
-    addMascotMessage("Tá, cancelei. O que mais?", executionSession?.taskId ?? null);
+    addMascotMessage("Tá, cancelei. O que mais?", executionSession?.taskId ?? null, "fallback");
   }
 
   function handleChatKeyDown(e: React.KeyboardEvent) {
@@ -478,8 +474,12 @@ const pathname = usePathname();
                 </div>
 
                 {group.entries.map(({ message: msg, index }, entryIdx) => {
-                  const isError = msg.text.startsWith("__ERROR__:");
-                  const text = isError
+                  // `kind === "error"` é a fonte de verdade atual; o check
+                  // por prefixo continua aqui só pra mensagens JÁ salvas no
+                  // localStorage antes do campo `kind` existir (texto
+                  // literal "__ERROR__:..." persistido à moda antiga).
+                  const isError = msg.kind === "error" || msg.text.startsWith("__ERROR__:");
+                  const text = msg.text.startsWith("__ERROR__:")
                     ? msg.text.replace("__ERROR__:", "")
                     : msg.text;
                   const failedUserMessage = isError
@@ -488,7 +488,9 @@ const pathname = usePathname();
 
                   const effectiveRole = isError ? "error" : msg.role;
                   const prevEntry = entryIdx > 0 ? group.entries[entryIdx - 1] : null;
-                  const prevRole = prevEntry ? (prevEntry.message.text.startsWith("__ERROR__:") ? "error" : prevEntry.message.role) : null;
+                  const prevIsError =
+                    prevEntry && (prevEntry.message.kind === "error" || prevEntry.message.text.startsWith("__ERROR__:"));
+                  const prevRole = prevEntry ? (prevIsError ? "error" : prevEntry.message.role) : null;
                   const showAvatar = effectiveRole !== "error" && effectiveRole !== prevRole;
 
                   return (

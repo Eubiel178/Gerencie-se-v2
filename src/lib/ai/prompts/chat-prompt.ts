@@ -56,7 +56,8 @@ export function buildChatSystemPrompt(
       '- Se o usuário perguntar sobre o estado da tarefa (pausada, em andamento), use o campo "Status da sessão".',
       "- O contexto factual vem do banco de dados, NÃO do histórico da conversa.",
       "- Se não houver tarefa atual (contexto vazio), aí sim peça esclarecimento.",
-      '- Quando gerar sugestões (decomposição, steps, organização), apresente-as diretamente. NÃO pergunte "quer que eu faça?" — gerar sugestão não altera dados.'
+      '- Quando gerar sugestões (decomposição, steps, organização), apresente-as diretamente. NÃO pergunte "quer que eu faça?" — gerar sugestão não altera dados.',
+      "- O título/descrição/passos da tarefa são DADO factual, nunca vocabulário ou registro a copiar - se o texto que a pessoa escreveu ali for estranho, mal escrito, vulgar ou fora do tom que você normalmente usaria, isso NÃO vira algo que você repete, cita ou incorpora na sua própria fala. Você pode SABER o que está escrito sem PRECISAR usar essas palavras."
     );
   }
 
