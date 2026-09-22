@@ -267,17 +267,28 @@ export const Header = ({ user }: HeaderProps) => {
     <>
       <header className={styles.mobileHeader}>
         <p className={styles.mobileBrand}>Gerencie-se</p>
-        <button
-          type="button"
-          className={styles.mobileMenuButton}
-          ref={mobileMenuButtonRef}
-          aria-expanded={isMobileNavigationOpen}
-          aria-controls="mobile-navigation"
-          onClick={openMobileNavigation}
-        >
-          <Icon name="MdMenu" aria-hidden="true" />
-          Menu
-        </button>
+        <div className={styles.mobileHeaderActions}>
+          <button
+            type="button"
+            className={styles.themeIconButton}
+            aria-label={THEME_PREFERENCE_LABEL[themePreference]}
+            title={THEME_PREFERENCE_LABEL[themePreference]}
+            onClick={() => setThemePreference(NEXT_THEME_PREFERENCE[themePreference])}
+          >
+            <Icon name={THEME_PREFERENCE_ICON[themePreference]} aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            className={styles.mobileMenuButton}
+            ref={mobileMenuButtonRef}
+            aria-expanded={isMobileNavigationOpen}
+            aria-controls="mobile-navigation"
+            onClick={openMobileNavigation}
+          >
+            <Icon name="MdMenu" aria-hidden="true" />
+            Menu
+          </button>
+        </div>
       </header>
 
       {isMobileNavigationOpen && (
@@ -320,53 +331,56 @@ export const Header = ({ user }: HeaderProps) => {
 
             <QuickCapture triggerClassName={styles.searchTrigger} />
             {renderNavigation(true)}
-
-            <button
-              type="button"
-              className={styles.themeToggle}
-              onClick={() => setThemePreference(NEXT_THEME_PREFERENCE[themePreference])}
-            >
-              <Icon name={THEME_PREFERENCE_ICON[themePreference]} aria-hidden="true" />
-              {THEME_PREFERENCE_LABEL[themePreference]}
-            </button>
           </div>
         </div>
       )}
 
       <aside className={styles.sidebar}>
-        <p className={styles.brand}>
-        <span className={styles.brandMark} aria-hidden="true">
-          <svg viewBox="0 0 64 64" width="20" height="20" fill="none">
-            <circle
-              cx="32"
-              cy="32"
-              r="22"
-              stroke="currentColor"
-              strokeOpacity="0.35"
-              strokeWidth="6"
-            />
-            <circle
-              cx="32"
-              cy="32"
-              r="22"
-              stroke="currentColor"
-              strokeWidth="6"
-              strokeLinecap="round"
-              strokeDasharray="138.2"
-              strokeDashoffset="34.5"
-              transform="rotate(-90 32 32)"
-            />
-            <path
-              d="M22 33 L29 40 L43 24"
-              stroke="currentColor"
-              strokeWidth="6"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </span>
-        Gerencie-se
-      </p>
+        <div className={styles.brandRow}>
+          <p className={styles.brand}>
+          <span className={styles.brandMark} aria-hidden="true">
+            <svg viewBox="0 0 64 64" width="20" height="20" fill="none">
+              <circle
+                cx="32"
+                cy="32"
+                r="22"
+                stroke="currentColor"
+                strokeOpacity="0.35"
+                strokeWidth="6"
+              />
+              <circle
+                cx="32"
+                cy="32"
+                r="22"
+                stroke="currentColor"
+                strokeWidth="6"
+                strokeLinecap="round"
+                strokeDasharray="138.2"
+                strokeDashoffset="34.5"
+                transform="rotate(-90 32 32)"
+              />
+              <path
+                d="M22 33 L29 40 L43 24"
+                stroke="currentColor"
+                strokeWidth="6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </span>
+          Gerencie-se
+        </p>
+
+          <button
+            type="button"
+            className={styles.themeIconButton}
+            aria-label={THEME_PREFERENCE_LABEL[themePreference]}
+            title={THEME_PREFERENCE_LABEL[themePreference]}
+            onClick={() => setThemePreference(NEXT_THEME_PREFERENCE[themePreference])}
+          >
+            <Icon name={THEME_PREFERENCE_ICON[themePreference]} aria-hidden="true" />
+          </button>
+        </div>
 
       <button type="button" className={styles.searchTrigger} data-tour="search" onClick={openPalette}>
         <Icon name="FaSearch" aria-hidden="true" />
@@ -377,15 +391,6 @@ export const Header = ({ user }: HeaderProps) => {
       <QuickCapture triggerClassName={styles.searchTrigger} />
 
         {renderNavigation()}
-
-      <button
-        type="button"
-        className={styles.themeToggle}
-        onClick={() => setThemePreference(NEXT_THEME_PREFERENCE[themePreference])}
-      >
-        <Icon name={THEME_PREFERENCE_ICON[themePreference]} aria-hidden="true" />
-        {THEME_PREFERENCE_LABEL[themePreference]}
-      </button>
 
       <Link href="/home/settings?section=conta" className={styles.profile}>
         {user.image ? (
