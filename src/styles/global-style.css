@@ -20,6 +20,14 @@ html {
   /* Rolagem suave ao clicar em links âncora (#id). Desativado de volta
      para quem prefere menos animação — ver motion.css. */
   scroll-behavior: smooth;
+  /* Reserva o espaço da scrollbar mesmo quando ela some (ex.: `Modal`
+     trava `body.style.overflow = "hidden"` enquanto está aberto, ver
+     `components/modal/index.tsx`) - sem isso, o conteúdo ganha a largura
+     da scrollbar de volta por baixo do fundo escurecido e desloca tudo
+     alguns pixels pra direita por um instante (achado real: "toda vez que
+     um modal abre a scrollbar some e a tela cresce", sensação de bug
+     mesmo sem quebrar nada). */
+  scrollbar-gutter: stable;
 }
 
 html,

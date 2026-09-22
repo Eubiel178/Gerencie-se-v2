@@ -35,6 +35,74 @@
   will-change: transform;
 }
 
+/* Mesma ideia do `.bubbleAnchor` acima (ponto sem tamanho próprio, movido
+   via `onPositionChange`), só que ancorado no canto SUPERIOR direito do
+   bichinho, com uma folga que escala com o tamanho dele - onde o selo de
+   voz vive (ver `.voiceBadge` abaixo). Acima do `.bubbleAnchor` pra nunca
+   ficar por baixo de um balão/cartão que porventura esteja aberto ao
+   mesmo tempo. */
+.voiceBadgeAnchor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 12;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* Selo de status preso à borda do PERSONAGEM (mesmo padrão visual de um
+   indicador de mic/áudio grudado no canto do avatar de alguém numa
+   chamada) - lê como "isso é sobre ele falar" só de olhar, sem precisar
+   de texto ao lado (achado real: um ícone de som sozinho ao lado da
+   bolha do widget não dizia nada por si só; grudado no próprio bichinho,
+   a associação fica óbvia). Sempre abre confirmação antes de mudar (ver
+   `isConfirmingVoice` em `index.tsx`), nunca alterna direto no clique. */
+.voiceBadge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 2px solid var(--color-surface);
+  border-radius: var(--radius-full);
+  background: var(--color-surface-elevated);
+  color: var(--color-text-muted);
+  box-shadow: 0 0.125rem 0.5rem var(--color-shadow);
+  cursor: pointer;
+  pointer-events: auto;
+  transition:
+    color var(--duration-fast) var(--easing-standard),
+    background var(--duration-fast) var(--easing-standard);
+}
+.voiceBadge:hover {
+  color: var(--color-text);
+}
+.voiceBadge[aria-pressed="true"] {
+  color: var(--color-highlight);
+}
+.voiceBadge:focus-visible {
+  outline: 2px solid var(--color-highlight);
+  outline-offset: 2px;
+}
+
+.confirmVoiceText {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+}
+.confirmVoiceActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
 /*
  * Conteúdo estreito (mobile OU tablet com sidebar visível, mas pouca
  * largura de conteúdo sobrando): nunca captura toque. Diferente de um
@@ -73,8 +141,11 @@
 
   /* O mascote não passeia nessa faixa (regra acima) - o balão do
      Companion segue ele via `onPositionChange`, então também some, sem
-     ficar preso boiando num canto sem bichinho visível ali. */
-  .bubbleAnchor {
+     ficar preso boiando num canto sem bichinho visível ali. Mesma lógica
+     pro selo de voz: o toggle equivalente em Configurações continua
+     disponível como alternativa. */
+  .bubbleAnchor,
+  .voiceBadgeAnchor {
     display: none;
   }
 }

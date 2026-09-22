@@ -59,8 +59,8 @@
    adesivo, sem precisar gerar os PNGs de novo. */
 .headerAvatarFrame {
   display: block;
-  width: 2rem;
-  height: 2rem;
+  width: 2.5rem;
+  height: 2.5rem;
   border-radius: var(--radius-full);
   overflow: hidden;
   flex-shrink: 0;
@@ -180,7 +180,11 @@
 
 .msgRow {
   display: flex;
-  align-items: center;
+  /* Foto alinhada ao TOPO da bolha (padrão WhatsApp), não ao centro -
+     numa mensagem de várias linhas, centralizar a foto em relação à
+     altura inteira do balão a deixa flutuando no meio do texto em vez de
+     "ancorada" no início da mensagem, que é o que o olho espera. */
+  align-items: flex-start;
   gap: 0.3rem;
 }
 .msgRow[data-role="user"] {
@@ -253,7 +257,8 @@
 
 .chatMsg[data-role="error"] {
   background: color-mix(in srgb, var(--color-danger) 8%, var(--color-surface));
-  border: 1px solid color-mix(in srgb, var(--color-danger) 25%, var(--color-border));
+  border: 1px solid
+    color-mix(in srgb, var(--color-danger) 25%, var(--color-border));
   border-bottom-left-radius: var(--radius-xs);
   color: var(--color-text-muted);
 }
@@ -297,11 +302,22 @@
   animation-delay: 0.4s;
 }
 @keyframes typingBounce {
-  0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
-  30% { opacity: 1; transform: translateY(-0.15rem); }
+  0%,
+  60%,
+  100% {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-0.15rem);
+  }
 }
 @media (prefers-reduced-motion: reduce) {
-  .typingDots span { animation: none; opacity: 1; }
+  .typingDots span {
+    animation: none;
+    opacity: 1;
+  }
 }
 
 .chatActions {
@@ -355,7 +371,7 @@
 .chatField {
   flex: 1;
   min-width: 0;
-  padding: var(--space-1) var(--space-2);
+  padding: var(--space-2);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);
@@ -379,11 +395,18 @@
   animation: speakingPulse 1s ease-in-out infinite;
 }
 @keyframes speakingPulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.35; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
-  .speakingIcon { animation: none; }
+  .speakingIcon {
+    animation: none;
+  }
 }
 
 .avatar {
@@ -397,7 +420,11 @@
   border-radius: var(--radius-full);
   background: radial-gradient(
     circle at 30% 25%,
-    color-mix(in srgb, var(--color-highlight-soft) 55%, var(--color-surface-elevated)),
+    color-mix(
+      in srgb,
+      var(--color-highlight-soft) 55%,
+      var(--color-surface-elevated)
+    ),
     var(--color-surface-elevated) 70%
   );
   box-shadow:
@@ -505,7 +532,8 @@
 }
 
 @keyframes ping {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     opacity: 1;
   }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef, useSyncExternalStore, useCallback } from "react";
 
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 
 import { Button, Modal, ModalHeader } from "@/components";
@@ -307,9 +308,15 @@ const pathname = usePathname();
       if (result.proposal) {
         // Gemini detectou uma ação controlada
         setPendingProposal(result.proposal);
-      } else if (result.message) {
-        // Resposta de chat (Gemini ou fallback context-aware)
-        addMascotMessage(result.message, taskId);
+      } else if (result.messages.length > 0) {
+        // Resposta de chat (Gemini ou fallback context-aware) - normalmente
+        // UMA bolha, raramente 2-3 "beats" da MESMA resposta (ver
+        // `splitIntoConversationBeats` em `mascot-pet/actions.ts`). Cada
+        // uma vira sua própria `ChatMessage` no histórico - persiste e
+        // reabre exatamente como foi mostrada, sem juntar tudo numa só.
+        for (const beat of result.messages) {
+          addMascotMessage(beat, taskId);
+        }
         setMessage(null);
       }
     } catch (error) {
@@ -416,7 +423,7 @@ const pathname = usePathname();
             <div className={styles.bubbleHeaderIdentity}>
               {mascotAvatar && (
                 <span className={styles.headerAvatarFrame}>
-                  <img src={mascotAvatar} alt="" width={28} height={28} className={styles.headerAvatar} />
+                  <Image src={mascotAvatar} alt="" width={28} height={28} className={styles.headerAvatar} />
                 </span>
               )}
               <div className={styles.bubbleTitleGroup}>
@@ -455,7 +462,7 @@ const pathname = usePathname();
               <div className={styles.msgRow} data-role="mascot">
                 <div className={styles.msgAvatarSlot}>
                   {mascotAvatar && (
-                    <img src={mascotAvatar} alt="" width={24} height={24} data-kind="mascot" className={styles.msgAvatar} />
+                    <Image src={mascotAvatar} alt="" width={24} height={24} data-kind="mascot" className={styles.msgAvatar} />
                   )}
                 </div>
                 <div className={styles.chatMsg} data-role="mascot">
@@ -493,7 +500,7 @@ const pathname = usePathname();
                       {effectiveRole === "mascot" && (
                         <div className={styles.msgAvatarSlot}>
                           {showAvatar && mascotAvatar ? (
-                            <img src={mascotAvatar} alt="" width={24} height={24} data-kind="mascot" className={styles.msgAvatar} />
+                            <Image src={mascotAvatar} alt="" width={24} height={24} data-kind="mascot" className={styles.msgAvatar} />
                           ) : null}
                         </div>
                       )}
@@ -520,7 +527,7 @@ const pathname = usePathname();
                       {effectiveRole === "user" && (
                         <div className={styles.msgAvatarSlot}>
                           {showAvatar && userImage ? (
-                            <img src={userImage} alt="" width={24} height={24} className={styles.msgAvatar} />
+                            <Image src={userImage} alt="" width={24} height={24} className={styles.msgAvatar} />
                           ) : showAvatar ? (
                             <span className={styles.userAvatarFallback}>
                               <Icon name="FaUser" aria-hidden="true" size={11} />
@@ -574,7 +581,7 @@ const pathname = usePathname();
               <div className={styles.msgRow} data-role="mascot">
                 <div className={styles.msgAvatarSlot}>
                   {mascotAvatar && (
-                    <img src={mascotAvatar} alt="" width={24} height={24} data-kind="mascot" className={styles.msgAvatar} />
+                    <Image src={mascotAvatar} alt="" width={24} height={24} data-kind="mascot" className={styles.msgAvatar} />
                   )}
                 </div>
                 <div className={styles.chatMsg} data-role="mascot">

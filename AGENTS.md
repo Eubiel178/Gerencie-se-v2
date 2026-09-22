@@ -116,3 +116,5 @@ Schemas Zod em `src/validation/execution-session-schema.ts`:
 - `executionActionSchema`: { sessionId: string }
 
 nao fazer teste sem antes me consultar independe
+
+e nao rode mais de um agente ao mesmo tempo

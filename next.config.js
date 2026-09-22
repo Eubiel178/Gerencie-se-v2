@@ -18,6 +18,17 @@ const nextConfig = {
       {
         pathname: "/api/profile/avatar/**",
       },
+      // Avatares redondos do mascote (arquivo estático em `public/`, sem
+      // query string nem geração dinâmica) - usados no cabeçalho e nas
+      // mensagens do Widget do Assistant (`mascotAvatarUrl`). Uma vez que
+      // `localPatterns` é configurado, o Next passa a exigir QUALQUER
+      // caminho local seja listado explicitamente - sem esta entrada,
+      // `next/image` rejeitava com "Invalid src prop... does not match
+      // images.localPatterns" (erro real encontrado ao converter de
+      // `<img>` pra `<Image>`).
+      {
+        pathname: "/mascot/avatars/**",
+      },
     ],
   },
 

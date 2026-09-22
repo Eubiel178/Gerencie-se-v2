@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 
 import { usePathname } from "next/navigation";
 
+import { Button, Modal, ModalHeader } from "@/components";
+import { Icon } from "@/components/icon";
 import { updateAssistantPreferencesAction } from "@/features/assistant/actions";
 import { phraseCompanionStatus } from "@/features/execution-companion/domain/companion-status-phrasing";
 import { useTasksCompanion } from "@/features/execution-companion/hooks/use-tasks-companion";
@@ -82,15 +84,17 @@ export function MascotPet({
 }: MascotPetProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const bubbleAnchorRef = useRef<HTMLDivElement>(null);
+  const voiceBadgeAnchorRef = useRef<HTMLDivElement>(null);
   const runtimeRef = useRef<MascotRuntime | null>(null);
   const pathname = usePathname();
   const resolvedId =
     characterId === null ? null : (characterId ?? DEFAULT_MASCOT_CHARACTER_ID);
   const character = resolvedId ? MASCOT_CHARACTERS[resolvedId] : undefined;
 
-  // Cópias otimistas das preferências persistidas - o controle de voz
-  // (ver `VoiceControl`) responde na hora, sem esperar o server action
-  // voltar, e sem precisar abrir Configurações pra isso.
+  // Único dono do controle de fala automática - o selo que liga/desliga
+  // mora no próprio mascote (ver `voiceBadgeAnchorRef` abaixo), então não
+  // há mais um segundo componente irmão precisando ler o mesmo valor em
+  // sincronia (motivo original do store compartilhado, hoje removido).
   const [autoSpeechEnabled, setAutoSpeechEnabled] = useState(autoSpeechEnabledInitial);
   const [promptShown, setPromptShown] = useState(autoSpeechPromptShownInitial);
 
@@ -139,7 +143,28 @@ export function MascotPet({
   // já mostrou algo de verdade (a primeira mensagem É a "interação real"
   // depois da qual o pedido pede pra perguntar) - nunca antes disso, e
   // nunca mais depois de respondido uma vez.
-  const showVoicePrompt = !promptShown && message !== null;
+  //
+  // NUNCA amarrado à duração do balão espontâneo em si (bug corrigido):
+  // antes disso, `showVoicePrompt` dependia direto de `message !== null`,
+  // então o convite sumia junto com o balão que o disparou - muitas vezes
+  // rápido demais (4-12s) pra alguém ler e decidir uma pergunta que é
+  // SEPARADA do que o balão estava dizendo. Uma vez que a primeira
+  // mensagem de verdade aconteceu, o convite abre com sua PRÓPRIA
+  // duração, independente de quanto tempo o balão que o disparou durou.
+  const [voicePromptOpen, setVoicePromptOpen] = useState(false);
+  const voicePromptTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (promptShown || voicePromptOpen || message === null) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setVoicePromptOpen(true);
+    voicePromptTimerRef.current = setTimeout(() => setVoicePromptOpen(false), 15_000);
+  }, [message, promptShown, voicePromptOpen]);
+  useEffect(() => {
+    return () => {
+      if (voicePromptTimerRef.current) clearTimeout(voicePromptTimerRef.current);
+    };
+  }, []);
+  const showVoicePrompt = !promptShown && voicePromptOpen;
 
   function persistPreferences(patch: { autoSpeechEnabled?: boolean; autoSpeechPromptShown?: boolean }) {
     updateAssistantPreferencesAction(patch).catch(() => {
@@ -149,16 +174,24 @@ export function MascotPet({
     });
   }
 
-  function toggleAutoSpeech() {
-    const next = !autoSpeechEnabled;
-    setAutoSpeechEnabled(next);
-    persistPreferences({ autoSpeechEnabled: next });
-  }
-
   function answerVoicePrompt(enable: boolean) {
+    if (voicePromptTimerRef.current) clearTimeout(voicePromptTimerRef.current);
     setAutoSpeechEnabled(enable);
     setPromptShown(true);
     persistPreferences({ autoSpeechEnabled: enable, autoSpeechPromptShown: true });
+  }
+
+  // Selo de voz ANCORADO NO PRÓPRIO MASCOTE (não no widget do Assistant -
+  // tentativa anterior, corrigida: um selo pendurado no avatar do widget
+  // não lia como "isso é sobre o bichinho falar", já que os dois vivem em
+  // cantos opostos da tela). Sempre pede confirmação antes de mudar,
+  // nunca alterna direto no clique (pedido explícito).
+  const [isConfirmingVoice, setIsConfirmingVoice] = useState(false);
+  function confirmVoiceToggle() {
+    const next = !autoSpeechEnabled;
+    setAutoSpeechEnabled(next);
+    persistPreferences({ autoSpeechEnabled: next });
+    setIsConfirmingVoice(false);
   }
 
   useEffect(() => {
@@ -172,9 +205,35 @@ export function MascotPet({
       // CSS do balão (`bottom: 100%`) cuida de ficar acima dele.
       onPositionChange: (position) => {
         const anchor = bubbleAnchorRef.current;
-        if (!anchor) return;
-        const centerX = position.x + (character.displayWidth ?? character.frameWidth) / 2;
-        anchor.style.transform = `translate(${Math.round(centerX)}px, ${Math.round(position.y)}px)`;
+        if (anchor) {
+          const centerX = position.x + (character.displayWidth ?? character.frameWidth) / 2;
+          anchor.style.transform = `translate(${Math.round(centerX)}px, ${Math.round(position.y)}px)`;
+        }
+        // Selo de voz no canto SUPERIOR direito do bichinho DE VERDADE, não
+        // do frame inteiro. Raças de cachorro/gato (golden, akita, os 6
+        // gatos - ver `dogBreedOptions`/`catBreedOptions` em
+        // `domain/characters.ts`) reservam um frame bem maior que o bicho
+        // visível (~33%/38% de preenchimento, o resto é folga transparente
+        // pras pernas esticarem andando) - usar o frame inteiro deixava o
+        // selo flutuando longe do bicho pra essas raças (achado real:
+        // "ficou muito longe"). `contentFillRatio` (mesmo dado usado pelo
+        // avatar circular do widget) corrige isso; pra quem não define
+        // esse campo (panda, raposa, urso, gato/cachorro originais) o
+        // cálculo cai de volta pro frame inteiro, sem mudança de
+        // comportamento. Assume o bicho centralizado dentro do frame - uma
+        // aproximação razoável sem coordenadas exatas de recorte por raça.
+        const badgeAnchor = voiceBadgeAnchorRef.current;
+        if (badgeAnchor) {
+          const width = character.displayWidth ?? character.frameWidth;
+          const height = character.displayHeight ?? character.frameHeight;
+          const fillRatio = character.contentFillRatio ?? 1;
+          const visibleRight = position.x + width / 2 + (width * fillRatio) / 2;
+          const visibleTop = position.y + height / 2 - (height * fillRatio) / 2;
+          const gap = Math.max(6, width * fillRatio * 0.06);
+          const badgeX = visibleRight + gap;
+          const badgeY = visibleTop - gap;
+          badgeAnchor.style.transform = `translate(${Math.round(badgeX)}px, ${Math.round(badgeY)}px)`;
+        }
       },
       onClick: () => handleMascotClickRef.current(),
     });
@@ -240,13 +299,49 @@ export function MascotPet({
         )}
       </div>
 
+      {/* Selo de voz preso ao PRÓPRIO bichinho (canto inferior direito do
+          corpo, ver cálculo em `onPositionChange` acima) - não ao widget do
+          Assistant. Sempre pede confirmação antes de mudar (nunca alterna
+          direto no clique). Some junto com o resto do mascote em telas
+          estreitas (`@media` em `styles.module.css`) - o toggle equivalente
+          em Configurações (`autoSpeechEnabled` no painel de preferências)
+          já cobre essa faixa. */}
       {assistantEnabled && (
-        <VoiceControl
-          autoSpeechEnabled={autoSpeechEnabled}
-          showPrompt={showVoicePrompt}
-          onToggle={toggleAutoSpeech}
-          onAnswerPrompt={answerVoicePrompt}
-        />
+        <div ref={voiceBadgeAnchorRef} className={styles.voiceBadgeAnchor}>
+          <button
+            type="button"
+            className={styles.voiceBadge}
+            aria-pressed={autoSpeechEnabled}
+            aria-label={autoSpeechEnabled ? "Desligar a fala do Companion" : "Ligar a fala do Companion"}
+            onClick={() => setIsConfirmingVoice(true)}
+          >
+            <Icon name={autoSpeechEnabled ? "MdVolumeUp" : "MdVolumeOff"} size={14} />
+          </button>
+        </div>
+      )}
+
+      {assistantEnabled && showVoicePrompt && <VoiceControl onAnswerPrompt={answerVoicePrompt} />}
+
+      {isConfirmingVoice && (
+        <Modal onClose={() => setIsConfirmingVoice(false)}>
+          <ModalHeader
+            title={autoSpeechEnabled ? "Desligar a fala do Companion?" : "Ligar a fala do Companion?"}
+            onClose={() => setIsConfirmingVoice(false)}
+          />
+          <p className={styles.confirmVoiceText}>
+            {autoSpeechEnabled
+              ? "Ele continua escrevendo normalmente, só para de falar em voz alta."
+              : "Além de escrever, ele também vai falar em voz alta de vez em quando."}
+          </p>
+          <div className={styles.confirmVoiceActions}>
+            <Button.Root type="button" variant="secondary" onClick={() => setIsConfirmingVoice(false)}>
+              Cancelar
+            </Button.Root>
+            <Button.Root type="button" onClick={confirmVoiceToggle}>
+              {autoSpeechEnabled ? "Desligar" : "Ligar"}
+            </Button.Root>
+          </div>
+        </Modal>
       )}
     </>
   );
