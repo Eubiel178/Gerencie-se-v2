@@ -222,7 +222,6 @@ export function useTaskMutations(task: ITask) {
     busyStepId,
     focusSession,
     remaining,
-    executionSession,
     isExecuting,
     executingElapsedSeconds,
     handleTaskRemove,

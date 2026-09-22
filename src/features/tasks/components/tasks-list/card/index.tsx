@@ -47,7 +47,6 @@ export function Card({
     busyStepId,
     focusSession,
     remaining,
-    executionSession,
     isExecuting,
     executingElapsedSeconds,
     handleTaskRemove,
