@@ -26,8 +26,15 @@ const WORK_STATUS_LABEL: Record<string, string> = {
   paused: "pausada",
 };
 
-function statusLabel(task: ITask, isActive: boolean): string {
-  if (isActive) return "TAREFA ATUAL, sendo executada agora";
+// Achado real (teste ao vivo): uma tarefa em execução, atrasada e com
+// 0 passos concluídos gerou a resposta "essa tarefa tá parada" - o
+// Companion combinou "prazo vencido" + "0 passos" numa conclusão de
+// "abandonada", mesmo a tarefa estando EM EXECUÇÃO agora. Execução,
+// progresso de passos e prazo são eixos independentes; cada um agora
+// tem sua PRÓPRIA linha rotulada (nunca uma frase só concatenando
+// tudo), pra nunca precisar o modelo inferir um a partir do outro.
+function executionStatusLabel(task: ITask, isActive: boolean): string {
+  if (isActive) return "EM EXECUÇÃO AGORA (esta é a tarefa atual)";
   if (task.completed) return "concluída";
   return WORK_STATUS_LABEL[task.workStatus ?? "pending"] ?? "não iniciada";
 }
@@ -93,22 +100,25 @@ export function buildTasksOverviewContext(
 
   for (const task of limited) {
     const isActive = task.id === activeTaskId;
-    const parts = [task.title, statusLabel(task, isActive)];
-    parts.push(`prioridade ${PRIORITY_LABELS[task.priority] ?? task.priority}`);
+    lines.push(`- ${task.title}`);
+    lines.push(`  Execução: ${executionStatusLabel(task, isActive)}`);
+    lines.push(`  Prioridade: ${PRIORITY_LABELS[task.priority] ?? task.priority}`);
 
     if (task.scheduledAt) {
       const overdue = !task.completed && isOverdue(task.scheduledAt);
-      parts.push(overdue ? `ATRASADA (${formatDeadline(task.scheduledAt)})` : formatDeadline(task.scheduledAt));
+      lines.push(`  Prazo: ${overdue ? `ATRASADO (${formatDeadline(task.scheduledAt)})` : formatDeadline(task.scheduledAt)}`);
     }
 
-    if (task.steps.length > 0) {
-      const done = task.steps.filter((s) => s.completed).length;
-      parts.push(`${done}/${task.steps.length} passos concluídos`);
-    }
-
-    lines.push(`- ${parts.join(" — ")}`);
+    lines.push(
+      task.steps.length > 0
+        ? `  Progresso: ${task.steps.filter((s) => s.completed).length}/${task.steps.length} passos concluídos`
+        : `  Progresso: sem passos cadastrados`
+    );
   }
 
+  lines.push(
+    "Execução, progresso de passos e prazo são dimensões INDEPENDENTES de cada tarefa - nunca infira uma a partir da outra. 0 passos concluídos e/ou prazo vencido NUNCA significam sozinhos que uma tarefa está parada, abandonada ou sem atenção - o campo \"Execução\" de cada tarefa é sempre a fonte de verdade sobre isso."
+  );
   lines.push("[FIM DO DADO]");
   return lines.join("\n");
 }

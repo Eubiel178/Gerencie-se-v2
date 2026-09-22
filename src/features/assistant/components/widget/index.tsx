@@ -18,6 +18,7 @@ import { useSpeak } from "@/lib/speech/speak-text";
 import { formatTimeOnly } from "@/utils/date";
 
 import { buildRecentHistory } from "../../hooks/build-recent-history";
+import { resolveConversationTaskId } from "../../hooks/resolve-conversation-task-id";
 import { useChatHistory } from "../../hooks/use-chat-history";
 import { useWidgetSeedRequest } from "../../hooks/use-widget-open-request";
 import { playMessageReceivedSound, playMessageSentSound } from "../../lib/chat-sound";
@@ -287,7 +288,7 @@ const pathname = usePathname();
       // cliente pra nunca deixar o loading preso indefinidamente, mesmo se
       // a chamada travar antes de chegar no Gemini (ex.: consulta ao banco).
       const result = await withTimeout(
-        sendAssistantMessage(text, recentHistory),
+        sendAssistantMessage(text, recentHistory, taskId),
         CHAT_TIMEOUT_MS
       );
 
@@ -355,7 +356,13 @@ const pathname = usePathname();
 
     // Tarefa em execução AGORA — mesma fonte que o cabeçalho "Acompanhando: X"
     // usa (`executionSession`), nunca um valor guardado de um render antigo.
-    const currentTaskId = executionSession?.taskId ?? null;
+    // Sem sessão ativa, cai pro foco que a PRÓPRIA conversa já estabeleceu
+    // (ex.: "Me ajuda" clicado numa tarefa específica) - achado real: sem
+    // isto, uma pergunta de acompanhamento como "divide em passos" perdia
+    // de vista a tarefa assim que não havia sessão ativa, virando um chat
+    // genérico mesmo o usuário tendo acabado de pedir ajuda com uma tarefa
+    // concreta.
+    const currentTaskId = executionSession?.taskId ?? resolveConversationTaskId(messages);
 
     setChatInput("");
     addUserMessage(text, currentTaskId);

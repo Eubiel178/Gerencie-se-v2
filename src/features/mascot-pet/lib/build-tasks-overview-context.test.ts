@@ -27,12 +27,12 @@ test("lista vazia retorna dado explícito de 'sem tarefas', nunca lista vazia si
   assert.match(text, /não tem nenhuma tarefa cadastrada/);
 });
 
-test("tarefa ativa é marcada como TAREFA ATUAL mesmo se workStatus disser outra coisa", () => {
+test("tarefa ativa é marcada como EM EXECUÇÃO AGORA mesmo se workStatus disser outra coisa", () => {
   const text = buildTasksOverviewContext(
     [makeTask({ id: "t1", workStatus: "in_progress" })],
     "t1"
   );
-  assert.match(text, /TAREFA ATUAL, sendo executada agora/);
+  assert.match(text, /Execução: EM EXECUÇÃO AGORA \(esta é a tarefa atual\)/);
 });
 
 test("tarefa concluída aparece como concluída, não como 'não iniciada'", () => {
@@ -46,12 +46,12 @@ test("tarefa pendente sem workStatus explícito aparece como não iniciada", () 
   assert.match(text, /não iniciada/);
 });
 
-test("tarefa com prazo vencido aparece marcada como ATRASADA", () => {
+test("tarefa com prazo vencido aparece marcada como ATRASADO", () => {
   const text = buildTasksOverviewContext(
     [makeTask({ scheduledAt: "2020-01-01T10:00" })],
     null
   );
-  assert.match(text, /ATRASADA/);
+  assert.match(text, /Prazo: ATRASADO/);
 });
 
 test("tarefa concluída com prazo no passado NÃO aparece como atrasada", () => {
@@ -59,7 +59,7 @@ test("tarefa concluída com prazo no passado NÃO aparece como atrasada", () => 
     [makeTask({ completed: true, scheduledAt: "2020-01-01T10:00" })],
     null
   );
-  assert.doesNotMatch(text, /ATRASADA/);
+  assert.doesNotMatch(text, /ATRASADO/);
 });
 
 test("progresso de passos aparece quando a tarefa tem passos", () => {
@@ -135,4 +135,34 @@ test("data de hoje aparece mesmo quando não há nenhuma tarefa cadastrada", () 
   const now = new Date("2026-09-22T12:00:00");
   const text = buildTasksOverviewContext([], null, now);
   assert.match(text, /Hoje é terça-feira, 22 de setembro de 2026/);
+});
+
+test("bug real corrigido: tarefa ATIVA, atrasada e com 0 passos ainda diz 'EM EXECUÇÃO AGORA' - nunca 'parada'", () => {
+  const text = buildTasksOverviewContext(
+    [
+      makeTask({
+        id: "active",
+        scheduledAt: "2020-01-01T10:00",
+        steps: [
+          { id: "s1", taskId: "active", title: "a", completed: false, order: 0 },
+          { id: "s2", taskId: "active", title: "b", completed: false, order: 1 },
+        ],
+      }),
+    ],
+    "active"
+  );
+  assert.match(text, /Execução: EM EXECUÇÃO AGORA/);
+  assert.match(text, /Prazo: ATRASADO/);
+  assert.match(text, /Progresso: 0\/2 passos concluídos/);
+});
+
+test("aviso explícito de que execução, progresso e prazo são dimensões independentes está sempre presente", () => {
+  const text = buildTasksOverviewContext([makeTask()], null);
+  assert.match(text, /dimensões INDEPENDENTES/);
+  assert.match(text, /NUNCA significam sozinhos que uma tarefa está parada, abandonada ou sem atenção/);
+});
+
+test("cada tarefa vem em linhas separadas e rotuladas, nunca uma frase só concatenada", () => {
+  const text = buildTasksOverviewContext([makeTask({ title: "Minha Tarefa" })], null);
+  assert.match(text, /- Minha Tarefa\n {2}Execução: /);
 });
