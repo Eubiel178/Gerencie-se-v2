@@ -8,6 +8,7 @@ import { updateAssistantPreferencesAction } from "@/features/assistant/actions";
 import { useChatHistory } from "@/features/assistant/hooks/use-chat-history";
 import { requestWidgetOpenWithMessage } from "@/features/assistant/hooks/use-widget-open-request";
 import { MascotPersonality } from "@/features/focus/domain";
+import { useGuidedTourStore } from "@/features/guided-tour/guided-tour-store";
 import { computeBubbleDisplayMs } from "@/features/mascot-pet/domain/bubble-timing";
 import { subscribeMascotEvent } from "@/features/mascot-pet/domain/events";
 import { shouldReplaceInteraction } from "@/features/mascot-pet/domain/interaction-policy";
@@ -364,6 +365,17 @@ export function useTasksCompanion(
     task: ITask | null,
     options?: { forceLocalOnly?: boolean; forceFrequencyBypass?: boolean }
   ) {
+    // O tour guiado (`GuidedTour`) tem um tooltip de verdade ocupando a
+    // tela agora - achado real: a saudação de presença espontânea do
+    // Companion competia pelo mesmo espaço, com o balão cortado por
+    // baixo do tooltip. Nunca mostra nada novo enquanto isso, mas também
+    // nunca consome a oportunidade (a próxima checagem periódica, ou o
+    // próximo evento real, tenta de novo normalmente depois).
+    if (useGuidedTourStore.getState().isActive) {
+      devLog(fact.kind, "silent", "guided_tour_active");
+      return;
+    }
+
     const config = INTENT_CONFIG[fact.kind];
 
     // Enquanto a aba está escondida, `activeRef` fica null de propósito

@@ -380,7 +380,7 @@ export function Card({
               data-pulse={primaryActionPulsing ? "" : undefined}
               onClick={handleMarkStarted}
             >
-              <Icon name="FaPlay" aria-hidden="true" /> Comecar
+              <Icon name="FaPlay" aria-hidden="true" /> Começar
             </Button.Root>
           )}
 

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { createPortal } from "react-dom";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import { useMobileNavStore } from "@/components/header/mobile-nav-store";
 import { getFocusableElements } from "@/components/modal/get-focusable-elements";
@@ -12,6 +12,7 @@ import type { MascotPersonality } from "@/features/focus/domain";
 
 import { dismissGuidedTourAction } from "../../actions";
 import { buildGuidedTourSteps, GUIDED_TOUR_MOBILE_BREAKPOINT_PX, GuidedTourStep } from "../../domain/steps";
+import { useGuidedTourStore } from "../../guided-tour-store";
 
 import styles from "./styles.module.css";
 
@@ -218,8 +219,47 @@ function waitForTarget(selector: string, timeoutMs: number): Promise<Element | n
   });
 }
 
+/** Mesmo raciocínio de `computeInitialSteps`, mas ESPERANDO cada alvo
+ * aparecer (`waitForTarget`) em vez de checar o DOM uma única vez -
+ * usado só na REATIVAÇÃO (replay a partir de Configurações), nunca no
+ * primeiro carregamento de página. Bug real corrigido: mesmo depois de
+ * confirmar `pathname === "/home"` (ver o efeito que chama isto), a
+ * navegação client-side do Next pode terminar ANTES do conteúdo
+ * assíncrono do Dashboard (checklist/mascote) montar de verdade - uma
+ * checagem síncrona nesse instante ainda descartava esses passos por
+ * engano. */
+async function computeInitialStepsAwaitingTargets(
+  mascotName: string,
+  mascotPersonality: MascotPersonality
+): Promise<GuidedTourStep[] | null> {
+  const allSteps = buildGuidedTourSteps(mascotName, mascotPersonality);
+  const currentPath = window.location.pathname;
+  const isMobileViewport = window.innerWidth <= MOBILE_BREAKPOINT_PX;
+  const available: GuidedTourStep[] = [];
+
+  for (const step of allSteps) {
+    if (!step.target) {
+      available.push(step);
+      continue;
+    }
+    if (isMobileViewport && MOBILE_NAV_PANEL_TARGETS.has(step.target)) {
+      available.push(step);
+      continue;
+    }
+    if (step.path && step.path !== currentPath) {
+      available.push(step);
+      continue;
+    }
+    const el = await waitForTarget(step.target, TARGET_WAIT_MS_AFTER_NAVIGATION);
+    if (isVisibleTarget(el)) available.push(step);
+  }
+
+  return available.length > 0 ? available : null;
+}
+
 export function GuidedTour({ active, mascotName, mascotPersonality, mascotAvatar, userId }: GuidedTourProps) {
   const router = useRouter();
+  const pathname = usePathname();
   // Ref (não outro useState) só pra não rodar `computeInitialSteps` -
   // que filtra passos e faz `document.querySelector` por passo - duas
   // vezes na mesma montagem só porque `steps` e `stepIndex` precisam do
@@ -251,6 +291,29 @@ export function GuidedTour({ active, mascotName, mascotPersonality, mascotAvatar
   const [finished, setFinished] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const wasActiveRef = useRef(active);
+  // A ativação (replay) pediu pra ir pra `/home` mas ainda não chegou lá -
+  // ver o efeito abaixo que consome isto assim que `pathname` virar
+  // "/home" de verdade, em vez de calcular os passos contra a página
+  // ERRADA (ver comentário do próximo efeito).
+  const pendingActivationRef = useRef(false);
+  // Descarta uma resolução assíncrona velha se uma reativação mais nova
+  // começar no meio do caminho (mesmo raciocínio de `generationRef` em
+  // `use-tasks-companion.ts`) - improvável (reativação não é algo que
+  // aconteça em rajada), mas barato de garantir.
+  const activationTokenRef = useRef(0);
+
+  async function activateFreshTour() {
+    const token = ++activationTokenRef.current;
+    setStepIndex(0);
+    setFinished(false);
+    // "Rever tour guiado" começa do zero de propósito - nunca deveria
+    // reaproveitar o passo salvo de uma sessão de tour anterior.
+    writeStoredStepId(userId, null);
+
+    const resolvedSteps = await computeInitialStepsAwaitingTargets(mascotName, mascotPersonality);
+    if (token !== activationTokenRef.current) return;
+    setSteps(resolvedSteps);
+  }
 
   // `GuidedTour` mora no layout persistente (`src/app/home/layout.tsx`) e
   // NÃO remonta ao navegar entre páginas de `/home/**` - então o
@@ -262,17 +325,38 @@ export function GuidedTour({ active, mascotName, mascotPersonality, mascotAvatar
   // relatado: "clico em rever e não acontece nada, só funciona depois de
   // recarregar a página"). Recalcula de propósito só na TRANSIÇÃO
   // false→true, não a cada mudança de `active`.
+  //
+  // Bug real corrigido: `revalidatePath("/home")` (ver `resetGuidedTourAction`)
+  // faz `active` virar `true` na hora, ENQUANTO A PÁGINA AINDA É a de
+  // Configurações (de onde "Rever tutorial" foi clicado) - o `router.push`
+  // pro Dashboard só roda depois, no chamador (`ReplayTourButton`). Calcular
+  // os passos disponíveis synchronous aqui, contra `window.location.pathname`
+  // sendo `/home/settings`, fazia todo passo sem `path` próprio (checklist,
+  // mascote - "mesma página do passo anterior") ser checado contra o DOM
+  // ERRADO e descartado pra sempre nessa sessão do tour (sobrava só
+  // boas-vindas/nav/new-task/fim). Se ainda não estamos em `/home` quando a
+  // reativação acontece, navega pra lá primeiro e adia o cálculo pro efeito
+  // seguinte, que reage a `pathname` virar `/home` de verdade.
   useEffect(() => {
     if (active && !wasActiveRef.current) {
-      setSteps(computeInitialSteps(true, mascotName, mascotPersonality));
-      setStepIndex(0);
-      setFinished(false);
-      // "Rever tour guiado" começa do zero de propósito - nunca deveria
-      // reaproveitar o passo salvo de uma sessão de tour anterior.
-      writeStoredStepId(userId, null);
+      if (window.location.pathname === "/home") {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- reage a `active` virar true (prop vinda do servidor via `revalidatePath`), não é estado derivável durante o render.
+        activateFreshTour();
+      } else {
+        pendingActivationRef.current = true;
+        router.push("/home");
+      }
     }
     wasActiveRef.current = active;
-  }, [active, mascotName, mascotPersonality, userId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active, mascotName, mascotPersonality, userId, router]);
+
+  useEffect(() => {
+    if (!pendingActivationRef.current || pathname !== "/home") return;
+    pendingActivationRef.current = false;
+    activateFreshTour();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
 
   // Lembra o passo atual entre recarregamentos de página (ver comentário
   // de `STEP_INDEX_STORAGE_KEY`) - grava a cada mudança de passo, nunca
@@ -410,6 +494,21 @@ export function GuidedTour({ active, mascotName, mascotPersonality, mascotAvatar
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stepIndex, steps]);
+
+  const isRenderingTour = !!steps && !!step && !finished;
+
+  // Avisa `useGuidedTourStore` sempre que o tour passa a mostrar (ou
+  // parar de mostrar) um tooltip de verdade na tela - achado real: a
+  // fala espontânea do Companion (saudação de presença) disputava o
+  // mesmo espaço de tela com o tooltip do tour, com o balão cortado por
+  // baixo dele. `useTasksCompanion` lê isso pra ficar em silêncio
+  // enquanto o tour está com um passo visível.
+  useEffect(() => {
+    useGuidedTourStore.getState().setActive(isRenderingTour);
+  }, [isRenderingTour]);
+  useEffect(() => {
+    return () => useGuidedTourStore.getState().setActive(false);
+  }, []);
 
   if (!steps || !step || finished) return null;
 
