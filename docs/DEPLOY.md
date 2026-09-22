@@ -122,6 +122,23 @@ valores de produção:
 | `GROQ_API_KEY` | Chave da API do Groq ([console.groq.com/keys](https://console.groq.com/keys), grátis) — provedor de IA PRIMÁRIO usado pelo Companion (mascote) para gerar as interações espontâneas e o chat (ver `src/lib/ai/gateway.ts`). Opcional; sem ela nem `GEMINI_API_KEY`, o Companion continua funcionando 100% com o fraseado local determinístico (ver `EXECUTION_COMPANION.md`) — nunca quebra, só perde a variação gerada por IA |
 | `GEMINI_API_KEY` | Chave da API do Gemini ([aistudio.google.com/apikey](https://aistudio.google.com/apikey), grátis) — provedor de IA de *fallback*, usado automaticamente quando o Groq falha, está indisponível ou em cooldown. Opcional, mesmo raciocínio do Groq acima |
 
+> **Nota de manutenção — modelos do Groq são descontinuados sem aviso.**
+> Achado real: os modelos padrão originais (`llama-3.3-70b-versatile` e
+> os fallbacks) pararam de existir na conta silenciosamente — toda
+> chamada caía com 404 e o app só continuava funcionando porque o
+> `gateway.ts` já tinha failover automático pro Gemini/fraseado local
+> (nada quebrava visivelmente, mas o Groq nunca era de fato usado). Se o
+> Companion parecer sempre no "modo local" (sem variação de IA) mesmo com
+> `GROQ_API_KEY` configurada, confira o catálogo atual antes de assumir
+> que é outro bug:
+> ```bash
+> curl -s https://api.groq.com/openai/v1/models -H "Authorization: Bearer SUA_CHAVE" | grep '"id"'
+> ```
+> Se o modelo padrão não estiver mais na lista, troque direto em
+> `src/lib/ai/providers/groq-provider.ts` (`GROQ_MODELS`) por um modelo de
+> texto genérico que ainda exista (nunca um modelo de áudio/imagem/
+> moderação).
+
 Na Vercel: **Project Settings → Environment Variables**. Em outro host,
 procure por "Environment Variables" ou "Config Vars" no painel.
 

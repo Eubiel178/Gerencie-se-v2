@@ -1,0 +1,1 @@
+ALTER TABLE "user_preference" ADD COLUMN "execution_intro_shown" boolean DEFAULT false NOT NULL;

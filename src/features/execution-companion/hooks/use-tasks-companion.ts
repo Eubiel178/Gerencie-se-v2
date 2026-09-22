@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { usePathname } from "next/navigation";
 
+import { updateAssistantPreferencesAction } from "@/features/assistant/actions";
 import { useChatHistory } from "@/features/assistant/hooks/use-chat-history";
 import { requestWidgetOpenWithMessage } from "@/features/assistant/hooks/use-widget-open-request";
 import { MascotPersonality } from "@/features/focus/domain";
@@ -180,7 +181,8 @@ export function useTasksCompanion(
   personality: MascotPersonality,
   autoSpeechEnabled: boolean,
   enabled: boolean,
-  userContext: TasksCompanionUserContext
+  userContext: TasksCompanionUserContext,
+  hasSeenExecutionIntro: boolean
 ) {
   const pathname = usePathname();
   const isTasksPage = pathname?.startsWith("/home/tasks") ?? false;
@@ -213,6 +215,11 @@ export function useTasksCompanion(
   const quietUntilLocalRef = useRef(0);
   const lastHelpAcceptedRef = useRef<{ taskTitle: string | null; at: number } | null>(null);
   const lastCelebrationRef = useRef<{ taskTitle: string | null; at: number } | null>(null);
+  // Espelho local (nunca lido de volta do servidor no meio da sessão) -
+  // impede mostrar a introdução contextual duas vezes no mesmo carregamento
+  // de página mesmo que o `updateAssistantPreferencesAction` (fire-and-forget
+  // abaixo) ainda não tenha terminado.
+  const hasSeenExecutionIntroRef = useRef(hasSeenExecutionIntro);
 
   // Ciclo de vida da interação vs. visibilidade da aba (ver `handleVisibilityChange`
   // mais abaixo): o FATO original por trás da mensagem ATIVA agora - nunca
@@ -352,7 +359,11 @@ export function useTasksCompanion(
     };
   }
 
-  async function tryShow(fact: CompanionFact, task: ITask | null) {
+  async function tryShow(
+    fact: CompanionFact,
+    task: ITask | null,
+    options?: { forceLocalOnly?: boolean; forceFrequencyBypass?: boolean }
+  ) {
     const config = INTENT_CONFIG[fact.kind];
 
     // Enquanto a aba está escondida, `activeRef` fica null de propósito
@@ -391,7 +402,9 @@ export function useTasksCompanion(
     const result = await resolveCompanionMessageAction({
       intent: fact.kind,
       priority: config.priority,
-      aiEligible: config.aiEligible,
+      frequencyBypass: options?.forceFrequencyBypass ? true : (config.frequencyBypass ?? false),
+      isEngagedViaChat: isEngagedViaChat(),
+      aiEligible: options?.forceLocalOnly ? false : config.aiEligible,
       personality,
       context,
       candidateMoves,
@@ -618,7 +631,25 @@ export function useTasksCompanion(
           return;
         }
 
-        tryShow({ kind: "execution-started", taskTitle: task?.title ?? getTaskTitle(session.taskId) }, task);
+        const taskTitle = task?.title ?? getTaskTitle(session.taskId);
+        if (!hasSeenExecutionIntroRef.current) {
+          // Otimista, antes mesmo de saber se `tryShow` de fato exibiu -
+          // nunca mostra a introdução duas vezes no mesmo carregamento de
+          // página por causa de um "Começar" repetido enquanto a
+          // persistência no servidor ainda está em voo.
+          hasSeenExecutionIntroRef.current = true;
+          tryShow({ kind: "execution-started", taskTitle, isFirstEver: true }, task, {
+            forceLocalOnly: true,
+            forceFrequencyBypass: true,
+          });
+          updateAssistantPreferencesAction({ executionIntroShown: true }).catch(() => {
+            // Falhou silenciosamente - pior caso, a introdução reaparece
+            // na próxima sessão (próximo carregamento do layout); nunca
+            // bloqueia o início da execução por causa disso.
+          });
+        } else {
+          tryShow({ kind: "execution-started", taskTitle }, task);
+        }
       } else if (type === "execution-resumed") {
         // Retomar libera um novo cutucão de ociosidade/sessão longa pro
         // trecho de execução ATUAL (mesmo `session.id`, período novo -
@@ -862,6 +893,9 @@ export function useTasksCompanion(
       clearInterval(periodicCheck);
       clearDismissTimer();
     };
+    // `hasSeenExecutionIntro` propositalmente FORA desta lista - é só o
+    // valor inicial do ref acima (mutado localmente depois, nunca por um
+    // novo valor de prop vindo de fora durante o ciclo de vida do hook).
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isTasksPage, enabled, personality, autoSpeechEnabled, userContext.firstName, userContext.gender]);
 

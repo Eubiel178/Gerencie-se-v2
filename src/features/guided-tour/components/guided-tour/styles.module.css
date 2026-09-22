@@ -50,6 +50,41 @@
   overflow-y: auto;
 }
 
+/* Único passo em que o tour se apresenta como o próprio Companion
+   falando (ver `speaksAsCompanion` em `domain/steps.ts`) - avatar +
+   nome no lugar do contador de passo/título genérico, e o corpo do
+   texto com a cara de um balão de fala, não de um parágrafo de manual. */
+.companionTooltip {
+  border: 1px solid color-mix(in srgb, var(--color-highlight) 35%, transparent);
+}
+
+.companionSender {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.companionAvatar {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  border: 1px solid var(--color-border);
+}
+
+.companionName {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.companionBody {
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-highlight) 10%, var(--color-surface-elevated));
+}
+
 .step {
   margin: 0;
   color: var(--color-highlight);

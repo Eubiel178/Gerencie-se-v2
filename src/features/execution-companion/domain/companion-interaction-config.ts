@@ -25,12 +25,23 @@ import type { CompanionFact } from "./companion-phrasing";
  */
 export const INTENT_CONFIG: Record<
   CompanionFact["kind"],
-  { priority: InteractionPriority; aiEligible: boolean; label: string }
+  {
+    priority: InteractionPriority;
+    aiEligible: boolean;
+    label: string;
+    /** Ignora o intervalo mínimo desde a última fala (ver
+     * `companion-frequency.ts`) - reservado pra situações raras o
+     * bastante que esperar a "vez" delas custaria mais que uma
+     * interrupção a mais: o próprio gate por-evento (nunca repetir o
+     * MESMO evento) já garante que isto é sempre uma ocorrência nova de
+     * verdade. Ainda respeita o freio de emergência se ele disparar. */
+    frequencyBypass?: boolean;
+  }
 > = {
   "execution-started": { priority: "meaningful", aiEligible: true, label: "início de tarefa" },
-  "execution-completed": { priority: "meaningful", aiEligible: true, label: "conclusão de tarefa" },
+  "execution-completed": { priority: "meaningful", aiEligible: true, label: "conclusão de tarefa", frequencyBypass: true },
   "deadline-approaching": { priority: "meaningful", aiEligible: true, label: "lembrete de prazo" },
-  "overdue-task": { priority: "meaningful", aiEligible: true, label: "aviso de tarefa atrasada" },
+  "overdue-task": { priority: "meaningful", aiEligible: true, label: "aviso de tarefa atrasada", frequencyBypass: true },
   "progress-milestone": { priority: "meaningful", aiEligible: true, label: "reconhecimento de progresso" },
   "reopened-task": { priority: "casual", aiEligible: true, label: "reconhecimento de reabertura" },
   "presence-greeting": { priority: "casual", aiEligible: true, label: "saudação de presença" },
@@ -38,11 +49,9 @@ export const INTENT_CONFIG: Record<
   "execution-idle-nudge": { priority: "casual", aiEligible: false, label: "check-in de ociosidade" },
   "return-after-absence": { priority: "casual", aiEligible: false, label: "reconhecimento de retorno" },
   "task-switching": { priority: "casual", aiEligible: true, label: "observação de troca de tarefa" },
-  "quiet-win": { priority: "meaningful", aiEligible: true, label: "reconhecimento de conclusão discreta" },
+  "quiet-win": { priority: "meaningful", aiEligible: true, label: "reconhecimento de conclusão discreta", frequencyBypass: true },
   "repeated-reopen": { priority: "meaningful", aiEligible: true, label: "oferta de ajuda pra tarefa recorrente" },
   // Pergunta sobre o próprio limite de espaço - sempre determinística
-  // (nunca via IA, ver `companion-phrasing.ts`) e sempre casual: se a
-  // cota casual já estourou, o silêncio resultante já resolve sozinho o
-  // "fale menos" sem precisar nem perguntar.
+  // (nunca via IA, ver `companion-phrasing.ts`).
   "ask-quiet-check": { priority: "casual", aiEligible: false, label: "pergunta sobre limite de espaço" },
 };

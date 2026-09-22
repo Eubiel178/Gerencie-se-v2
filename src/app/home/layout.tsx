@@ -13,7 +13,7 @@ import { getFocusFetcher, getMascotFetcher } from "@/features/focus/data/get-foc
 import { FocusSessionProvider } from "@/features/focus/focus-session-context";
 import { GuidedTour } from "@/features/guided-tour/components/guided-tour/lazy";
 import { shouldShowGuidedTour } from "@/features/guided-tour/get-guided-tour-status";
-import { MascotPet, characterIdForSpecies } from "@/features/mascot-pet";
+import { MascotPet, characterIdForSpecies, mascotAvatarUrl } from "@/features/mascot-pet";
 import { getGender } from "@/features/profile/get-gender";
 import { CommandPalette } from "@/features/search/components/command-palette";
 import { TaskReminders } from "@/features/tasks/components/reminder-scheduler";
@@ -77,10 +77,17 @@ const HomeLayout = async ({ children }: { children: React.ReactNode }) => {
             assistantEnabled={assistantPreferences.enabled}
             autoSpeechEnabled={assistantPreferences.autoSpeechEnabled}
             autoSpeechPromptShown={assistantPreferences.autoSpeechPromptShown}
+            hasSeenExecutionIntro={assistantPreferences.executionIntroShown}
             userFirstName={userFirstName}
             userGender={gender}
           />
-          <GuidedTour active={showGuidedTour} mascotName={mascot.name} userId={session?.user?.id ?? ""} />
+          <GuidedTour
+            active={showGuidedTour}
+            mascotName={mascot.name}
+            mascotPersonality={mascot.personality}
+            mascotAvatar={mascotAvatarUrl(mascot.species)}
+            userId={session?.user?.id ?? ""}
+          />
           <FocusMiniWidget />
         </div>
       </ExecutionCompanionProvider>

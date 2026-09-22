@@ -11,7 +11,14 @@ import type { Gender } from "@/features/profile/get-gender";
  * COMO dizer isso.
  */
 export type CompanionFact =
-  | { kind: "execution-started"; taskTitle: string }
+  // `isFirstEver` = true SÓ na primeiríssima vez que esta conta inicia
+  // uma execução acompanhada (ver `executionIntroShown` em
+  // `src/db/schema.ts`) - o tour guiado não ensina "Começar" (não existe
+  // nenhuma tarefa real pra apontar durante o onboarding), então a
+  // introdução acontece aqui, contextual, na hora real. Sempre 100%
+  // determinístico (nunca via IA - ver `INTENT_CONFIG`), pra nunca
+  // arriscar uma primeira impressão estranha.
+  | { kind: "execution-started"; taskTitle: string; isFirstEver?: boolean }
   | { kind: "execution-completed"; taskTitle: string }
   | { kind: "execution-idle-nudge"; taskTitle: string; elapsedMinutes: number }
   // Usuário voltou pra página de Tarefas depois de a aba ficar escondida
@@ -91,6 +98,12 @@ const PHRASERS: Record<MascotPersonality, Record<CompanionFact["kind"], Phraser>
   afetuoso: {
     "execution-started": (f) => {
       const fact = f as Extract<CompanionFact, { kind: "execution-started" }>;
+      if (fact.isFirstEver) {
+        return {
+          written: `Essa é a primeira vez que acompanho você numa tarefa. Vou ficar por aqui enquanto você trabalha nela.`,
+          spoken: `Primeira vez que a gente faz isso junto. Vou ficar por aqui com você, sem pressão nenhuma.`,
+        };
+      }
       return {
         written: `Começando "${fact.taskTitle}". Tô na torcida.`,
         spoken: `Boa, bora começar essa tarefa aí. Tô na torcida por você.`,
@@ -196,6 +209,12 @@ const PHRASERS: Record<MascotPersonality, Record<CompanionFact["kind"], Phraser>
   sarcastico: {
     "execution-started": (f) => {
       const fact = f as Extract<CompanionFact, { kind: "execution-started" }>;
+      if (fact.isFirstEver) {
+        return {
+          written: `Primeira vez que eu acompanho você numa tarefa. Vou ficar de olho, sem falar toda hora.`,
+          spoken: `Nossa estreia acompanhando algo de verdade. Relaxa, não vou ficar falando toda hora.`,
+        };
+      }
       return {
         written: `"${fact.taskTitle}" começou. Vamos ver até quando.`,
         spoken: `Ata, começou "${fact.taskTitle}". Vamos ver até quando dessa vez.`,
@@ -300,6 +319,12 @@ const PHRASERS: Record<MascotPersonality, Record<CompanionFact["kind"], Phraser>
   engracado: {
     "execution-started": (f) => {
       const fact = f as Extract<CompanionFact, { kind: "execution-started" }>;
+      if (fact.isFirstEver) {
+        return {
+          written: `Opa, primeira vez que eu acompanho você numa tarefa! Vou ficar por aqui.`,
+          spoken: `Opa, nossa primeira vez fazendo isso junto! Vou ficar por aqui com você.`,
+        };
+      }
       return {
         written: `"${fact.taskTitle}" começou. Bora nessa.`,
         spoken: `Começou "${fact.taskTitle}". Já separei minha torcida organizada aqui.`,
@@ -404,6 +429,12 @@ const PHRASERS: Record<MascotPersonality, Record<CompanionFact["kind"], Phraser>
   motivador: {
     "execution-started": (f) => {
       const fact = f as Extract<CompanionFact, { kind: "execution-started" }>;
+      if (fact.isFirstEver) {
+        return {
+          written: `Primeira vez que faço isso com você. Vou ficar acompanhando daqui pra frente.`,
+          spoken: `É a nossa primeira vez fazendo isso juntos. Vou ficar aqui com você até o fim.`,
+        };
+      }
       return {
         written: `Começou "${fact.taskTitle}". Só o começo já conta.`,
         spoken: `Boa, começou. Isso já é a parte mais difícil resolvida.`,
@@ -508,6 +539,12 @@ const PHRASERS: Record<MascotPersonality, Record<CompanionFact["kind"], Phraser>
   zen: {
     "execution-started": (f) => {
       const fact = f as Extract<CompanionFact, { kind: "execution-started" }>;
+      if (fact.isFirstEver) {
+        return {
+          written: `Primeira vez que acompanho você assim. Vou ficar por perto, sem pressa.`,
+          spoken: `É a primeira vez, então vou só ficar por perto. No seu ritmo, sempre.`,
+        };
+      }
       return {
         written: `Começando "${fact.taskTitle}". Sem pressa.`,
         spoken: `Começou agora. Sem pressa nenhuma, vai no seu tempo.`,

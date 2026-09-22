@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 
 import { useMobileNavStore } from "@/components/header/mobile-nav-store";
 import { getFocusableElements } from "@/components/modal/get-focusable-elements";
+import type { MascotPersonality } from "@/features/focus/domain";
 
 import { dismissGuidedTourAction } from "../../actions";
 import { buildGuidedTourSteps, GUIDED_TOUR_MOBILE_BREAKPOINT_PX, GuidedTourStep } from "../../domain/steps";
@@ -91,6 +92,11 @@ function tooltipPositionFor(rect: Rect | null): TooltipPosition {
 interface GuidedTourProps {
   active: boolean;
   mascotName: string;
+  mascotPersonality: MascotPersonality;
+  /** URL do avatar do mascote (ver `mascotAvatarUrl`) - usado só no passo
+   * do mascote (`speaksAsCompanion`), como "remetente" do balão. `null` =
+   * espécie ainda sem avatar próprio, o passo cai pro layout sem imagem. */
+  mascotAvatar: string | null;
   userId: string;
 }
 
@@ -169,10 +175,14 @@ function resolveStepIndex(steps: GuidedTourStep[], storedStepId: string | null):
 // Só é chamada dentro do inicializador de `useState` abaixo - este
 // componente só existe no cliente (ver `lazy.tsx`, `ssr: false`), então
 // `document`/`window` sempre existem quando isto roda.
-function computeInitialSteps(active: boolean, mascotName: string): GuidedTourStep[] | null {
+function computeInitialSteps(
+  active: boolean,
+  mascotName: string,
+  mascotPersonality: MascotPersonality
+): GuidedTourStep[] | null {
   if (!active) return null;
 
-  const allSteps = buildGuidedTourSteps(mascotName);
+  const allSteps = buildGuidedTourSteps(mascotName, mascotPersonality);
   const currentPath = window.location.pathname;
   const isMobileViewport = window.innerWidth <= MOBILE_BREAKPOINT_PX;
   const available = allSteps.filter((step) => {
@@ -208,7 +218,7 @@ function waitForTarget(selector: string, timeoutMs: number): Promise<Element | n
   });
 }
 
-export function GuidedTour({ active, mascotName, userId }: GuidedTourProps) {
+export function GuidedTour({ active, mascotName, mascotPersonality, mascotAvatar, userId }: GuidedTourProps) {
   const router = useRouter();
   // Ref (não outro useState) só pra não rodar `computeInitialSteps` -
   // que filtra passos e faz `document.querySelector` por passo - duas
@@ -219,7 +229,7 @@ export function GuidedTour({ active, mascotName, userId }: GuidedTourProps) {
   const initialStepsRef = useRef<GuidedTourStep[] | null | undefined>(undefined);
   function getInitialSteps(): GuidedTourStep[] | null {
     if (initialStepsRef.current === undefined) {
-      initialStepsRef.current = computeInitialSteps(active, mascotName);
+      initialStepsRef.current = computeInitialSteps(active, mascotName, mascotPersonality);
     }
     return initialStepsRef.current;
   }
@@ -254,7 +264,7 @@ export function GuidedTour({ active, mascotName, userId }: GuidedTourProps) {
   // false→true, não a cada mudança de `active`.
   useEffect(() => {
     if (active && !wasActiveRef.current) {
-      setSteps(computeInitialSteps(true, mascotName));
+      setSteps(computeInitialSteps(true, mascotName, mascotPersonality));
       setStepIndex(0);
       setFinished(false);
       // "Rever tour guiado" começa do zero de propósito - nunca deveria
@@ -262,7 +272,7 @@ export function GuidedTour({ active, mascotName, userId }: GuidedTourProps) {
       writeStoredStepId(userId, null);
     }
     wasActiveRef.current = active;
-  }, [active, mascotName, userId]);
+  }, [active, mascotName, mascotPersonality, userId]);
 
   // Lembra o passo atual entre recarregamentos de página (ver comentário
   // de `STEP_INDEX_STORAGE_KEY`) - grava a cada mudança de passo, nunca
@@ -431,20 +441,34 @@ export function GuidedTour({ active, mascotName, userId }: GuidedTourProps) {
 
       <div
         ref={containerRef}
-        className={styles.tooltip}
+        className={step.speaksAsCompanion ? `${styles.tooltip} ${styles.companionTooltip}` : styles.tooltip}
         style={{ width: Math.min(TOOLTIP_WIDTH, window.innerWidth - VIEWPORT_MARGIN * 2), top: position.top, bottom: position.bottom, left: position.left }}
         role="dialog"
         aria-modal="true"
         aria-labelledby="guided-tour-title"
         tabIndex={-1}
       >
-        <p className={styles.step}>
-          {stepIndex + 1} de {steps.length}
-        </p>
-        <h2 id="guided-tour-title" className={styles.title}>
-          {step.title}
-        </h2>
-        <p className={styles.body}>{step.body}</p>
+        {step.speaksAsCompanion ? (
+          <div className={styles.companionSender}>
+            {mascotAvatar && (
+              // eslint-disable-next-line @next/next/no-img-element -- avatar pequeno dentro de um overlay client-only, sem necessidade do pipeline de otimização do `next/image` aqui.
+              <img src={mascotAvatar} alt="" className={styles.companionAvatar} />
+            )}
+            <h2 id="guided-tour-title" className={styles.companionName}>
+              {step.title}
+            </h2>
+          </div>
+        ) : (
+          <>
+            <p className={styles.step}>
+              {stepIndex + 1} de {steps.length}
+            </p>
+            <h2 id="guided-tour-title" className={styles.title}>
+              {step.title}
+            </h2>
+          </>
+        )}
+        <p className={step.speaksAsCompanion ? `${styles.body} ${styles.companionBody}` : styles.body}>{step.body}</p>
 
         <div className={styles.actions}>
           <button type="button" className={styles.skip} onClick={finish}>

@@ -11,6 +11,7 @@ import styles from "@/app/home/home-layout.module.css";
 import { Button, Icon, type IconName } from "@/components";
 import { useMobileNavStore } from "@/components/header/mobile-nav-store";
 import { getFocusableElements } from "@/components/modal/get-focusable-elements";
+import { ThemePreference, useTheme } from "@/design-system/theme/use-theme";
 import { Gender } from "@/features/profile/get-gender";
 import { usePaletteStore } from "@/features/search/palette-store";
 import { QuickCapture } from "@/features/tasks/components/quick-capture";
@@ -69,6 +70,25 @@ const NAV_GROUPS: NavGroup[] = [
   { label: null, links: [{ href: "/home/settings", label: "Configurações", icon: "MdSettings" }] },
 ];
 
+// Ciclo curto (1 clique = 1 passo), nunca um menu à parte só pra 3
+// opções - "Sistema" já é o padrão pra quem nunca mexeu, então o ciclo
+// começa por ele.
+const NEXT_THEME_PREFERENCE: Record<ThemePreference, ThemePreference> = {
+  system: "light",
+  light: "dark",
+  dark: "system",
+};
+const THEME_PREFERENCE_ICON: Record<ThemePreference, IconName> = {
+  system: "MdBrightnessAuto",
+  light: "MdLightMode",
+  dark: "MdDarkMode",
+};
+const THEME_PREFERENCE_LABEL: Record<ThemePreference, string> = {
+  system: "Tema: automático",
+  light: "Tema: claro",
+  dark: "Tema: escuro",
+};
+
 function visibleNavGroups(gender: Gender): NavGroup[] {
   return NAV_GROUPS.map((group) => ({
     ...group,
@@ -101,6 +121,7 @@ function initials(name: string | null): string {
 export const Header = ({ user }: HeaderProps) => {
   useCaptureTimezone();
 
+  const { preference: themePreference, setPreference: setThemePreference } = useTheme();
   const pathname = usePathname();
   const openPalette = usePaletteStore((state) => state.open);
   const [isConfirmingSignOut, setIsConfirmingSignOut] = useState(false);
@@ -299,6 +320,15 @@ export const Header = ({ user }: HeaderProps) => {
 
             <QuickCapture triggerClassName={styles.searchTrigger} />
             {renderNavigation(true)}
+
+            <button
+              type="button"
+              className={styles.themeToggle}
+              onClick={() => setThemePreference(NEXT_THEME_PREFERENCE[themePreference])}
+            >
+              <Icon name={THEME_PREFERENCE_ICON[themePreference]} aria-hidden="true" />
+              {THEME_PREFERENCE_LABEL[themePreference]}
+            </button>
           </div>
         </div>
       )}
@@ -347,6 +377,15 @@ export const Header = ({ user }: HeaderProps) => {
       <QuickCapture triggerClassName={styles.searchTrigger} />
 
         {renderNavigation()}
+
+      <button
+        type="button"
+        className={styles.themeToggle}
+        onClick={() => setThemePreference(NEXT_THEME_PREFERENCE[themePreference])}
+      >
+        <Icon name={THEME_PREFERENCE_ICON[themePreference]} aria-hidden="true" />
+        {THEME_PREFERENCE_LABEL[themePreference]}
+      </button>
 
       <Link href="/home/settings?section=conta" className={styles.profile}>
         {user.image ? (

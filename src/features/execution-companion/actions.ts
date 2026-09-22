@@ -303,6 +303,16 @@ export async function completeExecutionSessionAction(
 export async function resolveCompanionMessageAction(params: {
   intent: string;
   priority: "meaningful" | "casual";
+  /** Ver `frequencyBypass` em `companion-interaction-config.ts` -
+   * ignora o intervalo mínimo desde a última fala (nunca o freio de
+   * emergência) pra situações raras o bastante que vale a pena falar
+   * mesmo logo após outra fala. */
+  frequencyBypass: boolean;
+  /** Se o usuário está conversando ativamente no chat do Widget agora -
+   * o histórico de chat vive só no `localStorage` do cliente, o
+   * servidor não tem como saber isso sozinho (ver
+   * `isEngagedViaChat()` em `use-tasks-companion.ts`). */
+  isEngagedViaChat: boolean;
   aiEligible: boolean;
   personality: MascotPersonality;
   context: Omit<CompanionInteractionContext, "eligibleMoves" | "humorEligible">;
@@ -345,7 +355,11 @@ export async function resolveCompanionMessageAction(params: {
 
     // Checagem só de leitura ANTES de gastar uma chamada de IA cara -
     // sem sentido gerar uma interação se a cota já estourou mesmo.
-    const hasBudget = await prefs.hasCompanionBudget(params.priority);
+    const hasBudget = await prefs.hasCompanionBudget({
+      priority: params.priority,
+      frequencyBypass: params.frequencyBypass,
+      isEngagedViaChat: params.isEngagedViaChat,
+    });
     if (!hasBudget) {
       console.log(`[Companion] intent=${params.intent} decision=silent reason=budget_exhausted priority=${params.priority}`);
       return { allowed: false };
@@ -368,7 +382,11 @@ export async function resolveCompanionMessageAction(params: {
       }
     }
 
-    const { allowed } = await prefs.registerCompanionMessageShown(phrase.written, params.priority);
+    const { allowed } = await prefs.registerCompanionMessageShown(phrase.written, {
+      priority: params.priority,
+      frequencyBypass: params.frequencyBypass,
+      isEngagedViaChat: params.isEngagedViaChat,
+    });
 
     console.log(
       `[Companion] intent=${params.intent} decision=${allowed ? "speak" : "silent"} ` +

@@ -12,13 +12,25 @@ export type RegisterInsightShown = {
 
 export type CompanionInteractionPriority = "meaningful" | "casual";
 
+export interface CompanionFrequencyCheck {
+  priority: CompanionInteractionPriority;
+  /** Ver `frequencyBypass` em `companion-interaction-config.ts`. */
+  frequencyBypass: boolean;
+  /** Se o usuário está conversando ativamente no chat do Widget agora -
+   * ver `isEngagedViaChat()` em `use-tasks-companion.ts`. O histórico de
+   * chat vive só no `localStorage` do cliente, então o servidor não tem
+   * como saber isso sozinho - precisa vir de quem chama. */
+  isEngagedViaChat: boolean;
+}
+
 export type CheckCompanionBudget = {
-  /** Checagem SÓ DE LEITURA (nunca consome cota) - usada como gate ANTES
+  /** Checagem SÓ DE LEITURA (nunca grava nada) - usada como gate ANTES
    * de gastar uma chamada de IA cara: sem sentido gerar uma interação se
-   * a cota já está esgotada mesmo. `registerCompanionMessageShown`
-   * continua sendo o commit de verdade, chamado DEPOIS de decidir o
-   * texto final (local ou IA). */
-  hasCompanionBudget: (priority: CompanionInteractionPriority) => Promise<boolean>;
+   * o intervalo mínimo desde a última fala ainda não passou.
+   * `registerCompanionMessageShown` continua sendo o commit de verdade,
+   * chamado DEPOIS de decidir o texto final (local ou IA) - ver
+   * `companion-frequency.ts` pra regra real de quando falar. */
+  hasCompanionBudget: (check: CompanionFrequencyCheck) => Promise<boolean>;
 };
 
 export type CompanionBoundary = {
@@ -33,15 +45,15 @@ export type CompanionBoundary = {
 };
 
 export type RegisterCompanionMessageShown = {
-  /** Mesma ideia de `registerInsightShown`, mas com cota PRÓPRIA — ver
-   * `assistantCompanionDailyCount`/`assistantCompanionMeaningfulCount`
-   * em `src/db/schema.ts`. Duas cotas independentes por `priority`:
-   * "meaningful" (começou/concluiu tarefa, prazo) tem um teto bem maior
-   * que "casual" (saudação, sessão longa, ociosidade) - um evento
-   * importante nunca é bloqueado só porque o Companion já falou algo
-   * casual antes no dia. */
+  /** Commit de verdade: recheca a mesma regra de `hasCompanionBudget`
+   * contra o estado MAIS FRESCO possível (protege contra corrida entre
+   * duas chamadas quase simultâneas) e, se permitido, grava
+   * `assistantCompanionLastSpokeAt = agora` - ver `companion-frequency.ts`.
+   * Repetir o MESMO texto de novo no mesmo dia sempre é permitido sem
+   * reavaliar o intervalo (a mesma condição persistindo entre
+   * navegações não deveria contar como uma nova interrupção). */
   registerCompanionMessageShown: (
     text: string,
-    priority: CompanionInteractionPriority
+    check: CompanionFrequencyCheck
   ) => Promise<{ allowed: boolean }>;
 };

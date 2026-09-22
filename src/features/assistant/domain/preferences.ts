@@ -11,6 +11,11 @@ export interface IAssistantPreferences {
   // Convite único "quer que eu fale às vezes?" já foi mostrado/respondido
   // (ver `VoiceOnboardingPrompt`) — nunca reaparece depois disso.
   autoSpeechPromptShown: boolean;
+  // Introdução contextual da Execução Acompanhada ("Começar" numa tarefa)
+  // já foi mostrada na PRIMEIRA vez - ver `isFirstEver` em
+  // `companion-phrasing.ts`. Nunca reaparece depois disso, mesmo em
+  // tarefas/sessões futuras.
+  executionIntroShown: boolean;
 }
 
 export type GetAssistantPreferences = {

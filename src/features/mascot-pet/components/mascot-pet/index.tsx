@@ -53,6 +53,10 @@ interface MascotPetProps {
   /** Convite único "quer que eu fale às vezes?" já foi respondido antes -
    * ver `VoiceControl`. */
   autoSpeechPromptShown?: boolean;
+  /** A introdução contextual da Execução Acompanhada (ver `isFirstEver`
+   * em `companion-phrasing.ts`) já foi mostrada antes - `false` numa
+   * conta nova, que ainda nunca clicou "Começar" em nada. */
+  hasSeenExecutionIntro?: boolean;
   /** Primeiro nome real do usuário (extraído do nome completo da sessão)
    * - usado OCASIONALMENTE pelo Companion (nunca em toda mensagem, ver
    * `useTasksCompanion`). `null` = sem nome disponível (conta Google sem
@@ -79,6 +83,7 @@ export function MascotPet({
   assistantEnabled = true,
   autoSpeechEnabled: autoSpeechEnabledInitial = true,
   autoSpeechPromptShown: autoSpeechPromptShownInitial = false,
+  hasSeenExecutionIntro = false,
   userFirstName = null,
   userGender = "nao_informado",
 }: MascotPetProps) {
@@ -102,7 +107,8 @@ export function MascotPet({
     mascot?.personality ?? "afetuoso",
     autoSpeechEnabled,
     assistantEnabled,
-    { firstName: userFirstName, gender: userGender }
+    { firstName: userFirstName, gender: userGender },
+    hasSeenExecutionIntro
   );
 
   // Cartão de estado (clicar no mascote, sem arrastar - ver `onClick` em

@@ -22,11 +22,7 @@ import type { AIProvider, AIProviderResponse } from "./types";
 // o comportamento robótico/customer-service que o Companion precisa
 // evitar. O qwen manteve personalidade, ritmo e continuidade sem cair
 // nesse padrão nos mesmos testes.
-const GROQ_MODELS: readonly string[] = (() => {
-  const primary = process.env.GROQ_MODEL || "qwen/qwen3.8-27b";
-  const fallbacks = ["openai/gpt-oss-120b", "openai/gpt-oss-20b"];
-  return [primary, ...fallbacks.filter((m) => m !== primary)];
-})();
+const GROQ_MODELS: readonly string[] = ["qwen/qwen3.8-27b", "openai/gpt-oss-120b", "openai/gpt-oss-20b"];
 
 // Sem isso, o Groq reserva um teto de output BEM maior que o necessário
 // pra uma resposta de chat/JSON curta - e o plano gratuito tem um limite

@@ -664,6 +664,14 @@ export const userPreferences = pgTable("user_preference", {
   // (nunca reaparece sozinho), só que separado porque são dois fluxos
   // independentes: dá pra pular o tour e ainda ver o checklist, ou vice-versa.
   guidedTourDismissed: boolean("guided_tour_dismissed").notNull().default(false),
+  // Marcado na PRIMEIRA vez que o usuário inicia uma execução acompanhada
+  // de verdade (clicou "Começar" numa tarefa) - o tour guiado não ensina
+  // isso (não existe alvo real pra apontar durante o onboarding, sem
+  // nenhuma tarefa criada ainda), então a introdução acontece aqui, de
+  // forma contextual, na hora que a experiência realmente começa. Nunca
+  // reaparece depois da primeira vez, mesmo que a pessoa abandone/reinicie
+  // outras tarefas depois - ver `companion-phrasing.ts` (`isFirstEver`).
+  executionIntroShown: boolean("execution_intro_shown").notNull().default(false),
   // Limite de interrupções (Modo Assistido): quantas mensagens contextuais
   // já foram auto-abertas HOJE (ver MAX_DAILY_INSIGHTS em
   // `local-assistant-preferences.ts`) — zera sozinho quando a data muda,
@@ -684,18 +692,37 @@ export const userPreferences = pgTable("user_preference", {
   // interrupções do dia com avisos sem relação nenhuma com a tarefa
   // clicada).
   //
-  // DUAS cotas, não uma só (evolução do design original de cota única):
-  // eventos MEANINGFUL (começou/concluiu tarefa, prazo perto/vencido) são
-  // raros e importantes por natureza - não podem ser bloqueados só porque
-  // o Companion já comentou algo CASUAL (saudação, sessão longa,
-  // ociosidade) antes no dia. `assistant_companion_daily_count/date`
-  // (nome mantido do design anterior) virou a cota CASUAL especificamente;
-  // `assistant_companion_meaningful_*` é a cota nova, maior, só pros
-  // eventos que realmente importam.
-  assistantCompanionDailyCount: integer("assistant_companion_daily_count").notNull().default(0),
-  assistantCompanionDailyDate: text("assistant_companion_daily_date"),
-  assistantCompanionMeaningfulCount: integer("assistant_companion_meaningful_count").notNull().default(0),
-  assistantCompanionMeaningfulDate: text("assistant_companion_meaningful_date"),
+  // Substituiu as duas cotas diárias antigas (`assistant_companion_daily_count`/
+  // `assistant_companion_meaningful_count`) - achado real: numa base
+  // conversível de teste/uso pesado num único dia, um teto de 12
+  // "meaningful" + 4 "casual" é atingido no MEIO DO DIA, e o Companion
+  // fica mudo pelo resto dele — o oposto de "transmitir presença e
+  // continuidade" (o próprio objetivo do produto). Contar "quantas vezes
+  // hoje" não diferencia "falou duas vezes com 3 segundos de intervalo"
+  // de "falou duas vezes com 3 horas de intervalo" - o problema real
+  // nunca foi o volume total do dia, era a FREQUÊNCIA.
+  //
+  // Novo mecanismo (ver `companion-frequency.ts`): controla por TEMPO
+  // DESDE A ÚLTIMA FALA, não contagem - `assistantCompanionLastSpokeAt`
+  // é a única fonte de verdade de "quando foi a última vez que o
+  // Companion falou", `withTimezone` obrigatório (mesmo raciocínio do
+  // `assistantCompanionQuietUntil` abaixo - comparado direto contra
+  // `Date.now()`). Precisa ser persistido no servidor (não uma ref de
+  // componente React) pra sobreviver a reload/navegação, que é
+  // justamente o que as refs client-side dos gates por-evento (em
+  // `use-tasks-companion.ts`) NÃO fazem sozinhas.
+  assistantCompanionLastSpokeAt: timestamp("assistant_companion_last_spoke_at", {
+    mode: "date",
+    withTimezone: true,
+  }),
+  // Freio de emergência (não o mecanismo principal) contra um bug de loop
+  // disparando dezenas de interações por minuto - teto alto o bastante
+  // pra um usuário normal, mesmo num dia de uso intenso, nunca perceber
+  // que existe. Ao ser atingido, NÃO bloqueia tudo (ver
+  // `isCompanionFrequencyAllowed`) - só força o maior intervalo mínimo
+  // possível pro resto do dia, tornando o Companion raro em vez de mudo.
+  assistantCompanionAbuseGuardCount: integer("assistant_companion_abuse_guard_count").notNull().default(0),
+  assistantCompanionAbuseGuardDate: text("assistant_companion_abuse_guard_date"),
   assistantCompanionLastText: text("assistant_companion_last_text"),
   // Limite explícito de espaço ("fique quieto por um tempo") — diferente
   // das cotas acima (que só reduzem VOLUME). Enquanto `now < quietUntil`,

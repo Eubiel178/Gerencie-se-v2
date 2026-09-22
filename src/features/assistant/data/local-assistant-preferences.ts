@@ -7,24 +7,55 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import { userPreferences } from "@/db/schema";
 import * as domain from "@/features/assistant/domain";
+import { COMPANION_FREQUENCY, isCompanionFrequencyAllowed } from "@/features/execution-companion/domain/companion-frequency";
 import { requireUserId } from "@/lib/auth";
 import { getOrCreateUserPreferencesRow } from "@/lib/shared/get-or-create-user-preferences";
 
 // No máximo 5 interrupções auto-abertas por dia — depois disso o
 // widget continua existindo (avatar visível), só para de auto-abrir o
 // balão sozinho até a data virar. Presença reduzida e o dismiss manual
-// continuam funcionando normalmente, independente desse limite.
+// continuam funcionando normalmente, independente desse limite. Isto é
+// do WIDGET (insights de produtividade), não do Companion de Tarefas -
+// ver `hasCompanionBudget`/`registerCompanionMessageShown` abaixo pro
+// controle de frequência do Companion (mecanismo diferente).
 const MAX_DAILY_INSIGHTS = 5;
 
-// Duas cotas do Companion de Tarefas, separadas de `MAX_DAILY_INSIGHTS`
-// (Widget) E entre si (ver comentário completo em `src/db/schema.ts`
-// sobre `assistantCompanionDailyCount`/`assistantCompanionMeaningfulCount`).
-// "Casual" continua pequeno de propósito (saudação/sessão longa/
-// ociosidade não podem virar barulho); "meaningful" é bem mais generoso
-// porque começar/concluir tarefa e avisos de prazo são raros por
-// natureza e nunca deveriam ser bloqueados por causa de conversa casual.
-const MAX_DAILY_CASUAL_MESSAGES = 4;
-const MAX_DAILY_MEANINGFUL_MESSAGES = 12;
+interface CompanionSpeechState {
+  lastSpokeAt: Date | null;
+  abuseGuardTriggered: boolean;
+  abuseGuardCountToday: number;
+  today: string;
+  lastText: string | null;
+}
+
+/** Lê o estado real de "quando o Companion falou pela última vez" +
+ * status do freio de emergência - fonte única usada tanto pela checagem
+ * (`hasCompanionBudget`, só leitura) quanto pelo commit
+ * (`registerCompanionMessageShown`), pra nunca divergir entre os dois. */
+async function readCompanionSpeechState(userId: string): Promise<CompanionSpeechState> {
+  const [row] = await db
+    .select({
+      lastSpokeAt: userPreferences.assistantCompanionLastSpokeAt,
+      abuseGuardCount: userPreferences.assistantCompanionAbuseGuardCount,
+      abuseGuardDate: userPreferences.assistantCompanionAbuseGuardDate,
+      lastText: userPreferences.assistantCompanionLastText,
+    })
+    .from(userPreferences)
+    .where(eq(userPreferences.userId, userId))
+    .limit(1);
+
+  const today = dayjs().format("YYYY-MM-DD");
+  const isSameDay = row?.abuseGuardDate === today;
+  const abuseGuardCountToday = isSameDay ? (row?.abuseGuardCount ?? 0) : 0;
+
+  return {
+    lastSpokeAt: row?.lastSpokeAt ?? null,
+    abuseGuardTriggered: abuseGuardCountToday >= COMPANION_FREQUENCY.ABUSE_GUARD_DAILY_MAX,
+    abuseGuardCountToday,
+    today,
+    lastText: row?.lastText ?? null,
+  };
+}
 
 /** Mesmo padrão de `LocalHydration.getGoal`: lê a linha de preferências do
  * usuário, criando com os valores padrão do schema na primeira leitura
@@ -47,6 +78,7 @@ export class LocalAssistantPreferences
       reducedPresence: row.assistantReducedPresence,
       autoSpeechEnabled: row.assistantAutoSpeechEnabled,
       autoSpeechPromptShown: row.assistantAutoSpeechPromptShown,
+      executionIntroShown: row.executionIntroShown,
     };
   }
 
@@ -58,6 +90,7 @@ export class LocalAssistantPreferences
     if (params.reducedPresence !== undefined) patch.assistantReducedPresence = params.reducedPresence;
     if (params.autoSpeechPromptShown !== undefined) patch.assistantAutoSpeechPromptShown = params.autoSpeechPromptShown;
     if (params.autoSpeechEnabled !== undefined) patch.assistantAutoSpeechEnabled = params.autoSpeechEnabled;
+    if (params.executionIntroShown !== undefined) patch.executionIntroShown = params.executionIntroShown;
 
     await db
       .insert(userPreferences)
@@ -116,68 +149,52 @@ export class LocalAssistantPreferences
     return { allowed: true };
   }
 
-  async hasCompanionBudget(priority: domain.CompanionInteractionPriority): Promise<boolean> {
+  async hasCompanionBudget(check: domain.CompanionFrequencyCheck): Promise<boolean> {
     const userId = await requireUserId();
-    const today = dayjs().format("YYYY-MM-DD");
-    const isMeaningful = priority === "meaningful";
-    const maxDaily = isMeaningful ? MAX_DAILY_MEANINGFUL_MESSAGES : MAX_DAILY_CASUAL_MESSAGES;
-
-    const [row] = await db
-      .select({
-        count: isMeaningful
-          ? userPreferences.assistantCompanionMeaningfulCount
-          : userPreferences.assistantCompanionDailyCount,
-        date: isMeaningful
-          ? userPreferences.assistantCompanionMeaningfulDate
-          : userPreferences.assistantCompanionDailyDate,
-      })
-      .from(userPreferences)
-      .where(eq(userPreferences.userId, userId))
-      .limit(1);
-
-    const isSameDay = row?.date === today;
-    const countToday = isSameDay ? row.count : 0;
-    return countToday < maxDaily;
+    const state = await readCompanionSpeechState(userId);
+    return isCompanionFrequencyAllowed({
+      priority: check.priority,
+      frequencyBypass: check.frequencyBypass,
+      isEngagedViaChat: check.isEngagedViaChat,
+      lastSpokeAt: state.lastSpokeAt,
+      now: new Date(),
+      abuseGuardTriggered: state.abuseGuardTriggered,
+    });
   }
 
   async registerCompanionMessageShown(
     text: string,
-    priority: domain.CompanionInteractionPriority
+    check: domain.CompanionFrequencyCheck
   ): Promise<{ allowed: boolean }> {
     const userId = await requireUserId();
-    const today = dayjs().format("YYYY-MM-DD");
-    const isMeaningful = priority === "meaningful";
-    const maxDaily = isMeaningful ? MAX_DAILY_MEANINGFUL_MESSAGES : MAX_DAILY_CASUAL_MESSAGES;
+    const state = await readCompanionSpeechState(userId);
 
-    const [row] = await db
-      .select({
-        count: isMeaningful
-          ? userPreferences.assistantCompanionMeaningfulCount
-          : userPreferences.assistantCompanionDailyCount,
-        date: isMeaningful
-          ? userPreferences.assistantCompanionMeaningfulDate
-          : userPreferences.assistantCompanionDailyDate,
-        lastText: userPreferences.assistantCompanionLastText,
-      })
-      .from(userPreferences)
-      .where(eq(userPreferences.userId, userId))
-      .limit(1);
-
-    const isSameDay = row?.date === today;
-    const countToday = isSameDay ? row.count : 0;
-
-    if (isSameDay && row.lastText === text) {
+    // Mesmo texto de antes (a mesma condição persistindo entre
+    // navegações) nunca conta como uma nova interrupção - nem recheca o
+    // intervalo mínimo.
+    if (state.lastText === text) {
       return { allowed: true };
     }
 
-    if (countToday >= maxDaily) {
+    const allowed = isCompanionFrequencyAllowed({
+      priority: check.priority,
+      frequencyBypass: check.frequencyBypass,
+      isEngagedViaChat: check.isEngagedViaChat,
+      lastSpokeAt: state.lastSpokeAt,
+      now: new Date(),
+      abuseGuardTriggered: state.abuseGuardTriggered,
+    });
+
+    if (!allowed) {
       return { allowed: false };
     }
 
-    const patch: Partial<typeof userPreferences.$inferInsert> = isMeaningful
-      ? { assistantCompanionMeaningfulCount: countToday + 1, assistantCompanionMeaningfulDate: today }
-      : { assistantCompanionDailyCount: countToday + 1, assistantCompanionDailyDate: today };
-    patch.assistantCompanionLastText = text;
+    const patch: Partial<typeof userPreferences.$inferInsert> = {
+      assistantCompanionLastSpokeAt: new Date(),
+      assistantCompanionAbuseGuardCount: state.abuseGuardCountToday + 1,
+      assistantCompanionAbuseGuardDate: state.today,
+      assistantCompanionLastText: text,
+    };
 
     await db
       .insert(userPreferences)
