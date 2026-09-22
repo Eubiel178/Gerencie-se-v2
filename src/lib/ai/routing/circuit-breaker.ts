@@ -1,6 +1,6 @@
 import "server-only";
 
-import { COOLDOWN_MS } from "../config";
+import { COOLDOWN_MS, ERROR_COOLDOWN_MS } from "../config";
 import type { ErrorCategory } from "../config";
 
 const modelCooldowns = new Map<string, number>();
@@ -23,6 +23,16 @@ export function markModelRateLimited(provider: string, model: string): void {
 
 export function markModelError(provider: string, model: string, errorType: Exclude<ErrorCategory, "rate_limit">): void {
   lastError.set(modelKey(provider, model), errorType);
+
+  // Timeout/erro de servidor também entram em cooldown - sem isso, o
+  // MESMO modelo lento/instável era tentado de novo do zero a cada nova
+  // mensagem do chat, pagando o timeout inteiro (até 30s) toda vez em
+  // vez de aprender que acabou de falhar e pular direto pro próximo
+  // modelo/provider (ver `ERROR_COOLDOWN_MS`).
+  if (errorType === "timeout" || errorType === "server_error") {
+    modelCooldowns.set(modelKey(provider, model), Date.now() + ERROR_COOLDOWN_MS);
+    console.log(`[AI] provider=${provider} model=${model} status=cooling_down reason=${errorType} cooldown=${ERROR_COOLDOWN_MS / 1000}s`);
+  }
 }
 
 export function clearModelError(provider: string, model: string): void {

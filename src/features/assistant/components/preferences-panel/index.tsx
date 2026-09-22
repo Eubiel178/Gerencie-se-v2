@@ -49,7 +49,7 @@ export function PreferencesPanel({ preferences, mascotName }: PreferencesPanelPr
           disabled={isSaving}
           onChange={(event) => handleToggle({ enabled: event.target.checked })}
         />
-        <span>Mostrar o assistente ({mascotName})</span>
+        <span>Companion ativo ({mascotName})</span>
       </label>
 
       <label className={styles.row} data-disabled={!visiblePreferences.enabled}>
@@ -62,9 +62,25 @@ export function PreferencesPanel({ preferences, mascotName }: PreferencesPanelPr
         <span>Presença reduzida (não abrir mensagens sozinho)</span>
       </label>
 
+      <label className={styles.row} data-disabled={!visiblePreferences.enabled}>
+        <input
+          type="checkbox"
+          checked={visiblePreferences.autoSpeechEnabled}
+          disabled={isSaving || !visiblePreferences.enabled}
+          onChange={(event) => handleToggle({ autoSpeechEnabled: event.target.checked })}
+        />
+        <span>
+          Voz automática do Companion (o mesmo ícone de som fixo no canto
+          da tela também liga/desliga isso na hora)
+        </span>
+      </label>
+
       <p className={styles.note}>
-        O assistente observa suas tarefas, hábitos e objetivos para sugerir o
-        que fazer a seguir — nunca acessa nada fora disso.
+        Desligar o Companion para as interações proativas por completo (nem
+        balão, nem sugestões). Desligar só a voz mantém as mensagens
+        escritas, sem falar sozinho. O Companion observa suas tarefas,
+        hábitos e objetivos para sugerir o que fazer a seguir — nunca
+        acessa nada fora disso.
       </p>
 
       {error && <p className={styles.error}>{error}</p>}

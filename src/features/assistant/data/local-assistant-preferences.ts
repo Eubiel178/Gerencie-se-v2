@@ -16,17 +16,37 @@ import { getOrCreateUserPreferencesRow } from "@/lib/shared/get-or-create-user-p
 // continuam funcionando normalmente, independente desse limite.
 const MAX_DAILY_INSIGHTS = 5;
 
+// Duas cotas do Companion de Tarefas, separadas de `MAX_DAILY_INSIGHTS`
+// (Widget) E entre si (ver comentário completo em `src/db/schema.ts`
+// sobre `assistantCompanionDailyCount`/`assistantCompanionMeaningfulCount`).
+// "Casual" continua pequeno de propósito (saudação/sessão longa/
+// ociosidade não podem virar barulho); "meaningful" é bem mais generoso
+// porque começar/concluir tarefa e avisos de prazo são raros por
+// natureza e nunca deveriam ser bloqueados por causa de conversa casual.
+const MAX_DAILY_CASUAL_MESSAGES = 4;
+const MAX_DAILY_MEANINGFUL_MESSAGES = 12;
+
 /** Mesmo padrão de `LocalHydration.getGoal`: lê a linha de preferências do
  * usuário, criando com os valores padrão do schema na primeira leitura
  * (nunca falha por "usuário sem preferências ainda"). */
 export class LocalAssistantPreferences
-  implements domain.GetAssistantPreferences, domain.UpdateAssistantPreferences, domain.RegisterInsightShown
+  implements
+    domain.GetAssistantPreferences,
+    domain.UpdateAssistantPreferences,
+    domain.RegisterInsightShown,
+    domain.CheckCompanionBudget,
+    domain.RegisterCompanionMessageShown
 {
   async getPreferences(): Promise<domain.IAssistantPreferences> {
     const userId = await requireUserId();
     const row = await getOrCreateUserPreferencesRow(userId);
 
-    return { enabled: row.assistantEnabled, reducedPresence: row.assistantReducedPresence };
+    return {
+      enabled: row.assistantEnabled,
+      reducedPresence: row.assistantReducedPresence,
+      autoSpeechEnabled: row.assistantAutoSpeechEnabled,
+      autoSpeechPromptShown: row.assistantAutoSpeechPromptShown,
+    };
   }
 
   async updatePreferences(params: Partial<domain.IAssistantPreferences>): Promise<void> {
@@ -35,6 +55,8 @@ export class LocalAssistantPreferences
     const patch: Partial<typeof userPreferences.$inferInsert> = {};
     if (params.enabled !== undefined) patch.assistantEnabled = params.enabled;
     if (params.reducedPresence !== undefined) patch.assistantReducedPresence = params.reducedPresence;
+    if (params.autoSpeechPromptShown !== undefined) patch.assistantAutoSpeechPromptShown = params.autoSpeechPromptShown;
+    if (params.autoSpeechEnabled !== undefined) patch.assistantAutoSpeechEnabled = params.autoSpeechEnabled;
 
     await db
       .insert(userPreferences)
@@ -88,6 +110,80 @@ export class LocalAssistantPreferences
           assistantDailyInsightDate: today,
           assistantLastInsightText: text,
         },
+      });
+
+    return { allowed: true };
+  }
+
+  async hasCompanionBudget(priority: domain.CompanionInteractionPriority): Promise<boolean> {
+    const userId = await requireUserId();
+    const today = dayjs().format("YYYY-MM-DD");
+    const isMeaningful = priority === "meaningful";
+    const maxDaily = isMeaningful ? MAX_DAILY_MEANINGFUL_MESSAGES : MAX_DAILY_CASUAL_MESSAGES;
+
+    const [row] = await db
+      .select({
+        count: isMeaningful
+          ? userPreferences.assistantCompanionMeaningfulCount
+          : userPreferences.assistantCompanionDailyCount,
+        date: isMeaningful
+          ? userPreferences.assistantCompanionMeaningfulDate
+          : userPreferences.assistantCompanionDailyDate,
+      })
+      .from(userPreferences)
+      .where(eq(userPreferences.userId, userId))
+      .limit(1);
+
+    const isSameDay = row?.date === today;
+    const countToday = isSameDay ? row.count : 0;
+    return countToday < maxDaily;
+  }
+
+  async registerCompanionMessageShown(
+    text: string,
+    priority: domain.CompanionInteractionPriority
+  ): Promise<{ allowed: boolean }> {
+    const userId = await requireUserId();
+    const today = dayjs().format("YYYY-MM-DD");
+    const isMeaningful = priority === "meaningful";
+    const maxDaily = isMeaningful ? MAX_DAILY_MEANINGFUL_MESSAGES : MAX_DAILY_CASUAL_MESSAGES;
+
+    const [row] = await db
+      .select({
+        count: isMeaningful
+          ? userPreferences.assistantCompanionMeaningfulCount
+          : userPreferences.assistantCompanionDailyCount,
+        date: isMeaningful
+          ? userPreferences.assistantCompanionMeaningfulDate
+          : userPreferences.assistantCompanionDailyDate,
+        lastText: userPreferences.assistantCompanionLastText,
+      })
+      .from(userPreferences)
+      .where(eq(userPreferences.userId, userId))
+      .limit(1);
+
+    const isSameDay = row?.date === today;
+    const countToday = isSameDay ? row.count : 0;
+
+    if (isSameDay && row.lastText === text) {
+      return { allowed: true };
+    }
+
+    if (countToday >= maxDaily) {
+      return { allowed: false };
+    }
+
+    const patch: Partial<typeof userPreferences.$inferInsert> = isMeaningful
+      ? { assistantCompanionMeaningfulCount: countToday + 1, assistantCompanionMeaningfulDate: today }
+      : { assistantCompanionDailyCount: countToday + 1, assistantCompanionDailyDate: today };
+    patch.assistantCompanionLastText = text;
+
+    await db
+      .insert(userPreferences)
+      .values({ userId, ...patch })
+      .onConflictDoUpdate({
+        target: userPreferences.userId,
+        set: patch,
       });
 
     return { allowed: true };

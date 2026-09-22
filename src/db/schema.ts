@@ -272,6 +272,16 @@ export const tasks = pgTable("task", {
   workStatus: text("work_status", { enum: ["pending", "in_progress", "paused"] })
     .notNull()
     .default("pending"),
+  // Quando esta tarefa foi pausada pela ÚLTIMA vez - direto na task, não
+  // só na sessão de execução (`execution_session.paused_at`), porque só
+  // UMA sessão fica rastreada no cliente por vez (a ativa/pausada mais
+  // recente). Sem isso, o card de uma tarefa pausada há mais tempo (que
+  // não é mais a sessão rastreada, porque outra tarefa foi iniciada
+  // depois) perdia a informação de "há quanto tempo" - o badge "Pausada"
+  // ficava sem contexto, ou pior, mostrava o horário da sessão ERRADA
+  // (achado relatado: "perdi a data que foi pausada"). Mesmo raciocínio
+  // de `completedAt` já existir na própria task, não numa tabela à parte.
+  pausedAt: timestamp("paused_at", { mode: "date" }),
 
   // Vínculo opcional com um objetivo (nulo = tarefa avulsa).
   goalId: text("goal_id").references(() => goals.id, { onDelete: "set null" }),
@@ -616,6 +626,19 @@ export const userPreferences = pgTable("user_preference", {
   hydrationDailyGoalMl: integer("hydration_daily_goal_ml").notNull().default(2000),
   assistantEnabled: boolean("assistant_enabled").notNull().default(true),
   assistantReducedPresence: boolean("assistant_reduced_presence").notNull().default(false),
+  // Fala automática do Companion (balão espontâneo com TTS) na página de
+  // Tarefas — ligado por padrão, mas o TTS em si só toca depois que o
+  // navegador "desbloqueia" áudio (algum gesto do usuário na página, ver
+  // `src/lib/speech/audio-unlock.ts`) por causa das restrições de autoplay.
+  // Desligar isso NUNCA remove o balão escrito, só o áudio.
+  assistantAutoSpeechEnabled: boolean("assistant_auto_speech_enabled").notNull().default(true),
+  // Marca quando o convite único "quer que eu fale às vezes?" já foi
+  // respondido (ver `speech-onboarding-prompt.tsx`) — nunca mais
+  // reaparece depois disso, independente da resposta. Não é uma permissão
+  // de navegador de verdade (TTS de saída não pede uma) — é só uma
+  // pergunta de produto, uma vez, num momento real (primeira fala
+  // espontânea do Companion), nunca fingindo um prompt nativo.
+  assistantAutoSpeechPromptShown: boolean("assistant_auto_speech_prompt_shown").notNull().default(false),
   // Só usado pra decidir quais links da navegação fazem sentido mostrar
   // (ex.: Ciclo Menstrual) — nunca exposto/usado fora disso.
   gender: text("gender", { enum: ["feminino", "masculino", "nao_informado"] })
@@ -651,6 +674,29 @@ export const userPreferences = pgTable("user_preference", {
   // enquanto a mesma condição persiste) nunca consome cota — só uma
   // mensagem com texto diferente da última conta como nova interrupção.
   assistantLastInsightText: text("assistant_last_insight_text"),
+  // Cota PRÓPRIA e separada da acima — o balão espontâneo do Companion na
+  // página de Tarefas (ver `companion-phrasing.ts`) não compete pela MESMA
+  // cota dos insights do Widget (deadline/streak/sobrecarga etc.). Widget
+  // e Companion são disparados por sistemas completamente diferentes; uma
+  // cota compartilhada faz o Companion parecer quebrado sempre que o
+  // Widget já avisou de algo antes no dia (achado em teste manual: usuário
+  // clicou "Começar" e nada apareceu, porque o Widget já tinha usado as 5
+  // interrupções do dia com avisos sem relação nenhuma com a tarefa
+  // clicada).
+  //
+  // DUAS cotas, não uma só (evolução do design original de cota única):
+  // eventos MEANINGFUL (começou/concluiu tarefa, prazo perto/vencido) são
+  // raros e importantes por natureza - não podem ser bloqueados só porque
+  // o Companion já comentou algo CASUAL (saudação, sessão longa,
+  // ociosidade) antes no dia. `assistant_companion_daily_count/date`
+  // (nome mantido do design anterior) virou a cota CASUAL especificamente;
+  // `assistant_companion_meaningful_*` é a cota nova, maior, só pros
+  // eventos que realmente importam.
+  assistantCompanionDailyCount: integer("assistant_companion_daily_count").notNull().default(0),
+  assistantCompanionDailyDate: text("assistant_companion_daily_date"),
+  assistantCompanionMeaningfulCount: integer("assistant_companion_meaningful_count").notNull().default(0),
+  assistantCompanionMeaningfulDate: text("assistant_companion_meaningful_date"),
+  assistantCompanionLastText: text("assistant_companion_last_text"),
 });
 
 export const hydrationLogs = pgTable("hydration_log", {

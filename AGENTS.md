@@ -18,6 +18,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Cada componente nova tem seu próprio `styles.module.css`
 - Nunca expor chaves de API (Gemini, etc.) no client-side
 - O mascote NÃO é um chatbot — é um companion que reage ao contexto
+- Nunca rodar múltiplos agentes/subagents em paralelo neste projeto (consome muito token) — investigar e trabalhar diretamente, ou no máximo um agente por vez
 
 ## Feature: Execution Companion (Companheiro de Execução)
 
@@ -81,12 +82,14 @@ src/app/api/cron/execution-checkin/route.ts  # Push check-in para sessões parad
 ### DB
 
 Tabela simplificada em `src/db/schema.ts`:
+
 - `execution_session`: id, userId, taskId, status, currentStepIndex, startedAt, pausedAt, completedAt, updatedAt, lastCheckinSentAt
 - `active_intention` e colunas `steps`/`mascotMessage` foram removidos na V1
 
 ### Notificações (Cron)
 
 `POST /api/cron/execution-checkin` — protegida por `CRON_SECRET`:
+
 - Sessão active sem update há 30+ min → "Como tá indo com [tarefa]?"
 - Sessão paused sem update há 15+ min → "Quando quiser voltar, é só clicar"
 - Anti-spam: 1 check-in por sessão a cada 30 min via `lastCheckinSentAt`
@@ -108,5 +111,8 @@ import { useExecutionCompanion } from "@/features/execution-companion";
 ### Validação
 
 Schemas Zod em `src/validation/execution-session-schema.ts`:
+
 - `startExecutionSessionSchema`: { taskId: string }
 - `executionActionSchema`: { sessionId: string }
+
+nao fazer teste sem antes me consultar independe

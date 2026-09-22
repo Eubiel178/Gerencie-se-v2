@@ -1,27 +1,18 @@
 "use client";
 
-import { useState } from "react";
-
 import { ConfirmCheckbox, ConfirmIconButton } from "@/components";
 import { Icon } from "@/components/icon";
 import { StatusBadge } from "@/components/status-badge";
 import { SharedBadge } from "@/features/connections/components/shared-badge";
 import { LoadAcceptedConnections } from "@/features/connections/domain";
-import {
-  deleteGoalAction,
-  setGoalCompletionAction,
-  updateGoalStepAction,
-} from "@/features/goals/actions";
-import { IGoal, calculateGoalProgress } from "@/features/goals/domain";
-import { useGoalStore } from "@/features/goals/goal-store";
-import { emitMascotEvent } from "@/features/mascot-pet";
+import { IGoal } from "@/features/goals/domain";
 import { formatDateOnly } from "@/utils/date";
 
 import { EditGoal } from "../../modal";
 import { PRIORITY_LABELS } from "../../modal/interfaces";
 
-
 import styles from "./styles.module.css";
+import { useGoalMutations } from "./use-goal-card-actions";
 
 interface CardProps {
   goal: IGoal;
@@ -29,84 +20,16 @@ interface CardProps {
 }
 
 export function Card({ goal, connections }: CardProps) {
-  const [isRemoving, setIsRemoving] = useState(false);
-  const [isTogglingCompletion, setIsTogglingCompletion] = useState(false);
-  const [busyStepId, setBusyStepId] = useState<string | null>(null);
-  const replaceGoal = useGoalStore((state) => state.replaceGoal);
-  const removeGoal = useGoalStore((state) => state.removeGoal);
-
-  async function handleToggleStep(stepId: string, completed: boolean) {
-    setBusyStepId(stepId);
-    try {
-      const result = await updateGoalStepAction({ id: stepId, completed });
-      if (!result.error) {
-        // Progresso é sempre calculado (nunca guardado - ver progress.ts),
-        // então prevemos aqui o valor pós-toggle com os mesmos dados já
-        // carregados, sem esperar o `router.refresh()` pra saber se
-        // acabou de bater 100%.
-        const stepsAfterToggle = goal.steps.map((step) =>
-          step.id === stepId ? { ...step, completed } : step,
-        );
-        const wasGoalCompleted = goal.completionOverride ?? (goal.progressPercent >= 100);
-        const isNowComplete = calculateGoalProgress(stepsAfterToggle) >= 100;
-        if (isNowComplete && !wasGoalCompleted)
-          emitMascotEvent("goal-completed");
-        replaceGoal({
-          ...goal,
-          steps: stepsAfterToggle,
-          progressPercent: calculateGoalProgress(stepsAfterToggle),
-          ...(isNowComplete
-            ? { completionOverride: null, completedAt: null }
-            : {}),
-        });
-      } else {
-        emitMascotEvent("action-error");
-      }
-    } finally {
-      setBusyStepId(null);
-    }
-  }
-
-  async function handleRemoveGoal() {
-    setIsRemoving(true);
-
-    try {
-      const result = await deleteGoalAction({ id: goal.id });
-      if (!result.error) {
-        removeGoal(goal.id);
-      } else {
-        emitMascotEvent("action-error");
-      }
-    } finally {
-      setIsRemoving(false);
-    }
-  }
-
-  async function handleToggleManualCompletion() {
-    setIsTogglingCompletion(true);
-    try {
-      const result = await setGoalCompletionAction({
-        id: goal.id,
-        completed: !isCompleted,
-      });
-      if (!result.error) {
-        if (!isCompleted) emitMascotEvent("goal-completed");
-        replaceGoal({
-          ...goal,
-          completedAt: result.completedAt ?? null,
-          completionOverride: result.completionOverride ?? null,
-        });
-      } else {
-        emitMascotEvent("action-error");
-      }
-    } finally {
-      setIsTogglingCompletion(false);
-    }
-  }
-
-  const isCompletedBySteps =
-    goal.steps.length > 0 && goal.progressPercent === 100;
-  const isCompleted = goal.completionOverride ?? isCompletedBySteps;
+  const {
+    isRemoving,
+    isTogglingCompletion,
+    busyStepId,
+    isCompleted,
+    isCompletedBySteps,
+    handleRemoveGoal,
+    handleToggleManualCompletion,
+    handleToggleStep,
+  } = useGoalMutations(goal);
 
   return (
     <li className={styles.card} data-priority={goal.priority}>

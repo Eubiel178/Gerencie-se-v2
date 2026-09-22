@@ -20,6 +20,21 @@
   will-change: transform;
 }
 
+/* Ponto (sem tamanho próprio) que o balão de fala do Companion usa como
+   referência - movido via `onPositionChange` do `MascotRuntime`, sempre
+   centralizado sobre o sprite atual. Acima do `.stage` (z-index 10) pra
+   nunca ficar por baixo do bichinho; `pointer-events: none` aqui, o
+   próprio balão (ver `speech-bubble/styles.module.css`) reativa clique
+   só em si mesmo. */
+.bubbleAnchor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 11;
+  pointer-events: none;
+  will-change: transform;
+}
+
 /*
  * Conteúdo estreito (mobile OU tablet com sidebar visível, mas pouca
  * largura de conteúdo sobrando): nunca captura toque. Diferente de um
@@ -53,6 +68,13 @@
      (sempre fixa no canto inferior direito) já mantém a presença do
      mascote sem esse problema. */
   .stage {
+    display: none;
+  }
+
+  /* O mascote não passeia nessa faixa (regra acima) - o balão do
+     Companion segue ele via `onPositionChange`, então também some, sem
+     ficar preso boiando num canto sem bichinho visível ali. */
+  .bubbleAnchor {
     display: none;
   }
 }

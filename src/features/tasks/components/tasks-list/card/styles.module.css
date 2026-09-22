@@ -266,6 +266,25 @@
   opacity: 0;
   pointer-events: none;
 }
+/* Pulso breve de reconhecimento quando o status MUDA DE VERDADE (ver
+   `usePulseOnChange` no componente) - só opacidade, sem deslocamento
+   (`translateY`/`scale`): qualquer movimento espacial aqui, repetido em
+   vários cards de uma grade parecida, dava a impressão de texto
+   "pulando" de um card pra outro (achado relatado). O atributo é
+   alternado via JS, nunca via remontagem do elemento - por isso NUNCA
+   toca no primeiro carregamento da lista (todo card montaria ao mesmo
+   tempo), só numa mudança real e isolada. */
+.statusBadge[data-pulse] {
+  animation: status-pulse 220ms ease-out;
+}
+@keyframes status-pulse {
+  from {
+    opacity: 0.35;
+  }
+  to {
+    opacity: 1;
+  }
+}
 .statusBadge[data-status="executing"] {
   background: color-mix(in srgb, var(--color-highlight) 10%, transparent);
   color: var(--color-highlight);
@@ -496,6 +515,15 @@
   flex: 0 1 auto;
   min-width: 0;
 }
+/* Pulso breve só quando o botão muda de ação de verdade (ver
+   `usePulseOnChange`/`data-pulse` no componente) - mesmo raciocínio do
+   `.statusBadge[data-pulse]`: nunca no primeiro carregamento da lista
+   (React desmonta/monta um botão diferente a cada troca de
+   Comecar/Pausar/Retomar, então uma `animation` incondicional tocaria
+   pra TODO card já na primeira renderização, não só numa mudança real). */
+.cardFooter .actionPrimary[data-pulse] {
+  animation: status-pulse 220ms ease-out;
+}
 .cardFooter .actionSecondary {
   flex: 1 1 auto;
   min-width: 0;
@@ -653,8 +681,10 @@
 
 /* Reduced motion: disable transitions on status badges */
 @media (prefers-reduced-motion: reduce) {
-  .statusBadge {
+  .statusBadge,
+  .cardFooter .actionPrimary {
     transition: none;
+    animation: none;
   }
   .statusIcon .pulse {
     animation: none;

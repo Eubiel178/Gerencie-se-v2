@@ -39,7 +39,18 @@
   box-shadow: 0 0.2rem 0.5rem var(--color-shadow);
   transform: translateY(-1px);
 }
-:where(.primary):active:not(:disabled) {
+/* SEM `:not(:disabled)` de propósito (diferente do `:hover` acima) - um
+   clique que dispara uma ação `loading` torna o botão `disabled` no
+   MESMO instante em que o dedo/mouse ainda está pressionado, então
+   `:active` deixa de bater com `:not(:disabled)` bem no meio do clique.
+   O resultado visto foi um "encolhe (0.97) e volta de repente pro
+   tamanho normal (1) assim que a ação começa" - lido como o card/botão
+   "crescendo" logo ao pausar/retomar (achado relatado). Sem a exclusão,
+   a escala de pressionado persiste suavemente até o dedo soltar (ou a
+   ação terminar); como um botão `disabled` já tem `pointer-events: none`
+   (ver abaixo), ele nunca pode ENTRAR em `:active` depois de já estar
+   desabilitado - só continua o estado que já estava em andamento. */
+:where(.primary):active {
   box-shadow: none;
   transform: scale(0.97);
 }
@@ -57,7 +68,8 @@
   box-shadow: 0 0.2rem 0.5rem var(--color-shadow);
   transform: translateY(-1px);
 }
-:where(.secondary):active:not(:disabled) {
+/* Ver comentário completo na mesma regra de `.primary` acima. */
+:where(.secondary):active {
   box-shadow: none;
   transform: scale(0.97);
 }

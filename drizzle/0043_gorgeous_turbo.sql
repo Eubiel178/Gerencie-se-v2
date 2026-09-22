@@ -1,0 +1,2 @@
+ALTER TABLE "user_preference" ADD COLUMN "assistant_companion_meaningful_count" integer DEFAULT 0 NOT NULL;--> statement-breakpoint
+ALTER TABLE "user_preference" ADD COLUMN "assistant_companion_meaningful_date" text;

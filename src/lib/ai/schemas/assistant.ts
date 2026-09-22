@@ -18,6 +18,18 @@ export const ResumeResponseSchema = z.object({
   message: z.string().max(280),
 });
 
+/**
+ * Uma interação espontânea do Companion na página de Tarefas, gerada
+ * numa ÚNICA chamada - `written` e `spoken` SEMPRE nascem juntos, do
+ * MESMO contexto, nunca de chamadas separadas. É isso que impede o
+ * bug de "o balão mostra uma coisa enquanto o TTS fala outra": não
+ * existe um caminho no código pra pedir só um dos dois.
+ */
+export const CompanionInteractionResponseSchema = z.object({
+  written: z.string().min(1).max(160),
+  spoken: z.string().min(1).max(220),
+});
+
 export const IntentionResponseSchema = z.object({
   action: z.enum([
     "task.create",

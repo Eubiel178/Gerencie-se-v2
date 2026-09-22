@@ -27,6 +27,10 @@ export interface ITask {
   /** Estado atual, separado do registro histórico de quando a tarefa foi
    * iniciada pela primeira vez. */
   workStatus?: TaskWorkStatus;
+  // Quando esta tarefa foi pausada pela última vez - direto na task (ver
+  // comentário completo em `src/db/schema.ts`), pra sobreviver mesmo
+  // depois que outra tarefa vira a sessão de execução rastreada.
+  pausedAt?: Date | null;
   // "Quebrar em passos menores" (Modo Assistido) — sempre carregado
   // junto (mesmo raciocínio de `IGoal.steps`), nunca gerado sozinho.
   steps: ITaskStep[];

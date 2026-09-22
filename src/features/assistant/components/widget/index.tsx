@@ -16,6 +16,7 @@ import { useSpeak } from "@/lib/speech/speak-text";
 import { formatTimeOnly } from "@/utils/date";
 
 import { useChatHistory } from "../../hooks/use-chat-history";
+import { playMessageReceivedSound, playMessageSentSound } from "../../lib/chat-sound";
 
 import { groupMessagesByDay } from "./group-messages-by-day";
 import styles from "./styles.module.css";
@@ -201,6 +202,38 @@ export function Widget({
     // antes do indicador "pensando" aparecer) também rolar até o fim.
   }, [isOpen, messages.length, pendingProposal, chatLoading]);
 
+  // Bolinha verde + sonzinho de "chegou mensagem" - funciona com o balão
+  // FECHADO de propósito (pedido explícito): a pessoa não devia precisar
+  // deixar o chat aberto pra saber que uma resposta chegou. Só conta
+  // mensagem NOVA do MASCOTE (nunca a própria mensagem que o usuário
+  // acabou de mandar, isso já tem o som de "enviar" em `handleSendChat`).
+  //
+  // `messages` vem de `useSyncExternalStore` (histórico compartilhado em
+  // `useChatHistory`) - sincronizar ESTADO LOCAL a partir da mudança de
+  // uma store externa é exatamente o caso legítimo de `useEffect` +
+  // `setState` que a própria doc do React descreve; o eslint-disable
+  // aqui é deliberado, não um jeito de ignorar a regra por preguiça.
+  const seenMessageCountRef = useRef(messages.length);
+  const [hasUnread, setHasUnread] = useState(false);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (isOpen) setHasUnread(false);
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (messages.length <= seenMessageCountRef.current) return;
+    const newMessages = messages.slice(seenMessageCountRef.current);
+    seenMessageCountRef.current = messages.length;
+
+    if (newMessages.some((m) => m.role === "mascot")) {
+      playMessageReceivedSound();
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (!isOpen) setHasUnread(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages.length]);
+
   function handleAvatarClick() {
     if (!isOpen) {
       setHasManuallyClosed(false);
@@ -294,6 +327,7 @@ export function Widget({
 
     setChatInput("");
     addUserMessage(text, currentTaskId);
+    playMessageSentSound();
     await sendToAssistant(text, currentTaskId);
   }
 
@@ -528,7 +562,9 @@ export function Widget({
         aria-label={
           isOpen
             ? `Fechar mensagem de ${mascot.name}`
-            : `Abrir mensagem de ${mascot.name}`
+            : hasUnread
+              ? `Abrir mensagem de ${mascot.name} (nova mensagem)`
+              : `Abrir mensagem de ${mascot.name}`
         }
         aria-expanded={isOpen}
         onClick={handleAvatarClick}
@@ -538,6 +574,7 @@ export function Widget({
           aria-hidden="true"
           className={styles.avatarIcon}
         />
+        {hasUnread && <span className={styles.unreadDot} aria-hidden="true" />}
       </button>
     </div>
   );

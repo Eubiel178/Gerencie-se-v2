@@ -207,6 +207,48 @@ export function getResumePrompt(personality: MascotPersonality): string {
  *
  * Mantido para reintrodução controlada de mutations na Fase 2+.
  */
+/**
+ * Prompt pra uma interação ESPONTÂNEA do Companion na página de Tarefas
+ * (ver `features/execution-companion/hooks/use-tasks-companion.ts` pro
+ * QUANDO/POR QUE - isso aqui só decide COMO dizer). Diferente do chat
+ * (`buildChatSystemPrompt`): aqui não há pergunta do usuário pra
+ * responder, o "pedido" é o próprio evento/contexto real que o servidor
+ * já decidiu que vale a pena comentar.
+ */
+export function getCompanionInteractionPrompt(personality: MascotPersonality): string {
+  return composePrompt(personality, [
+    "## SUA FUNÇÃO — INTERAÇÃO ESPONTÂNEA DO COMPANION",
+    "Você vai gerar UMA interação espontânea e curta sobre a situação real",
+    "descrita no CONTEXTO abaixo (evento, tarefa, progresso, prazo etc).",
+    "",
+    "Formato de saída (JSON): { written: string, spoken: string }",
+    "- `written`: texto curto pro balão de fala (uma frase, no máximo duas curtas).",
+    "- `spoken`: a MESMA intenção, escrita à parte pra soar natural em voz alta",
+    "  (pode usar contração/interjeição que o texto escrito evita).",
+    "- Os dois precisam representar EXATAMENTE o mesmo significado - nunca",
+    "  informação diferente entre um e outro.",
+    "",
+    "Regras de conteúdo:",
+    "- Use APENAS os dados reais fornecidos no CONTEXTO. Nunca invente título,",
+    "  progresso, prazo ou qualquer outro dado que não esteja lá.",
+    "- O INTENT informado no contexto diz que TIPO de interação é essa",
+    "  (saudação, reconhecimento, incentivo, observação, check-in, comemoração,",
+    "  lembrete gentil, reconhecimento de progresso, sugestão) - siga esse tipo,",
+    "  nunca transforme tudo em pergunta.",
+    "- Nunca repita a estrutura ou o sentido das MENSAGENS RECENTES listadas no",
+    "  contexto (se houver) - varie a forma de dizer a mesma coisa.",
+    "- Nome próprio (se fornecido no contexto) aparece no máximo em UMA das",
+    "  duas formas (escrita OU falada), nunca nas duas ao mesmo tempo, e só",
+    "  quando ficar natural - nunca force.",
+    "- Gênero (se fornecido) só influencia concordância gramatical quando fizer",
+    "  sentido de verdade - nunca invente nem force um adjetivo de gênero.",
+    "- Sem markdown, listas, reticências, travessão, dois-pontos ou emoji.",
+    "- Sem frase motivacional genérica de produtividade ('foco é tudo',",
+    "  'você consegue', etc) - a fala precisa soar como alguém reagindo à",
+    "  situação REAL descrita, não um cartaz de parede.",
+  ]);
+}
+
 export function getIntentionPrompt(personality: MascotPersonality): string {
   return composePrompt(personality, [
     "## SUA FUNÇÃO — CLASSIFICAÇÃO DE INTENÇÃO",

@@ -10,10 +10,10 @@ import {
 
 import {
   startExecutionSessionAction,
-  pauseExecutionSessionAction,
-  resumeExecutionSessionAction,
+  pauseTaskExecutionAction,
+  resumeTaskExecutionAction,
   completeExecutionSessionAction,
-  abandonExecutionSessionAction,
+  abandonTaskExecutionAction,
 } from "@/features/execution-companion/actions";
 import type { IExecutionSession } from "@/features/execution-companion/domain/types";
 import { useExecutionCompanionStore } from "@/features/execution-companion/execution-companion-store";
@@ -83,7 +83,10 @@ export function ExecutionCompanionProvider({
     const session = s.session;
     if (!session) return { error: "Nenhuma sessão ativa." };
 
-    const result = await pauseExecutionSessionAction({ sessionId: session.id });
+    // `task.work_status` e `execution_session.status` são escritos juntos,
+    // numa única transação no servidor - ver `pauseTaskExecutionAction`
+    // pro motivo (evita a tarefa e a sessão discordarem por um instante).
+    const result = await pauseTaskExecutionAction({ taskId: session.taskId, sessionId: session.id });
     if (!result.error) {
       const now = new Date();
       s.updateSession({ status: "paused", pausedAt: now, updatedAt: now });
@@ -97,7 +100,7 @@ export function ExecutionCompanionProvider({
     const session = s.session;
     if (!session) return { error: "Nenhuma sessão encontrada." };
 
-    const result = await resumeExecutionSessionAction({ sessionId: session.id });
+    const result = await resumeTaskExecutionAction({ taskId: session.taskId, sessionId: session.id });
     if (!result.error) {
       const now = new Date();
       s.updateSession({ status: "active", pausedAt: null, resumedAt: now, updatedAt: now });
@@ -126,7 +129,7 @@ export function ExecutionCompanionProvider({
     const session = s.session;
     if (!session) return { error: "Nenhuma sessão encontrada." };
 
-    const result = await abandonExecutionSessionAction({ sessionId: session.id });
+    const result = await abandonTaskExecutionAction({ taskId: session.taskId, sessionId: session.id });
     if (!result.error) {
       s.reset();
     }

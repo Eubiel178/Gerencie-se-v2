@@ -98,7 +98,7 @@ export function useTaskMutations(task: ITask) {
     try {
       const result = await markTaskStartedAction({ id: task.id });
       if (!result.error) {
-        replaceTask({ ...task, startedAt: task.startedAt ?? new Date() });
+        replaceTask({ ...task, startedAt: task.startedAt ?? new Date(), pausedAt: null });
         // Inicia ou faz switch da sessão de execução
         const switchResult = await startSession(task.id);
         // Se houve switch, atualiza a task antiga no store
@@ -106,7 +106,7 @@ export function useTaskMutations(task: ITask) {
           const tasks = useTaskStore.getState().tasks;
           const oldTask = tasks.find((t) => t.id === switchResult.previousTaskId);
           if (oldTask) {
-            replaceTask({ ...oldTask, workStatus: "paused" });
+            replaceTask({ ...oldTask, workStatus: "paused", pausedAt: new Date() });
           }
         }
       }
@@ -121,22 +121,67 @@ export function useTaskMutations(task: ITask) {
     if (activeAction === "updatingWorkStatus") return;
     setActiveAction("updatingWorkStatus");
     try {
-      const result = await setTaskWorkStatusAction({
-        id: task.id,
-        workStatus: nextStatus,
-      });
-      if (!result.error) {
-        replaceTask({ ...task, workStatus: nextStatus });
-
-        if (executionSession?.taskId === task.id) {
-          if (nextStatus === "paused") {
-            await pauseSession();
-          } else if (nextStatus === "in_progress") {
-            await resumeSession();
-          } else if (nextStatus === "pending") {
-            await abandonSession();
+      // Retomar (`in_progress`) uma tarefa que NÃO é a sessão rastreada
+      // agora (outra tarefa está ativa, ou não há sessão nenhuma pra
+      // esta) precisa do MESMO tratamento de troca que "Começar" usa
+      // (`handleMarkStarted`) - nunca só marcar `workStatus` sozinho.
+      // Bug real corrigido: antes disso, `resumeSession()` só rodava
+      // quando `executionSession.taskId === task.id`; se outra tarefa
+      // estivesse ativa, o código pulava a sessão de execução mas AINDA
+      // ASSIM marcava esta tarefa como "in_progress" no banco - duas
+      // tarefas (ou mais, com o tempo) ficavam mostrando "Fazendo agora"
+      // ao mesmo tempo, uma de verdade e outra "fantasma" sem sessão.
+      if (nextStatus === "in_progress" && executionSession?.taskId !== task.id) {
+        const result = await setTaskWorkStatusAction({ id: task.id, workStatus: "in_progress" });
+        if (!result.error) {
+          replaceTask({ ...task, workStatus: "in_progress", pausedAt: null });
+          const switchResult = await startSession(task.id);
+          if (switchResult.switched && switchResult.previousTaskId) {
+            const tasks = useTaskStore.getState().tasks;
+            const oldTask = tasks.find((t) => t.id === switchResult.previousTaskId);
+            if (oldTask) {
+              replaceTask({ ...oldTask, workStatus: "paused", pausedAt: new Date() });
+            }
           }
         }
+        return;
+      }
+
+      // Pausar/retomar/abandonar a sessão RASTREADA desta própria tarefa:
+      // `pauseSession`/`resumeSession`/`abandonSession` já escrevem
+      // `task.work_status` E `execution_session.status` juntos, numa
+      // única transação no servidor (ver `writeTaskAndSession` em
+      // `execution-companion/actions.ts`) - chamar `setTaskWorkStatusAction`
+      // à parte aqui reintroduziria a mesma janela de inconsistência já
+      // corrigida (duas escritas, duas revalidações, um instante em que
+      // as duas tabelas discordam).
+      if (executionSession?.taskId === task.id) {
+        const result =
+          nextStatus === "paused"
+            ? await pauseSession()
+            : nextStatus === "in_progress"
+              ? await resumeSession()
+              : await abandonSession();
+
+        if (!result.error) {
+          replaceTask({
+            ...task,
+            workStatus: nextStatus,
+            pausedAt: nextStatus === "paused" ? new Date() : null,
+          });
+        }
+        return;
+      }
+
+      // Sem sessão rastreada pra esta tarefa (ex.: "pending"/abandonar uma
+      // tarefa que nunca chegou a ter sessão) - só a tarefa muda mesmo.
+      const result = await setTaskWorkStatusAction({ id: task.id, workStatus: nextStatus });
+      if (!result.error) {
+        replaceTask({
+          ...task,
+          workStatus: nextStatus,
+          pausedAt: nextStatus === "paused" ? new Date() : null,
+        });
       }
     } finally {
       setActiveAction(null);

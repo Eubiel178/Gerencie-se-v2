@@ -77,10 +77,22 @@ export class LocalTask
   async loadAll(): Promise<domain.LoadAllTasks.Model> {
     const userId = await requireUserId();
 
+    // `.orderBy` explícito é OBRIGATÓRIO aqui - sem isso, o Postgres não
+    // garante a MESMA ordem entre duas leituras da mesma tabela, e um
+    // simples UPDATE (ex.: pausar/retomar, que só muda `work_status`) pode
+    // mudar a posição física da linha o suficiente pra alterar a ordem
+    // devolvida na PRÓXIMA leitura. Como a lista é revalidada a cada ação
+    // (pausar/retomar/concluir), isso aparecia como "a lista se reorganiza
+    // sozinha" (achado relatado) mesmo a ordenação por prioridade em
+    // `sortTasksByPriority` sendo estável - ela só preserva a ordem de
+    // ENTRADA entre itens empatados, e a ordem de entrada em si já vinha
+    // instável. `createdAt` (nunca muda depois de criada a tarefa) é a
+    // única coluna que garante posição estável entre leituras.
     const rows = await db
       .select()
       .from(tasks)
-      .where(or(eq(tasks.userId, userId), eq(tasks.sharedWithUserId, userId)));
+      .where(or(eq(tasks.userId, userId), eq(tasks.sharedWithUserId, userId)))
+      .orderBy(tasks.createdAt);
 
     const ownerIds = [...new Set(rows.filter((row) => row.userId !== userId).map((row) => row.userId))];
 
@@ -285,7 +297,7 @@ export class LocalTask
 
     await db
       .update(tasks)
-      .set({ startedAt: row.startedAt ?? new Date(), workStatus: "in_progress" })
+      .set({ startedAt: row.startedAt ?? new Date(), workStatus: "in_progress", pausedAt: null })
       .where(eq(tasks.id, params.id));
 
     return { xpEarned: row.startedAt ? 0 : TASK_START_XP };
@@ -295,7 +307,10 @@ export class LocalTask
     const userId = await requireUserId();
     await db
       .update(tasks)
-      .set({ workStatus: params.workStatus })
+      .set({
+        workStatus: params.workStatus,
+        pausedAt: params.workStatus === "paused" ? new Date() : null,
+      })
       .where(
         and(eq(tasks.id, params.id), or(eq(tasks.userId, userId), eq(tasks.sharedWithUserId, userId)))
       );
@@ -551,6 +566,7 @@ function mapRowToTask(
     completedAt: row.completedAt,
     startedAt: row.startedAt,
     workStatus: row.workStatus as domain.TaskWorkStatus,
+    pausedAt: row.pausedAt,
     steps,
     attachmentCount,
     scheduledAt: row.scheduledAt ?? undefined,

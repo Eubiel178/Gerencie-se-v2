@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { Header } from "@/components";
 import { Assistant } from "@/features/assistant";
+import { getAssistantPreferencesFetcher } from "@/features/assistant/data/get-assistant-preferences-fetcher";
 import {
   ExecutionCompanionProvider,
 } from "@/features/execution-companion";
@@ -30,14 +31,20 @@ const HomeLayout = async ({ children }: { children: React.ReactNode }) => {
     redirect("/verify-email");
   }
 
-  const [gender, mascot, showGuidedTour, activeFocusSession, activeExecutionSession] = await Promise.all([
-    getGender(),
-    getMascotFetcher().getMascot(),
-    shouldShowGuidedTour(),
-    getFocusFetcher().getActive(),
-    getExecutionSessionFetcher().getActiveOrPaused(),
-  ]);
+  const [gender, mascot, showGuidedTour, activeFocusSession, activeExecutionSession, assistantPreferences] =
+    await Promise.all([
+      getGender(),
+      getMascotFetcher().getMascot(),
+      shouldShowGuidedTour(),
+      getFocusFetcher().getActive(),
+      getExecutionSessionFetcher().getActiveOrPaused(),
+      getAssistantPreferencesFetcher().getPreferences(),
+    ]);
   const mascotCharacterId = characterIdForSpecies(mascot.species);
+  // Mesmo padrão já usado em `features/dashboard/index.tsx` - nunca
+  // inferido de outra forma, e `null` (conta Google sem esse campo, por
+  // exemplo) é um caso normal, tratado no fraseado do Companion.
+  const userFirstName = session?.user?.name?.split(" ")[0] ?? null;
 
   const intentionData = activeExecutionSession
     ? { taskId: activeExecutionSession.taskId }
@@ -64,7 +71,15 @@ const HomeLayout = async ({ children }: { children: React.ReactNode }) => {
           <Assistant mascot={mascot} />
           <TaskReminders />
           <CommandPalette />
-          <MascotPet characterId={mascotCharacterId} />
+          <MascotPet
+            characterId={mascotCharacterId}
+            mascot={mascot}
+            assistantEnabled={assistantPreferences.enabled}
+            autoSpeechEnabled={assistantPreferences.autoSpeechEnabled}
+            autoSpeechPromptShown={assistantPreferences.autoSpeechPromptShown}
+            userFirstName={userFirstName}
+            userGender={gender}
+          />
           <GuidedTour active={showGuidedTour} mascotName={mascot.name} userId={session?.user?.id ?? ""} />
           <FocusMiniWidget />
         </div>

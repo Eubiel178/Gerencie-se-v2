@@ -42,6 +42,14 @@ export interface MascotRuntimeOptions {
    * `position: absolute` num ancestral `position: relative` = local ao
    * container - ver `mascot-swarm` pro segundo caso). */
   boundsProvider?: (displayWidth: number, displayHeight: number) => MascotBounds;
+  /** Chamado a cada tick com a posição atual (mesmo espaço de coordenadas
+   * de `wrapper`) - usado pelo balão de fala do Companion (ver
+   * `speech-bubble`) pra seguir o bichinho sem precisar de re-render do
+   * React a cada frame (mesmo raciocínio de performance do resto do
+   * motor: "roda inteiramente fora do React"). Quem chama decide o que
+   * fazer com a posição (ex.: escrever `style.transform` num ref próprio
+   * diretamente). */
+  onPositionChange?: (position: MascotVector2) => void;
 }
 
 /** Uma instância ativa por CHAVE (não uma só pra sempre) - ver
@@ -58,6 +66,7 @@ export class MascotRuntime {
   private readonly reducedMotionQuery: MediaQueryList;
   private readonly instanceGroup: string;
   private readonly boundsProvider: (displayWidth: number, displayHeight: number) => MascotBounds;
+  private readonly onPositionChange?: (position: MascotVector2) => void;
 
   private app: Application | null = null;
   private sprite: AnimatedSprite | null = null;
@@ -98,6 +107,7 @@ export class MascotRuntime {
     this.wrapper = handles.wrapper;
     this.instanceGroup = options.instanceGroup ?? "global-pet";
     this.boundsProvider = options.boundsProvider ?? computeViewportBounds;
+    this.onPositionChange = options.onPositionChange;
 
     this.mobile = isMobileViewport();
     this.bounds = this.boundsProvider(this.displayWidth, this.displayHeight);
@@ -345,6 +355,7 @@ export class MascotRuntime {
 
   private positionWrapper(position: MascotVector2): void {
     this.wrapper.style.transform = `translate(${Math.round(position.x)}px, ${Math.round(position.y)}px)`;
+    this.onPositionChange?.(position);
   }
 
   private handlePointerDown = (event: PointerEvent): void => {

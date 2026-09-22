@@ -49,3 +49,17 @@ export function formatElapsed(seconds: number): string {
     ? `há ${hours}h ${String(minutes).padStart(2, "0")}min`
     : `há ${minutes} min`;
 }
+
+/** Mesmo formato curto de `formatElapsed` ("há X min"), mas a partir de
+ * uma data em vez de segundos já contados - usado pelo badge "Pausada"
+ * (`task.pausedAt`). Existe pra "Fazendo agora" e "Pausada" terem o MESMO
+ * tamanho de texto no badge: antes, "Pausada" usava
+ * `formatTemporalContext` ("Hoje às 14:32" ou "22/09/2026 às 14:32",
+ * bem mais longo que "há 12 min") - a diferença de comprimento fazia a
+ * linha de status quebrar (ou deixar de quebrar) ao alternar entre os
+ * dois estados, e o card inteiro "crescia e encolhia" a cada pausar/
+ * retomar (achado relatado). */
+export function formatElapsedSince(date: Date, now: Date = new Date()): string {
+  const seconds = Math.max(0, Math.floor((now.getTime() - date.getTime()) / 1000));
+  return formatElapsed(seconds);
+}

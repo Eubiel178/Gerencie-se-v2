@@ -3,17 +3,21 @@ import "server-only";
 import type { MascotPersonality } from "@/features/focus/domain/mascot";
 
 import { generateJSON, isAIProviderAvailable, sanitizeUserContent } from "./gateway";
+import type { CompanionInteractionContext } from "./prompts/companion-context-prompt";
+import { buildCompanionContextPrompt } from "./prompts/companion-context-prompt";
 import {
   getDecomposePrompt,
   getStuckPrompt,
   getResumePrompt,
   getIntentionPrompt,
+  getCompanionInteractionPrompt,
 } from "./prompts/system-prompt";
 import {
   DecomposeTaskResponseSchema,
   StuckResponseSchema,
   ResumeResponseSchema,
   IntentionResponseSchema,
+  CompanionInteractionResponseSchema,
 } from "./schemas/assistant";
 
 export class GeminiAssistantProvider {
@@ -142,6 +146,44 @@ export class GeminiAssistantProvider {
       const parsed = JSON.parse(result.text);
       const validated = IntentionResponseSchema.safeParse(parsed);
       if (validated.success) return validated.data;
+    } catch {
+      // invalid JSON
+    }
+
+    return null;
+  }
+
+  /**
+   * Gera UMA interação espontânea do Companion (balão + fala) pra um
+   * evento/contexto real da página de Tarefas - ver
+   * `use-tasks-companion.ts` pro QUANDO/POR QUE. `written`/`spoken`
+   * nascem da MESMA chamada, nunca separadas (evita o bug de balão e
+   * TTS discordando). Retorna `null` (nunca lança) se a IA estiver
+   * indisponível, falhar, ou responder algo que não valida no schema -
+   * quem chama SEMPRE tem um fallback determinístico local pronto
+   * (`companion-phrasing.ts`) pra esses casos.
+   */
+  async generateCompanionInteraction(
+    context: CompanionInteractionContext,
+    personality: MascotPersonality
+  ): Promise<{ written: string; spoken: string } | null> {
+    if (!isAIProviderAvailable()) return null;
+
+    const result = await generateJSON({
+      prompt: buildCompanionContextPrompt(context),
+      systemInstruction: getCompanionInteractionPrompt(personality),
+      operation: `companion_${context.intent}`,
+    });
+
+    if (!result) return null;
+
+    try {
+      const parsed = JSON.parse(result.text);
+      const validated = CompanionInteractionResponseSchema.safeParse(parsed);
+      if (validated.success) {
+        console.log(`[Companion] source=ai model=${result.model} intent=${context.intent}`);
+        return validated.data;
+      }
     } catch {
       // invalid JSON
     }

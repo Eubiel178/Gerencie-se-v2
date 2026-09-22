@@ -1,0 +1,1 @@
+ALTER TABLE "user_preference" ADD COLUMN "assistant_auto_speech_prompt_shown" boolean DEFAULT false NOT NULL;

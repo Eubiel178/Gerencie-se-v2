@@ -17,9 +17,11 @@ import {
   isOverdue,
   formatRemaining,
   formatElapsed,
+  formatElapsedSince,
 } from "./deadline-helpers";
 import { deriveDisplayStatus } from "./derive-display-status";
 import styles from "./styles.module.css";
+import { usePulseOnChange } from "./use-pulse-on-change";
 import { useTaskMutations } from "./use-task-card-actions";
 import { useTaskSyncRetry } from "./use-task-sync-retry";
 
@@ -65,6 +67,8 @@ export function Card({
     workStatus,
     isExecuting,
   });
+  const statusPulsing = usePulseOnChange(displayStatus);
+  const primaryActionPulsing = usePulseOnChange(workStatus);
 
   const completedSteps = task.steps.filter((s) => s.completed).length;
   const totalSteps = task.steps.length;
@@ -204,9 +208,24 @@ export function Card({
               },
               paused: {
                 label: "Pausada",
-                context: executionSession?.pausedAt
-                  ? formatTemporalContext(executionSession.pausedAt)
-                  : null,
+                // `task.pausedAt` (não `executionSession?.pausedAt`) -
+                // o cliente só rastreia UMA sessão de execução por vez
+                // (a ativa/pausada mais recente); uma tarefa pausada há
+                // mais tempo, que não é mais essa sessão, perdia o "há
+                // quanto tempo" ou mostrava o horário de OUTRA tarefa
+                // (achado relatado: "perdi a data que foi pausada").
+                // `pausedAt` mora na própria task por isso, mesmo
+                // raciocínio de `completedAt` abaixo.
+                //
+                // `formatElapsedSince` (curto, "há 12 min") em vez de
+                // `formatTemporalContext` (longo, "Hoje às 14:32") -
+                // MESMO formato/tamanho que "Fazendo agora" usa
+                // (`formatElapsed`). Formatos de tamanho bem diferentes
+                // entre os dois estados faziam a linha de status quebrar
+                // (ou parar de quebrar) ao alternar, e o card inteiro
+                // "crescia e encolhia" a cada pausar/retomar (achado
+                // relatado).
+                context: task.pausedAt ? formatElapsedSince(task.pausedAt) : null,
                 icon: "FaPause" as const,
                 variant: "paused",
               },
@@ -224,6 +243,14 @@ export function Card({
                 data-status={s.variant}
                 data-hidden={displayStatus === "idle" ? "" : undefined}
                 data-has-context={s.context ? "" : undefined}
+                // Pulso breve só quando o status MUDA DE VERDADE (nunca no
+                // primeiro render, nunca a cada segundo que
+                // `executingElapsedSeconds` tica - ver `usePulseOnChange`).
+                // Sem remontar o elemento (diferente da tentativa anterior
+                // com `key`): remontar dava a impressão de conteúdo
+                // "pulando" entre cards vizinhos, porque todo card monta
+                // pela primeira vez ao mesmo tempo quando a lista carrega.
+                data-pulse={statusPulsing ? "" : undefined}
               >
                 <span className={styles.statusIcon}>
                   {s.variant === "executing" && (
@@ -350,6 +377,7 @@ export function Card({
               type="button"
               loading={isStarting}
               className={styles.actionPrimary}
+              data-pulse={primaryActionPulsing ? "" : undefined}
               onClick={handleMarkStarted}
             >
               <Icon name="FaPlay" aria-hidden="true" /> Comecar
@@ -361,6 +389,7 @@ export function Card({
               type="button"
               loading={isUpdatingWorkStatus}
               className={styles.actionPrimary}
+              data-pulse={primaryActionPulsing ? "" : undefined}
               onClick={() => handleWorkStatus("paused")}
             >
               <Icon name="FaPause" aria-hidden="true" /> Pausar
@@ -372,6 +401,7 @@ export function Card({
               type="button"
               loading={isUpdatingWorkStatus}
               className={styles.actionPrimary}
+              data-pulse={primaryActionPulsing ? "" : undefined}
               onClick={() => handleWorkStatus("in_progress")}
             >
               <Icon name="FaPlay" aria-hidden="true" /> Retomar
