@@ -8,10 +8,17 @@ import { askGemini } from "@/lib/ai/gemini";
 import { buildChatSystemPrompt } from "@/lib/ai/prompts/chat-prompt";
 
 import { buildContextualFallback } from "./lib/companion-fallback";
+import { splitIntoConversationBeats } from "./lib/split-conversation-beats";
 
 export interface ChatResult {
   success: boolean;
+  /** Primeira bolha (ou a única) - mantido pra quem ainda lê só este
+   * campo. `messages` é a fonte de verdade completa. */
   message: string;
+  /** Um ou (raramente) mais "beats" conversacionais da MESMA resposta -
+   * ver `splitIntoConversationBeats` e a instrução "MAIS DE UMA MENSAGEM"
+   * em `chat-prompt.ts`. Sempre tem pelo menos 1 item. */
+  messages: string[];
   proposal?: {
     action: string;
     params: Record<string, unknown>;
@@ -83,17 +90,17 @@ export async function sendAssistantMessage(
   const cleanMessage = message.trim();
 
   if (!cleanMessage) {
-    return { success: false, message: "Digite uma mensagem." };
+    return { success: false, message: "Digite uma mensagem.", messages: ["Digite uma mensagem."] };
   }
 
   if (cleanMessage.length > 1000) {
-    return { success: false, message: "Mensagem muito longa." };
+    return { success: false, message: "Mensagem muito longa.", messages: ["Mensagem muito longa."] };
   }
 
   // Se Gemini indisponível (cooldown/rate limit/sem key), vai direto pro fallback
   if (!isAIProviderAvailable()) {
     const fallback = await buildContextualFallback(cleanMessage, fallbackDeps);
-    return { success: true, message: fallback };
+    return { success: true, message: fallback, messages: [fallback] };
   }
 
   try {
@@ -112,18 +119,20 @@ export async function sendAssistantMessage(
     }));
     const response = await askGemini(cleanMessage, systemInstruction, chatHistory);
     if (response) {
-      return { success: true, message: response.text };
+      const beats = splitIntoConversationBeats(response.text);
+      return { success: true, message: beats[0], messages: beats };
     }
     // Gemini indisponível → fallback context-aware
     const fallback = await buildContextualFallback(cleanMessage, fallbackDeps);
-    return { success: true, message: fallback };
+    return { success: true, message: fallback, messages: [fallback] };
   } catch (e) {
     console.error("[sendAssistantMessage] erro inesperado:", e);
     try {
       const fallback = await buildContextualFallback(cleanMessage, fallbackDeps);
-      return { success: true, message: fallback };
+      return { success: true, message: fallback, messages: [fallback] };
     } catch {
-      return { success: true, message: "Tô sem condições de responder agora. Tenta de novo em instantes." };
+      const text = "Tô sem condições de responder agora. Tenta de novo em instantes.";
+      return { success: true, message: text, messages: [text] };
     }
   }
 }

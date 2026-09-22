@@ -33,6 +33,15 @@ export function buildChatSystemPrompt(
     parts.push("", "Personalidade:", personalityRules);
   }
 
+  parts.push(
+    "",
+    "## MAIS DE UMA MENSAGEM (raro, opcional)",
+    "- Sua resposta normalmente é UMA mensagem só - isso continua sendo o padrão na grande maioria das vezes.",
+    "- Só quando houver de verdade dois momentos conversacionais diferentes (ex.: uma reação imediata seguida de um pensamento à parte, uma risada curta seguida da resposta real, um comentário e depois uma pergunta separada) - NUNCA pra simular digitação humana nem pra partir uma frase normal ao meio - separe as duas partes com uma linha contendo exatamente `%%%` sozinha, sem mais nada nela.",
+    "- Três mensagens são raras - só use quando existirem genuinamente três momentos distintos. Nunca mais que isso.",
+    "- Isso é um recurso raro pra quando o momento realmente pede, não um hábito. Decida pelo conteúdo de cada resposta, nunca por padrão fixo ou aleatório."
+  );
+
   if (executionContext) {
     parts.push(
       "",
@@ -40,6 +49,7 @@ export function buildChatSystemPrompt(
       executionContext,
       "",
       "## REGRAS PARA USO DO CONTEXTO",
+      "- Ter uma tarefa atual aqui não significa que ela precisa aparecer numa resposta casual - é conhecimento disponível, não pauta obrigatória. Só traga a tarefa à tona se o usuário perguntar sobre ela ou se for genuinamente relevante pro que foi dito (ex.: 'oi' não pede menção à tarefa).",
       '- Quando o usuário fizer referências como "essa tarefa", "a atual", "nela", "o que estou fazendo", "o que falta", "próximo passo", "meus passos" — use os dados acima como fonte de verdade.',
       "- Se existir uma tarefa atual, NÃO pergunte qual é. Já responda diretamente com os dados do contexto.",
       "- Se a tarefa não tiver passos, informe isso. NÃO invente passos.",

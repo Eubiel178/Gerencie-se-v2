@@ -51,7 +51,7 @@ export interface CompanionInteractionContext {
 export function buildCompanionContextPrompt(ctx: CompanionInteractionContext): string {
   const lines: string[] = [];
 
-  lines.push("CONTEXTO:");
+  lines.push("CONTEXTO (pra você ENTENDER a situação - não é uma lista que precisa aparecer inteira na fala):");
   lines.push(`Tipo de interação: ${ctx.intentLabel}`);
   if (ctx.taskTitle) {
     lines.push(fenceUserData("Tarefa", ctx.taskTitle));
