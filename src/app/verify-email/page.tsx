@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
+
 import { VerifyEmail } from "@/features/auth/verify-email";
+
+export const metadata: Metadata = {
+  title: "Verificar e-mail",
+  robots: { index: false },
+};
 
 interface VerifyEmailPageProps {
   searchParams: Promise<{ delivery?: string | string[]; resumed?: string | string[] }>;

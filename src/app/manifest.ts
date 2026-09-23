@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Gerencie-se",
     short_name: "Gerencie-se",
     description:
-      "Produtividade, organização, foco e disciplina em um só lugar.",
+      "Organize tarefas, rotina, hábitos e foco num só lugar. Um companheiro virtual acompanha sua execução.",
     start_url: "/home",
     display: "standalone",
     background_color: "#14151f",

@@ -23,6 +23,7 @@ import { isEmailVerified } from "@/lib/email";
 import styles from "./home-layout.module.css";
 
 export const dynamic = "force-dynamic";
+export const robots = { index: false };
 
 const HomeLayout = async ({ children }: { children: React.ReactNode }) => {
   const session = await auth();

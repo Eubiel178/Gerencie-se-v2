@@ -8,13 +8,19 @@ import "@/styles/global-style.css";
 
 import { ThemeInit } from "@/design-system/theme/theme-init";
 import { ServiceWorkerRegistration } from "@/features/pwa/service-worker-registration";
+import { appUrl } from "@/lib/shared/app-url";
 import { ToastProvider } from "@/providers/toast-context";
 
+const siteUrl = appUrl();
+
 export const metadata: Metadata = {
-  title: "Gerencie-se",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "Gerencie-se | Organize tarefas, rotina e foco",
+    template: "%s | Gerencie-se",
+  },
   description:
-    "Produtividade, organização, foco e disciplina em um só lugar.",
-  manifest: "/manifest.webmanifest",
+    "Organize tarefas, rotina, hábitos e foco num só lugar. Um companheiro virtual acompanha sua execução e ajuda quando você trava ou se distrai.",
   icons: {
     icon: [
       { url: "/icon.svg", type: "image/svg+xml" },
@@ -22,18 +28,37 @@ export const metadata: Metadata = {
     ],
     apple: "/apple-icon.png",
   },
+  openGraph: {
+    type: "website",
+    locale: "pt_BR",
+    siteName: "Gerencie-se",
+    title: "Gerencie-se | Organize tarefas, rotina e foco",
+    description:
+      "Organize tarefas, rotina, hábitos e foco num só lugar. Um companheiro virtual acompanha sua execução e ajuda quando você trava ou se distrai.",
+    images: [
+      {
+        url: "/icon-512.png",
+        width: 512,
+        height: 512,
+        alt: "Gerencie-se",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary",
+    title: "Gerencie-se | Organize tarefas, rotina e foco",
+    description:
+      "Organize tarefas, rotina, hábitos e foco num só lugar. Um companheiro virtual acompanha sua execução e ajuda quando você trava ou se distrai.",
+    images: ["/icon-512.png"],
+  },
+  alternates: {
+    canonical: "/",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
     title: "Gerencie-se",
   },
-  // Preenchida só quando o Google Search Console pedir a verificação do
-  // domínio pelo método "tag HTML" (o único viável num domínio *.vercel.app
-  // — não dá pra fazer verificação por DNS aí, quem controla esse DNS é a
-  // Vercel, não o dono do projeto). Cole o código que o Search Console
-  // mostrar (só o valor do atributo `content`, sem a tag inteira) na
-  // variável de ambiente `GOOGLE_SITE_VERIFICATION`. Sem essa variável
-  // configurada, a tag simplesmente não é renderizada — nada quebra.
   verification: process.env.GOOGLE_SITE_VERIFICATION
     ? { google: process.env.GOOGLE_SITE_VERIFICATION }
     : undefined,

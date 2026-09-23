@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Icon } from "@/components";
 import { ThemeToggle } from "@/design-system/theme/theme-toggle";
 import { MascotSwarm } from "@/features/mascot-pet/components/mascot-swarm/lazy";
+import { appUrl } from "@/lib/shared/app-url";
 
 import styles from "./landing-page.module.css";
 
@@ -24,9 +25,39 @@ const highlights = [
   },
 ] as const;
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "Gerencie-se",
+  applicationCategory: "ProductivityApplication",
+  operatingSystem: "Web",
+  description:
+    "Organize tarefas, rotina, hábitos e foco num só lugar. Um companheiro virtual acompanha sua execução e ajuda quando você trava ou se distrai.",
+  url: appUrl(),
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    "priceCurrency": "BRL",
+  },
+  featureList: [
+    "Gerenciamento de tarefas com prioridades e prazos",
+    "Organização de rotina diária",
+    "Rastreamento de hábitos e sequências",
+    "Metas e objetivos com acompanhamento de progresso",
+    "Modo foco com timer integrado",
+    "Companheiro virtual com animação e personalidade",
+    "Companheiro virtual que conversa e acompanha seu contexto",
+    "Suporte a voz e síntese de fala",
+  ],
+};
+
 export default function LandingPage() {
   return (
     <main className={styles.page}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <header className={styles.header}>
         <Link
           className={styles.brand}
@@ -61,8 +92,9 @@ export default function LandingPage() {
             Pare de carregar tudo na <em>cabeça.</em>
           </h1>
           <p className={styles.intro}>
-            O Gerencie-se reúne suas tarefas, hábitos e blocos de foco em um lugar
-            simples para você saber o que fazer agora — sem virar refém de listas.
+            O Gerencie-se reúne tarefas, rotina, hábitos e foco num lugar só.
+            Um companheiro virtual acompanha o que você faz, conversa com você e
+            ajuda a sair do planejamento para a ação.
           </p>
           <div className={styles.heroActions}>
             <Link className={styles.primaryAction} href="/register">
@@ -173,9 +205,9 @@ export default function LandingPage() {
           <p className={styles.eyebrow}>Você não está sozinho nessa</p>
           <h2>Escolha um companheiro.</h2>
           <p className={styles.mascotsIntroText}>
-            Ele anda pela tela, comemora quando você termina algo, e também
-            aceita um cafuné de vez em quando. Passe o mouse ou toque em cada um
-            pra conhecer.
+            Ele fica com você enquanto você faz as coisas. Comemora quando você
+            avança, percebe quando você trava e aparece na hora certa — não é só
+            decoração. Passe o mouse ou toque em cada um pra conhecer.
           </p>
         </div>
 
