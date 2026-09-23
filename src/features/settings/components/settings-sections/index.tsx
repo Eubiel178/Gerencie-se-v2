@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 import { Icon, IconName } from "@/components";
 
@@ -29,25 +29,24 @@ interface SettingsSectionsProps {
  * (Server Component, buscado de uma vez só em `Settings`) - aqui só
  * decide qual mostrar, nunca busca dado de novo.
  *
- * Todo o estado de navegação (`?section=`, e o caso especial do retorno
- * do OAuth do Google Agenda) é lido AQUI, num Client Component via
+ * O estado de navegação é lido AQUI, num Client Component via
  * `useSearchParams()` - de propósito, nunca como prop vinda de um
- * Server Component que leia `searchParams`. Um Server Component que
- * declara `searchParams` faz o Next.js tratar a rota inteira como
- * dependente da query string: TROCAR só o `?section=` (clicar numa
- * categoria, ou "Voltar") reexecutava o `Settings` inteiro no servidor -
- * as ~10 consultas em paralelo em `features/settings/index.tsx`
- * (incluindo, se a agenda estiver conectada, uma chamada de verdade à
- * API do Google Calendar) rodavam de novo a cada clique, mesmo a troca
- * de categoria sendo, na intenção original, 100% do lado do cliente
- * (achado relatado: "quando clico em algo demora pra acontecer, ou
- * quando clico em voltar"). Sem nenhum componente no caminho lendo
- * `searchParams` do lado do servidor, o Next.js não tem motivo pra
- * invalidar o cache da rota só porque a query string mudou - clicar
- * numa categoria vira troca de estado puramente no cliente.
+ * Server Component que leia `searchParams`. Mesmo assim, TROCAR só o
+ * `?section=` via `router.push` reexecutava o `Settings` inteiro no
+ * servidor: o router client do Next 16 (segment-cache) trata qualquer
+ * mudança só de query num page segment como um refresh (o key interno
+ * do segmento inclui a query serializada), re-fazia o request RSC e
+ * rodava de novo as ~10 consultas em paralelo de
+ * `features/settings/index.tsx` - incluindo, se a agenda estiver
+ * conectada, uma chamada de verdade à API do Google Calendar - a cada
+ * clique (o achado "quando clico em algo demora pra acontecer, ou
+ * quando clico em voltar"). Por isso a troca usa `history.pushState`
+ * (integrado ao router do Next, então `useSearchParams`/`usePathname`
+ * continuam reativos, inclusive no botão voltar do navegador via
+ * popstate): o router não é acionado - só este Client Component
+ * re-renderiza com a nova query, sem round-trip pro servidor.
  */
 export function SettingsSections({ sections }: SettingsSectionsProps) {
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   // Retorno do OAuth do Google Agenda: chega com
@@ -61,12 +60,23 @@ export function SettingsSections({ sections }: SettingsSectionsProps) {
   const requestedId = searchParams.get("section") ?? (cameFromGoogleCalendarRedirect ? "integracoes" : null);
   const active = sections.find((section) => section.id === requestedId) ?? null;
 
+  function removeGoogleOAuthResultParams(params: URLSearchParams) {
+    params.delete("google_calendar_connected");
+    params.delete("google_calendar_error");
+    return params;
+  }
+
   function openSection(id: string) {
-    router.push(`/home/settings?section=${id}`, { scroll: false });
+    const params = removeGoogleOAuthResultParams(new URLSearchParams(searchParams.toString()));
+    params.set("section", id);
+    window.history.pushState(null, "", `?${params.toString()}`);
   }
 
   function backToList() {
-    router.push("/home/settings", { scroll: false });
+    const params = removeGoogleOAuthResultParams(new URLSearchParams(searchParams.toString()));
+    params.delete("section");
+    const query = params.toString();
+    window.history.pushState(null, "", query ? `?${query}` : location.pathname);
   }
 
   if (!active) {
