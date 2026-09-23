@@ -9,6 +9,7 @@ import { getAssistantPreferencesFetcher } from "@/features/assistant/data/get-as
 import { getMascotFetcher } from "@/features/focus/data/get-focus-fetcher";
 import type { MascotPersonality } from "@/features/focus/domain";
 import { getTaskFetcher } from "@/features/tasks/data/get-task-fetcher";
+import { TASK_START_XP } from "@/features/tasks/data/local-task";
 import { GeminiAssistantProvider } from "@/lib/ai/gemini-provider";
 import type { CompanionInteractionContext } from "@/lib/ai/prompts/companion-context-prompt";
 import { requireUserId } from "@/lib/auth";
@@ -29,6 +30,11 @@ import type { IExecutionSession } from "./domain/types";
 // ver `companion-personality-profile.ts` pro que VARIA por personalidade
 // (a recuperação depois de um "não", que é sobre insistência, não limite).
 const QUIET_DURATION_MS = 60 * 60 * 1000;
+
+// XP por criar/alternar uma sessão de execução (toda vez que uma execução
+// começa ou uma outra tarefa vira a ativa). Compartilhado entre
+// `startExecutionSessionAction` e `startTaskExecutionAction`.
+const SESSION_START_XP = 5;
 
 const taskOwnershipFilter = (userId: string) =>
   or(eq(tasks.userId, userId), eq(tasks.sharedWithUserId, userId));
@@ -183,7 +189,7 @@ export async function startExecutionSessionAction(
       session = await repo.create({ taskId: data.taskId });
     }
 
-    await getMascotFetcher().addXp(5);
+    await getMascotFetcher().addXp(SESSION_START_XP);
 
     revalidatePath("/home");
     revalidatePath("/home/tasks");
@@ -196,6 +202,136 @@ export async function startExecutionSessionAction(
     };
   } catch {
     return { error: "Não foi possível criar a sessão de execução. Tente novamente." };
+  }
+}
+
+export type StartTaskExecutionResult = ActionResult & {
+  session?: IExecutionSession;
+  switched?: boolean;
+  previousTaskId?: string;
+  taskStartedAt?: Date | null;
+  taskWorkStatus?: "pending" | "in_progress" | "paused";
+  taskPausedAt?: Date | null;
+};
+
+/**
+ * "Começar"/"Retomar" numa ÚNICA ida ao servidor.
+ *
+ * Antes, o card executava duas Server Actions em sequência:
+ *   - "Começar": `markTaskStartedAction` → depois `startExecutionSessionAction`;
+ *   - "Retomar com troca de tarefa": `setTaskWorkStatusAction` → depois
+ *     `startExecutionSessionAction`.
+ * Cada uma tinha o próprio `revalidatePath` — 2 round-trips de rede pro
+ * cliente e 4 revalidações por clique. Esta ação combina os dois efeitos:
+ *
+ *   1. marca a tarefa como iniciada (idempotente, mesmo raciocínio de
+ *      `LocalTask.markStarted`: `startedAt` só preenchido na 1ª vez,
+ *      `work_status` = `in_progress`, `pausedAt` limpo);
+ *   2. cria a sessão ativa da tarefa — alternando (pausando a sessão ativa
+ *      anterior + a própria tarefa dela) se houver outra em andamento;
+ *
+ * com TODO o estado do banco numa única transação. O servidor segue a fonte
+ * de verdade: o client atualiza task/sessão a partir do retorno.
+ *
+ * XP preservado na mesma quantidade e condição de antes:
+ *   - `TASK_START_XP` só quando a tarefa é iniciada pela 1ª vez (não recontado
+ *     em retomar/recomeçar);
+ *   - `SESSION_START_XP` sempre que uma sessão de execução é criada/alternada.
+ */
+export async function startTaskExecutionAction(
+  data: { taskId: string }
+): Promise<StartTaskExecutionResult> {
+  const parsed = startExecutionSessionSchema.safeParse(data);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Dados inválidos." };
+  }
+
+  try {
+    const userId = await requireUserId();
+    const repo = getExecutionSessionFetcher();
+    const task = await getTaskFetcher().getById(data.taskId);
+
+    if (!task) {
+      return { error: "Tarefa não encontrada." };
+    }
+
+    const existing = await repo.getActive();
+    if (existing?.taskId === data.taskId) {
+      return { error: "Essa tarefa já está em andamento." };
+    }
+
+    const firstStart = !task.startedAt;
+    const now = new Date();
+    const sessionId = crypto.randomUUID();
+
+    await db.transaction(async (tx) => {
+      // 1) Marca a tarefa alvo como iniciada (idempotente) e em execução.
+      await tx
+        .update(tasks)
+        .set({
+          startedAt: task.startedAt ?? now,
+          workStatus: "in_progress",
+          pausedAt: null,
+        })
+        .where(and(eq(tasks.id, data.taskId), taskOwnershipFilter(userId)));
+
+      // 2) Alternância: pausa a sessão ativa atual e a tarefa dela.
+      if (existing) {
+        await tx
+          .update(executionSessions)
+          .set({ status: "paused", pausedAt: now, updatedAt: now })
+          .where(
+            and(
+              eq(executionSessions.userId, userId),
+              eq(executionSessions.status, "active")
+            )
+          );
+
+        await tx
+          .update(tasks)
+          .set({ workStatus: "paused", pausedAt: now })
+          .where(
+            and(eq(tasks.id, existing.taskId), taskOwnershipFilter(userId))
+          );
+      }
+
+      // 3) Sessão ativa da tarefa alvo.
+      await tx.insert(executionSessions).values({
+        id: sessionId,
+        userId,
+        taskId: data.taskId,
+        status: "active",
+        currentStepIndex: 0,
+        startedAt: now,
+        resumedAt: now,
+        updatedAt: now,
+      });
+    });
+
+    const session = await repo.getById(sessionId);
+    if (!session) {
+      return { error: "Não foi possível criar a sessão de execução." };
+    }
+
+    if (firstStart) {
+      await getMascotFetcher().addXp(TASK_START_XP);
+    }
+    await getMascotFetcher().addXp(SESSION_START_XP);
+
+    revalidatePath("/home");
+    revalidatePath("/home/tasks");
+
+    return {
+      error: null,
+      session,
+      switched: !!existing,
+      previousTaskId: existing?.taskId,
+      taskStartedAt: task.startedAt ?? now,
+      taskWorkStatus: "in_progress",
+      taskPausedAt: null,
+    };
+  } catch {
+    return { error: "Não foi possível iniciar a execução da tarefa. Tente novamente." };
   }
 }
 
