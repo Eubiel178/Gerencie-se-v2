@@ -1,53 +1,34 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
 import { Button, Modal, ModalHeader } from "@/components";
 
 import { resetGuidedTourAction } from "../../actions";
-import { GUIDED_TOUR_MOBILE_BREAKPOINT_PX } from "../../domain/steps";
 
 import styles from "./styles.module.css";
-
-const MOBILE_QUERY = `(max-width: ${GUIDED_TOUR_MOBILE_BREAKPOINT_PX}px)`;
-
-function subscribeToMobileQuery(callback: () => void) {
-  const query = window.matchMedia(MOBILE_QUERY);
-  query.addEventListener("change", callback);
-  return () => query.removeEventListener("change", callback);
-}
-
-function getIsMobileSnapshot(): boolean {
-  return window.matchMedia(MOBILE_QUERY).matches;
-}
-
-function getIsMobileServerSnapshot(): boolean {
-  return false;
-}
 
 /** Rearma o tour guiado (ver `GuidedTour`) e leva pro Dashboard, onde ele
  * de fato toca — chamado de Configurações, pra quem quiser rever depois
  * de já ter pulado ou concluído da primeira vez. Pede confirmação antes
  * (é uma navegação que tira a pessoa de Configurações no meio de algo
- * que ela podia estar fazendo). */
+ * que ela podia estar fazendo).
+ *
+ * Existe também no mobile de propósito: o motor do tour (`GuidedTour`)
+ * SABE rodar abaixo de `GUIDED_TOUR_MOBILE_BREAKPOINT_PX` — ele abre o
+ * painel de navegação mobile sozinho pra apontar pros alvos que só
+ * existem dentro dele (`data-tour="nav"`/`data-tour="search"`, ver
+ * `MOBILE_NAV_PANEL_TARGETS` no motor) e navega entre as telas. Já teve
+ * uma época em que o motor não rodava no mobile e este botão ficava
+ * oculto aqui embaixo prometendo algo que nunca aparecia — hoje o
+ * bloqueio foi removido do motor, então o botão volta a ser o caminho
+ * de reativar o tour também pra quem usa o app por celular. */
 export function ReplayTourButton() {
   const router = useRouter();
   const [isConfirming, setIsConfirming] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
-  // O motor do tour (`GuidedTour`) se recusa a mostrar qualquer passo
-  // abaixo de `GUIDED_TOUR_MOBILE_BREAKPOINT_PX` (a navegação vira um
-  // menu escondido atrás de um clique, sem os alvos que o tour aponta) -
-  // sem esta checagem, o botão ficava visível no mobile prometendo algo
-  // que nunca acontecia: clicar marcava no banco e navegava pro
-  // Dashboard, mas nenhum passo aparecia na tela (achado relatado).
-  const isMobile = useSyncExternalStore(
-    subscribeToMobileQuery,
-    getIsMobileSnapshot,
-    getIsMobileServerSnapshot,
-  );
 
   async function handleConfirm() {
     if (isLoading) return;
@@ -56,8 +37,6 @@ export function ReplayTourButton() {
     await resetGuidedTourAction();
     router.push("/home");
   }
-
-  if (isMobile) return null;
 
   return (
     <>
