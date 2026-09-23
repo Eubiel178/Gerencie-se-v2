@@ -508,7 +508,7 @@ export function GuidedTour({
   // Trava de foco/teclado - mesmo padrão de `components/modal` (Escape
   // pula o tour inteiro; Tab nunca escapa pro resto da página por trás).
   useEffect(() => {
-    if (!step) return;
+    if (!step || finished) return;
 
     const container = containerRef.current;
     if (!container) return;
@@ -551,7 +551,7 @@ export function GuidedTour({
       previouslyFocused?.focus?.();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stepIndex, steps]);
+  }, [finished, stepIndex, steps]);
 
   const isRenderingTour = !!steps && !!step && !finished;
 
