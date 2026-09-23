@@ -1,0 +1,208 @@
+Mascote flutuante (PixiJS) - créditos de asset
+
+Personagens: gato ("cat.png") e cachorro ("dog.png") - atlas de cada um
+gerado localmente a partir do pack abaixo (pasta "cat" e pasta "dog" do
+mesmo CatnDog.zip) - ver src/features/mascot-pet/domain/cat-frames.json
+e dog-frames.json pros retângulos de recorte de cada frame.
+
+Fonte: "Cat & Dog - Free Sprites" (arquivo CatnDog.zip)
+Autor: pzUH
+Licença: CC0 (Domínio Público) - https://opengameart.org/content/cat-dog-free-sprites
+Uso comercial permitido, sem exigência de atribuição (creditado aqui só
+por transparência/rastreabilidade do asset original).
+
+Nenhum dos 8 estados do pack original (Idle, Walk, Run, Jump, Hurt,
+Slide, Fall, Dead) chama-se "sleep", "happy" ou "celebrate" - o mapeamento
+usado (ver MASCOT_CHARACTERS em domain/characters.ts, mesmo mapeamento
+pros dois personagens) é:
+
+  idle        -> Idle
+  walk        -> Walk
+  run         -> Run
+  happy       -> Jump   (pose alegre, olhos fechados, língua de fora)
+  celebrate   -> Jump   (mesma pose de "happy", reaproveitada)
+  sad         -> Hurt   (olhos em X, lágrimas)
+  sleep       -> Idle   (reaproveitado; "Dead" também existe no pack mas
+                          fica com cara de desmaiado, não de dormindo -
+                          evitado de propósito)
+  interaction -> Slide  (pose de "escorregada" alegre, usada na reação ao clique)
+
+Pra adicionar mais personagens (ex.: coelho/raposa/urso) no futuro: gerar
+um atlas equivalente (mesmo esquema de nomes "<Estado>_<índice>") e
+adicionar uma entrada nova em MASCOT_CHARACTERS - o motor de
+movimento/comportamento não depende de nenhum bicho específico.
+
+---
+
+Personagem: pássaro ("bird.png") - atlas gerado localmente (sharp,
+composição simples em grade) a partir dos estados Idle/Walk/Hurt do
+pack abaixo (pasta "7 Bird").
+
+Fonte: "Free Street Animal Pixel Art"
+Autor/distribuidor: craftpix.net
+Licença: ver / (free license - uso
+pessoal/comercial permitido conforme os termos do site; sem exigir
+compra para este uso).
+
+Frames usados (ver bird-frames.json):
+  idle        -> Idle (4 frames)
+  walk        -> Walk (6 frames)
+  run         -> Walk (reaproveitado - correr é só andar mais rápido,
+                        a velocidade vem do motor, não da animação)
+  sad         -> Hurt (2 frames)
+  sleep       -> Idle (reaproveitado, mesmo raciocínio do gato/cachorro)
+  happy, celebrate, interaction -> sem frames próprios no pack (o motor
+                                    mantém a última animação tocando
+                                    nesses estados - ver runtime.ts)
+
+---
+
+Personagem: urso ("bear.png") - atlas gerado localmente (sharp) a partir
+dos dois arquivos baixados abaixo (idle + walk).
+
+Fonte: "Little Bear" (caz-bee.itch.io/little-bear)
+Autor: CazBee
+Licença: CC0 1.0 Universal - uso livre em projetos comerciais e não
+comerciais, crédito bem-vindo mas não obrigatório.
+
+Frames usados (ver bear-frames.json):
+  idle        -> Idle (1 frame, a única pose parada do pack)
+  walk        -> Walk (4 frames)
+  run         -> Walk (reaproveitado - mesmo raciocínio do pássaro)
+  sleep       -> Idle (reaproveitado)
+  sad, happy, celebrate, interaction -> sem frames próprios no pack.
+
+---
+
+Personagem: raposa ("fox.png") - atlas gerado localmente (sharp,
+recortando as linhas usadas do spritesheet original em colunas de
+32x32) a partir do pack abaixo.
+
+Fonte: "2D Pixel Art Fox Sprites" (elthen.itch.io/2d-pixel-art-fox-sprites)
+Autor: Elthen
+Licença: uso livre em projetos comerciais/não comerciais, EXCETO em
+projetos ligados a blockchain/cripto/NFT/Web3 (restrição do autor) -
+não se aplica ao Gerencie-se. Crédito bem-vindo, não obrigatório.
+
+O pack original tem 7 animações (Idle, Idle2, Movement, Catch, Damage,
+Sleep, Death); só as 5 abaixo foram extraídas pro atlas (Idle2 e Death
+não têm mapeamento aqui, então nem entraram no arquivo final):
+
+Frames usados (ver fox-frames.json):
+  idle        -> Idle (5 frames)
+  walk        -> Movement (8 frames)
+  run         -> Movement (reaproveitado - mesmo raciocínio do pássaro)
+  sad         -> Damage (5 frames)
+  sleep       -> Sleep (6 frames)
+  interaction -> Catch (11 frames - pose de bote/pulo, a mais parecida
+                  com uma reação animada a um clique; mesmo espírito do
+                  "Slide" do gato/cachorro)
+  happy, celebrate -> sem frames próprios no pack.
+
+---
+
+Um sapo (pack "FreeAnimalPack", FrogIdle.png) chegou a ser adicionado e
+foi removido: o pack só tinha uma animação (Idle) - sem frames de
+"andar" próprios, o bicho só deslizava pela tela (a posição se movia,
+mas a animação ficava presa no loop de Idle) em vez de dar a impressão
+de pular de verdade. Se aparecer um pack de sapo com um ciclo de
+movimento de verdade, vale reconsiderar.
+
+Urso, raposa e pássaro vêm de atlas pixel art nativamente 32x32 -
+bem menor que o frame do gato/cachorro (110x96). Pra não aparecerem
+minúsculos ao lado dos outros dois, `MascotCharacter.displayWidth`/
+`displayHeight` (ver domain/types.ts e engine/runtime.ts) amplia a
+exibição pra 96x96 com escala "nearest" (mantém o pixel nítido, sem
+borrar) - o arquivo de origem continua no tamanho original, só o
+tamanho de TELA muda.
+
+---
+
+Personagem: panda ("panda.png") - atlas gerado localmente (sharp,
+empilhando os dois spritesheets originais em duas linhas de 64x64) a
+partir do pack abaixo.
+
+Fonte: "PandaPack" (versão grátis, PandaFree.zip)
+Autor: ToffeeCraft (toffeecraft.itch.io)
+Licença: uso comercial ou pessoal permitido, pode editar livremente;
+NÃO pode redistribuir/revender o asset em si (não é o nosso caso - só
+está embutido no app) - https://toffeecraft.itch.io/panda-anim
+Crédito bem-vindo, não obrigatório.
+
+A versão grátis do pack só tem 3 arquivos: "Bambu" (só o bambuzinho,
+sem o panda - não usado), "PandaEating" e "PandaWave". Sem pose parada
+própria nem ciclo de "andar" dedicado - mapeamento (ver
+panda-frames.json e characters.ts):
+
+  idle        -> primeiro quadro de "PandaEating" (parado - mesmo
+                 raciocínio do urso, que também só tem uma pose parada)
+  walk        -> "PandaEating" (12 frames - o panda segura bambu
+                 alternando as pernas, lê como um ciclo de andar mesmo
+                 sem ser um "Walk" dedicado)
+  run         -> reaproveitado de "walk" (mesmo raciocínio dos outros)
+  sleep       -> reaproveitado do "idle"
+  interaction -> "PandaWave" (12 frames - aceno, usado como reação ao
+                 clique, mesmo espírito do "Slide"/"Catch" dos outros)
+  sad, happy, celebrate -> sem frames próprios no pack.
+
+Atlas nativo 64x64 - ampliado pra 96x96 igual aos outros personagens
+pixel art (mesma razão do parágrafo acima sobre urso/raposa/pássaro).
+
+---
+
+Personagens: 3 raças de cachorro ("golden.png", "akita.png",
+"dogue-alemao.png") e 6 gatos ("gato-preto.png", "gato-angora.png",
+"gato-tabby.png", "gato-laranja.png", "gato-lilas.png",
+"gato-siames.png") - atlas de cada um gerado localmente (sharp,
+composição em grade de 8 linhas por estado x N colunas por frame) a
+partir dos packs abaixo, baixados pelo usuário.
+
+Fonte: "Pet Dogs Pack" (raças Golden Retriever, Akita, Great Dane -
+usados como "golden"/"akita"/"dogue-alemao") e "Pet Cats Pack"
+(6 das 6 variantes do pack - Cat-1/Cat-2/Cat-3/Cat-4/Cat-5/Cat-6,
+usados como "gato-laranja"/"gato-preto"/"gato-lilas"/"gato-siames"/
+"gato-angora"/"gato-tabby" respectivamente)
+Autor: não informado nos arquivos baixados (só o License.txt de cada
+pack, sem nome de autor) - packs claramente do mesmo autor/estilo (11
+estados idênticos em nome e proporção entre as raças/variantes de cada
+pacote).
+Licença: Creative Commons Zero (CC0) - texto exato do License.txt de
+cada pack: "This pack ... Asset Pack is Creative Commons Zero (CC-0).
+Can be used in commercial and non-commercial projects." Domínio
+público, sem exigência de atribuição.
+
+Cada pack original tem 11 estados reais (bark/meow, idle, itching/itch,
+licking1, licking2, lying-down/laying, run, sitting, sleeping, stretching,
+walk) - bem mais rico que os outros personagens. Nenhum se chama
+literalmente "happy"/"celebrate"/"sad"/"interaction" - mapeamento usado
+(igual pras 3 raças de cachorro entre si, e igual pras 3 variantes de
+gato entre si - mesmos nomes de estado nos dois packs):
+
+  idle        -> Idle (10 frames)
+  walk        -> Walk (8 frames)
+  run         -> Run (8 frames)
+  sleep       -> Sleeping/Sleeping1 (1 frame, pose deitada)
+  happy       -> Stretching (espreguiçar - gesto contente, 10 frames no
+                 cachorro / 13 no gato)
+  celebrate   -> Bark/Meow (vocalização animada, 3-4 frames)
+  sad         -> Itching/Itch (incômodo leve - a pose negativa mais
+                 parecida disponível no pack, 2 frames)
+  interaction -> Licking1 (se limpar - reação de "atenção recebida" ao
+                 clique, 4-5 frames)
+
+Sitting, Laying/Lying-down e Licking2 existem nos packs mas não têm
+mapeamento pra nenhum `MascotStateName` do motor - ficaram de fora do
+atlas final de propósito (evita atlas maior que o necessário).
+
+Exceção: Cat-3 ("gato-lilas") não tem animação "Itch" no pack de
+origem (só 10 dos 11 estados, diferente das outras 5 variantes) -
+"sad" reaproveita os frames de "idle" nesse personagem específico, em
+vez de inventar um frame que não existe (mesmo raciocínio já usado
+pro urso/panda faltando outras poses).
+
+Atlas nativo 100x100 (cachorros) / 50x50 (gatos) - ampliado pra 96x96
+igual aos outros personagens pixel art.
+
+ZIPs originais ("Pet Dogs Pack.zip", "Pet Cats Pack.zip" e as demais
+variantes/duplicatas) permanecem na pasta Downloads do usuário, fora do
+projeto - nada além dos atlas finais + este texto entrou no repositório.

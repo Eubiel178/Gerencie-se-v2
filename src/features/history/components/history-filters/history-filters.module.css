@@ -1,0 +1,21 @@
+.filters {
+  display: flex;
+  align-items: end;
+  gap: var(--space-4);
+}
+
+.filters > * {
+  min-width: 9rem;
+}
+
+@media (max-width: 640px) {
+  .filters {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-3);
+  }
+
+  .filters > * {
+    min-width: 0;
+  }
+}

@@ -1,0 +1,44 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  color: var(--color-text);
+}
+
+.buttonRow {
+  display: flex;
+  color: var(--color-text);
+}
+
+.smallButton {
+  padding: 0.45rem var(--space-3);
+  font-size: var(--font-size-sm);
+}
+
+.mutedText {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.enabledMessage {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--color-success);
+  font-size: var(--font-size-sm);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  cursor: pointer;
+}
+.row input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--color-highlight);
+}

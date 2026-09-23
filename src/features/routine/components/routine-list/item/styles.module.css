@@ -1,0 +1,203 @@
+/* Linha compacta, não um card cheio como Tarefas/Objetivos — uma rotina
+   normal tem várias entradas visíveis ao mesmo tempo, então cada uma
+   precisa pesar pouco; a hierarquia vem do AGRUPAMENTO por período e do
+   destaque no próximo item, não de cada linha ter sombra/borda grossa
+   própria (mesma reflexão de "não virar Tarefas 2.0"). */
+.item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-left: 0.2rem solid transparent;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  transition:
+    background var(--duration-fast) var(--easing-standard),
+    border-color var(--duration-fast) var(--easing-standard);
+}
+.item:hover {
+  background: var(--color-surface-elevated);
+}
+/* Destaque sutil do "a seguir" (ver `isNext` em `index.tsx`) - mesma
+   linguagem visual da borda de prioridade em Tarefas/Objetivos, só que
+   aqui marca PROGRESSÃO no dia, não prioridade. */
+.item[data-next="true"] {
+  border-left-color: var(--color-highlight);
+  background: color-mix(in srgb, var(--color-highlight) 4%, var(--color-surface));
+}
+
+/* Checkbox — mesmo visual de "quadradinho com check" de
+   Tarefas/Objetivos (`.completeCheckbox`), sem o modal de confirmação
+   (ver comentário em `index.tsx`: aqui é uma ocorrência do dia, não uma
+   conclusão única). */
+.doneCheckbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-on-highlight);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--easing-standard);
+}
+.doneCheckbox[data-checked="true"] {
+  background: var(--color-success);
+  border-color: var(--color-success);
+}
+.doneCheckbox:focus-visible {
+  outline: 2px solid var(--color-highlight);
+  outline-offset: 2px;
+}
+.doneCheckbox:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+/* Meta acima do título — horário, "a seguir" e tarefa vinculada juntos,
+   pequenos e discretos, pra nunca competir em peso visual com o nome da
+   atividade abaixo (pedido explícito: "o horário é importante, mas não
+   deve competir visualmente com o nome da atividade"). */
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+.time {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.metaSep {
+  color: var(--color-border);
+  user-select: none;
+  font-size: 0.65rem;
+  line-height: 1;
+}
+.metaGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  white-space: nowrap;
+}
+.nextTag {
+  color: var(--color-highlight);
+  font-weight: 600;
+}
+.linkedTask {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 12rem;
+}
+
+.itemTitle {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 1rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.itemTitle[data-completed="true"] {
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+}
+
+.sharedBadge {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--color-info);
+  font-size: var(--font-size-xs);
+}
+
+/* Menu de mais-ações — editar/remover ficam recolhidos, nunca competindo
+   de forma permanente com o conteúdo (mesmo padrão de Tarefas/Objetivos). */
+.actions {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  color: var(--color-text);
+}
+.overflowMenu {
+  position: relative;
+  flex-shrink: 0;
+}
+.overflowMenu summary {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  list-style: none;
+  transition:
+    opacity var(--duration-fast) var(--easing-standard),
+    border-color var(--duration-fast) var(--easing-standard);
+}
+.overflowMenu summary:hover {
+  opacity: 0.72;
+  border-color: color-mix(in srgb, var(--color-border) 70%, var(--color-highlight));
+}
+.overflowMenu summary::-webkit-details-marker {
+  display: none;
+}
+.overflowMenu summary:focus-visible {
+  outline: 2px solid var(--color-highlight);
+  outline-offset: 2px;
+}
+.overflowMenuContent {
+  position: absolute;
+  z-index: 2;
+  right: 0;
+  top: calc(100% + var(--space-1));
+  display: flex;
+  gap: var(--space-1);
+  padding: 0.2rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-elevated);
+  box-shadow: 0 0.5rem 1.25rem var(--color-shadow);
+}
+.overflowMenuContent :global(button) {
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  opacity: 0.85;
+}
+.overflowMenuContent :global(button:hover) {
+  opacity: 0.65;
+}
+
+@media (max-width: 640px) {
+  .item {
+    padding: var(--space-2) var(--space-3);
+  }
+  .linkedTask {
+    max-width: 8rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .item {
+    transition: none;
+  }
+}

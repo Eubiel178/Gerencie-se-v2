@@ -1,0 +1,1 @@
+ALTER TABLE "mascot_state" ADD COLUMN "render_mode" text DEFAULT '2d' NOT NULL;

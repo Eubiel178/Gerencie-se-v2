@@ -1,0 +1,17 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  /* O espaço entre o bloco de campos, mensagem de erro e ação final era
+     4rem em todos os formulários que usam a primitiva. Isso separava o
+     botão de salvar do que ele confirma, sobretudo em modais e no mobile.
+     `space-5` preserva uma pausa clara sem transformar a ação em outra
+     seção da tela. */
+  gap: var(--space-5);
+  width: 100%;
+}
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}

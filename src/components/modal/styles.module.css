@@ -1,0 +1,130 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-overlay);
+  padding: var(--space-4);
+  /* `opacity: 1` declarado aqui FORA da animação, de propósito (achado em
+     auditoria visual: modal reportado preso em ~24% de opacidade,
+     ilegível, em desktop — sem reproduzir de forma determinística, mas o
+     mecanismo mais provável é este: sem um valor de repouso próprio, a
+     opacidade do elemento depende inteiramente da animação abaixo
+     terminar limpa; qualquer interrupção dela por throttling do navegador
+     (aba em segundo plano, pressão de GPU) podia deixar o elemento preso
+     num quadro intermediário, sem nada garantindo o valor final). Com
+     `opacity: 1` já sendo o estado de repouso, a animação continua
+     fazendo o fade visual normalmente, mas nunca é a ÚNICA fonte da
+     opacidade final. */
+  opacity: 1;
+  animation: overlayIn var(--duration-fast) var(--easing-standard);
+}
+
+:where(.modal) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: min(23rem, 100%);
+  max-height: calc(100vh - var(--space-8));
+  overflow-y: auto;
+  padding: var(--space-4);
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 1.5rem 3rem var(--color-shadow);
+  /* Mesmo raciocínio do `opacity: 1` em `.overlay` acima. */
+  opacity: 1;
+  animation: modalIn var(--duration-base) var(--easing-standard);
+}
+
+/* Duas larguras extras, além do padrão (23rem) acima — pra quem chama
+   escolher por CONTEÚDO real, não deixar todo modal do app do mesmo
+   tamanho (achado relatado: revisão de modais). `:where(.modal)` acima
+   tem especificidade zero de propósito - qualquer classe normal, como
+   estas, já vence sem precisar de `!important`.
+   - `.medium` (27rem): formulários com 2-3 campos mas com rótulos/chips
+     mais longos que apertam em 23rem (ex.: "Algumas vezes por semana"
+     em Hábitos).
+   - `.wide` (31rem): formulários mais ricos, com várias seções ou linhas
+     horizontais de opções (ex.: os 4 chips de Prioridade + anexos em
+     Tarefa, as 7 amostras de cor + campo customizado em Evento). */
+.medium {
+  width: min(27rem, 100%);
+}
+.wide {
+  width: min(31rem, 100%);
+}
+
+@media (max-width: 640px) {
+  /* No mobile todo modal já vira bottom sheet de largura cheia (ver
+     regra mobile mais abaixo) - `.medium`/`.wide` precisam ceder de
+     volta pra 100% aqui, senão a maior especificidade delas (normal,
+     não `:where()`) venceria a regra mobile do modal base e um modal
+     "wide" ficaria mais largo que a tela. */
+  .medium,
+  .wide {
+    width: 100%;
+  }
+}
+
+@keyframes overlayIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/*
+ * Mobile: bottom sheet em vez de diálogo centralizado — ver seção 39 do
+ * guia do projeto. Um diálogo pequeno flutuando no meio da tela, com
+ * padding nos 4 lados, desperdiça espaço numa tela estreita e obriga
+ * scroll interno cedo em formulários maiores (ex. Nova Tarefa). Ancorado
+ * embaixo, sem padding lateral/inferior, cantos retos na base e usando
+ * quase a tela toda de altura resolve isso — e combina com o gesto de
+ * "puxar pra fechar" que usuários de celular já esperam desse padrão.
+ * 640px é o breakpoint mobile já documentado em `tokens.css`.
+ */
+@media (max-width: 640px) {
+  .overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  :where(.modal) {
+    width: 100%;
+    max-height: 92vh;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    border-bottom: none;
+    animation-name: modalInMobile;
+  }
+}
+
+@keyframes modalInMobile {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay,
+  :where(.modal) {
+    animation: none;
+  }
+}

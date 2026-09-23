@@ -1,0 +1,127 @@
+/* Ancorado pelo container pai (`bubbleAnchor` em `mascot-pet/index.tsx`),
+   que já recebe o `transform` do mascote via `onPositionChange` — este
+   balão só precisa se posicionar ACIMA do próprio anchor, sem saber nada
+   de coordenadas de tela. Redesenhado pra parecer o PRÓPRIO mascote
+   falando (bolha de fala com rabicho), não uma notificação de sistema
+   flutuando ao lado dele - por isso maior, mais leve (sombra suave, sem
+   borda pesada) e sem fileira de botões (ver `index.tsx`). */
+.bubble {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 14px;
+  min-width: 180px;
+  max-width: min(300px, 80vw);
+  padding: 14px 18px;
+  border-radius: 20px;
+  background: var(--color-surface-elevated);
+  color: var(--color-text);
+  box-shadow: 0 0.375rem 1.25rem var(--color-shadow);
+  pointer-events: auto;
+  animation: bubble-in 200ms ease-out;
+}
+
+.text {
+  margin: 0;
+  padding-right: 14px;
+  font-size: 15px;
+  line-height: 1.45;
+  font-weight: 500;
+}
+
+/* Legenda discreta da tarefa real por trás da mensagem - clareza sobre
+   QUAL tarefa sem precisar repetir o título dentro da frase toda vez. */
+.taskTag {
+  margin: 0 0 4px;
+  padding-right: 14px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.actionButton {
+  padding: 6px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--easing-standard);
+}
+.actionButton:hover {
+  background: var(--color-border);
+}
+.actionButton[data-kind="accept"],
+.actionButton[data-kind="confirm"] {
+  border-color: var(--color-highlight);
+  color: var(--color-highlight);
+}
+
+.closeButton {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-text-muted);
+  opacity: 0.55;
+  cursor: pointer;
+  transition: opacity var(--duration-fast) var(--easing-standard);
+}
+
+.closeButton:hover {
+  opacity: 1;
+  background: var(--color-border);
+}
+
+/* Rabicho apontando pro mascote logo abaixo - é isso que faz o balão ler
+   como "o bichinho está falando" em vez de um card solto ao lado dele. */
+.tail {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 9px solid transparent;
+  border-right: 9px solid transparent;
+  border-top: 10px solid var(--color-surface-elevated);
+}
+
+@keyframes bubble-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(6px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bubble {
+    animation: none;
+  }
+}

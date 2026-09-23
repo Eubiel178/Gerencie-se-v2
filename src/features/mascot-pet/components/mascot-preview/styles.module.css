@@ -1,0 +1,24 @@
+.stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.crop {
+  position: relative;
+  overflow: hidden;
+  /* "center", não "top left": junto com o `.stage` virar flex acima,
+     isso garante que, quando o palco é limitado (`MAX_STAGE_PX` em
+     index.tsx), o corte tira igualmente de todos os lados em volta do
+     bicho - nunca corta um pedaço dele de um lado só. */
+  transform-origin: center center;
+}
+
+.atlas {
+  position: absolute;
+  max-width: none;
+  width: auto;
+  height: auto;
+}

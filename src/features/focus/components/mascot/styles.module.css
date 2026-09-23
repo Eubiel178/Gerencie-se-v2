@@ -1,0 +1,15 @@
+.wrapper{display:flex;flex-direction:column;align-items:center;gap:var(--space-3)}
+.speechRow{display:flex;align-items:center;gap:var(--space-2);max-width:18rem}
+/* Enquanto a fala está tocando, o ícone pulsa em vez de virar um spinner
+   de carregamento — a fala pode durar vários segundos, e um anel girando
+   por tanto tempo passa a impressão de estar travado/quebrado, não de
+   "falando agora". */
+.speakingIcon{animation:speakingPulse 1s ease-in-out infinite}
+@keyframes speakingPulse{0%,100%{opacity:1}50%{opacity:.35}}
+@media (prefers-reduced-motion: reduce){.speakingIcon{animation:none}}
+.speechBubble{position:relative;margin:0;padding:var(--space-2) var(--space-3);border:1px solid var(--color-border);border-radius:var(--radius-md);background:var(--color-surface-elevated);color:var(--color-text);font-size:var(--font-size-sm)}
+
+.name{margin:0;color:var(--color-text);font-weight:600;font-size:var(--font-size-md)}
+.level{margin:0;color:var(--color-text-muted);font-size:var(--font-size-sm)}
+.xpTrack{width:10rem;height:.4rem;border-radius:var(--radius-full);background:var(--color-border);overflow:hidden}
+.xpFill{height:100%;background:var(--color-highlight);border-radius:var(--radius-full);transition:width var(--duration-base) var(--easing-standard)}

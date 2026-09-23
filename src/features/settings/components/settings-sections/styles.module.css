@@ -1,0 +1,107 @@
+.categoryList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.categoryItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: 0 0.4rem 1rem var(--color-shadow);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform var(--duration-base) var(--easing-standard),
+    box-shadow var(--duration-base) var(--easing-standard),
+    border-color var(--duration-base) var(--easing-standard);
+}
+
+.categoryItem:hover,
+.categoryItem:focus-visible {
+  transform: translateY(-0.125rem);
+  box-shadow: 0 0.75rem 1.5rem var(--color-shadow);
+  border-color: var(--color-highlight);
+}
+
+.categoryIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--radius-md);
+  /* Mesmo par usado no botão "primary" do app (Entrar, Salvar...) —
+     já verificado por cálculo de contraste WCAG AA em ambos os temas
+     (~5,9:1 claro, ~8:1 escuro). O par com --color-highlight-soft que
+     eu tinha usado antes aqui só passava em ~2,8:1 - achado ao checar
+     o contraste deste chip logo depois de criá-lo. */
+  background: var(--color-highlight);
+  color: var(--color-on-highlight);
+  font-size: 1.2rem;
+}
+
+.categoryText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  flex: 1;
+}
+
+.categoryLabel {
+  color: var(--color-text);
+  font-size: var(--font-size-md);
+  font-weight: 600;
+}
+
+.categoryDescription {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.categoryChevron {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+}
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-4);
+  border: none;
+  background: transparent;
+  color: var(--color-highlight);
+  font: inherit;
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.backButton:hover,
+.backButton:focus-visible {
+  text-decoration: underline;
+}
+
+.sectionTitle {
+  margin: 0 0 var(--space-4);
+  color: var(--color-text);
+  font-size: var(--font-size-lg);
+}
+
+.sectionContent {
+  min-width: 0;
+}

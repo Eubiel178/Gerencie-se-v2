@@ -1,0 +1,75 @@
+/*
+ * Cores e fonte vêm de src/design-system/tokens (importado antes deste
+ * arquivo em src/app/layout.tsx) — nada de cor solta aqui. `color-scheme`
+ * avisa o navegador para colorir scrollbar/inputs nativos de acordo com o
+ * tema atual.
+ */
+:root {
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+  }
+}
+
+html {
+  /* Rolagem suave ao clicar em links âncora (#id). Desativado de volta
+     para quem prefere menos animação — ver motion.css. */
+  scroll-behavior: smooth;
+  /* Reserva o espaço da scrollbar mesmo quando ela some (ex.: `Modal`
+     trava `body.style.overflow = "hidden"` enquanto está aberto, ver
+     `components/modal/index.tsx`) - sem isso, o conteúdo ganha a largura
+     da scrollbar de volta por baixo do fundo escurecido e desloca tudo
+     alguns pixels pra direita por um instante (achado real: "toda vez que
+     um modal abre a scrollbar some e a tela cresce", sensação de bug
+     mesmo sem quebrar nada). */
+  scrollbar-gutter: stable;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100vh;
+  width: 100%;
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--color-text-muted) 30%, transparent) transparent;
+
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  background-color: var(--color-background);
+}
+
+/* Scrollbar do body: visível e estilizada. O `color-scheme` (light/dark)
+   já garante que a scrollbar nativa Combine com o tema. Mantemos ela
+   presente porque a area principal de conteudo rola via body. */
+body::-webkit-scrollbar {
+  width: 8px;
+}
+body::-webkit-scrollbar-track {
+  background: transparent;
+}
+body::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--color-text-muted) 30%, transparent);
+  border-radius: var(--radius-full);
+}
+body::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--color-text-muted) 50%, transparent);
+}
+
+input,
+select,
+textarea {
+  outline: none;
+  border: none;
+}
+
+.no-scroll {
+  overflow-y: hidden;
+}

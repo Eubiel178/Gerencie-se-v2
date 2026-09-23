@@ -1,0 +1,10 @@
+.formWrapper{gap:var(--space-5)}
+.colorSwatches{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2)}
+.colorSwatch{width:1.6rem;height:1.6rem;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0;transition:transform var(--duration-fast) var(--easing-standard),border-color var(--duration-fast) var(--easing-standard)}
+.colorSwatch:hover{transform:scale(1.1)}
+.colorSwatch[data-selected="true"]{border-color:var(--color-text)}
+.customColorField{width:1.6rem;height:1.6rem;padding:0;border:2px dashed var(--color-border);border-radius:50%;overflow:hidden}
+
+.titleField{border:none;border-bottom:2px solid var(--color-border);border-radius:0;padding:var(--space-2) 0;background:transparent;font-size:var(--font-size-lg);font-weight:600}
+.titleField:hover:not(:disabled,:focus-visible){border-bottom-color:color-mix(in srgb,var(--color-highlight) 40%,var(--color-border))}
+.titleField:focus-visible{border-bottom-color:var(--color-highlight);outline:none;box-shadow:none}

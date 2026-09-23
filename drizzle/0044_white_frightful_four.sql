@@ -1,0 +1,1 @@
+ALTER TABLE "user_preference" ADD COLUMN "assistant_companion_quiet_until" timestamp;

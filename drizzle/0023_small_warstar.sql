@@ -1,0 +1,1 @@
+ALTER TABLE "user_preference" ADD COLUMN "email_task_reminders" boolean DEFAULT false NOT NULL;

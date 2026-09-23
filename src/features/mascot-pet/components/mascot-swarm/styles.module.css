@@ -1,0 +1,106 @@
+/* Palco onde os mascotes passeiam - `position: relative` de propósito:
+   é o que faz o `.wrapper` de cada bicho (`position: absolute`) andar
+   dentro DESTA área, nunca da janela inteira (ver `boundsProvider` em
+   `index.tsx`). Fundo com leve textura de pontos + um brilho suave, pra
+   parecer um cantinho de cenário, não uma div vazia com bichos flutuando
+   no nada. */
+.stage {
+  position: relative;
+  overflow: hidden;
+  min-height: clamp(15rem, 26vw, 21rem);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(circle at 18% 20%, color-mix(in srgb, var(--color-highlight) 12%, transparent), transparent 45%),
+    radial-gradient(circle at 82% 75%, color-mix(in srgb, var(--color-success) 12%, transparent), transparent 40%),
+    radial-gradient(circle, var(--color-border) 1px, transparent 1px) 0 0 / 22px 22px,
+    var(--color-surface);
+}
+
+/* "Chão" da clareira - uma faixa esverdeada embaixo, pros bichos e as
+   árvores parecerem apoiados em grama, não flutuando num fundo genérico. */
+.stage::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 26%;
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--color-success) 16%, transparent),
+    transparent
+  );
+  pointer-events: none;
+}
+
+/* Árvores decorativas nas laterais (ver `Scenery`/`Tree` em `index.tsx`)
+   - puramente visuais: nunca recebem interação, e ficam ATRÁS dos bichos
+   (ordem do DOM - `Scenery` é o primeiro filho do palco). */
+.scenery {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.treeSlot {
+  position: absolute;
+  bottom: 0;
+}
+.tree {
+  display: block;
+}
+
+.wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  cursor: grab;
+  /* Sem isso, iniciar o arraste num touchscreen também rolaria a página
+     por baixo do dedo (mesma razão do mascote que anda pela tela). */
+  touch-action: none;
+  will-change: transform;
+}
+
+.label {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  z-index: 1;
+  margin-bottom: 0.3rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-full);
+  background: var(--color-text);
+  color: var(--color-background);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate(-50%, 0.3rem);
+  transition:
+    opacity var(--duration-fast) var(--easing-standard),
+    transform var(--duration-fast) var(--easing-standard);
+  pointer-events: none;
+}
+.label[data-visible="true"] {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* 13rem (achado relatado: "mascotes colado no chão") mal cabia um
+   bichinho de ~96px de altura com folga nenhuma pra passear na vertical
+   - a "raia" de movimento (`makeLaneBoundsProvider` em `index.tsx`) ficava
+   baixa o bastante pra parecer grudado na grama do fundo. */
+@media (max-width: 760px) {
+  .stage {
+    min-height: 18rem;
+  }
+}
+
+/* O motor já congela o passeio autônomo sozinho quando o sistema pede
+   menos movimento (ver `MascotBehavior.setReducedMotion`) - aqui só
+   desliga a transição do rótulo de nome, que é decoração nossa, não do
+   motor. */
+@media (prefers-reduced-motion: reduce) {
+  .label {
+    transition: none;
+  }
+}

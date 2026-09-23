@@ -1,0 +1,215 @@
+/* Acima do Modal (z-index 50) e da paleta de comando (60) - o tour
+   precisa ficar por cima de qualquer outra coisa que porventura esteja
+   aberta. */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--color-overlay);
+}
+
+/* Realce visual em volta do elemento apontado - não é um "buraco" de
+   verdade no fundo escuro (ver comentário no componente): só uma borda +
+   leve brilho, suficiente pra guiar o olho sem precisar recortar a
+   camada de baixo. */
+.spotlight {
+  position: fixed;
+  border: 2px solid var(--color-highlight);
+  border-radius: var(--radius-md);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-highlight) 22%, transparent);
+  pointer-events: none;
+  transition:
+    top var(--duration-base) var(--easing-standard),
+    left var(--duration-base) var(--easing-standard),
+    width var(--duration-base) var(--easing-standard),
+    height var(--duration-base) var(--easing-standard);
+}
+
+.tooltip {
+  position: fixed;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: 0 1.5rem 3rem var(--color-shadow);
+  color: var(--color-text);
+  /* Rede de segurança: a posição em `index.tsx` já é calculada pra caber
+     na tela, mas isto garante que o tooltip NUNCA fique impossível de ler
+     (vira scroll interno em vez de conteúdo cortado/invisível) mesmo numa
+     tela mais baixa que o previsto ou com fonte aumentada (zoom/acessibilidade). */
+  max-height: calc(100vh - (var(--space-4) * 2));
+  max-width: calc(100vw - (var(--space-4) * 2));
+  overflow-y: auto;
+}
+
+/* Único passo em que o tour se apresenta como o próprio Companion
+   falando (ver `speaksAsCompanion` em `domain/steps.ts`) - avatar +
+   nome no lugar do contador de passo/título genérico, e o corpo do
+   texto com a cara de um balão de fala, não de um parágrafo de manual. */
+.companionTooltip {
+  border: 1px solid color-mix(in srgb, var(--color-highlight) 35%, transparent);
+}
+
+.companionSender {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.companionAvatar {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  border: 1px solid var(--color-border);
+}
+
+.companionName {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.companionBody {
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-highlight) 10%, var(--color-surface-elevated));
+}
+
+/* Escolha "Com voz"/"Sem voz" - mesmo padrão visual do `ThemeToggle` do
+   design system (segmented control de 2 opções), só que local a este
+   componente (o tour não importa o outro pra não criar acoplamento). */
+.voiceChoice {
+  display: inline-flex;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  margin-top: var(--space-3);
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+.voiceOption {
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--easing-standard),
+    color var(--duration-fast) var(--easing-standard);
+}
+.voiceOption:hover {
+  color: var(--color-text);
+}
+.voiceOptionActive {
+  background: var(--color-highlight);
+  color: var(--color-on-highlight);
+}
+.voiceOptionActive:hover {
+  color: var(--color-on-highlight);
+}
+
+.step {
+  margin: 0;
+  color: var(--color-highlight);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 1.2rem;
+  letter-spacing: -0.02em;
+}
+
+.body {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.skip {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text-muted);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.skip:hover {
+  color: var(--color-text);
+}
+
+.navButtons {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.back,
+.next {
+  padding: 0.5rem var(--space-4);
+  border: 0;
+  border-radius: var(--radius-full);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.back {
+  background: var(--color-surface-elevated);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+.back:hover {
+  border-color: var(--color-highlight);
+}
+
+.next {
+  background: var(--color-highlight);
+  color: var(--color-on-highlight);
+}
+.next:hover {
+  transform: translateY(-1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spotlight {
+    transition: none;
+  }
+  .next:hover {
+    transform: none;
+  }
+}
+
+@media (max-width: 24rem) {
+  .tooltip { padding: var(--space-4); }
+  .actions { align-items: flex-start; flex-direction: column; }
+  .navButtons { width: 100%; justify-content: flex-end; }
+}

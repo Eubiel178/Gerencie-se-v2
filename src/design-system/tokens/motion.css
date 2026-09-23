@@ -1,0 +1,22 @@
+/**
+ * Regra global de acessibilidade para movimento. Qualquer transição/anima-
+ * ção nova do design system deve poder ser cortada por esta regra — por
+ * isso as animações usam as variáveis --duration-* (nunca um tempo fixo
+ * dentro do componente), que são zeradas aqui.
+ */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+    --duration-slow: 0ms;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

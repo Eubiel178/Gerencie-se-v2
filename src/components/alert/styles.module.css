@@ -1,0 +1,21 @@
+.alert {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-md);
+}
+
+.error {
+  color: var(--color-danger);
+}
+
+.success {
+  color: var(--color-success);
+}
+
+.warning {
+  color: var(--color-warning);
+}
+
+.info {
+  color: var(--color-info);
+}

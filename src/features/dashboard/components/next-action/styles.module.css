@@ -1,0 +1,100 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--color-highlight);
+  color: var(--color-on-highlight);
+  text-decoration: none;
+  transition: transform var(--duration-fast) var(--easing-standard);
+}
+.card:hover {
+  transform: translateY(-2px);
+}
+.card:focus-visible {
+  outline: 2px solid var(--color-highlight);
+  outline-offset: 3px;
+}
+
+.card[data-kind="overdue"] {
+  background: var(--color-danger);
+  color: var(--color-on-danger);
+}
+.card[data-kind="resumed"] {
+  background: var(--color-success);
+  color: var(--color-on-success);
+}
+.card[data-kind="none"] {
+  background: var(--color-surface-elevated);
+  color: var(--color-text);
+}
+
+/* A cor do card "Prioridade" era sempre a mesma (--color-highlight, azul)
+   não importa a prioridade real da tarefa — a mesma cor pra "Alta" e pra
+   uma tarefa comum sem prioridade alta o bastante pra entrar aqui
+   (achado relatado: "podia ter a cor ligada com a prioridade"). Mesma
+   paleta já usada na borda esquerda do card de tarefa
+   (`styles.module.css` de Tarefas) — agora as duas telas falam a mesma
+   linguagem de cor pra prioridade, em vez de cada uma ter a sua. */
+.card[data-kind="priority"][data-priority="critica"] {
+  background: var(--color-danger);
+  color: var(--color-on-danger);
+}
+.card[data-kind="priority"][data-priority="alta"] {
+  background: var(--color-priority-high);
+  color: var(--color-on-priority-high);
+}
+.card[data-kind="priority"][data-priority="media"] {
+  background: var(--color-warning);
+  color: var(--color-on-warning);
+}
+.card[data-kind="priority"][data-priority="baixa"] {
+  background: var(--color-success);
+  color: var(--color-on-success);
+}
+
+/* Retomar uma tarefa preserva a prioridade de contexto, mas não deve
+   apagar o sinal da prioridade real dela. A regra verde acima é o
+   fallback para registros legados sem prioridade; quando ela existe,
+   este conjunto a substitui com a mesma linguagem dos cards de tarefa. */
+.card[data-kind="resumed"][data-priority="critica"] {
+  background: var(--color-danger);
+  color: var(--color-on-danger);
+}
+.card[data-kind="resumed"][data-priority="alta"] {
+  background: var(--color-priority-high);
+  color: var(--color-on-priority-high);
+}
+.card[data-kind="resumed"][data-priority="media"] {
+  background: var(--color-warning);
+  color: var(--color-on-warning);
+}
+.card[data-kind="resumed"][data-priority="baixa"] {
+  background: var(--color-success);
+  color: var(--color-on-success);
+}
+
+.eyebrow {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.85;
+}
+
+.title {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  line-height: var(--line-height-tight);
+}
+
+.time {
+  flex-shrink: 0;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  opacity: 0.85;
+}

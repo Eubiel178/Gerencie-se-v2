@@ -1,0 +1,148 @@
+/* :where() zera a especificidade — uma classe local (ex.: `.rememberRow`
+   passada por `className`) sempre vence, não importa a ordem de
+   carregamento do CSS no bundle final (mesmo motivo do Button, ver
+   `components/button/styles.module.css`). */
+:where(.root) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+:where(.wrapper) {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-1);
+}
+
+.field {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  padding: 0.65rem var(--space-3);
+  transition:
+    border-color var(--duration-fast) var(--easing-standard),
+    box-shadow var(--duration-fast) var(--easing-standard);
+}
+.field::placeholder {
+  color: var(--color-text-muted);
+}
+.field:hover:not(:disabled, :focus-visible) {
+  border-color: color-mix(in srgb, var(--color-highlight) 40%, var(--color-border));
+}
+.field:focus-visible {
+  border-color: var(--color-highlight);
+  outline: 2px solid var(--color-highlight);
+  outline-offset: 1px;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-highlight) 18%, transparent);
+}
+.field.incorrect {
+  border-color: var(--color-danger);
+}
+.field.incorrect::placeholder {
+  color: var(--color-danger);
+}
+.field.incorrect:focus-visible {
+  outline-color: var(--color-danger);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-danger) 18%, transparent);
+}
+
+.colorField {
+  height: 2.75rem;
+  padding: 0 var(--space-2);
+  cursor: pointer;
+}
+
+.textarea {
+  resize: vertical;
+  max-height: 12rem;
+  min-height: 6rem;
+}
+
+.select {
+  appearance: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%235b5f77' stroke-width='2'%3E%3Cpath d='M5 8l5 5 5-5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--space-3) center;
+  background-size: 1rem;
+  padding-right: var(--space-7);
+}
+/* O SVG do data-URI acima não pode ler `var(--color-text-muted)` — é
+   uma string estática. Troca pela cor equivalente do tema escuro
+   quando ele estiver ativo, pra não ficar um cinza claro demais sobre
+   fundo escuro. */
+:root[data-theme="dark"] .select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23a4a7c1' stroke-width='2'%3E%3Cpath d='M5 8l5 5 5-5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23a4a7c1' stroke-width='2'%3E%3Cpath d='M5 8l5 5 5-5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  }
+}
+
+/* Campo de senha — input + botão de mostrar/ocultar como um controle
+   único, em vez de duas caixas separadas lado a lado. */
+.passwordWrapper {
+  position: relative;
+  display: flex;
+  width: 100%;
+}
+.passwordField {
+  padding-right: var(--space-7);
+}
+.passwordToggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--space-7);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--color-text);
+  font-family: var(--font-sans);
+}
+
+.helperText {
+  min-height: 1em;
+  margin: 0;
+  color: var(--color-danger);
+  font-size: var(--font-size-xs);
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-md);
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--easing-standard);
+}
+.button:hover:not(:disabled) .icon {
+  color: var(--color-text);
+}
+.button:focus-visible {
+  outline: 2px solid var(--color-highlight);
+  outline-offset: -2px;
+}

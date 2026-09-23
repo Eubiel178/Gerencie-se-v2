@@ -1,0 +1,5 @@
+.totals{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-3);padding:var(--space-4);border:1px solid var(--color-border);border-radius:var(--radius-lg);background:var(--color-surface)}
+.totalItem{display:flex;flex-direction:column;align-items:center;gap:var(--space-1)}
+.totalValue{font-size:1.3rem;font-weight:700;color:var(--color-text)}
+.totalLabel{font-size:var(--font-size-xs);color:var(--color-text-muted)}
+@media(max-width:420px){.totals{grid-template-columns:1fr;text-align:center}}

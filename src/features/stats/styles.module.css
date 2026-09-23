@@ -1,0 +1,128 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  max-width: 72rem;
+  margin: 0 auto;
+}
+
+.heading {
+  margin: 0;
+  color: var(--color-text);
+  font-size: clamp(1.8rem, 4vw, 2.7rem);
+  line-height: var(--line-height-tight);
+  letter-spacing: -0.055em;
+}
+
+.subheading {
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: var(--space-4);
+}
+
+.bigNumber {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.bigNumber[data-tone="warning"] {
+  color: var(--color-danger);
+}
+
+.hint {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.weeksNav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+.weeksRange {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+.weeksNavButtons {
+  display: flex;
+  gap: var(--space-1);
+}
+.weekBars {
+  display: flex;
+  gap: var(--space-2);
+  align-items: end;
+  height: 2.5rem;
+  margin-top: var(--space-2);
+}
+.weekBar {
+  flex: 1;
+  display: flex;
+  align-items: end;
+  height: 100%;
+}
+.weekBarFill {
+  width: 100%;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  background: var(--color-highlight);
+  min-height: 2px;
+}
+
+.taskTimeList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.taskTimeRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(4rem, 10rem) auto;
+  align-items: center;
+  gap: var(--space-3);
+}
+.taskTimeTitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+}
+.taskTimeBarTrack {
+  height: 0.5rem;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-elevated);
+  overflow: hidden;
+}
+.taskTimeBarFill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--color-highlight);
+}
+.taskTimeMinutes {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+@media (max-width: 520px) {
+  .taskTimeRow {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .taskTimeBarTrack {
+    display: none;
+  }
+}

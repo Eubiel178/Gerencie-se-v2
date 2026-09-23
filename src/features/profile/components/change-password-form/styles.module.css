@@ -1,0 +1,12 @@
+.actions {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: end;
+}
+
+.formError {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  color: var(--color-danger);
+}

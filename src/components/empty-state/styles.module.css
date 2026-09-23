@@ -1,0 +1,52 @@
+.box {
+  display: grid;
+  place-items: center;
+  /* Estados vazios precisam ser encontrados, não ocupar a altura de uma
+     tela inteira quando a lista ainda está curta. */
+  min-height: 11rem;
+  padding: var(--space-5);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  background: var(--color-surface);
+}
+
+/* Mesmo estilo de texto pra dentro da caixa (".box") e pra variante
+   "inline" solta - a caixa centraliza via `.box` (grid + text-align), não
+   precisa de uma cópia própria da regra de texto. */
+.message {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--color-info);
+  font-size: var(--font-size-md);
+}
+.message[data-tone="muted"] {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+.action {
+  min-height: 2.75rem;
+  margin-top: var(--space-3);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-highlight);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-highlight);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  cursor: pointer;
+}
+.action:hover {
+  background: color-mix(in srgb, var(--color-highlight) 10%, transparent);
+}
+.action:focus-visible {
+  outline: 2px solid var(--color-highlight);
+  outline-offset: 2px;
+}
+@media (max-width: 640px) {
+  .box {
+    min-height: 9rem;
+    padding: var(--space-4);
+  }
+}

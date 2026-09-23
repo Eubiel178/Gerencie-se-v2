@@ -1,0 +1,1 @@
+ALTER TABLE "user_preference" ADD COLUMN "weekly_summary_enabled" boolean DEFAULT false NOT NULL;

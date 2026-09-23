@@ -1,0 +1,161 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+.rangeLabel {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+.summary {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+.summary strong {
+  color: var(--color-text);
+}
+.navActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.tableToggle {
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  color: var(--color-highlight);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.navButtons {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.chartArea {
+  position: relative;
+}
+
+.svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  /* As colunas de hit-test cobrem toda a área - sem isso o navegador
+     tenta selecionar texto ao arrastar por cima do gráfico. */
+  touch-action: none;
+}
+
+.gridline {
+  stroke: var(--color-border);
+  stroke-width: 1;
+}
+.axisLabel {
+  font-size: 8px;
+  fill: var(--color-text-muted);
+  font-family: var(--font-sans);
+}
+
+.axisLabelStrong {
+  fill: var(--color-text);
+  font-weight: 600;
+}
+
+.line {
+  stroke: var(--color-highlight);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.crosshair {
+  stroke: var(--color-border);
+  stroke-width: 1;
+}
+
+.hoverDot {
+  fill: var(--color-highlight);
+  stroke: var(--color-surface);
+  stroke-width: 2;
+}
+
+.endDot {
+  fill: var(--color-highlight);
+  stroke: var(--color-surface);
+  stroke-width: 2;
+}
+.endLabel {
+  font-size: 9px;
+  font-weight: 600;
+  fill: var(--color-text);
+  font-family: var(--font-sans);
+}
+
+.tooltip {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-elevated);
+  box-shadow: 0 0.25rem 0.75rem var(--color-shadow);
+  pointer-events: none;
+  white-space: nowrap;
+}
+.tooltipValue {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+}
+.tooltipLabel {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.tableScroll {
+  /* Com o detalhe por dia, a tabela ganhou 7 colunas a mais - em telas
+     estreitas ela não cabe mais de largura inteira; rola só a tabela
+     (nunca a página) em vez de cortar/espremer o conteúdo. */
+  overflow-x: auto;
+}
+.table {
+  width: 100%;
+  min-width: 34rem;
+  border-collapse: collapse;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+}
+.tableCaption {
+  text-align: left;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  padding-bottom: var(--space-2);
+}
+.table th,
+.table td {
+  text-align: left;
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+.table th:not(:first-child):not(:last-child),
+.table td:not(:first-child):not(:last-child) {
+  text-align: center;
+}

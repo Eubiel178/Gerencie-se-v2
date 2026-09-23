@@ -1,0 +1,199 @@
+/**
+ * Design tokens do Gerencie-se — fonte única da identidade visual.
+ *
+ * A paleta antiga do projeto (#1f2233 / #23253a / #2b2e41 / #38bdf8) era
+ * pensada só para tema escuro. Ela vira a base do tema escuro aqui, e o
+ * tema claro é derivado dela (mesma identidade, contraste ajustado pra
+ * texto em fundo claro — ver comentários abaixo).
+ *
+ * Nunca usar cor solta em componente novo: sempre um destes tokens.
+ */
+
+:root {
+  /* Superfícies — tema claro (padrão). Nem fundo nem superfície são
+     branco puro de propósito: #ffffff sobre #ffffff/quase-branco brilha
+     demais (cansa a vista em uso prolongado ou ambiente já claro) sem
+     ganhar nada em legibilidade — um branco levemente acinzentado já
+     read como "branco" pro olho, só sem o brilho. --color-surface-
+     elevated continua o único branco puro do tema, reservado pra
+     hierarquia (o que "flutua" sobre --color-surface). */
+  --color-background: #eef1f6;
+  --color-surface: #fbfcfe;
+  --color-surface-elevated: #ffffff;
+  --color-border: #e2e5eb;
+
+  /* Texto — tema claro */
+  --color-text: #1f2233;
+  --color-text-muted: #5b5f77;
+  --color-text-inverse: #f5f7fa;
+
+  /*
+   * #38bdf8 puro não passa em contraste de texto (~2:1) sobre fundo
+   * branco. --color-highlight é a cor usada em texto/ícone/borda de foco;
+   * --color-highlight-soft é só para fundo decorativo/badge, nunca texto.
+   */
+  --color-highlight: #0369a1;
+  --color-highlight-soft: #38bdf8;
+  /* Branco, não quase-preto: #051d2c sobre #0369a1 só passa em ~2,9:1
+     (abaixo do mínimo de 4,5:1 do WCAG AA pra texto normal) - achado
+     numa checagem de contraste de todos os pares de token. Branco passa
+     em ~5,9:1. É o mesmo botão "primary" usado no app inteiro (Entrar,
+     Salvar, Criar Tarefa...), então valia a pena corrigir na fonte. */
+  --color-on-highlight: #ffffff;
+
+  --color-success: #15803d;
+  --color-warning: #b45309;
+  --color-danger: #b91c1c;
+  --color-info: #0369a1;
+  --color-on-success: #ffffff;
+  --color-on-warning: #ffffff;
+  --color-on-danger: #ffffff;
+  --color-on-info: #ffffff;
+
+  /* Quinto tom semântico, entre --color-warning e --color-danger — usado
+     hoje só pela prioridade "alta" de tarefa (baixa/média/alta/crítica:
+     4 níveis, mas success/warning/danger/info só cobrem 3 tons de
+     severidade "acionável"). Antes hardcoded em chip-group.module.css. */
+  --color-priority-high: #f97316;
+  --color-on-priority-high: #211002;
+
+  --color-shadow: rgba(15, 23, 42, 0.12);
+  --color-overlay: rgba(15, 18, 30, 0.45);
+
+  /* Elevação — valores semânticos para camadas sobre o conteúdo. */
+  --shadow-lg: 0 1rem 3rem var(--color-shadow);
+  --z-sticky: 20;
+  --z-modal: 50;
+
+  /* Espaçamento — escala em rem (base 4px) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+
+  /* Raio */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 999px;
+
+  /* Tipografia — mantém a stack de fonte de sistema já usada (sem custo
+     de download de fonte), só centralizada aqui como token */
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.5rem;
+  --font-size-2xl: 2rem;
+  --line-height-tight: 1.25;
+  --line-height-base: 1.5;
+
+  /* Movimento — ver design-system/theme/motion.css para prefers-reduced-motion */
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --duration-slow: 320ms;
+  --easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /*
+   * Breakpoints — NÃO são custom properties utilizáveis em `@media`: a
+   * spec de CSS não permite `var()` dentro da condição de um `@media`
+   * (só dentro do bloco de declarações). Sem um pré-processador (Sass,
+   * postcss-custom-media), não há como ter um token de verdade aqui —
+   * isto é só documentação de quais valores já são usados no projeto,
+   * pra copiar em vez de inventar um novo:
+   *
+   *   640px — breakpoint mobile mais comum (workspace, tasks, goals,
+   *           habits, routine, assistant/widget)
+   *   720px — colapso da sidebar em `home-layout.module.css` (decisão
+   *           estrutural, não mexer sem testar visualmente em várias
+   *           larguras — não é só cosmético). Reaproveitado tal-e-qual
+   *           por `focus-mini-widget.module.css` e por
+   *           `mascot-pet/viewport-bounds.ts` (mesmo corte: é quando a
+   *           sidebar deixa de existir de verdade).
+   *   760px — corte mobile↔tablet em telas SEM sidebar (landing page,
+   *           login/registro, vitrine de mascotes da landing) — usado
+   *           de forma consistente nos 3 lugares, nada pra unificar.
+   *
+   * Reavaliado (2026-09): uma versão anterior deste comentário também
+   * listava "768px — dashboard" como um 3º valor divergente dos dois
+   * acima. Não é: o dashboard nunca usa `768px` como breakpoint de
+   * verdade — usa `@media (max-width: 1016px)`
+   * (`styles.module.css` do Dashboard), onde 1016 = 768 (largura de CONTEÚDO
+   * desejada pra 2 colunas) + 248 (largura da sidebar). É um cálculo
+   * diferente em natureza de 720/760 (que são largura de JANELA, sem
+   * sidebar no cálculo), não a mesma medida "divergida" — misturar os
+   * dois seria o bug, não uma correção.
+   */
+}
+
+/* Tema escuro automático (segue o SO) — só quando o usuário não escolheu
+   um tema explícito na interface (data-theme ausente) */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-background: #14151f;
+    --color-surface: #1f2233;
+    --color-surface-elevated: #23253a;
+    --color-border: rgba(255, 255, 255, 0.08);
+
+    --color-text: #f4f5f7;
+    --color-text-muted: #a4a7c1;
+    --color-text-inverse: #1f2233;
+
+    --color-highlight: #38bdf8;
+    --color-highlight-soft: #0c4a6e;
+    --color-on-highlight: #051d2c;
+
+    --color-success: #4ade80;
+    --color-warning: #fbbf24;
+    --color-danger: #f87171;
+    --color-info: #38bdf8;
+    --color-on-success: #052e16;
+    --color-on-warning: #451a03;
+    --color-on-danger: #450a0a;
+    --color-on-info: #051d2c;
+
+    --color-priority-high: #fb923c;
+    --color-on-priority-high: #431407;
+
+    --color-shadow: rgba(0, 0, 0, 0.519);
+    --color-overlay: rgba(0, 0, 0, 0.6);
+  }
+}
+
+/* Tema escuro explícito (usuário escolheu no seletor de tema) */
+:root[data-theme="dark"] {
+  --color-background: #14151f;
+  --color-surface: #1f2233;
+  --color-surface-elevated: #23253a;
+  --color-border: rgba(255, 255, 255, 0.08);
+
+  --color-text: #f4f5f7;
+  --color-text-muted: #a4a7c1;
+  --color-text-inverse: #1f2233;
+
+  --color-highlight: #38bdf8;
+  --color-highlight-soft: #0c4a6e;
+  --color-on-highlight: #051d2c;
+
+  --color-success: #4ade80;
+  --color-warning: #fbbf24;
+  --color-danger: #f87171;
+  --color-info: #38bdf8;
+  --color-on-success: #052e16;
+  --color-on-warning: #451a03;
+  --color-on-danger: #450a0a;
+  --color-on-info: #051d2c;
+
+  --color-priority-high: #fb923c;
+  --color-on-priority-high: #431407;
+
+  --color-shadow: rgba(0, 0, 0, 0.519);
+  --color-overlay: rgba(0, 0, 0, 0.6);
+}

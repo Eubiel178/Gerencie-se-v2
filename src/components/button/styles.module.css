@@ -1,0 +1,167 @@
+/* Três variantes (aparência), as únicas que se repetiam de verdade em
+   várias telas (ver Button.Root). Tudo dentro de `:where(...)` —
+   especificidade zerada — pra uma classe local passada via `className`
+   SEMPRE vencer, não importa a ordem de carregamento do CSS no bundle
+   final. `tone` (cor) fica fora do `:where`, de propósito: precisa
+   vencer a cor da variante mesmo sem `className`. */
+.button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    filter var(--duration-fast) var(--easing-standard),
+    opacity var(--duration-fast) var(--easing-standard),
+    transform var(--duration-fast) var(--easing-standard),
+    box-shadow var(--duration-fast) var(--easing-standard),
+    background-color var(--duration-fast) var(--easing-standard),
+    border-color var(--duration-fast) var(--easing-standard);
+}
+
+:where(.primary) {
+  padding: 0.7rem var(--space-5);
+  border: 1px solid transparent;
+  background: var(--color-highlight);
+  color: var(--color-on-highlight);
+  font-size: var(--font-size-md);
+  box-shadow: 0 1px 2px var(--color-shadow);
+}
+:where(.primary):hover:not(:disabled) {
+  filter: brightness(1.08);
+  box-shadow: 0 0.2rem 0.5rem var(--color-shadow);
+  transform: translateY(-1px);
+}
+/* SEM `:not(:disabled)` de propósito (diferente do `:hover` acima) - um
+   clique que dispara uma ação `loading` torna o botão `disabled` no
+   MESMO instante em que o dedo/mouse ainda está pressionado, então
+   `:active` deixa de bater com `:not(:disabled)` bem no meio do clique.
+   O resultado visto foi um "encolhe (0.97) e volta de repente pro
+   tamanho normal (1) assim que a ação começa" - lido como o card/botão
+   "crescendo" logo ao pausar/retomar (achado relatado). Sem a exclusão,
+   a escala de pressionado persiste suavemente até o dedo soltar (ou a
+   ação terminar); como um botão `disabled` já tem `pointer-events: none`
+   (ver abaixo), ele nunca pode ENTRAR em `:active` depois de já estar
+   desabilitado - só continua o estado que já estava em andamento. */
+:where(.primary):active {
+  box-shadow: none;
+  transform: scale(0.97);
+}
+
+:where(.secondary) {
+  padding: 0.7rem var(--space-5);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-elevated);
+  color: var(--color-text);
+  font-size: var(--font-size-md);
+  box-shadow: 0 1px 2px var(--color-shadow);
+}
+:where(.secondary):hover:not(:disabled) {
+  filter: brightness(1.05);
+  box-shadow: 0 0.2rem 0.5rem var(--color-shadow);
+  transform: translateY(-1px);
+}
+/* Ver comentário completo na mesma regra de `.primary` acima. */
+:where(.secondary):active {
+  box-shadow: none;
+  transform: scale(0.97);
+}
+
+:where(.ghost) {
+  padding: 0.7rem var(--space-5);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--color-text);
+  font-size: var(--font-size-md);
+  box-shadow: none;
+}
+:where(.ghost):hover:not(:disabled) {
+  background: var(--color-surface-elevated);
+  filter: none;
+  box-shadow: none;
+  transform: none;
+}
+
+.toneDanger {
+  color: var(--color-danger);
+}
+/* `tone="danger"` sozinho (regra acima) é pensado pra botão ghost/ícone
+   (só o texto/ícone fica vermelho, sem fundo) - é como toda ação
+   destrutiva do app até aqui usava `tone`. Combinado com a variante
+   `primary` (preenchida) - caso novo, usado no botão "Confirmar" dos
+   popups de confirmação - precisa de um fundo vermelho sólido também,
+   senão o botão continua azul (cor de `:where(.primary)`) com um texto
+   quase ilegível por cima. */
+.primary.toneDanger {
+  background: var(--color-danger);
+  color: var(--color-on-danger);
+}
+.primary.toneDanger:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+.toneHighlight {
+  color: var(--color-highlight);
+}
+/* Mesmo problema do `.primary.toneDanger` acima, agora no botão
+   "Concluir"/"Reabrir" do `ConfirmCheckbox`: `.primary` já preenche o
+   fundo com `--color-highlight` e o texto com `--color-on-highlight`
+   (contraste correto) - mas `.toneHighlight` sozinho pisa por cima e
+   troca o texto pra `--color-highlight`, a MESMA cor do fundo, apagando
+   o texto do botão. Combinado com `.primary`, mantém o texto no par de
+   cores certo em vez de repetir a cor do fundo. */
+.primary.toneHighlight {
+  color: var(--color-on-highlight);
+}
+.toneMuted {
+  color: var(--color-text-muted);
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--color-highlight);
+  outline-offset: 2px;
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+
+.content {
+  visibility: hidden;
+}
+
+.spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 1em;
+  height: 1em;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  animation: spin 700ms linear infinite;
+}
+
+/* A animação precisa repetir o `translate(-50%, -50%)` de centralização
+   do `.spinner` — só `rotate(360deg)` aqui substituiria esse transform
+   inteiro (não compõe automaticamente com o que está fora do
+   keyframe), fazendo o círculo "escorregar" até o canto em vez de girar
+   no lugar. */
+@keyframes spin {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}

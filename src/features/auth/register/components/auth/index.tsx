@@ -1,0 +1,150 @@
+"use client";
+
+import { useState } from "react";
+
+import { useForm } from "react-hook-form";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
+import { signIn } from "next-auth/react";
+import { z } from "zod";
+
+import { Alert, Form, Input, Button } from "@/components";
+import { Icon } from "@/components/icon";
+import { registerAction } from "@/features/auth/actions";
+import { validationSchema } from "@/validation/register-schema";
+
+import styles from "../../../auth-page.module.css";
+
+
+
+type FormData = z.input<typeof validationSchema>;
+
+export function Auth() {
+  const [formError, setFormError] = useState<string | null>(null);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+
+  const {
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    register,
+  } = useForm<FormData>({
+    resolver: zodResolver(validationSchema),
+    mode: "onChange",
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      confirm_password: "",
+    },
+  });
+
+  const handleOnSubmit = async (data: FormData) => {
+    setFormError(null);
+
+    const result = await registerAction(data);
+
+    if (result.error) {
+      setFormError(result.error);
+    }
+  };
+
+  async function handleGoogleSignIn() {
+    setIsGoogleLoading(true);
+
+    try {
+      await signIn("google", { callbackUrl: "/home" });
+    } catch {
+      setIsGoogleLoading(false);
+    }
+  }
+
+  return (
+    <section className={styles.formCard}>
+      <div>
+        <h1>Comece com clareza.</h1>
+        <p className={styles.formIntro}>
+          Crie sua conta para transformar o que importa hoje em um próximo passo possível.
+        </p>
+      </div>
+
+      <Form.Root onSubmit={handleSubmit(handleOnSubmit)}>
+        <Form.Wrapper>
+          <Input.Root
+            sharedProps={{
+              error: errors.name?.message,
+            }}
+          >
+            <Input.Label htmlFor="name">Nome</Input.Label>
+            <Input.Wrapper>
+              <Input.Field
+                {...register("name")}
+                autoComplete="name"
+                placeholder="Maria Silva"
+                autoFocus
+              />
+            </Input.Wrapper>
+
+            <Input.HelperText />
+          </Input.Root>
+
+          <Input.Root sharedProps={{ error: errors.email?.message }}>
+            <Input.Label htmlFor="email">E-mail</Input.Label>
+            <Input.Wrapper>
+              <Input.Field
+                {...register("email")}
+                type="email"
+                autoComplete="email"
+                placeholder="nome@exemplo.com"
+              />
+            </Input.Wrapper>
+
+            <Input.HelperText />
+          </Input.Root>
+
+          <Input.Root sharedProps={{ error: errors.password?.message }}>
+            <Input.Label htmlFor="password">Senha</Input.Label>
+            <Input.Wrapper>
+              <Input.FieldPassword {...register("password")} autoComplete="new-password" />
+            </Input.Wrapper>
+
+            <Input.HelperText />
+          </Input.Root>
+
+          <Input.Root sharedProps={{ error: errors.confirm_password?.message }}>
+            <Input.Label htmlFor="confirm_password">Confirmar senha</Input.Label>
+            <Input.Wrapper>
+              <Input.FieldPassword {...register("confirm_password")} autoComplete="new-password" />
+            </Input.Wrapper>
+
+            <Input.HelperText />
+          </Input.Root>
+        </Form.Wrapper>
+
+        {formError && <Alert variant="error">{formError}</Alert>}
+
+        <Button.Root loading={isSubmitting}>Criar conta grátis</Button.Root>
+      </Form.Root>
+
+      <Button.Root
+        type="button"
+        className={styles.googleButton}
+        loading={isGoogleLoading}
+        onClick={handleGoogleSignIn}
+      >
+        <span className={styles.googleButtonContent}>
+          <Icon name="FaGoogle" aria-hidden="true" />
+          <span>Continuar com Google</span>
+        </span>
+      </Button.Root>
+
+      <div className={styles.authSwitch}>
+        <p className={styles.authSwitchText}>Já tem uma conta?</p>
+
+        <Link className={styles.link} href="/login">
+          Entrar
+        </Link>
+      </div>
+    </section>
+  );
+}

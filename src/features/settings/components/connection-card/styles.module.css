@@ -1,0 +1,68 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.statusRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.statusText {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--color-text);
+}
+.mutedText {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+.error {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-md);
+  color: var(--color-danger);
+}
+.buttonRow {
+  display: flex;
+}
+
+.disconnectButton {
+  background: var(--color-surface-elevated);
+  border-color: var(--color-border);
+  color: var(--color-danger);
+  box-shadow: 0 1px 2px var(--color-shadow);
+}
+
+.connectLink {
+  display: inline-block;
+  width: fit-content;
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-highlight);
+  color: var(--color-on-highlight);
+  text-align: center;
+  text-decoration: none;
+  transition: filter var(--duration-fast) var(--easing-standard);
+}
+.connectLink:hover {
+  filter: brightness(1.08);
+}
+.connectLink:focus-visible {
+  outline: 2px solid var(--color-highlight);
+  outline-offset: 2px;
+}
+
+.confirmText {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-md);
+  color: var(--color-text);
+}
+.confirmActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}

@@ -1,0 +1,35 @@
+.section{display:flex;flex-direction:column;gap:var(--space-6);max-width:48rem;margin:0 auto}
+/* Mesmo tratamento de cabeçalho de Tarefas/Hábitos/Rotina/Objetivos/
+   Eventos (borda inferior + respiro) - antes era só um <div> solto, sem
+   essa moldura, enquanto o resto do app já a usa (achado de auditoria:
+   "3 padrões visuais diferentes entre as 6 telas de tracker"). Aqui não
+   tem botão de ação ao lado (a criação é por formulário sempre visível,
+   não modal - ver `AddForm` abaixo do cabeçalho), mas o container e a
+   moldura são os mesmos por padrão de projeto. */
+.toolbar{display:flex;align-items:end;justify-content:space-between;gap:var(--space-4);padding-bottom:var(--space-5);border-bottom:1px solid var(--color-border)}
+.heading{margin:0;color:var(--color-text);font-size:clamp(1.8rem,4vw,2.7rem);line-height:var(--line-height-tight);letter-spacing:-.055em}
+.subheading{margin:var(--space-2) 0 0;color:var(--color-text-muted);font-size:var(--font-size-sm)}
+.disclaimer{padding:var(--space-3);border:1px dashed var(--color-border);border-radius:var(--radius-md);color:var(--color-text-muted);font-size:var(--font-size-xs);background:var(--color-surface)}
+.addForm{display:flex;gap:var(--space-2);flex-wrap:wrap;align-items:flex-start}
+.addForm>*{flex:1;min-width:9rem}
+/* Abaixo de 640px (mesmo corte de workspace/tasks/goals/habits/routine),
+   9rem de largura mínima por campo não sobra espaço pra 2 por linha sem
+   espremer - o campo de intervalo cortava o placeholder e o botão
+   "Adicionar" ficava espremido do lado dele (achado em auditoria visual
+   mobile). Cada campo/botão vira largura cheia, uma linha por vez. */
+@media (max-width: 640px) {
+  .addForm>*{flex:1 1 100%;min-width:0}
+}
+.groups{display:flex;flex-direction:column;gap:var(--space-5)}
+.categoryGroup{display:flex;flex-direction:column;gap:var(--space-3)}
+.categoryGroupTitle{margin:0;color:var(--color-text-muted);font-size:var(--font-size-xs);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.list{display:flex;flex-direction:column;gap:var(--space-3);padding:0;margin:0;list-style:none}
+.item{display:flex;align-items:center;justify-content:space-between;gap:var(--space-3);padding:var(--space-3);border:1px solid var(--color-border);border-left:0.3rem solid var(--color-border);border-radius:var(--radius-lg);background:var(--color-surface);box-shadow:0 .5rem 1.25rem var(--color-shadow);transition:transform var(--duration-base) var(--easing-standard),box-shadow var(--duration-base) var(--easing-standard)}
+.item:hover{transform:translateY(-.25rem);box-shadow:0 1rem 2rem var(--color-shadow)}
+.itemOverdue{border-left-color:var(--color-danger)}
+.itemInfo{display:flex;flex-direction:column;gap:var(--space-1)}
+.itemTitle{margin:0;color:var(--color-text);font-size:1rem}
+.itemMeta{color:var(--color-text-muted);font-size:var(--font-size-xs)}
+.itemNotes{margin:0;color:var(--color-text-muted);font-size:var(--font-size-xs);font-style:italic}
+.actions{display:flex;align-items:center;gap:var(--space-1)}
+.markDoneButton{background:var(--color-surface-elevated);border-color:var(--color-border);color:var(--color-text);box-shadow:0 1px 2px var(--color-shadow);padding:.45rem var(--space-3);font-size:var(--font-size-sm)}

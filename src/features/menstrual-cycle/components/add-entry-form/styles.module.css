@@ -1,0 +1,5 @@
+.form{display:flex;flex-direction:column;gap:var(--space-3);padding:var(--space-4);border:1px solid var(--color-border);border-radius:var(--radius-lg);background:var(--color-surface)}
+.symptoms{display:flex;gap:var(--space-2);flex-wrap:wrap}
+.symptomChip{display:flex;align-items:center;gap:var(--space-1);padding:.3rem .7rem;border-radius:var(--radius-full);border:1px solid var(--color-border);font-size:var(--font-size-xs);cursor:pointer}
+.symptomChipActive{background:var(--color-highlight);border-color:var(--color-highlight);color:var(--color-on-highlight)}
+.formError{margin:0;font-family:var(--font-sans);color:var(--color-danger);font-size:var(--font-size-md)}

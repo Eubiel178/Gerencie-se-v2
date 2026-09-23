@@ -1,0 +1,75 @@
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+:where(.chip) {
+  padding: 0.45rem var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-surface-elevated);
+  color: var(--color-text-muted);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--easing-standard),
+    border-color var(--duration-fast) var(--easing-standard),
+    color var(--duration-fast) var(--easing-standard),
+    transform var(--duration-fast) var(--easing-standard),
+    box-shadow var(--duration-fast) var(--easing-standard);
+}
+.chip:hover {
+  border-color: var(--color-highlight);
+  transform: translateY(-1px);
+}
+.chip:active {
+  transform: scale(0.94);
+}
+.chip[data-selected="true"] {
+  background: var(--color-highlight);
+  border-color: var(--color-highlight);
+  color: var(--color-on-highlight);
+  transform: scale(1.06);
+  box-shadow: 0 0.3rem 0.6rem var(--color-shadow);
+}
+.chip[data-selected="true"]:hover {
+  transform: scale(1.06) translateY(-1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(.chip) {
+    transition: background var(--duration-fast) var(--easing-standard),
+      border-color var(--duration-fast) var(--easing-standard),
+      color var(--duration-fast) var(--easing-standard);
+  }
+  .chip:hover,
+  .chip:active,
+  .chip[data-selected="true"],
+  .chip[data-selected="true"]:hover {
+    transform: none;
+  }
+}
+
+.chip[data-tone="low"][data-selected="true"] {
+  background: var(--color-success);
+  border-color: var(--color-success);
+  color: var(--color-on-success);
+}
+.chip[data-tone="medium"][data-selected="true"] {
+  background: var(--color-warning);
+  border-color: var(--color-warning);
+  color: var(--color-on-warning);
+}
+.chip[data-tone="high"][data-selected="true"] {
+  background: var(--color-priority-high);
+  border-color: var(--color-priority-high);
+  color: var(--color-on-priority-high);
+}
+.chip[data-tone="critical"][data-selected="true"] {
+  background: var(--color-danger);
+  border-color: var(--color-danger);
+  color: var(--color-on-danger);
+}

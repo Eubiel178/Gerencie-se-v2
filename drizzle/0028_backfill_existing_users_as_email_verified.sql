@@ -1,0 +1,13 @@
+-- Migração de DADOS, não de schema — a coluna "email_verified" já existe
+-- desde o começo (Auth.js), nunca tinha sido usada até a verificação de
+-- e-mail no cadastro (ver src/features/auth/actions.ts,
+-- verifyEmailAction/registerAction).
+--
+-- Sem isto, TODA conta criada antes desta feature (local ou via Google)
+-- ficaria trancada atrás do gate de /verify-email em
+-- src/app/home/layout.tsx na primeira visita depois do deploy — ninguém
+-- nunca precisou confirmar nada até agora, então exigir isso
+-- retroativamente seria travar gente de fora da própria conta sem aviso
+-- nenhum. "Adota" toda conta já existente como verificada; só cadastros
+-- NOVOS (a partir de agora) passam pelo código de 6 dígitos de verdade.
+UPDATE "user" SET "email_verified" = now() WHERE "email_verified" IS NULL;

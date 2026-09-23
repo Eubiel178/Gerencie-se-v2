@@ -1,0 +1,9 @@
+.section{display:flex;flex-direction:column;gap:var(--space-6);max-width:36rem;margin:0 auto}
+.heading{margin:0;color:var(--color-text);font-size:clamp(1.8rem,4vw,2.7rem);line-height:var(--line-height-tight);letter-spacing:-.055em;text-align:center}
+.subheading{margin:var(--space-2) 0 0;color:var(--color-text-muted);font-size:var(--font-size-sm);text-align:center}
+.historyTitle{margin:0 0 var(--space-3);color:var(--color-text);font-size:var(--font-size-md)}
+.historyHeader{display:flex;align-items:baseline;justify-content:space-between;gap:var(--space-2);margin:0 0 var(--space-3)}
+.historyHeader .historyTitle{margin:0}
+.historyLink{color:var(--color-highlight);font-family:var(--font-sans);font-size:var(--font-size-xs);text-decoration:none;white-space:nowrap}
+.historyLink:hover{text-decoration:underline}
+.historyLink:focus-visible{outline:2px solid var(--color-highlight);outline-offset:2px;border-radius:var(--radius-sm)}

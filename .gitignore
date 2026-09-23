@@ -19,13 +19,17 @@
 # misc
 .DS_Store
 *.pem
+*.rar
+*.zip
+*.7z
 
 # debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# local env files
+# local env files (contêm segredos: AUTH_SECRET, DATABASE_URL, credenciais do Google...)
+.env
 .env*.local
 
 # vercel

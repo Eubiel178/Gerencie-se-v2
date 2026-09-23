@@ -1,0 +1,83 @@
+"use client";
+
+import type { UseFormRegister, UseFormSetValue } from "react-hook-form";
+
+import { useRouter } from "next/navigation";
+
+import { Button, Input } from "@/components";
+
+import { FormData } from "../interfaces";
+
+import styles from "./styles.module.css";
+
+interface SyncWithGoogleProps {
+  register: UseFormRegister<FormData>;
+  setValue: UseFormSetValue<FormData>;
+  isChecked: boolean;
+  isGoogleConnected: boolean;
+}
+
+/**
+ * Bloco "Sincronizar com Google Agenda" reaproveitado por AddTask e
+ * EditTask. Regras (ver Fase 11 do plano):
+ * - a checkbox nunca bloqueia salvar a tarefa — se o Google não estiver
+ *   conectado, mostramos um aviso com um jeito de conectar, mas o usuário
+ *   pode desmarcar e continuar criando/editando a tarefa normalmente;
+ * - a data/hora em si é pedida por `ReminderFields` (campo geral da
+ *   tarefa, não exclusivo do Google) — aqui só validamos que ela foi
+ *   preenchida quando marcar sincronizar (ver `task-schema.ts`).
+ */
+export function SyncWithGoogle({
+  register,
+  setValue,
+  isChecked,
+  isGoogleConnected,
+}: SyncWithGoogleProps) {
+  const router = useRouter();
+
+  return (
+    <div className={styles.container}>
+      <div className={styles.checkboxRow}>
+        <Input.Wrapper>
+          <Input.Field
+            {...register("syncEnabled")}
+            type="checkbox"
+            id="syncEnabled"
+          />
+        </Input.Wrapper>
+
+        <Input.Label htmlFor="syncEnabled">
+          Sincronizar com Google Agenda
+        </Input.Label>
+      </div>
+
+      {isChecked && !isGoogleConnected && (
+        <div className={styles.notConnectedPanel}>
+          <p className={styles.noticeText}>
+            Para sincronizar esta tarefa com o Google Agenda, conecte sua
+            conta Google.
+          </p>
+
+          <div className={styles.buttonsRow}>
+            <Button.Root
+              type="button"
+              className={styles.smallButton}
+              onClick={() => router.push("/home/settings")}
+            >
+              Conectar Google Agenda
+            </Button.Root>
+
+            <Button.Root
+              type="button"
+              variant="ghost"
+              className={styles.smallButton}
+              onClick={() => setValue("syncEnabled", false, { shouldDirty: true })}
+            >
+              Continuar sem sincronizar
+            </Button.Root>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
