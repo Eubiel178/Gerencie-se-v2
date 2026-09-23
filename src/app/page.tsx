@@ -27,27 +27,48 @@ const highlights = [
 
 const jsonLd = {
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  name: "Gerencie-se",
-  applicationCategory: "ProductivityApplication",
-  operatingSystem: "Web",
-  description:
-    "Organize tarefas, rotina, hábitos e foco num só lugar. Um companheiro virtual acompanha sua execução e ajuda quando você trava ou se distrai.",
-  url: appUrl(),
-  offers: {
-    "@type": "Offer",
-    price: "0",
-    "priceCurrency": "BRL",
-  },
-  featureList: [
-    "Gerenciamento de tarefas com prioridades e prazos",
-    "Organização de rotina diária",
-    "Rastreamento de hábitos e sequências",
-    "Metas e objetivos com acompanhamento de progresso",
-    "Modo foco com timer integrado",
-    "Companheiro virtual com animação e personalidade",
-    "Companheiro virtual que conversa e acompanha seu contexto",
-    "Suporte a voz e síntese de fala",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": `${appUrl()}/#website`,
+      name: "Gerencie-se",
+      url: appUrl(),
+      inLanguage: "pt-BR",
+    },
+    {
+      "@type": "Organization",
+      "@id": `${appUrl()}/#organization`,
+      name: "Gerencie-se",
+      url: appUrl(),
+      logo: {
+        "@type": "ImageObject",
+        url: `${appUrl()}/icon-512.png`,
+      },
+    },
+    {
+      "@type": "SoftwareApplication",
+      name: "Gerencie-se",
+      applicationCategory: "ProductivityApplication",
+      operatingSystem: "Web",
+      description:
+        "Organize tarefas, rotina, hábitos e foco num só lugar. Um companheiro virtual acompanha sua execução e ajuda quando você trava ou se distrai.",
+      url: appUrl(),
+      offers: {
+        "@type": "Offer",
+        price: "0",
+        "priceCurrency": "BRL",
+      },
+      featureList: [
+        "Gerenciamento de tarefas com prioridades e prazos",
+        "Organização de rotina diária",
+        "Rastreamento de hábitos e sequências",
+        "Metas e objetivos com acompanhamento de progresso",
+        "Modo foco com timer integrado",
+        "Companheiro virtual com animação e personalidade",
+        "Companheiro virtual que conversa e acompanha seu contexto",
+        "Suporte a voz e síntese de fala",
+      ],
+    },
   ],
 };
 
@@ -89,7 +110,7 @@ export default function LandingPage() {
             <span /> Clareza para o seu próximo passo
           </p>
           <h1>
-            Pare de carregar tudo na <em>cabeça.</em>
+            Pare de carregar tudo na <em>cabeça</em> com o Gerencie-se.
           </h1>
           <p className={styles.intro}>
             O Gerencie-se reúne tarefas, rotina, hábitos e foco num lugar só.
