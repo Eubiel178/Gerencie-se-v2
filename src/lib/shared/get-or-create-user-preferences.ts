@@ -25,7 +25,7 @@ import { userPreferences } from "@/db/schema";
  * getPreferences`.
  */
 export async function getOrCreateUserPreferencesRow(
-  userId: string
+  userId: string,
 ): Promise<typeof userPreferences.$inferSelect> {
   const [row] = await db
     .select()
@@ -38,8 +38,7 @@ export async function getOrCreateUserPreferencesRow(
   const [created] = await db
     .insert(userPreferences)
     .values({ userId })
-    .onConflictDoNothing()
-    .returning();
+    .onConflictDoNothing();
 
   if (created) return created;
 
