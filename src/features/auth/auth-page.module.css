@@ -33,4 +33,4 @@ button.link{background:none;border:none;padding:0;font-size:inherit;cursor:point
    auditoria visual). `align-items:flex-start` + um respiro fixo no topo
    (em vez de centralizar) resolve pras 4 telas de uma vez, sem depender
    da altura de cada uma. */
-@media(max-width:760px){.authPage{display:block;min-height:auto}.visual{display:none}.main{min-height:100vh;min-height:100dvh;padding:var(--space-5);align-items:flex-start;padding-top:var(--space-7)}.formCard{max-width:30rem}}
+@media(max-width:760px){.authPage{display:block;min-height:auto}.visual{display:none}.main{box-sizing:border-box;min-height:100vh;min-height:100dvh;padding:var(--space-5);align-items:flex-start;padding-top:var(--space-7)}.formCard{max-width:30rem}}
