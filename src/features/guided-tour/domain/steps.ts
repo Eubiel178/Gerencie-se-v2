@@ -1,15 +1,14 @@
 import type { MascotPersonality } from "@/features/focus/domain";
 
-// Abaixo disso a navegação vira um menu por trás de um clique (a
-// sidebar com os `data-tour="nav"`/`data-tour="search"`/etc. não existe
-// no DOM - ver `Header`), então o tour não tem pra onde apontar e nunca
-// aparece (ver `computeInitialSteps` em `components/guided-tour/index.tsx`).
-// Exportado (não só um literal local) porque `ReplayTourButton`
-// precisa do MESMO valor pra decidir se mostra "Ver tutorial
-// novamente" - sem isso, o botão ficava visível no mobile prometendo
-// algo que o motor do tour se recusa a fazer (achado relatado: "o
-// botão de ver tutorial no mobile ainda existe" - clicar nele marcava
-// no banco e navegava, mas nada aparecia na tela).
+// Abaixo disso a navegação vira um menu por trás de um clique (a sidebar
+// de desktop com os `data-tour="nav"`/`data-tour="search"`/etc. não existe
+// no DOM — ver `Header`). O tour NÃO desliga nesse viewport: o motor
+// (`components/guided-tour/index.tsx`) abre o painel de navegação mobile
+// sozinho pro passo apontar pros alvos que só existem dentro dele
+// (`MOBILE_NAV_PANEL_TARGETS`), e `ReplayTourButton` mostra o "Rever
+// tutorial" também no mobile. Exportado porque o motor do tour usa o MESMO
+// valor pra detectar o viewport (tanto na montagem dos passos quanto na
+// hora de decidir se abre/fecha o painel ao apontar pra um passo).
 export const GUIDED_TOUR_MOBILE_BREAKPOINT_PX = 720;
 
 export interface GuidedTourStep {
