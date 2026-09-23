@@ -9,11 +9,12 @@ import {
 } from "react";
 
 import {
-  startExecutionSessionAction,
+  startTaskExecutionAction,
   pauseTaskExecutionAction,
   resumeTaskExecutionAction,
   completeExecutionSessionAction,
   abandonTaskExecutionAction,
+  type StartTaskExecutionResult,
 } from "@/features/execution-companion/actions";
 import type { IExecutionSession } from "@/features/execution-companion/domain/types";
 import { useExecutionCompanionStore } from "@/features/execution-companion/execution-companion-store";
@@ -24,7 +25,7 @@ interface ExecutionCompanionContextValue {
   session: IExecutionSession | null;
   intention: { taskId: string } | null;
 
-  startSession: (taskId: string) => Promise<ActionResult & { switched?: boolean; previousTaskId?: string }>;
+  startSession: (taskId: string) => Promise<StartTaskExecutionResult>;
   pauseSession: () => Promise<ActionResult>;
   resumeSession: () => Promise<ActionResult>;
   completeSession: () => Promise<ActionResult>;
@@ -69,7 +70,9 @@ export function ExecutionCompanionProvider({
   const startSession = useCallback(async (taskId: string) => {
     const s = storeRef.current;
 
-    const result = await startExecutionSessionAction({ taskId });
+    // Ação combinada: marca a tarefa como iniciada E cria/alterna a sessão
+    // de execução num único round-trip (ver `startTaskExecutionAction`).
+    const result = await startTaskExecutionAction({ taskId });
 
     if (result.error) {
       return { error: result.error };
@@ -81,7 +84,15 @@ export function ExecutionCompanionProvider({
       emitMascotEvent("execution-started", { taskId });
     }
 
-    return { error: null, switched: result.switched, previousTaskId: result.previousTaskId };
+    return {
+      error: null,
+      switched: result.switched,
+      previousTaskId: result.previousTaskId,
+      session: result.session,
+      taskStartedAt: result.taskStartedAt,
+      taskWorkStatus: result.taskWorkStatus,
+      taskPausedAt: result.taskPausedAt,
+    };
   }, []);
 
   const pauseSession = useCallback(async () => {

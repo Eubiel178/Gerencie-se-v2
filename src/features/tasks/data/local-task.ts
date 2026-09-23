@@ -32,7 +32,10 @@ export type UpdateTaskSyncStateParams = {
  */
 // XP simbólico por só começar uma tarefa — bem menor que o de concluir,
 // pra não competir com a recompensa "de verdade" de terminar algo.
-const TASK_START_XP = 5;
+// Exportado porque `startTaskExecutionAction` (execution-companion) replica
+// esta mesma regra na ação combinada "Começar/Retomar" — uma única fonte
+// de verdade pro valor, sem duplicar o número mágico.
+export const TASK_START_XP = 5;
 
 export class LocalTask
   implements

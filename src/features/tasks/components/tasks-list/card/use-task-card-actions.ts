@@ -9,7 +9,6 @@ import { useFocusSession } from "@/features/focus/focus-session-context";
 import { emitMascotEvent } from "@/features/mascot-pet";
 import {
   deleteTaskAction,
-  markTaskStartedAction,
   setTaskWorkStatusAction,
   toggleTaskCompleteAction,
   updateTaskStepAction,
@@ -103,15 +102,22 @@ export function useTaskMutations(task: ITask) {
     if (activeAction === "starting") return;
     setActiveAction("starting");
     try {
-      const result = await markTaskStartedAction({ id: task.id });
+      // Ação combinada (server-side): marca a tarefa como iniciada E cria/
+      // alterna a sessão de execução numa única transação — ver
+      // `startTaskExecutionAction` em `execution-companion/actions.ts`.
+      // Antes eram duas Server Actions em sequência (2 round-trips).
+      const result = await startSession(task.id);
       if (!result.error) {
-        replaceTask({ ...task, startedAt: task.startedAt ?? new Date(), pausedAt: null });
-        // Inicia ou faz switch da sessão de execução
-        const switchResult = await startSession(task.id);
+        replaceTask({
+          ...task,
+          startedAt: result.taskStartedAt ?? task.startedAt ?? new Date(),
+          workStatus: result.taskWorkStatus ?? "in_progress",
+          pausedAt: result.taskPausedAt ?? null,
+        });
         // Se houve switch, atualiza a task antiga no store
-        if (switchResult.switched && switchResult.previousTaskId) {
+        if (result.switched && result.previousTaskId) {
           const tasks = useTaskStore.getState().tasks;
-          const oldTask = tasks.find((t) => t.id === switchResult.previousTaskId);
+          const oldTask = tasks.find((t) => t.id === result.previousTaskId);
           if (oldTask) {
             replaceTask({ ...oldTask, workStatus: "paused", pausedAt: new Date() });
           }
@@ -138,14 +144,21 @@ export function useTaskMutations(task: ITask) {
       // ASSIM marcava esta tarefa como "in_progress" no banco - duas
       // tarefas (ou mais, com o tempo) ficavam mostrando "Fazendo agora"
       // ao mesmo tempo, uma de verdade e outra "fantasma" sem sessão.
+      // Hoje isso usa a MESMA ação combinada do "Começar"
+      // (`startTaskExecutionAction`), que marca a tarefa + cria/alterna a
+      // sessão numa única transação, num único round-trip.
       if (nextStatus === "in_progress" && executionSession?.taskId !== task.id) {
-        const result = await setTaskWorkStatusAction({ id: task.id, workStatus: "in_progress" });
+        const result = await startSession(task.id);
         if (!result.error) {
-          replaceTask({ ...task, workStatus: "in_progress", pausedAt: null });
-          const switchResult = await startSession(task.id);
-          if (switchResult.switched && switchResult.previousTaskId) {
+          replaceTask({
+            ...task,
+            workStatus: "in_progress",
+            startedAt: result.taskStartedAt ?? task.startedAt ?? new Date(),
+            pausedAt: result.taskPausedAt ?? null,
+          });
+          if (result.switched && result.previousTaskId) {
             const tasks = useTaskStore.getState().tasks;
-            const oldTask = tasks.find((t) => t.id === switchResult.previousTaskId);
+            const oldTask = tasks.find((t) => t.id === result.previousTaskId);
             if (oldTask) {
               replaceTask({ ...oldTask, workStatus: "paused", pausedAt: new Date() });
             }

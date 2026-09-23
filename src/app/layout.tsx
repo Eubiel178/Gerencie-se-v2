@@ -16,6 +16,7 @@ const siteUrl = appUrl();
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
+  applicationName: "Gerencie-se",
   title: {
     default: "Gerencie-se | Organize tarefas, rotina e foco",
     template: "%s | Gerencie-se",
