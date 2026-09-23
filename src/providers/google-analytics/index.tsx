@@ -10,8 +10,18 @@ import type { ProviderProps } from "@/providers/provider-props";
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
 function trackPageView(url: string) {
-  if (!GA_MEASUREMENT_ID || typeof window === "undefined") return;
-  window.gtag("config", GA_MEASUREMENT_ID, { page_path: url });
+  if (
+    !GA_MEASUREMENT_ID ||
+    typeof window === "undefined" ||
+    typeof window.gtag !== "function"
+  ) {
+    return;
+  }
+  window.gtag("event", "page_view", {
+    page_path: url,
+    page_location: window.location.href,
+    page_title: document.title,
+  });
 }
 
 function PageViewTracker() {
@@ -43,7 +53,7 @@ export function GoogleAnalytics({ children }: ProviderProps) {
           window.gtag = gtag;
           gtag('js', new Date());
           gtag('config', '${GA_MEASUREMENT_ID}', {
-            page_path: window.location.pathname,
+            send_page_view: false,
           });
         `}
       </Script>
