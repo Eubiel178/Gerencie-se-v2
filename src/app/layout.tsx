@@ -9,6 +9,7 @@ import "@/styles/global-style.css";
 import { ThemeInit } from "@/design-system/theme/theme-init";
 import { ServiceWorkerRegistration } from "@/features/pwa/service-worker-registration";
 import { appUrl } from "@/lib/shared/app-url";
+import { GoogleAnalytics } from "@/providers/google-analytics";
 import { ToastProvider } from "@/providers/toast-context";
 
 const siteUrl = appUrl();
@@ -83,9 +84,11 @@ export default function RootLayout({
             design-system/theme/theme-init.tsx pra entender por que isso
             não usa mais next/script com beforeInteractive. */}
         <ThemeInit />
-        <SessionProvider>
-          <ToastProvider>{children}</ToastProvider>
-        </SessionProvider>
+        <GoogleAnalytics>
+          <SessionProvider>
+            <ToastProvider>{children}</ToastProvider>
+          </SessionProvider>
+        </GoogleAnalytics>
         <ServiceWorkerRegistration />
       </body>
     </html>
