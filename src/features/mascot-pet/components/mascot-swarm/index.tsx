@@ -209,6 +209,10 @@ function Scenery() {
 export function MascotSwarm() {
   const stageRef = useRef<HTMLDivElement>(null);
   const wrapperRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  // Runtimes ativos da montagem atual - o `IntersectionObserver` do palco
+  // pausa/retoma eles sem precisar re-montar (ver `setPaused` em
+  // `engine/runtime.ts`).
+  const runtimesRef = useRef<MascotRuntime[]>([]);
   const visibleIds = useVisibleCharacterIds();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
@@ -233,6 +237,8 @@ export function MascotSwarm() {
       })
       .filter((runtime): runtime is MascotRuntime => runtime !== null);
 
+    runtimesRef.current = runtimes;
+
     runtimes.forEach((runtime) => {
       runtime.mount().catch((error: unknown) => {
         console.error("[mascot-swarm] falha ao inicializar o PixiJS", error);
@@ -240,9 +246,30 @@ export function MascotSwarm() {
     });
 
     return () => {
+      runtimesRef.current = [];
       runtimes.forEach((runtime) => runtime.destroy());
     };
   }, [visibleIds]);
+
+  // O palco fica no meio da página: enquanto ele não está na janela, não
+  // faz sentido 6 loops de animação (desktop) continuarem renderizando a
+  // 60fps no thread principal - era o que deixava a Landing inteira (pros
+  // cliques, inclusive "Entrar" no cabeçalho) lenta. Pausa quando sai do
+  // viewport, volta quando entra (a mesma lógica que já existia pra aba
+  // em segundo plano, agora na escala do palco).
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        runtimesRef.current.forEach((runtime) => runtime.setPaused(!entry.isIntersecting));
+      }
+    });
+
+    observer.observe(stage);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <div className={styles.stage} ref={stageRef}>

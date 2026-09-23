@@ -1,0 +1,32 @@
+/* Ícone só (sem rótulo) no cabeçalho - a posição fixa junto da marca é o
+   que resolve achabilidade: um botão dentro de uma lista de links de
+   navegação passava despercebido/confundia como mais um link (achado
+   relatado: "eu mesmo olhei e não achei"). Usado no cabeçalho da dashboard
+   e da landing page. */
+.toggle {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-surface-elevated);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition:
+    border-color var(--duration-fast) var(--easing-standard),
+    color var(--duration-fast) var(--easing-standard);
+}
+.toggle svg {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+.toggle:hover {
+  border-color: var(--color-highlight);
+  color: var(--color-text);
+}
+.toggle:focus-visible {
+  outline: 2px solid var(--color-highlight);
+  outline-offset: 2px;
+}

@@ -70,6 +70,13 @@
   filter: brightness(1.08);
   transform: translateY(-1px);
 }
+/* O toque/clique ganha reconhecimento imediato (causa raiz de "toquei e
+   nada aconteceu / toquei de novo"): mesmo que a navegação para /login
+   demore a responder, o botão reage na hora. */
+.headerCta:active {
+  filter: brightness(0.97);
+  transform: translateY(0);
+}
 .headerCta:focus-visible {
   outline: 2px solid var(--color-highlight);
   outline-offset: 3px;
@@ -80,6 +87,10 @@
 .navigation a:hover,
 .loginLink:hover {
   color: var(--color-highlight);
+}
+.loginLink:active {
+  color: var(--color-highlight);
+  opacity: 0.7;
 }
 .hero {
   max-width: 1180px;
@@ -155,6 +166,9 @@
 .primaryAction:hover {
   transform: translateY(-2px);
 }
+.primaryAction:active {
+  transform: translateY(0) scale(0.98);
+}
 .secondaryAction {
   padding: 0.8rem 0;
   color: var(--color-text);
@@ -162,6 +176,9 @@
   font-weight: 700;
   text-decoration: none;
   border-bottom: 1px solid var(--color-border);
+}
+.secondaryAction:active {
+  opacity: 0.7;
 }
 .note {
   margin: var(--space-5) 0 0;

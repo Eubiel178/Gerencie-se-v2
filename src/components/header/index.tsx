@@ -11,8 +11,7 @@ import styles from "@/app/home/home-layout.module.css";
 import { Button, Icon, type IconName } from "@/components";
 import { useMobileNavStore } from "@/components/header/mobile-nav-store";
 import { getFocusableElements } from "@/components/modal/get-focusable-elements";
-import { useEffectiveTheme } from "@/design-system/theme/use-effective-theme";
-import { ThemePreference, useTheme } from "@/design-system/theme/use-theme";
+import { ThemeIconToggle } from "@/components/theme-icon-toggle";
 import { Gender } from "@/features/profile/get-gender";
 import { usePaletteStore } from "@/features/search/palette-store";
 import { QuickCapture } from "@/features/tasks/components/quick-capture";
@@ -71,25 +70,6 @@ const NAV_GROUPS: NavGroup[] = [
   { label: null, links: [{ href: "/home/settings", label: "Configurações", icon: "MdSettings" }] },
 ];
 
-// O cabeçalho alterna só entre claro/escuro (pedido explícito) - "Sistema"
-// continua existindo, mas só como opção em Configurações (`ThemeToggle`,
-// que mostra as 3). Ver `useEffectiveTheme` - quando a preferência salva
-// é "system", o botão precisa saber qual dos dois está de fato NA TELA
-// agora (nunca "o oposto de system", que não quer dizer nada) pra
-// alternar pro tema explícito oposto.
-const NEXT_EXPLICIT_THEME: Record<"light" | "dark", ThemePreference> = {
-  light: "dark",
-  dark: "light",
-};
-const EFFECTIVE_THEME_ICON: Record<"light" | "dark", IconName> = {
-  light: "MdLightMode",
-  dark: "MdDarkMode",
-};
-const EFFECTIVE_THEME_LABEL: Record<"light" | "dark", string> = {
-  light: "Tema: claro",
-  dark: "Tema: escuro",
-};
-
 function visibleNavGroups(gender: Gender): NavGroup[] {
   return NAV_GROUPS.map((group) => ({
     ...group,
@@ -122,8 +102,6 @@ function initials(name: string | null): string {
 export const Header = ({ user }: HeaderProps) => {
   useCaptureTimezone();
 
-  const { setPreference: setThemePreference } = useTheme();
-  const effectiveTheme = useEffectiveTheme();
   const pathname = usePathname();
   const openPalette = usePaletteStore((state) => state.open);
   const [isConfirmingSignOut, setIsConfirmingSignOut] = useState(false);
@@ -270,15 +248,7 @@ export const Header = ({ user }: HeaderProps) => {
       <header className={styles.mobileHeader}>
         <p className={styles.mobileBrand}>Gerencie-se</p>
         <div className={styles.mobileHeaderActions}>
-          <button
-            type="button"
-            className={styles.themeIconButton}
-            aria-label={EFFECTIVE_THEME_LABEL[effectiveTheme]}
-            title={EFFECTIVE_THEME_LABEL[effectiveTheme]}
-            onClick={() => setThemePreference(NEXT_EXPLICIT_THEME[effectiveTheme])}
-          >
-            <Icon name={EFFECTIVE_THEME_ICON[effectiveTheme]} aria-hidden="true" />
-          </button>
+          <ThemeIconToggle />
           <button
             type="button"
             className={styles.mobileMenuButton}
@@ -333,6 +303,49 @@ export const Header = ({ user }: HeaderProps) => {
 
             <QuickCapture triggerClassName={styles.searchTrigger} />
             {renderNavigation(true)}
+
+            {/* O "Sair" precisa existir no mobile também — na sidebar
+                desktop ele fica no fim da coluna; entre 720px pra baixo a
+                sidebar some e o painel de navegação é o único lugar de
+                deslogar. Mesma confirmação em dois passos e o mesmo
+                `handleSignOut` da sidebar (lógica única, sem duplicar). */}
+            <div className={styles.mobileSignOut}>
+              {isConfirmingSignOut ? (
+                <div className={styles.signOutConfirm}>
+                  <span className={styles.signOutConfirmText}>Sair da conta?</span>
+
+                  <div className={styles.signOutConfirmActions}>
+                    <Button.Preset
+                      icon={{ name: "MdClose" }}
+                      root={{
+                        tone: "muted",
+                        "aria-label": "Cancelar",
+                        onClick: () => setIsConfirmingSignOut(false),
+                      }}
+                    />
+
+                    <Button.Preset
+                      icon={{ name: "FaCheck" }}
+                      root={{
+                        tone: "danger",
+                        "aria-label": "Confirmar saída",
+                        loading: isSigningOut,
+                        onClick: handleSignOut,
+                      }}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <button
+                  className={styles.signOut}
+                  type="button"
+                  onClick={() => setIsConfirmingSignOut(true)}
+                >
+                  <Icon name="FaSignOutAlt" aria-hidden="true" />
+                  Sair
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -373,15 +386,7 @@ export const Header = ({ user }: HeaderProps) => {
           Gerencie-se
         </p>
 
-          <button
-            type="button"
-            className={styles.themeIconButton}
-            aria-label={EFFECTIVE_THEME_LABEL[effectiveTheme]}
-            title={EFFECTIVE_THEME_LABEL[effectiveTheme]}
-            onClick={() => setThemePreference(NEXT_EXPLICIT_THEME[effectiveTheme])}
-          >
-            <Icon name={EFFECTIVE_THEME_ICON[effectiveTheme]} aria-hidden="true" />
-          </button>
+        <ThemeIconToggle />
         </div>
 
       <button type="button" className={styles.searchTrigger} data-tour="search" onClick={openPalette}>

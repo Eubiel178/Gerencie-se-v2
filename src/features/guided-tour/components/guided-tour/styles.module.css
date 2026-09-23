@@ -45,7 +45,7 @@
      na tela, mas isto garante que o tooltip NUNCA fique impossível de ler
      (vira scroll interno em vez de conteúdo cortado/invisível) mesmo numa
      tela mais baixa que o previsto ou com fonte aumentada (zoom/acessibilidade). */
-  max-height: calc(100vh - (var(--space-4) * 2));
+  max-height: calc(100dvh - (var(--space-4) * 2));
   max-width: calc(100vw - (var(--space-4) * 2));
   overflow-y: auto;
 }

@@ -89,6 +89,10 @@ export class MascotRuntime {
   private reducedMotion: boolean;
   private currentRenderedState: MascotStateName | null = null;
   private destroyed = false;
+  // Pausado por quem controla a visibilidade da área (ex.: a vitrine da
+  // Landing Page pausa os bichos quando o palco sai da janela). É
+  // independente do estado "aba em segundo plano" em `applyTickPaused`.
+  private paused = false;
   private unsubscribeEvent: (() => void) | null = null;
   private unsubscribeIdleWatch: (() => void) | null = null;
 
@@ -214,6 +218,7 @@ export class MascotRuntime {
 
     app.ticker.add(this.handleTick);
     this.positionWrapper(this.behavior.snapshot().position);
+    this.applyTickPaused();
   }
 
   /** Modo Foco (`/home/focus`): presença reduzida de propósito - o
@@ -224,6 +229,16 @@ export class MascotRuntime {
    * persistida. */
   setQuietMode(quiet: boolean): void {
     this.behavior.setQuietMode(quiet, this.bounds);
+  }
+
+  /** Pausa/retoma o loop de frames inteiro do bichinho - usado pra parar
+   * de gastar CPU quando a área dele não está na tela (ex.: vitrine da
+   * Landing Page fora do viewport). Mesma mecânica do estado "aba em
+   * segundo plano" (`applyTickPaused`): `ticker.stop` pausa o frame
+   * inteiro, não só a animação do sprite. */
+  setPaused(paused: boolean): void {
+    this.paused = paused;
+    this.applyTickPaused();
   }
 
   destroy(): void {
@@ -334,14 +349,22 @@ export class MascotRuntime {
   // pausa o loop de frame inteiro (não só a animação do sprite); volta a
   // rodar sozinho quando a aba fica visível de novo.
   private handleVisibilityChange = (): void => {
-    if (!this.app) return;
+    this.applyTickPaused();
+  };
 
-    if (document.hidden) {
+  // Pausa o ticker quando (a) o próprio bichinho foi pausado por quem
+  // controla a visibilidade da área dele (`setPaused`) ou (b) a aba ficou
+  // em segundo plano. Centraliza os dois casos: se a aba voltar enquanto
+  // o bichinho ainda está pausado, ele não volta a rodar sozinho.
+  private applyTickPaused(): void {
+    if (!this.app || this.destroyed) return;
+
+    if (this.paused || document.hidden) {
       this.app.ticker.stop();
     } else {
       this.app.ticker.start();
     }
-  };
+  }
 
   private handleReducedMotionChange = (event: MediaQueryListEvent): void => {
     this.reducedMotion = event.matches;

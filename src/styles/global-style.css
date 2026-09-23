@@ -33,7 +33,7 @@ html {
 html,
 body {
   margin: 0;
-  min-height: 100vh;
+  min-height: 100dvh;
   width: 100%;
   font-family: var(--font-sans);
   color: var(--color-text);

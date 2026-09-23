@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { Icon } from "@/components";
-import { ThemeToggle } from "@/design-system/theme/theme-toggle";
+import { ThemeIconToggle } from "@/components/theme-icon-toggle";
 import { MascotSwarm } from "@/features/mascot-pet/components/mascot-swarm/lazy";
 import { appUrl } from "@/lib/shared/app-url";
 
@@ -74,7 +74,7 @@ export default function LandingPage() {
           <a href="#recursos">Recursos</a>
         </nav>
         <div className={styles.headerActions}>
-          <ThemeToggle compact />
+          <ThemeIconToggle />
           <Link className={styles.loginLink} href="/login">
             Entrar
           </Link>

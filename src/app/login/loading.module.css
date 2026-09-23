@@ -1,0 +1,12 @@
+.wrapper {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5);
+  color: var(--color-text);
+}
+.message {
+  margin: 0;
+  font-family: var(--font-sans);
+}
