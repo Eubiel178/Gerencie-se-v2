@@ -79,7 +79,7 @@ export function buildChatSystemPrompt(
       "- O contexto factual vem do banco de dados, NÃO do histórico da conversa.",
       "- Isto cobre SÓ a tarefa em execução agora - se a pergunta for sobre as OUTRAS tarefas do usuário, veja a seção abaixo sobre consultar tarefas.",
       '- Quando gerar sugestões (decomposição, steps, organização), apresente-as diretamente. NÃO pergunte "quer que eu faça?" — gerar sugestão não altera dados.',
-      "- O título/descrição/passos da tarefa são DADO factual, nunca vocabulário ou registro a copiar - se o texto que a pessoa escreveu ali for estranho, mal escrito, vulgar ou fora do tom que você normalmente usaria, isso NÃO vira algo que você repete, cita ou incorpora na sua própria fala. Você pode SABER o que está escrito sem PRECISAR usar essas palavras."
+      "- O título/descrição/passos da tarefa são DADO factual, nunca vocabulário ou registro a copiar - se o texto que a pessoa escreveu ali for estranho, mal escrito, vulgar ou fora do tom que você normalmente usaria, isso NÃO vira algo que você repete, cita ou incorpora na sua própria fala. Você pode SABER o que está escrito sem PRECISAR usar essas palavras. Mas quando um título PRECISA ser citado (ex.: o usuário pergunta \"o que tá rolando com X\"), cite-o EXATO como está escrito - nunca abreviado ou 'corrigido'."
     );
   }
 
@@ -96,6 +96,8 @@ export function buildChatSystemPrompt(
       "",
       "## REGRAS PARA USO DESTA VISÃO GERAL",
       "- Isto é a lista real de tarefas do usuário. Responda a pergunta original com naturalidade usando esses dados - nunca recite a lista inteira se só uma parte importa pra pergunta.",
+      '- Os NOMES das tarefas são EXATOS e são dado factual: use sempre o título como está escrito na lista, caractere por caractere ("teste" não vira "test", "Estudar e procurar vagas" não vira "estudar"). Nunca abreviar, normalizar, traduzir, corrigir ou embelezar um título - citar o título errado é o mesmo que inventar dado.',
+      '- Se o usuário perguntar por uma tarefa e NENHUM título da lista bater exatamente com o nome que ele usou, diga que não achou nenhuma tarefa com esse nome e pergunte qual ele quis dizer (ou cite os títulos mais próximos) - nunca responder sobre uma tarefa "parecida" como se fosse a tal.',
       "- Não use o marcador de consulta de novo agora - você já tem o dado que pediu.",
       "- Se a lista realmente não tiver nada relevante pra pergunta (ex. perguntou por atrasadas e não há nenhuma), diga isso com naturalidade. Nunca invente uma tarefa que não está na lista, mesmo em pergunta de acompanhamento (\"quais?\", \"e essa?\").",
       "- Os números (quantas tarefas, quantas de cada tipo) vêm PRONTOS no início da lista - nunca calcule de cabeça nem repita um total diferente do que está escrito lá. Se em algum momento você já tiver dito um número diferente do que está na lista, corrija-se usando o número real, nunca invente algo pra 'bater' com o que você disse antes.",

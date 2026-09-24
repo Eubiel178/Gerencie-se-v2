@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 
 import { db } from "@/db/client";
 import { executionSessions } from "@/db/schema";
@@ -43,6 +43,14 @@ export class LocalExecutionSession {
 
   async getActiveOrPaused(): Promise<IExecutionSession | null> {
     const userId = await requireUserId();
+
+    // Só UMA sessão fica rastreada por vez (a ativa / pausada mais
+    // recente - ver a doc de `tasks.pausedAt` no schema). Sem ORDER BY, o
+    // Postgres devolvia uma sessão ARBITRÁRIA entre as ~90 `paused`
+    // acumuladas (achado real: o chat usava de contexto uma sessão velha
+    // de outra tarefa). A ordem por início espelha a sequência real de
+    // trocas (`switchToTask`), então é o jeito honesto de "pegar a
+    // última".
     const [row] = await db
       .select()
       .from(executionSessions)
@@ -52,6 +60,7 @@ export class LocalExecutionSession {
           eq(executionSessions.status, "active")
         )
       )
+      .orderBy(desc(executionSessions.startedAt))
       .limit(1);
 
     if (row) return mapSessionRow(row);
@@ -65,6 +74,7 @@ export class LocalExecutionSession {
           eq(executionSessions.status, "paused")
         )
       )
+      .orderBy(desc(executionSessions.startedAt))
       .limit(1);
 
     return pausedRow ? mapSessionRow(pausedRow) : null;
