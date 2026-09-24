@@ -1,0 +1,89 @@
+/* Switch — trilho + knob em CSS puro, movimentação por `left` é trocada por
+   posicionamento absoluto com transição (transform não cabe porque o knob
+   desliza ao longo do trilho; usa-se `left` só porque o movimento é
+   pequeno e contido — nada de layout pesado por trás). */
+:where(.track) {
+  position: relative;
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 1.45rem;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface-elevated);
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--easing-standard),
+    border-color var(--duration-fast) var(--easing-standard);
+}
+
+:where(.track):hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--color-highlight) 50%, var(--color-border));
+}
+
+:where(.track):focus-visible {
+  outline: 2px solid var(--color-highlight);
+  outline-offset: 2px;
+}
+
+:where(.track):disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+:where(.trackOn) {
+  background: var(--color-highlight);
+  border-color: var(--color-highlight);
+}
+
+:where(.knob) {
+  position: absolute;
+  top: 50%;
+  left: 0.15rem;
+  width: 1.05rem;
+  height: 1.05rem;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  background: var(--color-on-highlight);
+  box-shadow: 0 0.0625rem 0.125rem rgb(0 0 0 / 0.25);
+  transition: left var(--duration-fast) var(--easing-standard);
+}
+
+:where(.knobOn) {
+  left: calc(100% - 1.2rem);
+}
+
+/* Linha de configuração liga/desliga (SwitchRow) */
+:where(.row) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-height: 2rem;
+}
+
+:where(.rowText) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+:where(.rowTitle) {
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+}
+
+:where(.rowHelper) {
+  color: var(--color-text-muted);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(.track),
+  :where(.knob) {
+    transition-duration: 0.01ms;
+  }
+}

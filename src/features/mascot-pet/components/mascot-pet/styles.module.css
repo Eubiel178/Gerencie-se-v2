@@ -104,48 +104,31 @@
 }
 
 /*
- * Conteúdo estreito (mobile OU tablet com sidebar visível, mas pouca
- * largura de conteúdo sobrando): nunca captura toque. Diferente de um
- * desktop largo (onde o mascote roda por um espaço quase todo vazio ao
- * redor do conteúdo, ver `viewport-bounds.ts`), esses layouts são uma
- * única coluna de cards quase de ponta a ponta — mesmo confinado a um
- * canto pequeno, o mascote ainda pode ocasionalmente pousar sobre um
- * card. Sem `pointer-events: none` aqui, ele bloquearia o toque em
- * qualquer controle por baixo enquanto estiver ali (violação direta da
- * regra "nunca cobrir controles"). O preço é que arrastar o bichinho só
- * funciona num desktop largo — aceitável, já que arrastar um objeto
- * pequeno sobreposto ao conteúdo tende a brigar com o gesto de rolagem
- * da própria página em touchscreens de qualquer forma.
+ * Telas estreitas (mobile inteiro OU tablet com sidebar visível mas pouca
+ * largura de conteúdo sobrando — o mesmo intervalo que
+ * `isNarrowContentViewport()` define em `viewport-bounds.ts`; o corte
+ * 968px = 720px (`NARROW_CONTENT_WIDTH`) + 248px (`SIDEBAR_WIDTH`) fica
+ * aí no TS, CSS não importa constante JS).
  *
- * 968px = 720 (largura de conteúdo "estreita", `NARROW_CONTENT_WIDTH`
- * em `viewport-bounds.ts`) + 248 (largura da sidebar, `SIDEBAR_WIDTH`
- * lá) — o mesmo cálculo de `isNarrowContentViewport()`, só que CSS não
- * pode importar a constante do TS, então o valor final já somado fica
- * documentado aqui.
+ * O mascote NÃO é mais escondido nessa faixa (antes: `display: none` no
+ * `.stage`). Ele continua usando o MESMO engine de sempre, confinado ao
+ * cantinho inferior esquerdo pelos bounds do `viewport-bounds.ts`
+ * (margem lateral 12px, margem inferior 72px + safe area do sistema) e,
+ * enquanto a área principal rola, o componente liga o quiet mode
+ * existente — o bichinho para de passear e fica recolhido nessa posição
+ * segura, NUNCA escondido (ver o efeito de scroll em
+ * `components/mascot-pet/index.tsx`). Quando o scroll para, volta a
+ * andar normalmente.
+ *
+ * As proteções de sempre continuam valendo exatamente como estão:
+ * - `.stage`: `pointer-events: none` — nunca captura clique/toque fora
+ *   do bichinho; z-index 10, abaixo de header/widget (20), modal/bottom
+ *   sheet (50), palette (60) e tour (70) — modais e bottom sheets sempre
+ *   ficam por cima dele.
+ * - `.wrapper`: `pointer-events: auto` — drag/toque preservados; o
+ *   sprite do mascote é o único ponto que captura interação.
+ * - Escala reduzida (`MOBILE_SCALE` em `engine/runtime.ts`) e bounds
+ *   confinados cuidam de tamanho/posição em tela pequena; o teclado
+ *   virtual é acompanhado via `visualViewport.resize` → `handleResize`.
+ * - `prefers-reduced-motion` continua valendo (ver `engine/runtime.ts`).
  */
-@media (max-width: 968px) {
-  /* Nessa faixa o "canto vazio" pressupõe que a página não rola - falso
-     em qualquer lista de cards de uma coluna só (Tarefas, Hábitos,
-     Dashboard...): o mascote é `position: fixed`, então fica sempre no
-     MESMO canto da TELA enquanto a página rola por baixo - e qualquer
-     card que passar por ali tem a tag/status cobertos de verdade
-     (confirmado visualmente: reduzir a opacidade ainda deixava o texto
-     ilegível, não só "decorativo por cima"). Sem uma forma barata de
-     saber a geometria de scroll/cards daqui, a solução robusta é não
-     deixar o bichinho passear nessa faixa - a bolha do assistente
-     (sempre fixa no canto inferior direito) já mantém a presença do
-     mascote sem esse problema. */
-  .stage {
-    display: none;
-  }
-
-  /* O mascote não passeia nessa faixa (regra acima) - o balão do
-     Companion segue ele via `onPositionChange`, então também some, sem
-     ficar preso boiando num canto sem bichinho visível ali. Mesma lógica
-     pro selo de voz: o toggle equivalente em Configurações continua
-     disponível como alternativa. */
-  .bubbleAnchor,
-  .voiceBadgeAnchor {
-    display: none;
-  }
-}

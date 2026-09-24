@@ -1,3 +1,5 @@
+import { SpeechVoiceId } from "@/lib/speech/voices";
+
 export interface IAssistantPreferences {
   enabled: boolean;
   // Presença reduzida: o widget fica só como um ponto discreto, sem o
@@ -16,6 +18,10 @@ export interface IAssistantPreferences {
   // `companion-phrasing.ts`. Nunca reaparece depois disso, mesmo em
   // tarefas/sessões futuras.
   executionIntroShown: boolean;
+  // Voz PT-BR da fala do mascote/assistente/Companion/Tour (seletor em
+  // Configurações, ver `src/lib/speech/voices.ts`). Usada pela rota
+  // `/api/mascot-speech` (Edge TTS) — `pt-BR-ThalitaNeural` padrão.
+  voiceId: SpeechVoiceId;
 }
 
 export type GetAssistantPreferences = {

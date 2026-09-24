@@ -111,32 +111,42 @@ export function useChatHistory() {
     getHydratedServerSnapshot
   );
 
-  const addUserMessage = useCallback((text: string, taskId: string | null) => {
-    const msg: ChatMessage = {
-      id: crypto.randomUUID(),
-      role: "user",
-      text,
-      timestamp: Date.now(),
-      taskId,
-    };
-    memory = [...memory, msg];
+  // Aplica MESMO corte (`slice(-MAX_MESSAGES)`) no array em memória e no
+  // que vai pro localStorage: antes o corte só existia na persistência,
+  // então numa sessão longa a lista em tela (que lê `memory`) crescia
+  // além das 50 e "pulava" de volta ao recarregar — achado relatado.
+  const appendMessage = useCallback((msg: ChatMessage) => {
+    memory = [...memory, msg].slice(-MAX_MESSAGES);
     saveHistory(memory);
     emitChange();
   }, []);
 
-  const addMascotMessage = useCallback((text: string, taskId: string | null, kind: ChatMessage["kind"] = "ai") => {
-    const msg: ChatMessage = {
-      id: crypto.randomUUID(),
-      role: "mascot",
-      text,
-      timestamp: Date.now(),
-      taskId,
-      kind,
-    };
-    memory = [...memory, msg];
-    saveHistory(memory);
-    emitChange();
-  }, []);
+  const addUserMessage = useCallback(
+    (text: string, taskId: string | null) => {
+      appendMessage({
+        id: crypto.randomUUID(),
+        role: "user",
+        text,
+        timestamp: Date.now(),
+        taskId,
+      });
+    },
+    [appendMessage]
+  );
+
+  const addMascotMessage = useCallback(
+    (text: string, taskId: string | null, kind: ChatMessage["kind"] = "ai") => {
+      appendMessage({
+        id: crypto.randomUUID(),
+        role: "mascot",
+        text,
+        timestamp: Date.now(),
+        taskId,
+        kind,
+      });
+    },
+    [appendMessage]
+  );
 
   const clearHistory = useCallback(() => {
     memory = [];

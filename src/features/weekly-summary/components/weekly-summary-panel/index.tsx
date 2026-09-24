@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Alert, Button } from "@/components";
+import { Alert, Button, SwitchRow } from "@/components";
 
 import { updateWeeklySummaryPreferenceAction, sendTestWeeklySummaryAction } from "../../actions";
 
@@ -52,22 +52,15 @@ export function WeeklySummaryPanel({ enabled, email }: WeeklySummaryPanelProps) 
 
   return (
     <div className={styles.panel}>
-      <label className={styles.row}>
-        <input
-          type="checkbox"
-          checked={isEnabled}
-          disabled={isSaving}
-          onChange={(event) => handleToggle(event.target.checked)}
-        />
-        <span>Receber resumo semanal por e-mail</span>
-      </label>
+      <SwitchRow
+        title="E-mail"
+        helper="Um resumo do seu progresso toda semana."
+        checked={isEnabled}
+        disabled={isSaving}
+        onChange={(checked) => void handleToggle(checked)}
+      />
 
       {actionError && <Alert variant="error">{actionError}</Alert>}
-
-      <p className={styles.note}>
-        Um e-mail por semana com tarefas concluídas, sequência de hábitos,
-        progresso dos objetivos e o nível do mascote. Desligado por padrão.
-      </p>
 
       <Button.Root
         type="button"

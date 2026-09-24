@@ -1,0 +1,1 @@
+ALTER TABLE "user_preference" ALTER COLUMN "assistant_voice_id" SET DEFAULT 'pt-BR-ThalitaNeural';

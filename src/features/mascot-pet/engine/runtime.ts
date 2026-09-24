@@ -211,6 +211,11 @@ export class MascotRuntime {
     this.wrapper.addEventListener("pointercancel", this.handlePointerUp);
 
     window.addEventListener("resize", this.handleResize);
+    // Teclado virtual no mobile: `visualViewport` encolhe quando o teclado
+    // abre sem que `window` redimensione (iOS/Safari, principalmente).
+    // Reusa o MESMO `handleResize` - recalcula bounds e mantém o sprite
+    // dentro da área visível de verdade.
+    window.visualViewport?.addEventListener("resize", this.handleResize);
     this.reducedMotionQuery.addEventListener("change", this.handleReducedMotionChange);
     document.addEventListener("visibilitychange", this.handleVisibilityChange);
     this.unsubscribeEvent = subscribeMascotEvent((type) => this.behavior.handleEvent(type));
@@ -248,6 +253,7 @@ export class MascotRuntime {
     }
 
     window.removeEventListener("resize", this.handleResize);
+    window.visualViewport?.removeEventListener("resize", this.handleResize);
     this.reducedMotionQuery.removeEventListener("change", this.handleReducedMotionChange);
     document.removeEventListener("visibilitychange", this.handleVisibilityChange);
     this.unsubscribeEvent?.();

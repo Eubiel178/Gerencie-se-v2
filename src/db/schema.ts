@@ -639,6 +639,12 @@ export const userPreferences = pgTable("user_preference", {
   // pergunta de produto, uma vez, num momento real (primeira fala
   // espontânea do Companion), nunca fingindo um prompt nativo.
   assistantAutoSpeechPromptShown: boolean("assistant_auto_speech_prompt_shown").notNull().default(false),
+  // Voz PT-BR da fala do mascote/assistente/Companion/Tour (seletor em
+  // Configurações, ver `src/lib/speech/voices.ts`). Guarda o `ShortName`
+  // do Edge TTS; valores fora do catálogo (ex.: default legado de uma
+  // voz já removida) são normalizados pra este default pela guarda
+  // `isSupportedVoice` na leitura.
+  assistantVoiceId: text("assistant_voice_id").notNull().default("pt-BR-ThalitaNeural"),
   // Só usado pra decidir quais links da navegação fazem sentido mostrar
   // (ex.: Ciclo Menstrual) — nunca exposto/usado fora disso.
   gender: text("gender", { enum: ["feminino", "masculino", "nao_informado"] })

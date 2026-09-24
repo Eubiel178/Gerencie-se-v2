@@ -157,11 +157,13 @@ export class GeminiAssistantProvider {
    * Gera UMA interação espontânea do Companion (balão + fala) pra um
    * evento/contexto real da página de Tarefas - ver
    * `use-tasks-companion.ts` pro QUANDO/POR QUE. `written`/`spoken`
-   * nascem da MESMA chamada, nunca separadas (evita o bug de balão e
-   * TTS discordando). Retorna `null` (nunca lança) se a IA estiver
-   * indisponível, falhar, ou responder algo que não valida no schema -
-   * quem chama SEMPRE tem um fallback determinístico local pronto
-   * (`companion-phrasing.ts`) pra esses casos.
+   * nascem da MESMA chamada, e `spoken` é SEMPRE o MESMO texto de
+   * `written` (mensagem canônica; compatibilidade temporária - garantia
+   * reforçada aqui e na Server Action `resolveCompanionMessageAction`).
+   * Retorna `null` (nunca lança) se a IA estiver indisponível, falhar,
+   * ou responder algo que não valida no schema - quem chama SEMPRE tem
+   * um fallback determinístico local pronto (`companion-phrasing.ts`) pra
+   * esses casos.
    */
   async generateCompanionInteraction(
     context: CompanionInteractionContext,
@@ -185,14 +187,25 @@ export class GeminiAssistantProvider {
         // chamada - um `move` fora de `context.eligibleMoves` (modelo
         // "inventando" uma opção que não foi oferecida) nunca é
         // confiado, mesmo passando na validação genérica do enum acima.
+        // Mensagem canônica: `spoken` é FORÇADO a ser o MESMO texto de
+        // `written` (ver doc de `CompanionPhrase`) - o modelo não
+        // "rescreve pra fala", pronúncia é da camada `toSpeechText`.
         if (!context.eligibleMoves.includes(validated.data.move)) {
           console.log(
             `[Companion] source=ai model=${result.model} intent=${context.intent} move_clamped=${validated.data.move}->${context.eligibleMoves[0]}`
           );
-          return { ...validated.data, move: context.eligibleMoves[0] };
+          return {
+            written: validated.data.written,
+            spoken: validated.data.written,
+            move: context.eligibleMoves[0],
+          };
         }
         console.log(`[Companion] source=ai model=${result.model} intent=${context.intent} move=${validated.data.move}`);
-        return validated.data;
+        return {
+          written: validated.data.written,
+          spoken: validated.data.written,
+          move: validated.data.move,
+        };
       }
     } catch {
       // invalid JSON

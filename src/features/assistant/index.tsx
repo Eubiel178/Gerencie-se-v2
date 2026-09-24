@@ -7,7 +7,6 @@ export * from "./domain";
 export * from "./actions";
 export { getAssistantService } from "./services/assistant-service";
 export { getAssistantPreferencesFetcher } from "./data/get-assistant-preferences-fetcher";
-export { PreferencesPanel } from "./components/preferences-panel";
 
 export async function Assistant({ mascot, userImage }: { mascot?: IMascotState; userImage?: string | null }) {
   const snapshot = await getAssistantService().getSnapshot(mascot);

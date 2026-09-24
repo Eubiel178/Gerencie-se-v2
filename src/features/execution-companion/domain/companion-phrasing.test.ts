@@ -15,6 +15,7 @@ const PERSONALITIES: MascotPersonality[] = [
 
 const FACTS: CompanionFact[] = [
   { kind: "execution-started", taskTitle: "Estudar React" },
+  { kind: "execution-started", taskTitle: "Estudar React", isFirstEver: true },
   { kind: "execution-completed", taskTitle: "Estudar React" },
   { kind: "execution-idle-nudge", taskTitle: "Estudar React", elapsedMinutes: 12 },
   { kind: "return-after-absence", taskTitle: "Estudar React", firstName: null },
@@ -25,6 +26,10 @@ const FACTS: CompanionFact[] = [
   { kind: "overdue-task", taskTitle: "Estudar React", daysOverdue: 2 },
   { kind: "progress-milestone", taskTitle: "Estudar React", completedSteps: 3, totalSteps: 5 },
   { kind: "reopened-task", taskTitle: "Estudar React" },
+  { kind: "task-switching", taskTitle: "Estudar React" },
+  { kind: "quiet-win", taskTitle: "Estudar React" },
+  { kind: "repeated-reopen", taskTitle: "Estudar React", reopenCount: 2 },
+  { kind: "ask-quiet-check" },
 ];
 
 test("phraseCompanion: toda combinação de personalidade x fato gera texto escrito e falado", () => {
@@ -46,13 +51,44 @@ test("phraseCompanion: usa o título real da tarefa, nunca um texto genérico fi
   assert.match(phrase.written, /Escrever relatório/);
 });
 
-test("phraseCompanion: escrito e falado podem diferir (não precisam ser o mesmo texto)", () => {
-  const phrase = phraseCompanion(
-    { kind: "execution-idle-nudge", taskTitle: "Estudar React", elapsedMinutes: 12 },
-    "afetuoso"
-  );
+test("phraseCompanion: UMA mensagem canônica - spoken é literalmente o MESMO texto de written (balão e voz nunca divergem)", () => {
+  for (const personality of PERSONALITIES) {
+    for (const fact of FACTS) {
+      const phrase = phraseCompanion(fact, personality);
+      assert.equal(
+        phrase.spoken,
+        phrase.written,
+        `${personality}/${fact.kind}: spoken difere de written`
+      );
+    }
+  }
+});
 
-  assert.notEqual(phrase.written, phrase.spoken);
+test("phraseCompanion: mensagem proativa/contextual SEMPRE identifica a entidade pelo nome da tarefa (nunca um texto genérico que omite de quem se fala)", () => {
+  const taskTitle = "Estudar React";
+  const contextualFacts: CompanionFact[] = [
+    { kind: "execution-idle-nudge", taskTitle, elapsedMinutes: 12 },
+    { kind: "return-after-absence", taskTitle, firstName: null },
+    { kind: "presence-greeting", taskTitle, firstName: null },
+    { kind: "long-session", taskTitle, elapsedMinutes: 45, gender: "nao_informado" },
+    { kind: "deadline-approaching", taskTitle, minutesUntilDue: 40 },
+    { kind: "overdue-task", taskTitle, daysOverdue: 3 },
+    { kind: "progress-milestone", taskTitle, completedSteps: 2, totalSteps: 4 },
+    { kind: "reopened-task", taskTitle },
+    { kind: "task-switching", taskTitle },
+    { kind: "quiet-win", taskTitle },
+    { kind: "repeated-reopen", taskTitle, reopenCount: 2 },
+  ];
+
+  for (const fact of contextualFacts) {
+    for (const personality of PERSONALITIES) {
+      const phrase = phraseCompanion(fact, personality);
+      assert.ok(
+        phrase.written.includes(`"${taskTitle}"`),
+        `${personality}/${fact.kind} não cita a entidade: ${phrase.written}`
+      );
+    }
+  }
 });
 
 test("phraseCompanion: volta de ausência nunca presume distração (linguagem neutra)", () => {

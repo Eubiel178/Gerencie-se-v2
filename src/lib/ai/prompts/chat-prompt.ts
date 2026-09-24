@@ -28,10 +28,12 @@ export const TASKS_TOOL_MARKER = "[[CONSULTAR_TAREFAS]]";
  * embutido em `mascot-pet/actions.ts`, tinha ~4 regras já presentes,
  * quase palavra por palavra, em COMPANION_SYSTEM_PROMPT).
  *
- * `tasksOverview`: SÓ definido na SEGUNDA chamada de uma mesma mensagem,
- * depois que o modelo pediu a ferramenta na primeira (ver
- * `TASKS_TOOL_MARKER` acima e o fluxo em `mascot-pet/actions.ts`) - nunca
- * enviado por padrão, pra não pagar token à toa numa conversa casual.
+ * `tasksOverview`: injetado de DOIS jeitos (ver o fluxo em
+ * `mascot-pet/actions.ts`): (1) já na PRIMEIRA chamada quando a detecção
+ * de intenção factorial do usuário exige os dados (`dependsOnPlanningData`);
+ * (2) na SEGUNDA chamada de uma mesma mensagem, depois que o modelo pediu
+ * a ferramenta na primeira (`TASKS_TOOL_MARKER` - rede de segurança).
+ * Nunca enviado por padrão numa conversa casual, pra não pagar token à toa.
  */
 export function buildChatSystemPrompt(
   personality: string,
@@ -72,8 +74,8 @@ export function buildChatSystemPrompt(
       '- Quando o usuário fizer referências como "essa tarefa", "a atual", "nela", "o que estou fazendo", "o que falta", "próximo passo", "meus passos" — use os dados acima como fonte de verdade.',
       "- Se existir uma tarefa atual, NÃO pergunte qual é. Já responda diretamente com os dados do contexto.",
       "- Se a tarefa não tiver passos, informe isso. NÃO invente passos.",
-      '- Se o usuário perguntar sobre o estado da tarefa (pausada, em andamento), use o campo "Status de execução".',
-      "- Status de execução, progresso de passos e prazo são DIMENSÕES INDEPENDENTES do contexto - nunca infira uma a partir da outra. 0 passos concluídos e/ou prazo vencido NUNCA significam sozinhos que a tarefa está parada, abandonada ou sem atenção - \"Status de execução\" é sempre a fonte de verdade sobre isso, não uma dedução sua a partir de progresso/prazo.",
+      '- Se o usuário perguntar sobre o estado da tarefa (pausada, em andamento, o que está fazendo agora), use os campos "Estado no card" E "Sessão de execução" - os dois, nunca só um. Uma tarefa com "Sessão de execução: PAUSADA" NUNCA está em execução agora.',
+      '- "Estado no card", "Sessão de execução", progresso de passos e prazo são DIMENSÕES INDEPENDENTES do contexto - nunca infira uma a partir da outra. 0 passos concluídos e/ou prazo vencido NUNCA significam sozinhos que a tarefa está parada, abandonada ou sem atenção - "Sessão de execução" e "Estado no card" são sempre a fonte de verdade sobre isso, não uma dedução sua a partir de progresso/prazo.',
       "- O contexto factual vem do banco de dados, NÃO do histórico da conversa.",
       "- Isto cobre SÓ a tarefa em execução agora - se a pergunta for sobre as OUTRAS tarefas do usuário, veja a seção abaixo sobre consultar tarefas.",
       '- Quando gerar sugestões (decomposição, steps, organização), apresente-as diretamente. NÃO pergunte "quer que eu faça?" — gerar sugestão não altera dados.',
@@ -82,9 +84,11 @@ export function buildChatSystemPrompt(
   }
 
   if (tasksOverview) {
-    // Segunda chamada da mesma mensagem (ver `TASKS_TOOL_MARKER` acima) -
-    // o modelo JÁ pediu e JÁ recebeu; a única coisa que falta é responder
-    // de verdade com o dado em mãos, nunca pedir de novo.
+    // O dado CHEGOU (na 1ª chamada via detecção de intenção, ou na 2ª
+    // porque o modelo pediu via `TASKS_TOOL_MARKER`) - o modelo JÁ tem o
+    // dado em mãos; a única coisa que falta é responder de verdade com
+    // ele, nunca pedir de novo (o bloco «else» abaixo sobre pedir a
+    // consulta nem chega a existir nesta chamada).
     parts.push(
       "",
       "## VISÃO GERAL DAS TAREFAS DO USUÁRIO (você pediu, aqui está)",
@@ -94,7 +98,12 @@ export function buildChatSystemPrompt(
       "- Isto é a lista real de tarefas do usuário. Responda a pergunta original com naturalidade usando esses dados - nunca recite a lista inteira se só uma parte importa pra pergunta.",
       "- Não use o marcador de consulta de novo agora - você já tem o dado que pediu.",
       "- Se a lista realmente não tiver nada relevante pra pergunta (ex. perguntou por atrasadas e não há nenhuma), diga isso com naturalidade. Nunca invente uma tarefa que não está na lista, mesmo em pergunta de acompanhamento (\"quais?\", \"e essa?\").",
-      "- Os números (quantas tarefas, quantas de cada tipo) vêm PRONTOS no início da lista - nunca calcule de cabeça nem repita um total diferente do que está escrito lá. Se em algum momento você já tiver dito um número diferente do que está na lista, corrija-se usando o número real, nunca invente algo pra 'bater' com o que você disse antes."
+      "- Os números (quantas tarefas, quantas de cada tipo) vêm PRONTOS no início da lista - nunca calcule de cabeça nem repita um total diferente do que está escrito lá. Se em algum momento você já tiver dito um número diferente do que está na lista, corrija-se usando o número real, nunca invente algo pra 'bater' com o que você disse antes.",
+      '- "Estado no card" (como a tarefa aparece pra pessoa: não iniciada / em andamento / pausada / concluída) e "Sessão de execução" (existe sessão ATIVA ou PAUSADA agora) são coisas DIFERENTES. Uma tarefa com "Sessão de execução: PAUSADA" NUNCA está "em execução/em andamento agora". Sem sessão ≠ pausada, e pausada ≠ sem atenção. Se não houver dado suficiente sobre o estado de execução (ex.: nem sessão nem "Estado no card" indicando), diga que não dá pra saber - nunca inferir nem inventar.',
+      '- Respeite o TEMPO exato da pergunta. "O que tenho pra hoje?" = só tarefas com prazo HOJE (rótulo "Hoje, até HH:MM"); "amanhã" = só "Amanhã, até HH:MM"; "atrasadas/vencidas" = prazos que já passaram, o que inclui "HOJE, mas o horário já passou" E "ATRASADA desde..."; "sem prazo" só entra quando pedido. NÃO misture atrasadas com "pra hoje" automaticamente - se forem relevantes, cite em uma frase separada e breve.',
+      '- Prazo e execução são independentes: uma tarefa pausada ou em execução SEM prazo não vira "tarefa pra hoje" por causa disso. Se a pergunta é por data, responda por data.',
+      '- "O que estou fazendo agora?" = SÓ a tarefa com "Sessão de execução: ATIVA". "Quais estão pausadas?" = tarefas com "Sessão de execução: PAUSADA" ou "Estado no card: pausada".',
+      '- Responda direto à pergunta factual ("quais são pra hoje?") com a lista correspondente - não vire uma consulta simples numa análise longa, recomendação ou palestra. Recomendação ("o que devo fazer agora?") pode combinar prioridade/prazo/execução - mas só quando a pergunta PEDE recomendação.',
     );
   } else {
     parts.push(

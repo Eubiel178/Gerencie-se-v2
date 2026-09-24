@@ -518,6 +518,13 @@ export async function resolveCompanionMessageAction(params: {
       }
     }
 
+    // PONTO ÚNICO de normalização da mensagem canônica: venha a frase do
+    // fallback local OU da IA, `spoken` é sempre forçado ao MESMO texto de
+    // `written` aqui antes de qualquer entrega ao resto do app. É isso que
+    // garante que balão e voz nunca mais divergem (compatibilidade
+    // temporária: o campo duplicado está em remoção, ver `CompanionPhrase`).
+    phrase = { written: phrase.written, spoken: phrase.written };
+
     const { allowed } = await prefs.registerCompanionMessageShown(phrase.written, {
       priority: params.priority,
       frequencyBypass: params.frequencyBypass,

@@ -1,10 +1,8 @@
 import { ThemeToggle } from "@/design-system/theme/theme-toggle";
-import { PreferencesPanel } from "@/features/assistant/components/preferences-panel";
 import { getAssistantPreferencesFetcher } from "@/features/assistant/data/get-assistant-preferences-fetcher";
 import { PeoplePanel } from "@/features/connections/components/people-panel";
 import { getConnectionFetcher } from "@/features/connections/data/get-connection-fetcher";
 import { ExportDataPanel } from "@/features/export/components/export-data-panel";
-import { MascotSettings } from "@/features/focus/components/mascot-settings";
 import { getMascotFetcher } from "@/features/focus/data/get-focus-fetcher";
 import { ReplayTourButton } from "@/features/guided-tour/components/replay-tour-button";
 import { ChangePasswordForm } from "@/features/profile/components/change-password-form";
@@ -22,6 +20,7 @@ import styles from "@/styles/workspace.module.css";
 
 import { AccountPanel } from "./components/account-panel";
 import { CalendarStatusBannerFromUrl } from "./components/calendar-status-banner-from-url";
+import { CompanionPreferencesPanel } from "./components/companion-preferences-panel";
 import { ConnectionCard } from "./components/connection-card";
 import { SettingsSections, type SettingsSection } from "./components/settings-sections";
 
@@ -107,33 +106,12 @@ export async function Settings() {
     {
       id: "mascote",
       label: "Mascote e assistente",
-      description: "Espécie, nome, personalidade e sugestões",
+      description: "Como seu companheiro aparece, fala e ajuda",
       icon: "FaPaw",
       content: (
-        <div className={styles.settingGrid}>
-          <section className={styles.settingPanel}>
-            <div className={styles.panelHeader}>
-              <h3>Mascote</h3>
-              <p className={styles.panelText}>
-                Escolha o nome, a espécie e a personalidade do mascote
-                que te acompanha no Foco e também como assistente pelo
-                resto do app.
-              </p>
-            </div>
-            <MascotSettings mascot={mascot} />
-          </section>
-          <section className={styles.settingPanel}>
-            <div className={styles.panelHeader}>
-              <h3>Assistente</h3>
-              <p className={styles.panelText}>
-                {mascot.name} aparece discretamente na tela com
-                sugestões baseadas no que você tem pendente — é o mesmo
-                mascote escolhido ao lado.
-              </p>
-            </div>
-            <PreferencesPanel preferences={assistantPreferences} mascotName={mascot.name} />
-          </section>
-        </div>
+        <section className={styles.settingPanel}>
+          <CompanionPreferencesPanel mascot={mascot} preferences={assistantPreferences} />
+        </section>
       ),
     },
     {

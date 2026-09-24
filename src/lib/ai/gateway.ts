@@ -80,17 +80,23 @@ async function attemptWithFailover(
 
   const pairs = buildProviderModelPairs(providers);
   const triedProviders = new Set<string>();
+  // Contador de tentativas por operação - `attempt=1` na primeira, maior
+  // que 1 indica que o failover entre providers/modelos ocorreu (mesmo
+  // formato `[AI] operation=... key=value` usado no resto; sem conteúdo
+  // de mensagem, só diagnóstico técnico).
+  let attempt = 0;
 
   for (const { provider, model } of pairs) {
+    attempt += 1;
     if (triedProviders.has(provider.name)) continue;
     if (isProviderUnavailable(provider.name, provider.models)) {
-      console.log(`[AI] operation=${operation} provider=${provider.name} status=skipped unavailable`);
+      console.log(`[AI] operation=${operation} provider=${provider.name} attempt=${attempt} status=skipped unavailable`);
       triedProviders.add(provider.name);
       continue;
     }
 
     if (isModelCoolingDown(provider.name, model)) {
-      console.log(`[AI] operation=${operation} provider=${provider.name} model=${model} status=skipped cooldown`);
+      console.log(`[AI] operation=${operation} provider=${provider.name} model=${model} attempt=${attempt} status=skipped cooldown`);
       continue;
     }
 
@@ -103,17 +109,17 @@ async function attemptWithFailover(
         // Não aceita - tenta o próximo provider/model do loop em vez de
         // devolver inglês pro usuário. Não conta como erro de rede/rate
         // limit (não marca cooldown), só pula esta resposta específica.
-        console.warn(`[AI] operation=${operation} provider=${provider.name} model=${model} status=wrong_language duration=${duration}ms`);
+        console.warn(`[AI] operation=${operation} provider=${provider.name} model=${model} attempt=${attempt} status=wrong_language duration=${duration}ms`);
         continue;
       }
 
       if (result) {
-        console.log(`[AI] operation=${operation} provider=${provider.name} model=${model} status=success duration=${duration}ms`);
+        console.log(`[AI] operation=${operation} provider=${provider.name} model=${model} attempt=${attempt} status=success duration=${duration}ms`);
         clearModelError(provider.name, model);
         return { result, provider: provider.name };
       }
 
-      console.log(`[AI] operation=${operation} provider=${provider.name} model=${model} status=no_response duration=${duration}ms`);
+      console.log(`[AI] operation=${operation} provider=${provider.name} model=${model} attempt=${attempt} status=no_response duration=${duration}ms`);
     } catch (error: unknown) {
       const duration = Date.now() - start;
       const errorType = classifyError(error);
@@ -124,7 +130,7 @@ async function attemptWithFailover(
         markModelError(provider.name, model, errorType);
       }
 
-      console.error(`[AI] operation=${operation} provider=${provider.name} model=${model} status=error error=${errorType} duration=${duration}ms`);
+      console.error(`[AI] operation=${operation} provider=${provider.name} model=${model} attempt=${attempt} status=error error=${errorType} duration=${duration}ms`);
     }
   }
 

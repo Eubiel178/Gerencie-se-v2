@@ -10,6 +10,7 @@ import * as domain from "@/features/assistant/domain";
 import { COMPANION_FREQUENCY, isCompanionFrequencyAllowed } from "@/features/execution-companion/domain/companion-frequency";
 import { requireUserId } from "@/lib/auth";
 import { getOrCreateUserPreferencesRow } from "@/lib/shared/get-or-create-user-preferences";
+import { DEFAULT_VOICE_ID, isSupportedVoice } from "@/lib/speech/voices";
 
 // No máximo 5 interrupções auto-abertas por dia — depois disso o
 // widget continua existindo (avatar visível), só para de auto-abrir o
@@ -79,6 +80,9 @@ export class LocalAssistantPreferences
       autoSpeechEnabled: row.assistantAutoSpeechEnabled,
       autoSpeechPromptShown: row.assistantAutoSpeechPromptShown,
       executionIntroShown: row.executionIntroShown,
+      // Default literal garante que valores fora do allowlist (banco
+      // corrompido / voz removida) nunca estourem a tipagem aqui.
+      voiceId: isSupportedVoice(row.assistantVoiceId) ? row.assistantVoiceId : DEFAULT_VOICE_ID,
     };
   }
 
@@ -91,6 +95,7 @@ export class LocalAssistantPreferences
     if (params.autoSpeechPromptShown !== undefined) patch.assistantAutoSpeechPromptShown = params.autoSpeechPromptShown;
     if (params.autoSpeechEnabled !== undefined) patch.assistantAutoSpeechEnabled = params.autoSpeechEnabled;
     if (params.executionIntroShown !== undefined) patch.executionIntroShown = params.executionIntroShown;
+    if (params.voiceId !== undefined) patch.assistantVoiceId = params.voiceId;
 
     await db
       .insert(userPreferences)

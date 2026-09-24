@@ -22,10 +22,16 @@ export const ResumeResponseSchema = z.object({
 
 /**
  * Uma interação espontânea do Companion na página de Tarefas, gerada
- * numa ÚNICA chamada - `written` e `spoken` SEMPRE nascem juntos, do
- * MESMO contexto, nunca de chamadas separadas. É isso que impede o
- * bug de "o balão mostra uma coisa enquanto o TTS fala outra": não
- * existe um caminho no código pra pedir só um dos dois.
+ * numa ÚNICA chamada, a partir de UM contexto. TEMPORARIAMENTE ainda
+ * devolve `written` E `spoken` (compatibilidade — a duplicação está em
+ * remoção, e enquanto durar os dois campos são carregados de ponta a
+ * ponta), porém `spoken` é SEMPRE o MESMO texto de `written`: nunca é
+ * mais reescrito "pra soar natural em voz alta" (era essa segunda versão
+ * livre que fazia balão e TTS poderem divergir — fonte do "Elta venceu
+ * faz pouco."). Os providers de IA e a Server Action
+ * (`resolveCompanionMessageAction`) FORÇAM `spoken === written`; não
+ * existe caminho pra pedir só um dos dois, e pronúncia é cuidada fora
+ * do modelo, em `lib/speech/speak-text.ts`.
  */
 export const CompanionInteractionResponseSchema = z.object({
   written: z.string().min(1).max(160),

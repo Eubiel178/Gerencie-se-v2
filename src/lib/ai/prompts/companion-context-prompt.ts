@@ -43,8 +43,11 @@ export interface CompanionInteractionContext {
   durationMinutes?: number | null;
   firstName?: string | null;
   gender?: "feminino" | "masculino" | "nao_informado";
-  /** Últimas mensagens espontâneas já mostradas nesta sessão - só pra
-   * evitar repetição semântica, nunca dado factual novo. */
+  /** Últimas mensagens espontâneas já mostradas nesta sessão - o modelo
+   * usa pra saber o que JÁ foi estabelecido pra pessoa (continuidade de
+   * referência: se a última mensagem já nomeou a MESMA tarefa, pronomes
+   * ficam ok sem repetir o título) e pra evitar repetição semântica.
+   * Nunca dado factual novo. */
   recentTexts?: string[];
 }
 
@@ -73,13 +76,15 @@ export function buildCompanionContextPrompt(ctx: CompanionInteractionContext): s
     lines.push(`Tempo de execução contínua: ${ctx.durationMinutes} min`);
   }
   if (ctx.firstName) {
-    lines.push(fenceUserData("Primeiro nome do usuário (uso opcional, no máximo em UMA das duas formas)", ctx.firstName));
+    lines.push(fenceUserData("Primeiro nome do usuário (uso opcional, no máximo UMA vez no texto)", ctx.firstName));
   }
   if (ctx.gender && ctx.gender !== "nao_informado") {
     lines.push(`Gênero informado pelo usuário (só pra concordância gramatical se fizer sentido): ${ctx.gender}`);
   }
   if (ctx.recentTexts && ctx.recentTexts.length > 0) {
-    lines.push("Mensagens espontâneas recentes (NÃO repita a forma/estrutura destas):");
+    lines.push(
+      "Mensagens espontâneas recentes (já vistas pelo usuário — CONTEXTO de continuidade: se a mais recente já nomeou a MESMA tarefa, você pode usar pronomes sem repetir o título; NÃO repita a forma/estrutura destas):"
+    );
     for (const text of ctx.recentTexts) {
       lines.push(fenceUserData("- Mensagem recente", text));
     }

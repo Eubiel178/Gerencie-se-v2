@@ -3,25 +3,6 @@
   flex-direction: column;
   gap: var(--space-2);
 }
-.row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-size: var(--font-size-sm);
-  color: var(--color-text);
-  cursor: pointer;
-}
-.row input {
-  width: 1rem;
-  height: 1rem;
-  accent-color: var(--color-highlight);
-}
-.note {
-  margin: 0;
-  font-family: var(--font-sans);
-  font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
-}
 .testButton {
   align-self: flex-start;
 }

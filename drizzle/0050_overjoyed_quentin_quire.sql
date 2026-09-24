@@ -1,0 +1,1 @@
+ALTER TABLE "user_preference" ADD COLUMN "assistant_voice_id" text DEFAULT 'pf_dora' NOT NULL;

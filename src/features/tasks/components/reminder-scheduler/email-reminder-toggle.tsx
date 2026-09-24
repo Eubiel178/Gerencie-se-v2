@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 
+import { SwitchRow } from "@/components";
 import { updateEmailTaskRemindersPreferenceAction } from "@/features/tasks/actions";
-
-import styles from "./styles.module.css";
 
 interface EmailReminderToggleProps {
   enabled: boolean;
@@ -43,14 +42,12 @@ export function EmailReminderToggle({ enabled }: EmailReminderToggleProps) {
   }
 
   return (
-    <label className={styles.row}>
-      <input
-        type="checkbox"
-        checked={checked}
-        disabled={isSaving}
-        onChange={(event) => handleToggle(event.target.checked)}
-      />
-      <span>E-mail</span>
-    </label>
+    <SwitchRow
+      title="E-mail"
+      helper="Para tarefas vencidas, mesmo com o app fechado."
+      checked={checked}
+      disabled={isSaving}
+      onChange={(nextChecked) => void handleToggle(nextChecked)}
+    />
   );
 }

@@ -284,11 +284,16 @@ const pathname = usePathname();
     try {
       const recentHistory = buildRecentHistory(messages);
 
+      // O fuso do USUÁRIO viaja junto: "hoje"/"amanhã"/atrasado são
+      // classificados nele no servidor (nunca no UTC do servidor), igual
+      // ao card de tarefas que roda no navegador dele.
+      const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
       // UMA chamada server-side — gera resposta com contexto. Limitada no
       // cliente pra nunca deixar o loading preso indefinidamente, mesmo se
       // a chamada travar antes de chegar no Gemini (ex.: consulta ao banco).
       const result = await withTimeout(
-        sendAssistantMessage(text, recentHistory, taskId),
+        sendAssistantMessage(text, recentHistory, taskId, userTimeZone),
         CHAT_TIMEOUT_MS
       );
 

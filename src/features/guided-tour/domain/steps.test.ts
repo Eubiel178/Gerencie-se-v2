@@ -27,6 +27,13 @@ test("todas as 5 personalidades têm introdução escrita e falada, não vazias"
   }
 });
 
+test("introdução do mascote é UMA mensagem canônica: spoken é idêntico ao written (balão e voz nunca divergem)", () => {
+  for (const personality of PERSONALITIES) {
+    const intro = MASCOT_STEP_INTRO[personality];
+    assert.equal(intro.spoken, intro.written, `${personality}: spoken difere de written`);
+  }
+});
+
 test("introdução do mascote cobre os 3 conceitos pedidos: ficar durante execução, reagir, ajudar se travar/distrair", () => {
   for (const personality of PERSONALITIES) {
     const { written } = MASCOT_STEP_INTRO[personality];

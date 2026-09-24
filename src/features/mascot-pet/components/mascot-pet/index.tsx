@@ -16,6 +16,7 @@ import {
 } from "@/features/mascot-pet/domain/characters";
 import { isQuietModeRoute } from "@/features/mascot-pet/engine/quiet-mode-routes";
 import { MascotRuntime } from "@/features/mascot-pet/engine/runtime";
+import { isNarrowContentViewport } from "@/features/mascot-pet/engine/viewport-bounds";
 import type { Gender } from "@/features/profile/get-gender";
 
 import { CompanionStatusCard } from "../companion-status-card";
@@ -27,6 +28,12 @@ import styles from "./styles.module.css";
 // Duração fixa do cartão de estado (clicar no mascote) - não precisa da
 // lógica adaptativa do balão espontâneo (sem ações, texto sempre curto).
 const STATUS_CARD_DISPLAY_MS = 7000;
+
+// Opção A do comportamento móvel: depois de ~200ms sem evento de scroll,
+// considera-se que o scroll "terminou" e o mascote pode retomar o passeio.
+// Longo o bastante pra não alternar em cada micro-gesto, curto o bastante
+// pra não deixar o bichinho travado depois de parar.
+const SCROLL_SETTLE_MS = 200;
 
 interface MascotPetProps {
   /** Id de personagem (ver `MASCOT_CHARACTERS`) - normalmente calculado a
@@ -261,15 +268,53 @@ export function MascotPet({
     // certa pro id atual.
   }, [character]);
 
-  // Modo Foco (e outras rotas densas — ver `QUIET_MODE_ROUTE_PREFIXES` em
-  // `engine/quiet-mode-routes.ts` pro motivo de cada uma): presença
-  // reduzida enquanto a pessoa está tentando se concentrar - "no conflito
-  // entre personalidade e concentração, concentração vence" (pedido
-  // explícito). Efeito separado do de montagem: só precisa reagir a
-  // MUDANÇA de rota, nunca remonta o runtime inteiro por isso.
-  useEffect(() => {
-    runtimeRef.current?.setQuietMode(isQuietModeRoute(pathname));
-  }, [pathname]);
+// Quiet mode combinado, MESMO `setQuietMode` do runtime:
+// quiet por ROTA (Modo Foco e outras rotas densas — ver
+// `QUIET_MODE_ROUTE_PREFIXES` em `engine/quiet-mode-routes.ts` pro motivo
+// de cada uma) OU quiet por SCROLL (telas estreitas — ver o efeito de
+// scroll abaixo). Um `ref` + efeito de sincronização para o listener de
+// scroll consultar o último valor sem re-criar listener nem remontar o
+// runtime: efeito separado do de montagem, só reage a MUDANÇA de rota.
+const scrollQuietRef = useRef(false);
+const syncQuietRef = useRef<() => void>(() => {});
+useEffect(() => {
+  syncQuietRef.current = () => {
+    runtimeRef.current?.setQuietMode(isQuietModeRoute(pathname) || scrollQuietRef.current);
+  };
+  syncQuietRef.current();
+}, [pathname]);
+
+// Opção A (telas/colunas estreitas, ver `isNarrowContentViewport`):
+// enquanto a área principal rola, o mascote PARA de passear e fica
+// recolhido na posição segura (o canto confinado dos bounds) usando o
+// quiet mode existente — NUNCA escondido, só imóvel e presente. Quando o
+// scroll para por `SCROLL_SETTLE_MS`, retoma o passeio normalmente, sem
+// movimentos bruscos próprios (o quiet mode é idempotente enquanto já
+// quieto — ver `MascotBehavior.setQuietMode`). Desktop largo segue como
+// antes (sem quiet por scroll: o mascote rola por espaço vazio).
+useEffect(() => {
+  let settleTimer: number | null = null;
+
+  const onScroll = () => {
+    if (!isNarrowContentViewport()) return;
+    scrollQuietRef.current = true;
+    syncQuietRef.current();
+    if (settleTimer !== null) window.clearTimeout(settleTimer);
+    settleTimer = window.setTimeout(() => {
+      scrollQuietRef.current = false;
+      syncQuietRef.current();
+    }, SCROLL_SETTLE_MS);
+  };
+
+  // `capture` pega scroll de QUALQUER container (a área principal rola
+  // via `body`; painéis internos também existem); `passive` porque nunca
+  // cancelamos o scroll.
+  window.addEventListener("scroll", onScroll, { capture: true, passive: true });
+  return () => {
+    window.removeEventListener("scroll", onScroll, { capture: true });
+    if (settleTimer !== null) window.clearTimeout(settleTimer);
+  };
+}, []);
 
   if (!character) return null;
 
@@ -308,10 +353,9 @@ export function MascotPet({
       {/* Selo de voz preso ao PRÓPRIO bichinho (canto inferior direito do
           corpo, ver cálculo em `onPositionChange` acima) - não ao widget do
           Assistant. Sempre pede confirmação antes de mudar (nunca alterna
-          direto no clique). Some junto com o resto do mascote em telas
-          estreitas (`@media` em `styles.module.css`) - o toggle equivalente
-          em Configurações (`autoSpeechEnabled` no painel de preferências)
-          já cobre essa faixa. */}
+          direto no clique). Continua visível no mobile junto com o mascote
+          (não há mais `@media` que esconda o palco em telas estreitas - o
+          toggle equivalente em Configurações segue como alternativa). */}
       {assistantEnabled && (
         <div ref={voiceBadgeAnchorRef} className={styles.voiceBadgeAnchor}>
           <button

@@ -150,3 +150,20 @@ export function getMascotLine(
     hour: now.getHours(),
   });
 }
+
+const VOICE_PREVIEW: Record<MascotPersonality, string> = {
+  afetuoso: "Oi, eu sou seu companheiro de todo dia. Tô aqui pra te ajudar.",
+  sarcastico: "Sou eu, seu companheiro. Pode esperar sinceridade, tá avisado.",
+  engracado: "Oi, eu sou seu companheiro. O bom humor já vem incluso.",
+  motivador: "Eu sou seu companheiro. Vamos fazer acontecer, um passo de cada vez.",
+  zen: "Sou seu companheiro. Estou aqui quando você precisar, sem pressa.",
+};
+
+/** Frase de preview do seletor de voz (Configurações): o mascote se
+ * apresenta no tom da personalidade escolhida — conteúdo neutro (é só um
+ * timbre pra avaliar), mas que mostra de quebra o tom de cada perfil.
+ * Sem nome do mascote nem dados do usuário, e seguindo as mesmas regras
+ * de escrita das falas (ver comentário acima de `MascotEvent`). */
+export function getMascotVoicePreview(personality: MascotPersonality): string {
+  return VOICE_PREVIEW[personality];
+}

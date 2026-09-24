@@ -1,0 +1,173 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  width: 100%;
+  max-width: 34rem;
+}
+
+.panelHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.panelTitle {
+  margin: 0;
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-md);
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.group + .group {
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-5);
+}
+
+.groupLabel {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+
+.identity {
+  display: grid;
+  grid-template-columns: 8rem 1fr;
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.preview {
+  display: flex;
+  justify-content: center;
+}
+
+.identityFields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.identityFields > :first-child {
+  grid-column: 1 / -1;
+}
+
+.switches {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Encaixe visual das opções que só existem com o Companion LIGADO — a
+   relação pai/filho fica explícita sem precisar de mais texto. */
+.switchesNested {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-left: var(--space-2);
+  padding: var(--space-1) 0 var(--space-1) var(--space-4);
+  border-left: 2px solid var(--color-border);
+}
+
+.voiceRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.voiceLabel {
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+}
+
+.voiceSelect {
+  max-width: 15rem;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.5rem var(--space-3);
+}
+
+.voiceSelect:focus-visible {
+  border-color: var(--color-highlight);
+  outline: 2px solid var(--color-highlight);
+  outline-offset: 1px;
+}
+
+.voiceSelect:disabled {
+  opacity: 0.6;
+}
+
+.voiceHelper {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+}
+
+.saved {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  /* Tempo próprio (maior que os tokens de duração do app): o "Salvo"
+     precisa ficar legível por um instante antes de esvanecer. */
+  animation: saved-flash 1.6s var(--easing-standard) forwards;
+}
+
+@keyframes saved-flash {
+  0% {
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  65% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .saved {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+@media (max-width: 540px) {
+  .identity {
+    grid-template-columns: 1fr;
+  }
+
+  .identityFields {
+    grid-template-columns: 1fr;
+  }
+
+  .identityFields > :first-child {
+    grid-column: auto;
+  }
+
+  .switchesNested {
+    margin-left: 0;
+    padding-left: var(--space-3);
+  }
+}

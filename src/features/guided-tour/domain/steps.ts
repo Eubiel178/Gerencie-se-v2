@@ -41,69 +41,48 @@ export interface GuidedTourStep {
 // qualquer forma - o Companion se apresentando é exatamente isso). Texto
 // curto e em primeira pessoa, nunca um manual de funcionalidades - mas
 // cobre os 3 pontos pedidos: fica durante a execução, reage ao que
-// acontece, aparece se a pessoa travar/se distrair. `spoken` é a MESMA
-// intenção reescrita pra soar natural em voz alta (mesmo padrão de
-// `companion-phrasing.ts`) - usada só se a fala automática estiver
-// ligada (ver `GuidedTour`), nunca lida ao pé da letra do `written`.
-// export const MASCOT_STEP_INTRO: Record<MascotPersonality, { written: string; spoken: string }> = {
-//   afetuoso: {
-//     written: "Oi! Eu sou seu companheiro por aqui — fico com você quando começa uma tarefa de verdade, reajo ao que rola durante a execução, e apareço se você travar ou se distrair. Pode trocar meu nome, espécie e jeito de ser quando quiser, em Configurações.",
-//     spoken: "Oi! Eu sou seu companheiro por aqui. Fico com você quando você começa uma tarefa de verdade, reajo ao que rola enquanto você executa, e apareço se você travar ou se distrair um pouco. Pode trocar meu nome, minha espécie e meu jeito de ser quando quiser, lá em Configurações.",
-//   },
-//   sarcastico: {
-//     written: "Sou eu, seu companheiro. Fico de olho quando você começa uma tarefa pra valer, comento o que rola durante a execução, e apareço se você travar ou sumir no meio do caminho. Nome, espécie e personalidade dá pra trocar em Configurações, se meu jeito não for a sua praia.",
-//     spoken: "Sou eu, seu companheiro. Fico de olho quando você começa uma tarefa pra valer, comento o que rola enquanto você executa, e apareço se você travar ou sumir no meio do caminho. Nome, espécie e personalidade dá pra trocar lá em Configurações, se meu jeito não for a sua praia.",
-//   },
-//   engracado: {
-//     written: "Opa! Eu sou seu companheiro por aqui — fico com você quando começa uma tarefa de verdade, reajo junto durante a execução, e apareço se você travar ou se distrair. Nome, espécie e personalidade dá pra trocar em Configurações, se bater vontade de bagunçar tudo.",
-//     spoken: "Opa! Eu sou seu companheiro por aqui. Fico com você quando você começa uma tarefa de verdade, reajo junto enquanto você executa, e apareço se você travar ou se distrair um pouco. Nome, espécie e personalidade dá pra trocar lá em Configurações, se bater vontade de bagunçar tudo.",
-//   },
-//   motivador: {
-//     written: "Eu sou seu companheiro nessa jornada! Fico com você quando começa uma tarefa de verdade, celebro o progresso durante a execução, e apareço se você travar ou se distrair. Pode ajustar meu nome, espécie e personalidade em Configurações quando quiser.",
-//     spoken: "Eu sou seu companheiro nessa jornada! Fico com você quando você começa uma tarefa de verdade, celebro o progresso enquanto você executa, e apareço se você travar ou se distrair um pouco. Pode ajustar meu nome, minha espécie e minha personalidade lá em Configurações, quando quiser.",
-//   },
-//   zen: {
-//     written: "Eu sou seu companheiro por aqui. Fico com você quando começa uma tarefa de verdade, acompanho o ritmo durante a execução, e apareço com calma se você travar ou se distrair. Nome, espécie e personalidade dá pra ajustar em Configurações.",
-//     spoken: "Eu sou seu companheiro por aqui. Fico com você quando você começa uma tarefa de verdade, acompanho o ritmo enquanto você executa, e apareço com calma se você travar ou se distrair um pouco. Nome, espécie e personalidade dá pra ajustar lá em Configurações.",
-//   },
-// };
+// acontece, aparece se a pessoa travar/se distrair. `spoken` é sempre
+// IDÊNTICO ao `written` (balão e voz nunca divergem - mesma decisão de
+// `companion-phrasing.ts`): o tour usa o mesmo texto pra falar e pra
+// mostrar, sem segunda redação pra "soar natural" (pronúncia é cuidada
+// pela camada `toSpeechText` em `lib/speech/speak-text.ts`).
 export const MASCOT_STEP_INTRO: Record<
   MascotPersonality,
   { written: string; spoken: string }
 > = {
   afetuoso: {
     written:
-      "Oi! Eu vou te fazer companhia por aqui. Quando você começar uma tarefa, posso ficar com você, acompanhar como as coisas estão indo e ajudar se você travar ou se distrair. E se quiser, dá pra mudar meu nome, aparência e personalidade depois.",
+      "Oi! Eu vou te fazer companhia por aqui. Quando você começar uma tarefa, posso ficar com você, acompanhar a execução e ajudar se você travar ou se distrair. E se quiser, dá pra mudar meu nome, aparência e personalidade depois.",
     spoken:
-      "Oi! Eu vou te fazer companhia por aqui. Quando você começar uma tarefa, posso ficar com você, acompanhar como as coisas estão indo e ajudar se você travar ou se distrair. E depois você pode mudar meu nome, aparência e meu jeito de ser.",
+      "Oi! Eu vou te fazer companhia por aqui. Quando você começar uma tarefa, posso ficar com você, acompanhar a execução e ajudar se você travar ou se distrair. E se quiser, dá pra mudar meu nome, aparência e personalidade depois.",
   },
 
   sarcastico: {
     written:
-      "Então, aparentemente somos uma dupla agora. Quando você começar uma tarefa, eu fico por perto, acompanho o progresso e apareço se você travar ou acabar se perdendo pelo caminho. Se não gostar da minha cara ou do meu jeito, dá pra mudar depois.",
+      "Então, aparentemente somos uma dupla agora. Quando você começar uma tarefa, eu fico por perto, acompanho o progresso da execução e apareço se você travar ou acabar se perdendo pelo caminho. Se não gostar da minha cara ou do meu jeito, dá pra mudar depois.",
     spoken:
-      "Então, aparentemente somos uma dupla agora. Quando você começar uma tarefa, eu fico por perto, acompanho como tá indo e apareço se você travar ou se perder pelo caminho. E sim, dá pra mudar minha aparência e meu jeito depois.",
+      "Então, aparentemente somos uma dupla agora. Quando você começar uma tarefa, eu fico por perto, acompanho o progresso da execução e apareço se você travar ou acabar se perdendo pelo caminho. Se não gostar da minha cara ou do meu jeito, dá pra mudar depois.",
   },
 
   engracado: {
     written:
-      "Opa! Parece que agora somos uma dupla. Quando você começar uma tarefa, eu acompanho a aventura, comemoro o que der certo e apareço se você travar ou se distrair no caminho. Minha aparência e meu jeito também podem mudar depois.",
+      "Opa! Parece que agora somos uma dupla. Quando você começar uma tarefa, eu acompanho a execução, comemoro o que der certo e apareço se você travar ou se distrair no caminho. Minha aparência e meu jeito também podem mudar depois.",
     spoken:
-      "Opa! Parece que agora somos uma dupla. Quando você começar uma tarefa, eu acompanho a aventura e apareço se você travar ou se distrair no caminho. E depois dá pra mudar minha aparência e meu jeito também.",
+      "Opa! Parece que agora somos uma dupla. Quando você começar uma tarefa, eu acompanho a execução, comemoro o que der certo e apareço se você travar ou se distrair no caminho. Minha aparência e meu jeito também podem mudar depois.",
   },
 
   motivador: {
     written:
       "Eu vou acompanhar você por aqui. Quando começar uma tarefa, fico junto durante a execução, acompanho seu progresso e posso ajudar quando bater aquela trava ou distração. Vamos fazendo uma coisa de cada vez.",
     spoken:
-      "Eu vou acompanhar você por aqui. Quando começar uma tarefa, fico junto, acompanho seu progresso e posso ajudar quando você travar ou se distrair. Uma coisa de cada vez.",
+      "Eu vou acompanhar você por aqui. Quando começar uma tarefa, fico junto durante a execução, acompanho seu progresso e posso ajudar quando bater aquela trava ou distração. Vamos fazendo uma coisa de cada vez.",
   },
 
   zen: {
     written:
-      "Eu vou te acompanhar por aqui, sem pressão. Quando você começar uma tarefa, fico com você durante o processo e posso ajudar se você travar, se distrair ou só precisar encontrar o próximo passo.",
+      "Eu vou te acompanhar por aqui, sem pressão. Quando você começar uma tarefa, fico com você durante a execução e posso ajudar se você travar, se distrair ou só precisar encontrar o próximo passo.",
     spoken:
-      "Eu vou te acompanhar por aqui, sem pressão. Quando você começar uma tarefa, fico com você e posso ajudar se você travar, se distrair ou só precisar encontrar o próximo passo.",
+      "Eu vou te acompanhar por aqui, sem pressão. Quando você começar uma tarefa, fico com você durante a execução e posso ajudar se você travar, se distrair ou só precisar encontrar o próximo passo.",
   },
 };
 
